@@ -10,17 +10,20 @@ export class MfsBusinessEntity {
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true })
   org_email: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', unique: true, nullable: true })
   wallet_address: string;
 
   @Column({ type: 'varchar' })
   native_currency: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   certificate: string;
+
+  @Column({ type: 'integer', nullable: true })
+  dao_id: number;
 
   //@ManyToOne(() => DaoEntity, (dao) => dao.businesses)
   // @JoinColumn({ name: 'dao_id' })
