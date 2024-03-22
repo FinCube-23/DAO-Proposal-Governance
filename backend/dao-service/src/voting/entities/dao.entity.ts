@@ -1,20 +1,20 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('dao')
-export class VotingServiceEntity {
+export class DAOEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar' })
   name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   token_name: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   token_address: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'float', nullable: true })
   royalty_amount: number;
 
   @Column({ type: 'varchar' })
