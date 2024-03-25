@@ -30,5 +30,4 @@ COPY --from=builder /usr/src/app/dist ./dist
 
 EXPOSE 3000
 
-# USER node
 CMD [ "npm", "run", "start:dev" ]

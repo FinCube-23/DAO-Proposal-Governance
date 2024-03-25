@@ -10,7 +10,7 @@ services:
       - 3003:3000
     volumes:
       - ./:/usr/src/app
-      # - node_modules:/usr/src/app/node_modules/
+
     environment:
       APP_ENV: ${APP_ENV}
       APP_PORT: ${APP_PORT}
@@ -19,8 +19,10 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASS: ${DB_PASS}
+      PG_ADMIN: ${PG_ADMIN}
+      PG_PASS: ${PG_PASS}
     env_file:  # Add this line to specify the environment file
-      - .env  # Specify the path to your .env file
+      - .env.local # Specify the path to your .env file
 
   pgsqldb:
     container_name: pgsqldb
@@ -38,8 +40,8 @@ services:
     container_name: pgadmin4
     image: dpage/pgadmin4:8.0
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: root
+      PGADMIN_DEFAULT_EMAIL: '${PG_ADMIN}'
+      PGADMIN_DEFAULT_PASSWORD: '${PG_PASS}'
     ports:
       - '5050:80'
     depends_on:
