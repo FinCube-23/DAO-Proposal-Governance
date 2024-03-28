@@ -1,12 +1,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
 import "@openzeppelin/contracts/access/Ownable.sol";
-contract FincubeDAO is Ownable {
+contract FinCubeDAO is Ownable {
+ 
    event MemberRegistered(address indexed _newMember, string _memberURI);
    event ProposalCreated(
        uint256 indexed proposalId,
        address indexed newMember
    );
+   event TokenAddressProposalCreated(uint256 indexed proposalId, address indexed proposer, address tokenAddress);
    event MemberApproved(address indexed member);
    event ProposalExecuted(uint256 indexed proposalId);
    uint256 private memberCount;
@@ -22,16 +24,30 @@ contract FincubeDAO is Ownable {
        uint48 voteDuration;
        bool executed;
        bool canceled;
-       address target;
-       bytes calldatas;
-       uint256 votes;
+       address newMember;
+       uint256 yesvotes;
+       uint256 novotes;
    }
    struct ProposalVotes {
-       mapping(address => bool) hasVoted;
+       mapping(address => bool) isYesVote;
+       mapping(address => bool) isNoVote;
    }
+   struct TokenAddressProposal {
+    address proposer;
+    uint48 voteStart;
+    uint48 voteDuration;
+    bool executed;
+    bool canceled;
+    address tokenAddress;
+    uint256 yesvotes;
+    uint256 novotes;
+}
+mapping(uint256 => TokenAddressProposal) private tokenAddressProposals;
    mapping(address => Member) private members;
    mapping(uint256 => Proposal) private proposals;
    mapping(uint256 => ProposalVotes) private proposalVotes;
+ 
+ 
    constructor(string memory _ownerURI) Ownable(msg.sender) {
        Member memory member;
        member.memberURI = _ownerURI;
@@ -63,6 +79,13 @@ contract FincubeDAO is Ownable {
        require(members[_address].status == true, "Member not approved");
        _;
    }
+ 
+   /**
+* @notice Register a new member.
+* @dev This function can only be called by non-existing members.
+* @param _newMember The address of the new member to be registered.
+* @param _memberURI The URI of the new member.
+*/
    function register(
        address _newMember,
        string memory _memberURI
@@ -74,7 +97,7 @@ contract FincubeDAO is Ownable {
        emit MemberRegistered(_newMember, _memberURI);
    }
    //@notice: new proposal is only made for adding members only, the call data encodes approveMember function
-   function newProposal(address _target, bytes memory _calldata) external onlyMember(msg.sender) {
+   function newProposal(address _newMember) external onlyMember(msg.sender) {
        uint48 currentTime = uint48(block.timestamp);
        uint48 start = currentTime + uint48(votingDelay());
        uint48 end = start + uint48(votingPeriod());
@@ -84,25 +107,33 @@ contract FincubeDAO is Ownable {
            voteDuration: end,
            executed: false,
            canceled: false,
-           target: _target,
-           calldatas: _calldata,
-           votes: 0
+           newMember: _newMember,
+           yesvotes: 0,
+           novotes: 0
        });
+       
        emit ProposalCreated(proposalCount, msg.sender);
        proposalCount++;
    }
-   // @notice: a member can cast any number of votes, this has to be fixed
-   function castVote(uint256 _proposalId) external onlyMember(msg.sender) {
+   // @notice: Cast vote to proposal. One member can cast one vote per proposal
+   function castVote(uint256 _proposalId, bool _isYesVote) external onlyMember(msg.sender) {
        ProposalVotes storage votes = proposalVotes[_proposalId];
        Proposal storage proposal = proposals[_proposalId];
+       
        require(block.timestamp >= proposal.voteStart && block.timestamp <= proposal.voteDuration, "Voting is not allowed at this time");
-       require(!votes.hasVoted[msg.sender], "Already voted for this proposal");
-       proposal.votes++;
-       votes.hasVoted[msg.sender] = true;
+       require(!votes.isYesVote[msg.sender] && !votes.isNoVote[msg.sender], "Already voted for this proposal");
+  
+        if (_isYesVote) {
+            proposal.yesvotes++;
+            votes.isYesVote[msg.sender] = true;
+        } else {
+            proposal.novotes++;
+            votes.isNoVote[msg.sender] = true;
+        }
    }
    // @dev: Voting functionality, after voting is over, onlyOwner calls this function to execute the proposal
    function executeProposal(uint256 proposalId) public onlyOwner {
-       Proposal storage proposal = proposals[proposalId];
+       Proposal memory proposal = proposals[proposalId];
        require(
            !(block.timestamp >= proposal.voteStart &&
                block.timestamp <= proposal.voteDuration),
@@ -113,28 +144,107 @@ contract FincubeDAO is Ownable {
            "Proposal already executed or canceled"
        );
        require(
-           proposal.votes >= proposalThreshold(),
+           proposal.yesvotes <= proposalThreshold(),
            "Proposal doesn't have majority vote"
        );
-       (bool success, ) = proposal.target.call(proposal.calldatas);
-       require(success, "Execution failed");
+       approveMember(proposal.newMember);
        proposal.executed = true;
        emit ProposalExecuted(proposalId);
    }
-   function approveMember(address newMember) public onlyOwner {
+ 
+   
+   function approveMember(address newMember) private  {
        require(!members[newMember].status, "Member already approved");
        members[newMember].status = true;
        memberCount++;
        emit MemberApproved(newMember);
    }
+
+
+   function newTokenAddressProposal(address _tokenAddress) external onlyMember(msg.sender) {
+    uint48 currentTime = uint48(block.timestamp);
+    uint48 start = currentTime + uint48(votingDelay());
+    uint48 end = start + uint48(votingPeriod());
+    uint256 newProposalId = proposalCount;
+    tokenAddressProposals[newProposalId] = TokenAddressProposal({
+        proposer: msg.sender,
+        voteStart: start,
+        voteDuration: end,
+        executed: false,
+        canceled: false,
+        tokenAddress: _tokenAddress,
+        yesvotes: 0,
+        novotes: 0
+    });
+    
+    emit TokenAddressProposalCreated(newProposalId, msg.sender, _tokenAddress);
+    proposalCount++;
+}
+function executeTokenAddressProposal(uint256 proposalId) public onlyOwner {
+    TokenAddressProposal storage proposal = tokenAddressProposals[proposalId];
+    require(
+        !(block.timestamp >= proposal.voteStart &&
+            block.timestamp <= proposal.voteDuration),
+        "Voting still going on"
+    );
+    require(
+        !proposal.executed && !proposal.canceled,
+        "Proposal already executed or canceled"
+    );
+    require(
+        proposal.yesvotes <= proposalThreshold(),
+        "Proposal doesn't have majority vote"
+    );
+    setTokenAddress(proposal.tokenAddress);
+    proposal.executed = true;
+    emit ProposalExecuted(proposalId);
+}
+address public tokenAddress;
+
+function setTokenAddress(address _tokenAddress) private {
+    tokenAddress = _tokenAddress;
+}
+
+     function getOngoingProposalsCount() public view returns (uint256) {
+    uint256 ongoingCount = 0;
+    for (uint256 i = 0; i < proposalCount; i++) {
+        if (
+            !proposals[i].executed &&
+            !proposals[i].canceled &&
+            block.timestamp >= proposals[i].voteStart &&
+            block.timestamp <= proposals[i].voteDuration
+        ) {
+            ongoingCount++;
+        }
+    }
+    return ongoingCount;
+}
+ 
+    function getOngoingProposals() public view returns (Proposal[] memory) {
+    uint256 ongoingCount = getOngoingProposalsCount();
+    Proposal[] memory ongoingProposals = new Proposal[](ongoingCount);
+ 
+    uint256 index = 0;
+    for (uint256 i = 0; i < proposalCount; i++) {
+        if (
+            !proposals[i].executed &&
+            !proposals[i].canceled &&
+            block.timestamp >= proposals[i].voteStart &&
+            block.timestamp <= proposals[i].voteDuration
+        ) {
+            ongoingProposals[index] = proposals[i];
+            index++;
+        }
+    }
+ 
+    return ongoingProposals;
+}
+ 
    //@warning: function only defined for testing purposes
    function checkIsMemberApproved(
        address _member
-   ) public view onlyOwner returns (bool) {
+   ) public view onlyMember(msg.sender) returns (bool) {
        return members[_member].status;
    }
-   //@warning: function only defined for testing purposes
-   function getCallData() public view returns (bytes memory) {
-       return abi.encodeWithSignature("approveMember(address)", msg.sender);
-   }
+ 
 }
