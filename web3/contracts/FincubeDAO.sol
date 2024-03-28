@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity ^0.8.8;
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract FincubeDAO is Ownable {
+contract FinCubeDAO is Ownable {
     event MemberRegistered(address indexed _newMember, string _memberURI);
     event ProposalCreated(
         uint256 indexed proposalId,
@@ -12,32 +11,34 @@ contract FincubeDAO is Ownable {
     event MemberApproved(address indexed member);
     event ProposalExecuted(uint256 indexed proposalId);
     uint256 private memberCount;
-
+    uint256 private proposalCount;
     struct Member {
         string memberURI;
         bool status;
     }
     //@notice: This is own implementation of Proposal as per OpenZeppelin's governance function
-    struct Proposal {
+    struct MemberApprovalProposal {
         address proposer;
         uint48 voteStart;
         uint48 voteDuration;
         bool executed;
         bool canceled;
-        address target;
-        bytes calldatas;
+        address newMember;
         uint256 votes;
     }
-
+    struct ProposalVotes {
+        mapping(address => bool) hasVoted;
+    }
     mapping(address => Member) private members;
-    mapping(uint256 => Proposal) private proposals;
-    uint256 private proposalCount;
+    mapping(uint256 => MemberApprovalProposal) private proposals;
+    mapping(uint256 => ProposalVotes) private proposalVotes;
 
     constructor(string memory _ownerURI) Ownable(msg.sender) {
         Member memory member;
         member.memberURI = _ownerURI;
         member.status = true;
         members[msg.sender] = member;
+        memberCount = 1;
     }
 
     function votingDelay() public pure returns (uint256) {
@@ -59,7 +60,6 @@ contract FincubeDAO is Ownable {
         );
         _;
     }
-
     modifier onlyMember(address _address) {
         require(
             (bytes(members[_address].memberURI).length > 0),
@@ -69,6 +69,12 @@ contract FincubeDAO is Ownable {
         _;
     }
 
+    /**
+     * @notice Register a new member.
+     * @dev This function can only be called by non-existing members.
+     * @param _newMember The address of the new member to be registered.
+     * @param _memberURI The URI of the new member.
+     */
     function register(
         address _newMember,
         string memory _memberURI
@@ -77,27 +83,27 @@ contract FincubeDAO is Ownable {
         member.memberURI = _memberURI;
         member.status = false;
         members[_newMember] = member;
-
         emit MemberRegistered(_newMember, _memberURI);
     }
 
-    //@notice: new proposal is only made for adding members only, the call data encodes approveMember function
-    function newProposal(
-        address _target,
-        bytes memory _calldata
+    /**
+     * @notice A new proposal is only made for adding members only, the call data encodes approveMember function.
+     * @dev This function can only be called by an existing member.
+     * @param _newMember The address of the new member to be approved.
+     */
+    function newMemberApprovalProposal(
+        address _newMember
     ) external onlyMember(msg.sender) {
         uint48 currentTime = uint48(block.timestamp);
         uint48 start = currentTime + uint48(votingDelay());
         uint48 end = start + uint48(votingPeriod());
-
-        proposals[proposalCount] = Proposal({
+        proposals[proposalCount] = MemberApprovalProposal({
             proposer: msg.sender,
             voteStart: start,
             voteDuration: end,
             executed: false,
             canceled: false,
-            target: _target,
-            calldatas: _calldata,
+            newMember: _newMember,
             votes: 0
         });
 
@@ -105,22 +111,31 @@ contract FincubeDAO is Ownable {
         proposalCount++;
     }
 
-    // @notice: a member can cast any number of votes, this has to be fixed
+    /**
+     * @notice Cast vote to proposal. One member can cast one vote per proposal.
+     * @dev This function can only be called by an existing member. It also checks if the voting period is active and if the member has not already voted for this proposal.
+     * @param _proposalId The ID of the proposal to vote for.
+     */
     function castVote(uint256 _proposalId) external onlyMember(msg.sender) {
-        Proposal storage proposal = proposals[_proposalId];
-
+        ProposalVotes storage votes = proposalVotes[_proposalId];
+        MemberApprovalProposal storage proposal = proposals[_proposalId];
         require(
             block.timestamp >= proposal.voteStart &&
                 block.timestamp <= proposal.voteDuration,
             "Voting is not allowed at this time"
         );
-
+        require(!votes.hasVoted[msg.sender], "Already voted for this proposal");
         proposal.votes++;
+        votes.hasVoted[msg.sender] = true;
     }
 
-    // @dev: Voting functionality, after voting is over, onlyOwner calls this function to execute the proposal
-    function executeProposal(uint256 proposalId) public onlyOwner {
-        Proposal storage proposal = proposals[proposalId];
+    /**
+     * @notice Executes a member approval proposal.
+     * @dev This function can only be called by the owner. It checks if the voting period is over, if the proposal has not been executed or canceled, and if the proposal has received majority votes. If all conditions are met, it approves the new member and marks the proposal as executed.
+     * @param proposalId The ID of the proposal to be executed.
+     */
+    function executeMemberApprovalProposal(uint256 proposalId) public {
+        MemberApprovalProposal memory proposal = proposals[proposalId];
         require(
             !(block.timestamp >= proposal.voteStart &&
                 block.timestamp <= proposal.voteDuration),
@@ -134,15 +149,12 @@ contract FincubeDAO is Ownable {
             proposal.votes >= proposalThreshold(),
             "Proposal doesn't have majority vote"
         );
-
-        (bool success, ) = proposal.target.call(proposal.calldatas);
-        require(success, "Execution failed");
-
+        approveMember(proposal.newMember);
         proposal.executed = true;
         emit ProposalExecuted(proposalId);
     }
 
-    function approveMember(address newMember) public onlyOwner {
+    function approveMember(address newMember) private {
         require(!members[newMember].status, "Member already approved");
         members[newMember].status = true;
         memberCount++;
@@ -152,13 +164,7 @@ contract FincubeDAO is Ownable {
     //@warning: function only defined for testing purposes
     function checkIsMemberApproved(
         address _member
-    ) public view onlyOwner returns (bool) {
+    ) public view onlyMember(msg.sender) returns (bool) {
         return members[_member].status;
-    }
-
-    //@warning: function only defined for testing purposes
-
-    function getCallData() public view returns (bytes memory) {
-        return abi.encodeWithSignature("approveMember(address)", msg.sender);
     }
 }
