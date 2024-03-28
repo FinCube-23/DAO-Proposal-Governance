@@ -1,6 +1,7 @@
 import { Badge } from "@components/ui/badge";
 import { Card, CardHeader, CardContent, CardFooter } from "@components/ui/card";
 import { Proposal } from "@services/proposal/types";
+import { useNavigate } from "react-router-dom";
 
 interface Props {
     proposal: Proposal;
@@ -17,11 +18,16 @@ const convertStatusToVariant = (status: string) => {
         default:
             return "default";
     }
-}
+};
 
 export default function ProposalCard({ proposal }: Props) {
+    const navigate = useNavigate();
+
     return (
-        <Card>
+        <Card
+            className="hover:border-green-500"
+            onClick={() => navigate(`/dashboard/proposals/${proposal.address}`)}
+        >
             <CardHeader>
                 <div>
                     <Badge variant={convertStatusToVariant(proposal.status)}>
@@ -30,11 +36,9 @@ export default function ProposalCard({ proposal }: Props) {
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="font-bold text-2xl">
-                {proposal.title}
-                </div>
+                <div className="font-bold text-2xl">{proposal.title}</div>
                 <div className="text-muted-foreground">
-                {proposal.description}
+                    {proposal.description}
                 </div>
             </CardContent>
             <CardFooter>
@@ -44,10 +48,7 @@ export default function ProposalCard({ proposal }: Props) {
                         href="#"
                         className="text-green-500 hover:underline cursor-pointer"
                     >
-                        <p className="overflow-tranc">
-                            {/* 0x68fa609716a1901b51e22c88baf660ca1d8dec0b */}
-                            {proposal.address}
-                        </p>
+                        <p className="overflow-tranc">{proposal.address}</p>
                     </a>
                 </div>
             </CardFooter>
