@@ -6,7 +6,7 @@ export default function RootLayout() {
         <>
             <div>
                 <Header />
-                <div className="container mt-10">
+                <div className="container mt-20 mb-10">
                     <Outlet />
                 </div>
             </div>

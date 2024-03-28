@@ -62,3 +62,7 @@
 .navbar-gradient {
   background: linear-gradient(to bottom, rgba(34,197,94,1) 0%, rgba(16,185,129,0) 100%);
 }
+
+.overflow-tranc {
+  @apply overflow-hidden overflow-ellipsis md:overflow-auto w-16 md:w-full;  
+}

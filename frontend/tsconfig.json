@@ -30,6 +30,7 @@
           "@pages/*": ["./src/pages/*"],
           "@layouts/*": ["./src/layouts/*"],
           "@routes/*": ["./src/routes/*"],
+          "@sevices/*": ["./src/services/*"],
         }
     },
     "include": ["src"],
