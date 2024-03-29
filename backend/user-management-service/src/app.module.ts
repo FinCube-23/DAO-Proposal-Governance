@@ -12,6 +12,7 @@ import { DatabaseModule } from './database/database.module';
     ExchangeUserModule,
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: '.env.local',
     }),
     DatabaseModule,
   ],

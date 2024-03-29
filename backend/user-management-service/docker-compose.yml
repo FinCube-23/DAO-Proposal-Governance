@@ -2,6 +2,6 @@ services:
   psql:
     image: postgres
     env_file:
-      - .env
+      - .env.local
     ports:
       - '5432:5432'

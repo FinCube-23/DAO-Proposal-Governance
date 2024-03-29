@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+
+
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title FinCubeDAO
@@ -19,6 +21,7 @@ contract FinCubeDAO is Ownable {
     event ProposalExecuted(uint256 indexed proposalId);
     uint256 private memberCount;
     uint256 private proposalCount;
+
     /**
      * @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
@@ -28,6 +31,7 @@ contract FinCubeDAO is Ownable {
         string memberURI;
         bool status;
     }
+    
     /**
      * @dev Represents the different types of proposals that can be created.
      */
@@ -123,6 +127,7 @@ contract FinCubeDAO is Ownable {
         );
         _;
     }
+
     /**
      * @notice Modifier to ensure that the provided address is a valid and approved member.
      * @param _address The address to be checked.
@@ -152,6 +157,7 @@ contract FinCubeDAO is Ownable {
         members[_newMember] = member;
         emit MemberRegistered(_newMember, _memberURI);
     }
+
     /**
      * @notice Creates a new proposal for approving a new member.
      * @dev This function can only be called by an existing member.
@@ -225,7 +231,6 @@ contract FinCubeDAO is Ownable {
     ) external onlyMember(msg.sender) {
         ProposalVotes storage votes = proposalVotes[_proposalId];
         Proposal storage proposal = proposals[_proposalId];
-
         require(
             block.timestamp >= proposal.voteStart &&
                 block.timestamp <= proposal.voteDuration,
@@ -283,7 +288,6 @@ contract FinCubeDAO is Ownable {
      * @dev This function iterates through the proposals mapping and counts the proposals that have not been executed or canceled and are within the voting period.
      * @return The count of ongoing proposals.
      */
-
     function getOngoingProposalsCount() public view returns (uint256) {
         uint256 ongoingCount = 0;
         for (uint256 i = 0; i < proposalCount; i++) {
@@ -304,7 +308,6 @@ contract FinCubeDAO is Ownable {
      * @dev This function first calls `getOngoingProposalsCount` to get the count of ongoing proposals, then iterates through the proposals mapping and populates an array with the ongoing proposals.
      * @return An array of ongoing proposals.
      */
-
     function getOngoingProposals() public view returns (Proposal[] memory) {
         uint256 ongoingCount = getOngoingProposalsCount();
         Proposal[] memory ongoingProposals = new Proposal[](ongoingCount);
@@ -324,15 +327,16 @@ contract FinCubeDAO is Ownable {
 
         return ongoingProposals;
     }
+    
     /**
      * @notice Sets the token address.
      * @dev This function is marked as `private` because it should only be called internally by the `executeProposal` function.
      * @param _tokenAddress The address of the token to be set.
      */
-
     function setTokenAddress(address _tokenAddress) private {
         tokenAddress = _tokenAddress;
     }
+    
     /**
      * @notice Approves a new member.
      * @dev This function is marked as `private` because it should only be called internally by the `executeProposal` function.
@@ -345,12 +349,6 @@ contract FinCubeDAO is Ownable {
         emit MemberApproved(newMember);
     }
 
-    /**
-     * @notice Converts a byte array to an address.
-     * @dev This function is marked as `private` and `pure` because it does not read or modify the contract's state and is only used internally.
-     * @param bys The byte array to be converted.
-     * @return addr The address converted from the byte array.
-     */
     function bytesToAddress(
         bytes memory bys
     ) private pure returns (address addr) {
@@ -359,12 +357,6 @@ contract FinCubeDAO is Ownable {
         }
     }
 
-    /**
-     * @notice Converts an address to a byte array.
-     * @dev This function is marked as `private` and `pure` because it does not read or modify the contract's state and is only used internally.
-     * @param a The address to be converted.
-     * @return The byte array representation of the address.
-     */
     function toBytes(address a) private pure returns (bytes memory) {
         return abi.encodePacked(a);
     }
