@@ -91,7 +91,7 @@ contract FinCubeDAO is Ownable {
      * @dev This function is marked as `pure` because it does not read or modify the contract's state.
      * @return The voting delay period in seconds (currently 5 seconds).
      */
-    function votingDelay() private pure returns (uint256) {
+    function votingDelay() public pure returns (uint256) {
         return 5; // 5 seconds
     }
 
@@ -100,7 +100,7 @@ contract FinCubeDAO is Ownable {
      * @dev This function is marked as `pure` because it does not read or modify the contract's state.
      * @return The voting period duration in seconds (currently 60 seconds).
      */
-    function votingPeriod() private pure returns (uint256) {
+    function votingPeriod() public pure returns (uint256) {
         return 60; // 1 minute
     }
 
