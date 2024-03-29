@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
