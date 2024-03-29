@@ -66,3 +66,18 @@
 .overflow-tranc {
   @apply overflow-hidden overflow-ellipsis md:overflow-auto w-16 md:w-full;  
 }
+
+@keyframes border-pulsate {
+  0%   { border-color: rgba(34,197,94,1); }
+  50%  { border-color: rgba(0, 255, 0, 0); }
+  100% { border-color: rgba(34,197,94,1); }
+}
+
+.pulse-border {
+  border: 2px soild;
+}
+
+.pulse-border:hover{
+  border: 1px solid rgba(34,197,94,1);
+  animation: border-pulsate 2s infinite;
+}

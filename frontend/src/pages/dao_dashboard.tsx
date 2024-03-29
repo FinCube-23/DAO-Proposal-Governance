@@ -37,13 +37,13 @@ export default function DaoDashboard() {
         <div className="flex flex-col gap-5">
             <Card>
                 <CardHeader>
-                    <CardTitle>DAO Title Dashboard</CardTitle>
+                    <CardTitle className="text-2xl">DAO Title Dashboard</CardTitle>
                     <CardDescription>
                         <a
                             href="#"
                             className="text-sm text-green-500 cursor-pointer hover:underline"
                         >
-                            0x68fa609716a1901b51e22c88baf660ca1d8dec0b
+                            
                         </a>
                     </CardDescription>
                 </CardHeader>
@@ -72,8 +72,8 @@ export default function DaoDashboard() {
                     </div>
                 </CardFooter>
             </Card>
-            <div className="grid grid-cols-1  md:grid-cols-12 gap-5">
-                <div className="col-span-7 flex flex-col gap-5">
+            <div className="flex flex-col-reverse md:grid md:grid-cols-12 gap-5">
+                <div className="md:col-span-7 flex flex-col gap-5">
                     <Card>
                         <div className="flex justify-between items-center p-3">
                             <div className="flex items-center gap-3">
@@ -90,7 +90,7 @@ export default function DaoDashboard() {
                         <ProposalCard key={idx} proposal={proposal} />
                     ))}
                 </div>
-                <div className="col-span-5">
+                <div className="md:col-span-5">
                     <Card>
                         <CardHeader>
                             <div className="flex justify-between items-center">
