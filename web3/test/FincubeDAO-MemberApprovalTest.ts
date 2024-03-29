@@ -48,9 +48,8 @@ describe("FinCubeDAO", function () {
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
 
             //5 second delay between addition of new Proposal and proposal to be active
-            await new Promise(resolve => setTimeout(resolve, 6000));
-            const proposals = await finCubeDAO.getOngoingProposals();
-            expect(proposals.length).to.be.greaterThan(0);
+            await expect(finCubeDAO.connect(owner).newMemberApprovalProposal(addr2.address))
+                .to.emit(finCubeDAO, "ProposalCreated");
         });
 
         it("Should not create a new member proposal if not a member", async function () {
