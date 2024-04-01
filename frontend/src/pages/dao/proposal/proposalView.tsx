@@ -16,7 +16,7 @@ export default function ProposalView() {
         <div className="flex flex-col gap-5">
             <ProposalCard proposal={proposal} showStatus={false} />
             <div className="flex flex-col-reverse md:grid md:grid-cols-12">
-                <div className="md:col-span-8">
+                <div className="md:col-span-7">
                     <ProposalStatCard proposal={proposal} />
                 </div>
                 <div className="md:col-span-4">
