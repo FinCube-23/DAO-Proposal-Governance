@@ -1,7 +1,0 @@
-services:
-  psql:
-    image: postgres
-    env_file:
-      - .env.local
-    ports:
-      - '5433:5432'
