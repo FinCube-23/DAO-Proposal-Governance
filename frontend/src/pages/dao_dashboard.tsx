@@ -1,4 +1,4 @@
-import { Badge } from "@components/ui/badge";
+import ProposalCard from "@components/dao/ProposalCard";
 import { Button } from "@components/ui/button";
 import {
     Card,
@@ -8,21 +8,42 @@ import {
     CardContent,
     CardFooter,
 } from "@components/ui/card";
-
+import { Proposal } from "@services/proposal/types";
 import { Box, Coins, Flag, Vote, WalletCards } from "lucide-react";
+
+const proposals: Proposal[] = [
+    {
+        title: "Renovation Project",
+        description: "Renovating the community center",
+        status: "ongoing",
+        address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+    },
+    {
+        title: "Education Program",
+        description: "Funding educational workshops",
+        status: "executed",
+        address: "0x3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2",
+    },
+    {
+        title: "Park Cleanup",
+        description: "Organizing a community park cleanup event",
+        status: "canceled",
+        address: "0x5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+    },
+];
 
 export default function DaoDashboard() {
     return (
         <div className="flex flex-col gap-5">
             <Card>
                 <CardHeader>
-                    <CardTitle>DAO Title Dashboard</CardTitle>
+                    <CardTitle className="text-2xl">DAO Title Dashboard</CardTitle>
                     <CardDescription>
                         <a
                             href="#"
                             className="text-sm text-green-500 cursor-pointer hover:underline"
                         >
-                            0x68fa609716a1901b51e22c88baf660ca1d8dec0b
+                            
                         </a>
                     </CardDescription>
                 </CardHeader>
@@ -51,8 +72,8 @@ export default function DaoDashboard() {
                     </div>
                 </CardFooter>
             </Card>
-            <div className="grid grid-cols-12 gap-3">
-                <div className="col-span-7 flex flex-col gap-5">
+            <div className="flex flex-col-reverse md:grid md:grid-cols-12 gap-5">
+                <div className="md:col-span-7 flex flex-col gap-5">
                     <Card>
                         <div className="flex justify-between items-center p-3">
                             <div className="flex items-center gap-3">
@@ -64,58 +85,12 @@ export default function DaoDashboard() {
                             </div>
                         </div>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <div>
-                                <Badge>Executed</Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="font-bold text-2xl">
-                                Proposal Title Placeholder
-                            </div>
-                            <div className="text-muted-foreground">
-                                Proposal Desc Placeholder
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <div className="flex gap-1 text-sm">
-                                <div className="text-muted-foreground">
-                                    Published by
-                                </div>
-                                <a href="#" className="text-green-500 hover:underline cursor-pointer">
-                                    0x68fa609716a1901b51e22c88baf660ca1d8dec0b
-                                </a>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                    <Card>
-                        <CardHeader>
-                            <div>
-                                <Badge variant="destructive">Defeated</Badge>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="font-bold text-2xl">
-                                Proposal Title Placeholder
-                            </div>
-                            <div className="text-muted-foreground">
-                                Proposal Desc Placeholder
-                            </div>
-                        </CardContent>
-                        <CardFooter>
-                            <div className="flex gap-1 text-sm">
-                                <div className="text-muted-foreground">
-                                    Published by
-                                </div>
-                                <a href="#" className="text-green-500 hover:underline cursor-pointer">
-                                    0x68fa609716a1901b51e22c88baf660ca1d8dec0b
-                                </a>
-                            </div>
-                        </CardFooter>
-                    </Card>
+                    {/* Proposal List */}
+                    {proposals.map((proposal: Proposal, idx: number) => (
+                        <ProposalCard key={idx} proposal={proposal} />
+                    ))}
                 </div>
-                <div className="col-span-5">
+                <div className="md:col-span-5">
                     <Card>
                         <CardHeader>
                             <div className="flex justify-between items-center">
@@ -123,7 +98,7 @@ export default function DaoDashboard() {
                                     <Coins className="text-green-500" />
                                 </div>
                                 <div>
-                                    <Button>New Proposal</Button>
+                                    <Button>New Member</Button>
                                 </div>
                             </div>
                         </CardHeader>
