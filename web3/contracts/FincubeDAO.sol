@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
+
 import "@openzeppelin/contracts/access/Ownable.sol";
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
  */
+
 
 contract FinCubeDAO is Ownable {
  
@@ -20,7 +22,6 @@ contract FinCubeDAO is Ownable {
    event ProposalExecuted(uint256 indexed proposalId);
    uint256 private memberCount;
    uint256 private proposalCount;
-       /**
      * @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
      * @param status Whether the member is approved or not.
@@ -59,7 +60,7 @@ contract FinCubeDAO is Ownable {
         uint256 novotes;
     }
 
-        /**
+     /**
      * @dev Stores the vote information for a proposal.
      * @param isYesVote Mapping of addresses to whether they voted "yes" or not.
      * @param isNoVote Mapping of addresses to whether they voted "no" or not.
@@ -73,6 +74,7 @@ contract FinCubeDAO is Ownable {
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
     address public tokenAddress;
+
  
      /**
      * @notice Initializes the contract with the owner as the first member.
@@ -136,7 +138,7 @@ contract FinCubeDAO is Ownable {
        _;
    }
  
-   /**
+ /**
 * @notice Register a new member.
 * @dev This function can only be called by non-existing members.
 * @param _newMember The address of the new member to be registered.
@@ -209,6 +211,7 @@ contract FinCubeDAO is Ownable {
      * @param _proposalId The ID of the proposal to vote for.
      * @param _isYesVote Whether the vote is a "yes" vote (true) or a "no" vote (false).
      */
+
 function castVote(uint256 _proposalId, bool _isYesVote) external onlyMember(msg.sender) {
     
         ProposalVotes storage votes = proposalVotes[_proposalId];
@@ -260,14 +263,13 @@ function castVote(uint256 _proposalId, bool _isYesVote) external onlyMember(msg.
     }
  
    
-      /**
+     /**
      * @notice Returns the count of ongoing proposals.
      * @dev This function iterates through the proposals mapping and counts the proposals that have not been executed or canceled and are within the voting period.
      * @return  ongoingCount The count of ongoing proposals.
      */
 
-     function getOngoingProposalsCount() public view returns (uint256 ongoingCount) {
-
+   function getOngoingProposalsCount() public view returns (uint256 ongoingCount) {
     uint256 count = proposalCount;
     uint256 currentTimestamp = block.timestamp; 
     
