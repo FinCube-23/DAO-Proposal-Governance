@@ -18,8 +18,10 @@ contract FinCubeDAO is Ownable {
 
     event MemberApproved(address indexed member);
     event ProposalExecuted(uint256 indexed proposalId);
+    event ProposalCanceled(uint256 indexed proposalId);
     uint256 private memberCount;
     uint256 private proposalCount;
+
     /** @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
      * @param status Whether the member is approved or not.
@@ -33,8 +35,7 @@ contract FinCubeDAO is Ownable {
      */
     enum ProposalType {
         NewMemberProposal,
-        TokenAddressProposal,
-        RoyaltyProposal
+        GeneralProposal
     }
 
     /**
@@ -53,6 +54,7 @@ contract FinCubeDAO is Ownable {
         bool canceled;
         address proposer;
         bytes data;
+        address target;
         uint48 voteStart;
         uint48 voteDuration;
         uint256 yesvotes;
@@ -173,6 +175,7 @@ contract FinCubeDAO is Ownable {
             executed: false,
             canceled: false,
             data: _data,
+            target: address(0xdead),
             yesvotes: 0,
             novotes: 0
         });
@@ -188,32 +191,33 @@ contract FinCubeDAO is Ownable {
     }
 
     /**
-     * @notice Creates a new proposal for setting a token address.
+     * @notice Creates a new proposal. This is a generalized proposal which can invoke any public function of any contract using calldata.
      * @dev This function can only be called by an existing member.
-     * @param _tokenAddress The address of the token to be set.
+     * @param _calldata the calldata of function to be invoked. _target the address of contract having the function
      */
-    function newTokenAddressProposal(
-        address _tokenAddress
+    function newProposal(
+        bytes memory _calldata,
+        address _target
     ) external onlyMember(msg.sender) {
         uint48 currentTime = uint48(block.timestamp);
         uint48 start = currentTime + uint48(votingDelay());
         uint48 end = start + uint48(votingPeriod());
-        bytes memory _data = toBytes(_tokenAddress);
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
             voteStart: start,
             voteDuration: end,
             executed: false,
             canceled: false,
-            data: _data,
+            data: _calldata,
+            target: _target,
             yesvotes: 0,
             novotes: 0
         });
-        proposalType[proposalCount] = ProposalType.TokenAddressProposal;
+        proposalType[proposalCount] = ProposalType.GeneralProposal;
         emit ProposalCreated(
             proposalCount,
-            ProposalType.TokenAddressProposal,
-            _data
+            ProposalType.GeneralProposal,
+            _calldata
         );
         unchecked {
             proposalCount++;
@@ -232,7 +236,7 @@ contract FinCubeDAO is Ownable {
         bool _isYesVote
     ) external onlyMember(msg.sender) {
         ProposalVotes storage votes = proposalVotes[_proposalId];
-        Proposal memory proposal = proposals[_proposalId];
+        Proposal storage proposal = proposals[_proposalId];
 
         require(
             block.timestamp > proposal.voteStart &&
@@ -263,7 +267,7 @@ contract FinCubeDAO is Ownable {
      * @param proposalId The ID of the proposal to be executed.
      */
     function executeProposal(uint256 proposalId) public {
-        Proposal memory proposal = proposals[proposalId];
+        Proposal storage proposal = proposals[proposalId];
         require(
             !(block.timestamp > proposal.voteStart &&
                 block.timestamp < proposal.voteDuration),
@@ -281,10 +285,11 @@ contract FinCubeDAO is Ownable {
             approveMember(bytesToAddress(proposal.data));
             proposal.executed = true;
             emit ProposalExecuted(proposalId);
-        } else if (
-            proposalType[proposalId] == ProposalType.TokenAddressProposal
-        ) {
-            setTokenAddress(bytesToAddress(proposal.data));
+        } else if (proposalType[proposalId] == ProposalType.GeneralProposal) {
+            (bool success, ) = proposal.target.call(proposal.data);
+            if (!success) {
+                revert("Proposal execution failed");
+            }
             proposal.executed = true;
             emit ProposalExecuted(proposalId);
         }
@@ -352,15 +357,26 @@ contract FinCubeDAO is Ownable {
         return ongoingProposals;
     }
 
-    //     function cancelProposal(uint256 proposalId) public onlyOwner {
-    //     Proposal storage proposal = proposals[proposalId];
-    //     require(
-    //         !proposal.executed && !proposal.canceled,
-    //         "Proposal already executed or canceled"
-    //     );
-    //     proposal.canceled = true;
-    //     emit ProposalCanceled(proposalId);
-    // }
+    /**
+     * @notice Cancels a proposal that has not been executed or canceled yet.
+     * @param proposalId The ID of the proposal to be canceled.
+     * @dev Only the proposer of the proposal can call this function.
+     * @dev The proposal must not have been executed or canceled before.
+     */
+    function cancelProposal(uint256 proposalId) public onlyMember(msg.sender) {
+        Proposal storage proposal = proposals[proposalId];
+        require(
+            proposal.proposer == msg.sender,
+            "No permission to cancel proposal"
+        );
+        require(
+            !proposal.executed && !proposal.canceled,
+            "Proposal already executed or canceled"
+        );
+        proposal.canceled = true;
+        emit ProposalCanceled(proposalId);
+    }
+
     /**
      * @notice Sets the token address.
      * @dev This function is marked as `private` because it should only be called internally by the `executeProposal` function.
