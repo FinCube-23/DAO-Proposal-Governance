@@ -1,7 +1,37 @@
 services:
-  psql:
+  user-management-service:
+    container_name: user_management_api
+    build:
+      context: .
+      args:
+        - APP_ENV
+    command: npm run start
+    ports:
+      - 3001:3000
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env.local
+
+  user-management-pgsqldb:
+    container_name: user-management-pgsqldb
     image: postgres
     env_file:
       - .env.local
     ports:
       - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin4-user-management
+    image: dpage/pgadmin4:8.0
+    env_file:
+      - .env.local
+    ports:
+      - '5050:80'
+    depends_on:
+      - user-management-pgsqldb
+
+volumes:
+  postgres_data:

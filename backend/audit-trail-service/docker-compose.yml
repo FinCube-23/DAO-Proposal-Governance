@@ -2,36 +2,37 @@ services:
   audit-app:
     container_name: audit_service_api
     build:
-      context: ./
+      context: .
       args:
         - APP_ENV
     command: npm run start
     ports:
       - 3003:3000
     volumes:
-      - ./:/usr/src/app
-    env_file:  # Add this line to specify the environment file
+      - .:/usr/src/app
+    env_file:
+      # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
 
-  pgsqldb:
-    container_name: pgsqldb
+  audit-trail-pgsqldb:
+    container_name: audit-trail-pgsqldb
     image: postgres:16
     env_file:
       - .env.local
     ports:
-      - 5432:5432
+      - 5434:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   pgadmin:
-    container_name: pgadmin4
+    container_name: pgadmin4-audit-trail
     image: dpage/pgadmin4:8.0
     env_file:
       - .env.local
     ports:
-      - '5050:80'
+      - '5070:80'
     depends_on:
-      - pgsqldb
+      - audit-trail-pgsqldb
 
 volumes:
   postgres-data:
