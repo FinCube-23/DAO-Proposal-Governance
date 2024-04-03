@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.20;
+pragma solidity ^0.8.8;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
@@ -74,7 +74,7 @@ contract FinCubeDAO is Ownable {
     mapping(uint256 => Proposal) private proposals;
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
-    address public tokenAddress;
+ 
 
     /**
      * @notice Initializes the contract with the owner as the first member.
@@ -377,15 +377,7 @@ contract FinCubeDAO is Ownable {
         emit ProposalCanceled(proposalId);
     }
 
-    /**
-     * @notice Sets the token address.
-     * @dev This function is marked as `private` because it should only be called internally by the `executeProposal` function.
-     * @param _tokenAddress The address of the token to be set.
-     */
 
-    function setTokenAddress(address _tokenAddress) private {
-        tokenAddress = _tokenAddress;
-    }
 
     /**
      * @notice Approves a new member.

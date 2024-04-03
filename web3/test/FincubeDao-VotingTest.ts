@@ -109,7 +109,7 @@ describe("FinCubeDAO", function () {
     
         // Register addr1 as a new member
         await finCubeDAO.connect(addr1).registerMember(addr1.address, "Member URI");
-
+ 
         // Create a new member approval proposal
         await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
         await new Promise(resolve => setTimeout(resolve, 6000));
@@ -117,7 +117,7 @@ describe("FinCubeDAO", function () {
         await finCubeDAO.connect(owner).castVote(0, true);
         // Try to Execute the proposal
         await expect(finCubeDAO.executeProposal(0)).to.be.revertedWith("Voting still going on");
-
+ 
     });
     it("Should allow a user to be in the DAO as a new member", async function () {
         this.timeout(190000);
@@ -125,7 +125,7 @@ describe("FinCubeDAO", function () {
     
         // Register addr1 as a new member
         await finCubeDAO.connect(addr1).registerMember(addr1.address, "Member URI");
-
+ 
         // Create a new member approval proposal
         await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
         await new Promise(resolve => setTimeout(resolve, 6000));
@@ -136,44 +136,7 @@ describe("FinCubeDAO", function () {
         await finCubeDAO.executeProposal(0);
         // Check if addr1 is now a member
         expect(await finCubeDAO.checkIsMemberApproved(addr1.address)).to.equal(true);
-    });
-    
-    
-    it("Should allow a member to create and vote on a proposal to set a token address", async function () {
-        const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
-    
-        // Create a new token address proposal
-        await finCubeDAO.connect(owner).newTokenAddressProposal('0x6B175474E89094C44Da98b954EedeAC495271d0F');
-        await new Promise(resolve => setTimeout(resolve, 6000));
-    
-        // Cast a 'yes' vote on the proposal
-        await finCubeDAO.connect(owner).castVote(0, true);
-    
-        // Check if the vote was recorded for the proposal
-        const ongoingProposals = await finCubeDAO.getOngoingProposals();
-        expect(ongoingProposals[0].yesvotes).to.equal(1);
-    });
-    
-    it("Should execute a proposal to set a token address after the voting period", async function () {
-        const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
-    
-        // Create a new token address proposal
-        await finCubeDAO.connect(owner).newTokenAddressProposal(addr1.address);
-        await new Promise(resolve => setTimeout(resolve, 6000));
-    
-        // Cast a 'yes' vote on the proposal
-        await finCubeDAO.connect(owner).castVote(0, true);
-    
-        // Wait for the voting period to end
-        await time.increase(65000); // Increase time beyond voting period
-    
-        // Execute the proposal
-        await finCubeDAO.executeProposal(0);
-    
-        // Check if the token address was set
-        expect(await finCubeDAO.tokenAddress()).to.equal(addr1.address);
-    });
-    
+    });    
  
 });
 });
