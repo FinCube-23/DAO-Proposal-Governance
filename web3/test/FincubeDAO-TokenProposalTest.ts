@@ -59,7 +59,7 @@ describe("FinCubeDAO", function () {
         tokenAddressContract = await TokenAddressContract.deploy();
        
       });
-            it("should create a new proposal for setting a token address", async function () {
+      it("should create a new proposal for setting a token address", async function () {
         
         const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
           
@@ -198,12 +198,14 @@ describe("FinCubeDAO", function () {
         
         const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
         
+        
         // Encode the function call data
-        const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
+        const calldata = tokenAddressContract.interface.encodeFunctionData("set", [token]);
+        // const calldata = '0x2801617e0000000000000000000000001234567890123456789012345678901234567890'; // taken from remix and doesnt work either
         
         // Create a new proposal for setting a token address
         await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-        
+       // console.log(tokenAddressContract);
         // Vote on the proposal
         await new Promise(resolve => setTimeout(resolve, 6000));
         // Cast a 'yes' vote on the proposal
