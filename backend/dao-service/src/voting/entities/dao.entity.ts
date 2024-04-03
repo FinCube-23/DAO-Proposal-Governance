@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('dao')
 export class DAOEntity {
@@ -19,4 +19,9 @@ export class DAOEntity {
 
   @Column({ type: 'varchar' })
   address: string;
+
+
+  @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
+  @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
+
 }
