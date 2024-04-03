@@ -1,0 +1,14 @@
+services:
+  web3-proxy-service:
+    container_name: web3-proxy
+    build:
+      context: .
+      args:
+        - APP_ENV
+    command: npm run start
+    ports:
+      - 3004:3000
+    volumes:
+      - .:/usr/src/app
+    env_file:
+      - .env.local
