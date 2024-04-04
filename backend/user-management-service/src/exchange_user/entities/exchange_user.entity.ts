@@ -4,6 +4,8 @@ import {
   PrimaryGeneratedColumn,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 import { MfsBusinessEntity } from 'src/mfs_business/entities/mfs_business.entity';
 
@@ -28,6 +30,9 @@ export class ExchangeUserEntity {
 
   @Column({ type: 'float' })
   balance: number;
+
+  @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
+  @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
 
   //@ManyToOne(() => UserEntity, (user) => user.exchangeUsers)
   // @JoinColumn({ name: 'user_id' })

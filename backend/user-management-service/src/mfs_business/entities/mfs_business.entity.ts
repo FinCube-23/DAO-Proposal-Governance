@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 //import { DaoEntity } from './dao/entities/dao.entity';
 import { ExchangeUserEntity } from 'src/exchange_user/entities/exchange_user.entity';
 
@@ -28,6 +28,8 @@ export class MfsBusinessEntity {
   //@ManyToOne(() => DaoEntity, (dao) => dao.businesses)
   // @JoinColumn({ name: 'dao_id' })
   //dao: DaoEntity;
+  @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
+  @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
 
   @OneToMany(
     () => ExchangeUserEntity,
