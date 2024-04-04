@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
+import { DaoAuditModule } from './dao_audit/dao_audit.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { DatabaseModule } from './database/database.module';
       envFilePath: '.env.local',
     }),
     DatabaseModule,
+    DaoAuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
