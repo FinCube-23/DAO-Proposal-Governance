@@ -1,15 +1,25 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Put,
+  Param,
+  Delete,
+  NotFoundException,
+} from '@nestjs/common';
 import { VotingService } from './voting.service';
 import { DAOEntity } from './entities/dao.entity';
+import { ApiBody } from '@nestjs/swagger';
 @Controller('voting')
 export class VotingController {
-  constructor(private readonly votingServiceService: VotingService) { }
+  constructor(private readonly votingServiceService: VotingService) {}
 
   @Post()
+  @ApiBody({ type: DAOEntity })
   async create(@Body() daoEntity: DAOEntity): Promise<DAOEntity> {
     return this.votingServiceService.create(daoEntity);
   }
-
 
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<DAOEntity> {
@@ -21,9 +31,11 @@ export class VotingController {
     }
   }
 
-
   @Put(':id')
-  async update(@Param('id') id: string, @Body() daoEntity: DAOEntity): Promise<DAOEntity> {
+  async update(
+    @Param('id') id: string,
+    @Body() daoEntity: DAOEntity,
+  ): Promise<DAOEntity> {
     return this.votingServiceService.update(+id, daoEntity);
   }
 
