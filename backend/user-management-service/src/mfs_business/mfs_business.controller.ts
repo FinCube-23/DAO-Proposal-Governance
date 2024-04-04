@@ -2,25 +2,28 @@ import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException } fr
 import { MfsBusinessService } from './mfs_business.service';
 
 import { MfsBusinessEntity } from './entities/mfs_business.entity';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('mfs-business')
 export class MfsBusinessController {
   constructor(private readonly mfsBusinessService: MfsBusinessService) { }
 
   @Post()
+  @ApiBody({ type: MfsBusinessEntity })
   async create(@Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
     return this.mfsBusinessService.create(mfs_business_entity);
   }
-
-  @Post()
-  async findByEmail(@Body() email: string): Promise<MfsBusinessEntity> {
-    const mfs_business = await this.mfsBusinessService.findByEmail(email);
-    if (!mfs_business) {
-      throw new NotFoundException('MFS business not found');
-    } else {
-      return mfs_business;
-    }
-  }
+  //redundant api call
+  // @Post()
+  // @ApiBody({ type: String, description: "email" })
+  // async findByEmail(@Body() email: string): Promise<MfsBusinessEntity> {
+  //   const mfs_business = await this.mfsBusinessService.findByEmail(email);
+  //   if (!mfs_business) {
+  //     throw new NotFoundException('MFS business not found');
+  //   } else {
+  //     return mfs_business;
+  //   }
+  // }
 
   @Get()
   async findAll(): Promise<MfsBusinessEntity[]> {
