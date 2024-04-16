@@ -7,21 +7,25 @@ import {
   Param,
   Delete,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { VotingService } from './voting.service';
 import { DAOEntity } from './entities/dao.entity';
 import { ApiBody } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 @Controller('voting')
 export class VotingController {
   constructor(private readonly votingServiceService: VotingService) {}
 
   @Post()
   @ApiBody({ type: DAOEntity })
+  @UseGuards(AuthGuard('jwt'))
   async create(@Body() daoEntity: DAOEntity): Promise<DAOEntity> {
     return this.votingServiceService.create(daoEntity);
   }
 
   @Get(':id')
+  @UseGuards(AuthGuard('jwt'))
   async findOne(@Param('id') id: string): Promise<DAOEntity> {
     const dao = await this.votingServiceService.findOne(+id);
     if (!dao) {
@@ -32,6 +36,7 @@ export class VotingController {
   }
 
   @Put(':id')
+  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('id') id: string,
     @Body() daoEntity: DAOEntity,
@@ -40,6 +45,7 @@ export class VotingController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('id') id: string): Promise<any> {
     const dao = await this.votingServiceService.findOne(+id);
     if (!dao) {
