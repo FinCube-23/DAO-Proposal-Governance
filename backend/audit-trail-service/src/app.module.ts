@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
+import { DaoAuditModule } from './dao_audit/dao_audit.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthzModule } from './authz/authz.module';
     }),
     DatabaseModule,
     AuthzModule,
+    DaoAuditModule,
   ],
   controllers: [AppController],
   providers: [AppService],
