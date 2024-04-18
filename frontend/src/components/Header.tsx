@@ -1,5 +1,5 @@
-import { Button } from "@components/ui/button";
 import { Link } from "react-router-dom";
+import LoginButton from "./auth/LoginButton";
 
 export default function Header() {
     return (
@@ -18,7 +18,7 @@ export default function Header() {
                                 href="#"
                                 className="text-white hover:text-gray-300"
                             >
-                                <Button>Connect</Button>
+                                <LoginButton />
                             </a>
                         </li>
                     </ul>
