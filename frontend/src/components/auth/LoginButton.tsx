@@ -1,9 +1,18 @@
 import { Button } from "@components/ui/button";
 import { useAuth0 } from "@auth0/auth0-react";
 import { LogOut } from "lucide-react";
+import { useEffect } from "react";
 
 export default function LoginButton() {
-    const { loginWithPopup, isAuthenticated, logout } = useAuth0();
+    const { loginWithPopup, isAuthenticated, logout, getAccessTokenSilently, isLoading } = useAuth0();
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            getAccessTokenSilently().then((token) => {
+                localStorage.setItem("auth0-token", token);
+            })
+        }
+    }, [isLoading, isAuthenticated]);
+
     return (
         <>
             {isAuthenticated ? (
