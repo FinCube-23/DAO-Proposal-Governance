@@ -1,6 +1,6 @@
 services:
   web3-proxy-service:
-    container_name: web3-proxy
+    container_name: web3_proxy
     build:
       context: .
       args:
