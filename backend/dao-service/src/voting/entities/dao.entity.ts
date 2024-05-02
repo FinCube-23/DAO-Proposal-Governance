@@ -33,6 +33,14 @@ export class DAOEntity {
   @ApiProperty()
   address: string;
 
+  @Column({ type: 'integer' })
+  @ApiProperty()
+  proposal_ID: number;
+
+  @Column({ type: 'varchar' })
+  @ApiProperty()
+  proposal_metadata: string;
+
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
 }
