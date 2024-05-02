@@ -48,7 +48,7 @@ describe("FinCubeDAO", function () {
   async function deployFinCubeDAOFixture() {
     const [owner, addr1, addr2] = await hre.ethers.getSigners();
     const FinCubeDAO = await hre.ethers.getContractFactory("FinCubeDAO");
-    const finCubeDAO = await FinCubeDAO.deploy("Owner URI");
+    const finCubeDAO = await FinCubeDAO.deploy("DAO URI", "Owner URI");
     return { finCubeDAO, owner, addr1, addr2 };
   }
 
