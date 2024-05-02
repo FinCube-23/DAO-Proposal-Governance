@@ -3,17 +3,17 @@
 pragma solidity ^0.8.8;
  
 contract TokenAddressContract {
-    address public token1;
+    address public token;
     
-    function set(address token) public {
-        token1 = token;
+    function set(address tokenAddress) public {
+        token = tokenAddress;
     }
     
     function remove(address ) public {
-        delete token1;
+        delete token;
     }
  
     function getToken() public view returns(address) {
-        return token1;
+        return token;
     }
 }
