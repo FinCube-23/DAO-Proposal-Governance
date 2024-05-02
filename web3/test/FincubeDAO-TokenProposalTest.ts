@@ -52,7 +52,7 @@ describe("FinCubeDAO", function () {
     return { finCubeDAO, owner, addr1, addr2 };
   }
 
-    describe("newTokenAddressProposal", function () {
+    describe("New Token Address Proposal", function () {
       let tokenAddressContract: { interface: { encodeFunctionData: (arg0: string, arg1: string[]) => any; }; runner: { address: Typed | AddressLike; }; getToken: () => any; };
       beforeEach(async function(){
         const TokenAddressContract = await ethers.getContractFactory("TokenAddressContract");
@@ -213,9 +213,7 @@ describe("FinCubeDAO", function () {
         
         // Execute the proposal
         await new Promise(resolve => setTimeout(resolve, 65000));
-        console.log("amfdusdgdsgsdgsdofd");
-        
-        console.log(calldata);
+
         // Check that the token address was set correctly
         // const tokenAddress = await (tokenAddressContract.getToken());
         // console.log(tokenAddress, token);
