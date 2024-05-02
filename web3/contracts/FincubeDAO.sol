@@ -21,7 +21,7 @@ contract FinCubeDAO is Ownable {
     event ProposalCanceled(uint256 indexed proposalId);
     uint256 private memberCount;
     uint256 private proposalCount;
-
+    string public daoURI;
     /** @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
      * @param status Whether the member is approved or not.
@@ -74,18 +74,21 @@ contract FinCubeDAO is Ownable {
     mapping(uint256 => Proposal) private proposals;
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
- 
 
     /**
      * @notice Initializes the contract with the owner as the first member.
      * @param _ownerURI The URI that identifies the owner member.
      */
-    constructor(string memory _ownerURI) Ownable(msg.sender) {
+    constructor(
+        string memory _daoURI,
+        string memory _ownerURI
+    ) Ownable(msg.sender) {
         Member memory member;
         member.memberURI = _ownerURI;
         member.status = true;
         members[msg.sender] = member;
         memberCount = 1;
+        daoURI = _daoURI;
     }
 
     /**
@@ -376,8 +379,6 @@ contract FinCubeDAO is Ownable {
         proposal.canceled = true;
         emit ProposalCanceled(proposalId);
     }
-
-
 
     /**
      * @notice Approves a new member.

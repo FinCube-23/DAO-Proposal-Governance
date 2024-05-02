@@ -15,7 +15,7 @@ describe("FinCubeDAO", function () {
         return { finCubeDAO, owner, addr1, addr2 };
     }
 
-    describe("Deployment", function () {
+    describe("Contract Deployment", function () {
         it("Should set the owner as the first member", async function () {
             const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 

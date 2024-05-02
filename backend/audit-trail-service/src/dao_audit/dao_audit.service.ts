@@ -1,26 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { CreateDaoAuditDto } from './dto/create-dao_audit.dto';
-import { UpdateDaoAuditDto } from './dto/update-dao_audit.dto';
-
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { DaoAudit } from "./entities/dao_audit.entity";
 @Injectable()
 export class DaoAuditService {
-  create(createDaoAuditDto: CreateDaoAuditDto) {
-    return 'This action adds a new daoAudit';
+  constructor(
+    @InjectRepository(DaoAudit) private daoAuditRepository: Repository<DaoAudit>,
+  ) { }
+  create(createDaoAudit: DaoAudit) {
+    const new_dao_audit = this.daoAuditRepository.create(createDaoAudit);
+    return this.daoAuditRepository.save(new_dao_audit);
   }
 
   findAll() {
-    return `This action returns all daoAudit`;
+    return this.daoAuditRepository.find();
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} daoAudit`;
+    return this.daoAuditRepository.findOne({ where: { id } });
   }
 
-  update(id: number, updateDaoAuditDto: UpdateDaoAuditDto) {
-    return `This action updates a #${id} daoAudit`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} daoAudit`;
-  }
 }
