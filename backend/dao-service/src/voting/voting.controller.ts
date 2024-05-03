@@ -13,9 +13,9 @@ import { VotingService } from './voting.service';
 import { DAOEntity } from './entities/dao.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-@Controller('voting')
+@Controller('dao')
 export class VotingController {
-  constructor(private readonly votingServiceService: VotingService) {}
+  constructor(private readonly votingServiceService: VotingService) { }
 
   @Post()
   @ApiBody({ type: DAOEntity })
@@ -34,7 +34,7 @@ export class VotingController {
   async findOne(@Param('id') id: string): Promise<DAOEntity> {
     const dao = await this.votingServiceService.findOne(+id);
     if (!dao) {
-      throw new NotFoundException(`MFS business doesn't exist`);
+      throw new NotFoundException(`DAO doesn't exist`);
     } else {
       return dao;
     }
@@ -58,7 +58,7 @@ export class VotingController {
   async remove(@Param('id') id: string): Promise<any> {
     const dao = await this.votingServiceService.findOne(+id);
     if (!dao) {
-      throw new NotFoundException(`MFS business doesn't exist`);
+      throw new NotFoundException(`DAO doesn't exist`);
     } else {
       return this.votingServiceService.remove(+id);
     }

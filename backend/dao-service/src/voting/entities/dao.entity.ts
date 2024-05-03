@@ -5,8 +5,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany
 } from 'typeorm';
-
+import { ProposalEntity } from 'src/proposal-service/entities/proposal.entity';
 @Entity('dao')
 export class DAOEntity {
   @PrimaryGeneratedColumn()
@@ -33,14 +34,18 @@ export class DAOEntity {
   @ApiProperty()
   address: string;
 
-  @Column({ type: 'integer' })
-  @ApiProperty()
-  proposal_ID: number;
+  @Column({ type: 'integer', array: true, nullable: true })
+  @ApiProperty({ isArray: true })
+  proposal_ID: number[];
 
-  @Column({ type: 'varchar' })
-  @ApiProperty()
-  proposal_metadata: string;
+  @Column({ type: 'varchar', array: true, nullable: true })
+  @ApiProperty({ isArray: true })
+  proposal_metadata: string[];
 
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
+
+  @OneToMany(() => ProposalEntity, proposal => proposal.dao)
+  @ApiProperty({ type: () => [ProposalEntity] })
+  proposals: ProposalEntity[];
 }

@@ -7,7 +7,7 @@ import { DAOEntity } from './entities/dao.entity';
 export class VotingService {
   constructor(
     @InjectRepository(DAOEntity) private daoRepository: Repository<DAOEntity>,
-  ) {}
+  ) { }
 
   async create(dao: Partial<DAOEntity>): Promise<DAOEntity> {
     const new_dao = this.daoRepository.create(dao);
