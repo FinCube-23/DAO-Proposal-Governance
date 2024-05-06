@@ -24,7 +24,7 @@ export class DaoAuditService {
   }
   GET_TRANSACTION = gql`
     query MyQuery {
-      memberRegistereds(where: { transactionHash_gt: "" }) {
+      memberRegistereds(where: { transactionHash: "" }) {
         transactionHash
         id
         blockNumber
