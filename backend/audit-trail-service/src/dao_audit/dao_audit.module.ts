@@ -3,7 +3,7 @@ import { DaoAuditService } from './dao_audit.service';
 import { DaoAuditController } from './dao_audit.controller';
 import { DaoAudit } from './entities/dao_audit.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
- import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ApolloClient, InMemoryCache } from '@apollo/client';
 @Module({
   controllers: [DaoAuditController],
   providers: [
