@@ -5,7 +5,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
 import { DaoAuditModule } from './dao_audit/dao_audit.module';
-import { GraphqlModule } from './graphql/graphql.module';
+import { GraphQLModule } from './graphql/graphql.module';
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { GraphqlModule } from './graphql/graphql.module';
     DatabaseModule,
     AuthzModule,
     DaoAuditModule,
-    GraphqlModule,
+    GraphQLModule,
   ],
   controllers: [AppController],
   providers: [AppService],

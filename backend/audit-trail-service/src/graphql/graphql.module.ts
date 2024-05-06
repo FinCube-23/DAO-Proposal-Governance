@@ -9,7 +9,7 @@ import { GraphQLController } from './graphql.controller';
       provide: 'APOLLO_CLIENT',
       useFactory: () => {
         return new ApolloClient({
-          uri: 'https://api.studio.thegraph.com/query/67924/fincube-dao/v0.0.1',
+          uri: 'https://api.studio.thegraph.com/query/67924/fincube-dao/version/latest',
           cache: new InMemoryCache(),
         });
       },
