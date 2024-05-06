@@ -1,15 +1,27 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { DaoAuditService } from './dao_audit.service';
-import { DaoAudit } from "./entities/dao_audit.entity";
+import { DaoAudit } from './entities/dao_audit.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 @Controller('dao-audit')
 export class DaoAuditController {
-  constructor(private readonly daoAuditService: DaoAuditService) { }
+  constructor(private readonly daoAuditService: DaoAuditService) {}
 
   @Post()
   @ApiBody({ type: DaoAudit })
-  @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: DaoAudit })
+  @ApiResponse({
+    status: 200,
+    description: 'The record has been successfully created.',
+    type: DaoAudit,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
   create(@Body() daoAudit: DaoAudit) {
@@ -17,7 +29,11 @@ export class DaoAuditController {
   }
 
   @Get()
-  @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: DaoAudit })
+  @ApiResponse({
+    status: 200,
+    description: 'The record has been successfully updated.',
+    type: DaoAudit,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
   findAll() {
@@ -25,11 +41,18 @@ export class DaoAuditController {
   }
 
   @Get(':id')
-  @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: DaoAudit })
+  @ApiResponse({
+    status: 200,
+    description: 'The record has been successfully updated.',
+    type: DaoAudit,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  findOne(@Param('id') id: string) {
-    return this.daoAuditService.findOne(+id);
+  async getTransaction(@Query('transactionHash') transactionHash?: string) {
+    if (transactionHash) {
+      return this.daoAuditService.getTransaction(transactionHash);
+    } else {
+      return 0;
+    }
   }
-
 }
