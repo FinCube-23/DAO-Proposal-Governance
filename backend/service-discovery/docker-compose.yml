@@ -1,0 +1,12 @@
+services:
+  api-gateway-service:
+    container_name: api-gateway-service
+    build:
+      context: .
+      args:
+        - APP_ENV
+    command: node index.js
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/usr/src/app
