@@ -16,7 +16,7 @@ export class ProposalServiceController {
     return this.proposalService.create(proposal_entity);
   }
 
-  @Get(':id')
+  @Get(':dao-id')
   @UseGuards(AuthGuard('jwt'))
   async findProposal(@Param('id') id: string): Promise<ProposalEntity[]> {
     return this.proposalService.findOne(+id);
