@@ -28,7 +28,7 @@ export class ProposalEntity {
     @ApiProperty()
     executed: boolean;
 
-    @ManyToOne(() => DAOEntity, dao => dao.proposals)
+    @ManyToOne(() => DAOEntity, dao => dao.proposals, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'dao_id' })
     @ApiProperty({ type: () => DAOEntity })
     dao: DAOEntity;
