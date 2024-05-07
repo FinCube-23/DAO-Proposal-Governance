@@ -26,7 +26,7 @@ export class VotingController {
     return this.votingServiceService.create(daoEntity);
   }
 
-  @Get(':id')
+  @Get(':dao-id')
   @ApiResponse({ status: 200, type: DAOEntity })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -40,7 +40,7 @@ export class VotingController {
     }
   }
 
-  @Put(':id')
+  @Put(':dao-id')
   @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: DAOEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
@@ -51,7 +51,7 @@ export class VotingController {
     return this.votingServiceService.update(+id, daoEntity);
   }
 
-  @Delete(':id')
+  @Delete(':dao-id')
   @ApiResponse({ status: 200, description: 'The record has been successfully deleted.', type: DAOEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))

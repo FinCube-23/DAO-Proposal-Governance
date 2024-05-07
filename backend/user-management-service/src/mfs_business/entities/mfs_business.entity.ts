@@ -38,6 +38,7 @@ export class MfsBusinessEntity {
   @OneToMany(
     () => ExchangeUserEntity,
     (exchangeUser) => exchangeUser.mfsBusiness,
+    { onDelete: 'CASCADE' }
   )
   exchangeUsers: ExchangeUserEntity[];
 }
