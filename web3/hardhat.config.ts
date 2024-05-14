@@ -1,5 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
-import { ethers, upgrades } from "hardhat";
+import '@openzeppelin/hardhat-upgrades';
 import "@nomicfoundation/hardhat-toolbox";
 import 'hardhat-storage-layout';
 import "hardhat-gas-reporter"
