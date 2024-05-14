@@ -7,6 +7,9 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const config: HardhatUserConfig = {
+  mocha: {
+    require: ['@nomicfoundation/hardhat-chai-matchers', '@nomiclabs/hardhat-ethers']
+  },
   solidity: {
     compilers: [
       {
@@ -33,7 +36,7 @@ const config: HardhatUserConfig = {
       accounts: [`0x${process.env.WALLET_PRIVATE_KEY}`],
     },
   },
-  
+
   // https://hardhat.org/hardhat-runner/docs/guides/verifying
   // (npm etherscan deprecated)
   // https://coinsbench.com/verify-smart-contract-on-polygonscan-using-hardhat-9b8331dbd888
@@ -46,6 +49,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
+
 };
 
 
