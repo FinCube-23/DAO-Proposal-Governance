@@ -1,8 +1,9 @@
 import { HardhatUserConfig } from "hardhat/config";
+import '@openzeppelin/hardhat-upgrades';
 import "@nomicfoundation/hardhat-toolbox";
 import 'hardhat-storage-layout';
 import "hardhat-gas-reporter"
-
+import '@openzeppelin/hardhat-upgrades';
 import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
@@ -33,7 +34,7 @@ const config: HardhatUserConfig = {
       accounts: [`0x${process.env.WALLET_PRIVATE_KEY}`],
     },
   },
-  
+
   // https://hardhat.org/hardhat-runner/docs/guides/verifying
   // (npm etherscan deprecated)
   // https://coinsbench.com/verify-smart-contract-on-polygonscan-using-hardhat-9b8331dbd888
@@ -46,6 +47,7 @@ const config: HardhatUserConfig = {
       sepolia: process.env.ETHERSCAN_API_KEY,
     },
   },
+
 };
 
 

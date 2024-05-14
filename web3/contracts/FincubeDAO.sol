@@ -1,14 +1,16 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.19;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
  */
 
-contract FinCubeDAO is Ownable {
+contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     event MemberRegistered(address indexed _newMember, string _memberURI);
     event ProposalCreated(
         uint256 indexed proposalId,
@@ -16,12 +18,40 @@ contract FinCubeDAO is Ownable {
         bytes data
     );
 
+    /**
+     * @notice Initializes the contract with the owner as the first member.
+     * @param _ownerURI The URI that identifies the owner member.
+     */
+
+    function initialize(
+        string memory _daoURI,
+        string memory _ownerURI
+    ) public initializer {
+        __Ownable_init(msg.sender);
+        __UUPSUpgradeable_init();
+        Member memory member;
+        member.memberURI = _ownerURI;
+        member.status = true;
+        members[msg.sender] = member;
+        memberCount = 1;
+        daoURI = _daoURI;
+    }
+
+    /**
+     * @notice Authorize upgrade of new implementation.
+     */
+
+    function _authorizeUpgrade(
+        address newImplementation
+    ) internal override onlyOwner {}
+
     event MemberApproved(address indexed member);
     event ProposalExecuted(uint256 indexed proposalId);
     event ProposalCanceled(uint256 indexed proposalId);
     uint256 private memberCount;
     uint256 private proposalCount;
     string public daoURI;
+
     /** @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
      * @param status Whether the member is approved or not.
@@ -74,22 +104,6 @@ contract FinCubeDAO is Ownable {
     mapping(uint256 => Proposal) private proposals;
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
-
-    /**
-     * @notice Initializes the contract with the owner as the first member.
-     * @param _ownerURI The URI that identifies the owner member.
-     */
-    constructor(
-        string memory _daoURI,
-        string memory _ownerURI
-    ) Ownable(msg.sender) {
-        Member memory member;
-        member.memberURI = _ownerURI;
-        member.status = true;
-        members[msg.sender] = member;
-        memberCount = 1;
-        daoURI = _daoURI;
-    }
 
     /**
      * @notice Returns the voting delay period in seconds.
