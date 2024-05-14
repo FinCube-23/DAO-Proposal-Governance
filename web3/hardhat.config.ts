@@ -1,4 +1,5 @@
 import { HardhatUserConfig } from "hardhat/config";
+import '@openzeppelin/hardhat-upgrades';
 import "@nomicfoundation/hardhat-toolbox";
 import 'hardhat-storage-layout';
 import "hardhat-gas-reporter"
@@ -7,9 +8,6 @@ import * as dotenv from 'dotenv';
 dotenv.config({ path: '.env.local' });
 
 const config: HardhatUserConfig = {
-  mocha: {
-    require: ['@nomicfoundation/hardhat-chai-matchers', '@nomiclabs/hardhat-ethers']
-  },
   solidity: {
     compilers: [
       {
