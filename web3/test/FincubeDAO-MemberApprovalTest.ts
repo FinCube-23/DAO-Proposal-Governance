@@ -4,13 +4,17 @@ import {
 } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
-
+import { ethers, upgrades } from "hardhat";
 describe("FinCubeDAO", function () {
     async function deployFinCubeDAOFixture() {
+
         const [owner, addr1, addr2] = await hre.ethers.getSigners();
 
         const FinCubeDAO = await hre.ethers.getContractFactory("FinCubeDAO");
-        const finCubeDAO = await FinCubeDAO.deploy("DAO URI", "Owner URI");
+        const finCubeDAO = await upgrades.deployProxy(FinCubeDAO, ['DAO URI', 'Owner URI'], {
+            initializer: 'initialize',
+            kind: 'uups'
+        })
 
         return { finCubeDAO, owner, addr1, addr2 };
     }

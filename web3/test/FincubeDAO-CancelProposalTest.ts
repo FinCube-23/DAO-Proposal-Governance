@@ -4,7 +4,8 @@ import {
 } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import hre from "hardhat";
-import { deployProxy } from '@openzeppelin/hardhat-upgrades';
+import { ethers, upgrades } from "hardhat";
+
 
 describe("FinCubeDAO", function () {
     async function deployFinCubeDAOFixture() {
@@ -12,11 +13,10 @@ describe("FinCubeDAO", function () {
         const [owner, addr1, addr2] = await hre.ethers.getSigners();
 
         const FinCubeDAO = await hre.ethers.getContractFactory("FinCubeDAO");
-        const finCubeDAO = await deployProxy(FinCubeDAO, ['DAO URI', 'Owner URI'], {
+        const finCubeDAO = await upgrades.deployProxy(FinCubeDAO, ['DAO URI', 'Owner URI'], {
             initializer: 'initialize',
             kind: 'uups'
         })
-        await finCubeDAO.deployed();
 
         return { finCubeDAO, owner, addr1, addr2 };
     }
