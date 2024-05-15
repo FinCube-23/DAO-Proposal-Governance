@@ -22,32 +22,33 @@ export class DaoAuditService {
   findOne(id: number) {
     return this.daoAuditRepository.findOne({ where: { id } });
   }
-  GET_TRANSACTION = gql`
-    query MyQuery {
-      memberRegistereds(where: { blockTimestamp_gt: "" }) {
+
+  GET_MEMBERS_REGISTERED = gql`
+    query MyQuery($blockTimestamp_gt: String!) {
+      memberRegistereds(where: { blockTimestamp_gt: $blockTimestamp_gt }) {
         transactionHash
         id
-        blockNumber
         blockTimestamp
+        blockNumber
+        _newMember
+        _memberURI
       }
     }
   `;
-
-  async getTransaction(transactionHash: string) {
-    const result = await this.apolloClient.query({
-      query: this.GET_TRANSACTION,
-      variables: { transactionHash },
-    });
-    return result.data.transaction_data;
-  }
-
-  async executeQuery(query: string, variables?: any) {
-    const result = await this.apolloClient.query({
-      query: gql`
-        ${query}
-      `,
-      variables,
-    });
-    return result.data;
+  async getMembersRegistered(blockTimestamp_gt: string): Promise<any> {
+    try {
+      const result = await this.apolloClient.query({
+        query: this.GET_MEMBERS_REGISTERED,
+        variables: {
+          blockTimestamp_gt,
+        },
+      });
+      console.log(result);
+      console.log(result.data.memberRegistereds);
+      return result.data.memberRegistereds;
+    } catch (error) {
+      console.error('Error executing GraphQL query:', error);
+      throw error;
+    }
   }
 }

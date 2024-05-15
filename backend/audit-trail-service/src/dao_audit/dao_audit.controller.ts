@@ -24,7 +24,7 @@ export class DaoAuditController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  create(@Body() daoAudit: DaoAudit) {
+  create(@Body() daoAudit: DaoAudit): Promise<DaoAudit> {
     return this.daoAuditService.create(daoAudit);
   }
 
@@ -36,23 +36,26 @@ export class DaoAuditController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  findAll() {
+  findAll(): Promise<DaoAudit[]> {
     return this.daoAuditService.findAll();
   }
 
-  @Get(':id')
+  @Get('member-register/:blockTimestamp_gt')
   @ApiResponse({
     status: 200,
-    description: 'The record has been successfully updated.',
-    type: DaoAudit,
+    description:
+      'The member registered records have been successfully retrieved.',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async getTransaction(@Query('transactionHash') transactionHash?: string) {
-    if (transactionHash) {
-      return this.daoAuditService.getTransaction(transactionHash);
+  async getMembersRegistered(
+    @Param('blockTimestamp_gt') blockTimestamp_gt: string,
+  ): Promise<any> {
+    console.log(blockTimestamp_gt);
+    if (blockTimestamp_gt) {
+      return this.daoAuditService.getMembersRegistered(blockTimestamp_gt);
     } else {
-      return 0;
+      return 'Transaction hash error';
     }
   }
 }
