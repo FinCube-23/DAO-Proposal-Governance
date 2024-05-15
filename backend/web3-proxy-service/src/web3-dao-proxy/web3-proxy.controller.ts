@@ -6,32 +6,32 @@ import { Web3ProxyService } from './web3-proxy.service';
 export class Web3ProxyController {
   constructor(private readonly web3ProxyService: Web3ProxyService) { }
 
-  @Post()
+  @Post('balance')
   async getBalance(@Body('address') address: string) {
     return this.web3ProxyService.getBalance(address);
   }
 
-  @Get()
+  @Get('proposal-threshold')
   async getProposalThreshold(): Promise<number> {
     return this.web3ProxyService.getProposalThreshold();
   }
 
-  @Get()
+  @Get('proposal-count')
   async getOngoingProposalCount(): Promise<number> {
     return this.web3ProxyService.getOngoingProposalCount();
   }
 
-  @Get()
+  @Get('ongoing-proposals')
   async getOngoingProposals(): Promise<any> {
     return this.web3ProxyService.getOngoingProposals();
   }
 
-  @Post()
+  @Post('register-member')
   async registerMember(@Body('address') address: string, @Body('_memberURI') _memberURI: string): Promise<any> {
     return this.web3ProxyService.registerMember(address, _memberURI);
   }
 
-  @Post()
+  @Post('execute-proposal')
   async executeProposal(@Body('proposalId') proposalId: number): Promise<any> {
     return this.web3ProxyService.executeProposal(proposalId);
   }

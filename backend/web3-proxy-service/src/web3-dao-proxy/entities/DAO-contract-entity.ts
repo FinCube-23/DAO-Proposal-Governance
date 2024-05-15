@@ -1,6 +1,7 @@
 require('dotenv').config({ path: '.env.local' });
+const artifacts = require('../../../../../web3/artifacts/contracts/FincubeDAO.sol/FinCubeDAO.json')
 export class DAOContract {
-    address: string = process.env.CONTRACT_ADDRESS;
-    abi: string = process.env.CONTRACT_ABI;
-    signer: string = process.env.PRIVATE_KEY;
+    address: any = process.env.CONTRACT_ADDRESS;
+    abi: any = artifacts.abi;
+    signer: any = process.env.PRIVATE_KEY;
 }
