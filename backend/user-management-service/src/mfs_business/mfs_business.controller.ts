@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseGuards, Req } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
 import { AuthGuard } from '@nestjs/passport';
 import { MfsBusinessEntity } from './entities/mfs_business.entity';
@@ -13,8 +13,8 @@ export class MfsBusinessController {
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: MfsBusinessEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async create(@Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
-    return this.mfsBusinessService.create(mfs_business_entity);
+  async create(@Req() req, @Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
+    return this.mfsBusinessService.create(mfs_business_entity, req.body.role);
   }
   //redundant api call
   // @Post()

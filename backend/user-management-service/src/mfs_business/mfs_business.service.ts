@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MfsBusinessEntity } from './entities/mfs_business.entity';
@@ -7,7 +7,11 @@ import { MfsBusinessEntity } from './entities/mfs_business.entity';
 export class MfsBusinessService {
   constructor(@InjectRepository(MfsBusinessEntity) private mfsBusinessRepository: Repository<MfsBusinessEntity>) { }
 
-  async create(mfs_business: Partial<MfsBusinessEntity>): Promise<MfsBusinessEntity> {
+  async create(mfs_business: Partial<MfsBusinessEntity>, sub: string): Promise<MfsBusinessEntity> {
+    if (sub !== 'mfs_user') {
+      throw new UnauthorizedException;
+    }
+
     const new_mfs_business = this.mfsBusinessRepository.create(mfs_business);
     return this.mfsBusinessRepository.save(new_mfs_business);
   }
