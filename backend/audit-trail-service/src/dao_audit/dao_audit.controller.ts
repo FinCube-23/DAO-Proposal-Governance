@@ -11,8 +11,12 @@ import { DaoAuditService } from './dao_audit.service';
 import { DaoAudit } from './entities/dao_audit.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Logger } from '@nestjs/common';
+
 @Controller('dao-audit')
 export class DaoAuditController {
+  private readonly logger = new Logger(DaoAuditController.name);
+
   constructor(private readonly daoAuditService: DaoAuditService) {}
 
   @Post()
@@ -24,7 +28,10 @@ export class DaoAuditController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  create(@Body() daoAudit: DaoAudit) {
+  create(@Body() daoAudit: DaoAudit): Promise<DaoAudit> {
+    this.logger.log(
+      `Creating new DAO audit entry: ${JSON.stringify(daoAudit)}`,
+    );
     return this.daoAuditService.create(daoAudit);
   }
 
@@ -36,23 +43,30 @@ export class DaoAuditController {
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  findAll() {
+  findAll(): Promise<DaoAudit[]> {
+    this.logger.log('Fetching all DAO audit entries');
     return this.daoAuditService.findAll();
   }
 
-  @Get(':id')
+  @Get('member-register/:blockTimestamp_gt')
   @ApiResponse({
     status: 200,
-    description: 'The record has been successfully updated.',
-    type: DaoAudit,
+    description:
+      'The member registered records have been successfully retrieved.',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async getTransaction(@Query('transactionHash') transactionHash?: string) {
-    if (transactionHash) {
-      return this.daoAuditService.getTransaction(transactionHash);
+  async getMembersRegistered(
+    @Param('blockTimestamp_gt') blockTimestamp_gt: string,
+  ): Promise<any> {
+    if (blockTimestamp_gt) {
+      this.logger.log(
+        `Fetching registered members after block timestamp: ${blockTimestamp_gt}`,
+      );
+      return this.daoAuditService.getMembersRegistered(blockTimestamp_gt);
     } else {
-      return 0;
+      this.logger.warn('Transaction hash error');
+      return 'Transaction hash error';
     }
   }
 }

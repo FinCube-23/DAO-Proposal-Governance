@@ -4,7 +4,9 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
+  });
   const config = new DocumentBuilder()
     .setTitle('Audit Trail service API')
     .setDescription(
