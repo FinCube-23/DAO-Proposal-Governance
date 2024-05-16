@@ -4,6 +4,7 @@ import Welcome from "@pages/welcome";
 import DaoDashboard from "@pages/dao_dashboard";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import DaoLayout from "@layouts/DaoLayout";
+import Tests from "@pages/tests";
 
 export const rootRoutes: RouteObject = {
     path: "/",
@@ -12,6 +13,10 @@ export const rootRoutes: RouteObject = {
         {
             path: "",
             element: <Welcome />,
+        },
+        {
+            path: "tests",
+            element: <Tests />
         },
         {
             path: "dashboard",
