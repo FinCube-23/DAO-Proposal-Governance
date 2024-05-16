@@ -51,6 +51,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     uint256 private memberCount;
     uint256 private proposalCount;
     string public daoURI;
+    uint256 public votingDelay;
+    uint256 public votingPeriod;
 
     /** @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
@@ -108,28 +110,53 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     /**
      * @notice Returns the voting delay period in seconds.
      * @dev This function is marked as `pure` because it does not read or modify the contract's state.
-     * @return The voting delay period in seconds (currently 5 seconds).
+     * @return The voting delay period in seconds.
      */
-    function votingDelay() public pure returns (uint256) {
-        return 5; // 5 seconds
+    function getVotingDelay() public view returns (uint256) {
+        return votingDelay;
     }
 
     /**
      * @notice Returns the voting period duration in seconds.
      * @dev This function is marked as `pure` because it does not read or modify the contract's state.
-     * @return The voting period duration in seconds (currently 60 seconds).
+     * @return The voting period duration in seconds.
      */
-    function votingPeriod() public pure returns (uint256) {
-        return 60; // 1 minute
+    function getVotingPeriod() public view returns (uint256) {
+        return votingPeriod;
     }
 
     /**
-     * @notice Returns the proposal threshold, which is the minimum number of "yes" votes required for a proposal to be executed.
-     * @dev The proposal threshold is calculated as (memberCount + 1) / 2.
-     * @return threshold The proposal threshold.
+     * @notice Sets the delay before voting starts
+     * @dev This function can only be called by the owner
+     * @param _votingDelay The new delay (in seconds) before voting starts
      */
-    function proposalThreshold() public view returns (uint256 threshold) {
-        threshold = (memberCount + 1) / 2;
+    function setVotingDelay(uint256 _votingDelay) public onlyOwner {
+        votingDelay = _votingDelay;
+    }
+
+    /**
+     * @notice Sets the duration for which voting is open
+     * @dev This function can only be called by the owner
+     * @param _votingPeriod The new duration (in seconds) for which voting will be open
+     */
+    function setVotingPeriod(uint256 _votingPeriod) public onlyOwner {
+        votingPeriod = _votingPeriod;
+    }
+
+    /**
+     * @notice Modifier to ensure that the voting delay has been set.
+     */
+    modifier isVotingDelaySet() {
+        require(votingDelay > 0, "Voting delay is not set");
+        _;
+    }
+
+    /**
+     * @notice Modifier to ensure that the voting period has been set.
+     */
+    modifier isVotingPeriodSet() {
+        require(votingPeriod > 0, "Voting period is not set");
+        _;
     }
 
     /**
@@ -157,6 +184,27 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
+     * @notice Modifier to ensure that the provided address is already a member.
+     * @param _address The address to be checked.
+     */
+    modifier isExistingMember(address _address) {
+        require(
+            bytes(members[_address].memberURI).length > 0,
+            "Not an existing member"
+        );
+        _;
+    }
+
+    /**
+     * @notice Returns the proposal threshold, which is the minimum number of "yes" votes required for a proposal to be executed.
+     * @dev The proposal threshold is calculated as (memberCount + 1) / 2.
+     * @return threshold The proposal threshold.
+     */
+    function proposalThreshold() public view returns (uint256 threshold) {
+        threshold = (memberCount + 1) / 2;
+    }
+
+    /**
      * @notice Register a new member.
      * @dev This function can only be called by non-existing members.
      * @param _newMember The address of the new member to be registered.
@@ -180,10 +228,16 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      */
     function newMemberApprovalProposal(
         address _newMember
-    ) external onlyMember(msg.sender) {
+    )
+        external
+        onlyMember(msg.sender)
+        isExistingMember(_newMember)
+        isVotingDelaySet
+        isVotingPeriodSet
+    {
         uint48 currentTime = uint48(block.timestamp);
-        uint48 start = currentTime + uint48(votingDelay());
-        uint48 end = start + uint48(votingPeriod());
+        uint48 start = currentTime + uint48(getVotingDelay());
+        uint48 end = start + uint48(getVotingPeriod());
         bytes memory _data = toBytes(_newMember);
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
@@ -215,10 +269,10 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     function newProposal(
         bytes memory _calldata,
         address _target
-    ) external onlyMember(msg.sender) {
+    ) external onlyMember(msg.sender) isVotingDelaySet isVotingPeriodSet {
         uint48 currentTime = uint48(block.timestamp);
-        uint48 start = currentTime + uint48(votingDelay());
-        uint48 end = start + uint48(votingPeriod());
+        uint48 start = currentTime + uint48(getVotingDelay());
+        uint48 end = start + uint48(getVotingPeriod());
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
             voteStart: start,

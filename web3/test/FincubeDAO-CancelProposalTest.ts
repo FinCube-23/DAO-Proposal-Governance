@@ -18,6 +18,10 @@ describe("FinCubeDAO", function () {
             kind: 'uups'
         })
 
+        // Set voting delay and voting period
+        await finCubeDAO.setVotingDelay(1); // set delay to 1 second for testing
+        await finCubeDAO.setVotingPeriod(30); // set period to 30 seconds for testing
+
         return { finCubeDAO, owner, addr1, addr2 };
     }
     describe("Cancel Proposal", function () {
@@ -29,7 +33,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -47,7 +51,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
             await expect(finCubeDAO.connect(addr1).cancelProposal(0)).to.be.reverted;
@@ -62,7 +66,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -81,11 +85,11 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
             // Execute the proposal
-            await new Promise(resolve => setTimeout(resolve, 65000));
+            await new Promise(resolve => setTimeout(resolve, 35000));
             await finCubeDAO.executeProposal(0);
             // Check if addr1 is now a member
             await finCubeDAO.checkIsMemberApproved(addr1.address);

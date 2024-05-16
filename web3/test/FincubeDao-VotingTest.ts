@@ -17,6 +17,8 @@ describe("FinCubeDAO", function () {
             initializer: 'initialize',
             kind: 'uups'
         })
+        await finCubeDAO.setVotingDelay(1); // set delay to 1 second for testing
+        await finCubeDAO.setVotingPeriod(30); // set period to 30 seconds for testing
 
         return { finCubeDAO, owner, addr1, addr2 };
     }
@@ -30,7 +32,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -47,7 +49,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'no' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, false);
 
@@ -64,7 +66,7 @@ describe("FinCubeDAO", function () {
 
             // Create a new member approval proposal
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-            await new Promise(resolve => setTimeout(resolve, 6000));
+            await new Promise(resolve => setTimeout(resolve, 3000));
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -89,7 +91,7 @@ describe("FinCubeDAO", function () {
             await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
 
             // Wait for the voting period to end
-            await time.increase(65000); // Increase time beyond voting period
+            await time.increase(35000); // Increase time beyond voting period
 
             // Try to cast a vote after the voting period
             await expect(finCubeDAO.connect(owner).castVote(0, true)).to.be.revertedWith("Voting is not allowed at this time");
