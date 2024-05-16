@@ -12,7 +12,7 @@ import { ApolloClient, InMemoryCache } from '@apollo/client';
       provide: 'APOLLO_CLIENT',
       useFactory: () => {
         return new ApolloClient({
-          uri: 'https://api.studio.thegraph.com/query/67924/fincube-dao/version/latest',
+          uri: 'https://api.studio.thegraph.com/proxy/67924/fcgraph/v0.0.3',
           cache: new InMemoryCache(),
         });
       },
