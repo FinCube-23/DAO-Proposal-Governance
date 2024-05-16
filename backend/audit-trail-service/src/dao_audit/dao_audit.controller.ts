@@ -11,8 +11,12 @@ import { DaoAuditService } from './dao_audit.service';
 import { DaoAudit } from './entities/dao_audit.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { Logger } from '@nestjs/common';
+
 @Controller('dao-audit')
 export class DaoAuditController {
+  private readonly logger = new Logger(DaoAuditController.name);
+
   constructor(private readonly daoAuditService: DaoAuditService) {}
 
   @Post()
@@ -25,6 +29,9 @@ export class DaoAuditController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
   create(@Body() daoAudit: DaoAudit): Promise<DaoAudit> {
+    this.logger.log(
+      `Creating new DAO audit entry: ${JSON.stringify(daoAudit)}`,
+    );
     return this.daoAuditService.create(daoAudit);
   }
 
@@ -37,6 +44,7 @@ export class DaoAuditController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
   findAll(): Promise<DaoAudit[]> {
+    this.logger.log('Fetching all DAO audit entries');
     return this.daoAuditService.findAll();
   }
 
@@ -51,10 +59,13 @@ export class DaoAuditController {
   async getMembersRegistered(
     @Param('blockTimestamp_gt') blockTimestamp_gt: string,
   ): Promise<any> {
-    console.log(blockTimestamp_gt);
     if (blockTimestamp_gt) {
+      this.logger.log(
+        `Fetching registered members after block timestamp: ${blockTimestamp_gt}`,
+      );
       return this.daoAuditService.getMembersRegistered(blockTimestamp_gt);
     } else {
+      this.logger.warn('Transaction hash error');
       return 'Transaction hash error';
     }
   }
