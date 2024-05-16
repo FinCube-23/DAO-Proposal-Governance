@@ -6,7 +6,6 @@ import { ExchangeUserModule } from './exchange_user/exchange_user.module';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
-import { AuthenticationModule } from './authentication/authentication.module';
 
 @Module({
   imports: [
@@ -17,8 +16,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
       envFilePath: '.env.local',
     }),
     DatabaseModule,
-    AuthzModule,
-    AuthenticationModule,
+    AuthzModule
   ],
   controllers: [AppController],
   providers: [AppService],
