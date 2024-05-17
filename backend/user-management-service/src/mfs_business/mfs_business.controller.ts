@@ -13,8 +13,9 @@ export class MfsBusinessController {
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: MfsBusinessEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async create(@Req() req, @Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
-    return this.mfsBusinessService.create(mfs_business_entity, req.body.role);
+  async create(@Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
+
+    return this.mfsBusinessService.create(mfs_business_entity);
   }
   //redundant api call
   // @Post()
@@ -33,8 +34,8 @@ export class MfsBusinessController {
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async findAll(): Promise<MfsBusinessEntity[]> {
-    return this.mfsBusinessService.findAll();
+  async findAll(@Req() req): Promise<MfsBusinessEntity[]> {
+    return this.mfsBusinessService.findAll(req.user);
   }
 
 
@@ -43,8 +44,8 @@ export class MfsBusinessController {
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async findOne(@Param('id') id: string): Promise<MfsBusinessEntity> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req): Promise<MfsBusinessEntity> {
+    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
     if (!mfs_business) {
       throw new NotFoundException(`MFS business doesn't exist`);
     } else {
@@ -56,20 +57,20 @@ export class MfsBusinessController {
   @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: MfsBusinessEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async update(@Param('id') id: string, @Body() mfs_business_entity: MfsBusinessEntity): Promise<MfsBusinessEntity> {
-    return this.mfsBusinessService.update(+id, mfs_business_entity);
+  async update(@Param('id') id: string, @Body() mfs_business_entity: MfsBusinessEntity, @Req() req): Promise<MfsBusinessEntity> {
+    return this.mfsBusinessService.update(+id, mfs_business_entity, req.user);
   }
 
   @Delete(':id')
   @ApiResponse({ status: 200, description: 'The record has been successfully deleted.', type: MfsBusinessEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async remove(@Param('id') id: string): Promise<any> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id);
+  async remove(@Param('id') id: string, @Req() req): Promise<any> {
+    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
     if (!mfs_business) {
       throw new NotFoundException(`MFS business doesn't exist`);
     } else {
-      return this.mfsBusinessService.remove(+id);
+      return this.mfsBusinessService.remove(+id, req.user);
     }
   }
 }

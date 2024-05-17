@@ -8,10 +8,8 @@ export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) { }
 
   @Post()
-  //@UseGuards(AuthGuard('jwt'))
   async create(@Req() req, @Body() authenticationEntity: AuthenticationEntity): Promise<AuthenticationEntity> {
-    console.log(req);
-    return this.authenticationService.create(authenticationEntity);
+    return this.authenticationService.create(authenticationEntity, req.body.secret);
   }
 
   @Get(':sub')
