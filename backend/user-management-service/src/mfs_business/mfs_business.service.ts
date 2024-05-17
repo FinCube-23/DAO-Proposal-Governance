@@ -18,28 +18,32 @@ export class MfsBusinessService {
   }
 
   async findAll(sub: string): Promise<MfsBusinessEntity[]> {
-    if (await this.roleChecker.findOne(sub) !== 'MFS') {
+    const role = await this.roleChecker.findOne(sub);
+    if (role != 'MFS') {
       throw new UnauthorizedException();
     }
     return this.mfsBusinessRepository.find();
   }
 
   async findOne(id: number, sub: string): Promise<MfsBusinessEntity> {
-    if (await this.roleChecker.findOne(sub) !== 'MFS') {
+    const role = await this.roleChecker.findOne(sub);
+    if (role != 'MFS') {
       throw new UnauthorizedException();
     }
     return this.mfsBusinessRepository.findOne({ where: { id } });
   }
 
   async findByEmail(org_email: string, sub: string): Promise<MfsBusinessEntity> {
-    if (await this.roleChecker.findOne(sub) !== 'MFS') {
+    const role = await this.roleChecker.findOne(sub);
+    if (role != 'MFS') {
       throw new UnauthorizedException();
     }
     return this.mfsBusinessRepository.findOne({ where: { org_email } });
   }
 
   async update(id: number, exchange_user: Partial<MfsBusinessEntity>, sub: string): Promise<MfsBusinessEntity> {
-    if (await this.roleChecker.findOne(sub) !== 'MFS') {
+    const role = await this.roleChecker.findOne(sub);
+    if (role != 'MFS') {
       throw new UnauthorizedException();
     }
     await this.mfsBusinessRepository.update(id, exchange_user);
@@ -47,6 +51,10 @@ export class MfsBusinessService {
   }
 
   async remove(id: number, sub: string): Promise<string> {
+    const role = await this.roleChecker.findOne(sub);
+    if (role != 'MFS') {
+      throw new UnauthorizedException();
+    }
     await this.mfsBusinessRepository.delete(id);
     return `Removed #${id} MFS Business`;
   }

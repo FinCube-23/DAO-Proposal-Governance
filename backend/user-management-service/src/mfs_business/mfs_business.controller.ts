@@ -35,6 +35,7 @@ export class MfsBusinessController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
   async findAll(@Req() req): Promise<MfsBusinessEntity[]> {
+    console.log(req.user);
     return this.mfsBusinessService.findAll(req.user);
   }
 
