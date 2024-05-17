@@ -13,6 +13,15 @@ import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { Logger } from '@nestjs/common';
 
+import { ProposalDto } from './dto/proposal.dto';
+import {
+  Ctx,
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
+
 @Controller('dao-audit')
 export class DaoAuditController {
   private readonly logger = new Logger(DaoAuditController.name);
@@ -69,4 +78,11 @@ export class DaoAuditController {
       return 'Transaction hash error';
     }
   }
+
+  @EventPattern('proposal-placed')
+  handleProposalPlaced(proposal: ProposalDto) {
+    console.log(`Received a new proposal - Address: ${proposal.proposalAddress}`);
+    return this.daoAuditService.handleProposalPlaced(proposal);
+  }
+
 }

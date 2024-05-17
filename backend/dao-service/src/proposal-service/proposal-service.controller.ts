@@ -3,6 +3,9 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
+import { ProposalDto } from './dto/proposal.dto';
+
+
 @Controller('proposal-service')
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) { }
@@ -21,4 +24,12 @@ export class ProposalServiceController {
   async findProposal(@Param('id') id: string): Promise<ProposalEntity[]> {
     return this.proposalService.findOne(+id);
   }
+
+  @Post('place-proposal')
+  @ApiBody({ type: ProposalDto })
+  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: ProposalDto })
+  placeProposal(@Body() proposal: ProposalDto) {
+    return this.proposalService.placeProposal(proposal);
+  }
+
 }

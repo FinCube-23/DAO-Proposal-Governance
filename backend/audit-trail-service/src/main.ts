@@ -1,16 +1,17 @@
-import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
+  const app = await NestFactory.create(AppModule);
+  const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
-    transport: Transport.TCP,
+    transport: Transport.RMQ,
     options: {
-      host: 'localhost',
-      port: 3000,
+      urls: ['amqp://localhost:5672/'],
+      queue: 'proposal-queue',
     },
   });
 
@@ -24,10 +25,12 @@ async function bootstrap() {
     .setVersion('1.0')
     .addTag('audit-trail')
     .build();
-  const document = SwaggerModule.createDocument(swaggerApp, config);
-  SwaggerModule.setup('api', swaggerApp, document);
-  await app.listen();
-  // Start the Swagger application on a different port
-  await swaggerApp.listen(3232);
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+  
+  app.startAllMicroservices();
+  await app.listen(3000);
+
 }
 bootstrap();
+

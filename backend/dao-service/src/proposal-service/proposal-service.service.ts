@@ -1,12 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
+
+import { ClientProxy } from '@nestjs/microservices';
+import { ProposalDto } from './dto/proposal.dto';
+
 
 @Injectable()
 export class ProposalServiceService {
   constructor(
     @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
+    @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy
   ) { }
 
   async create(proposal: Partial<ProposalEntity>): Promise<ProposalEntity> {
@@ -22,4 +27,10 @@ export class ProposalServiceService {
       }
     });
   }
+
+  placeProposal(proposal: ProposalDto) {
+    console.log(this.rabbitClient.emit('proposal-placed', proposal));
+    return { message: 'Proposal Placed!' };
+  }
+
 }

@@ -3,9 +3,14 @@ import { ApolloClient, gql } from '@apollo/client';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DaoAudit } from './entities/dao_audit.entity';
+import { ProposalDto } from './dto/proposal.dto';
+
+
 @Injectable({ scope: Scope.REQUEST })
 export class DaoAuditService {
   private logger = new Logger(DaoAuditService.name);
+  proposal: ProposalDto[] = [];
+
   constructor(
     @InjectRepository(DaoAudit)
     private daoAuditRepository: Repository<DaoAudit>,
@@ -59,4 +64,11 @@ export class DaoAuditService {
       throw error;
     }
   }
+
+  handleProposalPlaced(proposal: ProposalDto) {
+    console.log(`Received a new proposal - Address: ${proposal.proposalAddress}`);
+    this.proposal.push(proposal);
+    // Code your actions............ (Not commented by LLMs) 
+  }
+
 }
