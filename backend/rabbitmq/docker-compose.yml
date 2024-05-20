@@ -9,5 +9,9 @@ services:
     volumes:
         - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
         - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - message_q_network
 
-
+networks:
+  message_q_network:
+    external: true
