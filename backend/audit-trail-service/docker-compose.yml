@@ -13,6 +13,18 @@ services:
     env_file:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
 
   audit-trail-pgsqldb:
     container_name: audit-trail-pgsqldb

@@ -14,7 +14,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'PROPOSAL_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: ['amqp://localhost:5672/'],
+          urls: ['amqp://localhost:5672'],
           queue: 'proposal-queue',
         },
       },
