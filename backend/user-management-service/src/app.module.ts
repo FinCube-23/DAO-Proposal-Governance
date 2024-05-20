@@ -16,7 +16,7 @@ import { AuthzModule } from './authz/authz.module';
       envFilePath: '.env.local',
     }),
     DatabaseModule,
-    AuthzModule,
+    AuthzModule
   ],
   controllers: [AppController],
   providers: [AppService],
