@@ -71,4 +71,8 @@ export class DaoAuditService {
     // Code your actions............ (Not commented by LLMs) 
   }
 
+  getProposals() {
+    return this.proposal;
+  }
+
 }

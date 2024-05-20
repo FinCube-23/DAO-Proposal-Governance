@@ -5,18 +5,17 @@ import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const microservice = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
-    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
+  const app = await NestFactory.create(AppModule, {
+    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose']
+  });
+  const microservice = await app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
-      urls: ['amqp://localhost:5672/'],
+      urls: ['amqp://localhost:5672'],
       queue: 'proposal-queue',
     },
   });
 
-  // Create a separate NestApplication instance for Swagger
-  const swaggerApp = await NestFactory.create(AppModule);
   const config = new DocumentBuilder()
     .setTitle('Audit Trail service API')
     .setDescription(
@@ -30,7 +29,6 @@ async function bootstrap() {
   
   app.startAllMicroservices();
   await app.listen(3000);
-
 }
 bootstrap();
 

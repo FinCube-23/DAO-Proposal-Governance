@@ -6,6 +6,11 @@ services:
     ports:
         - 5672:5672
         - 15672:15672
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://127.0.0.1:5672"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
     volumes:
         - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
         - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq

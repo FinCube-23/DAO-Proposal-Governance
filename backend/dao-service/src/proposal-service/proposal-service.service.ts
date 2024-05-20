@@ -29,7 +29,7 @@ export class ProposalServiceService {
   }
 
   placeProposal(proposal: ProposalDto) {
-    console.log(this.rabbitClient.emit('proposal-placed', proposal));
+    this.rabbitClient.emit('proposal-placed', proposal);
     return { message: 'Proposal Placed!' };
   }
 

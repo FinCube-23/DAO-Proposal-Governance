@@ -80,9 +80,15 @@ export class DaoAuditController {
   }
 
   @EventPattern('proposal-placed')
-  handleProposalPlaced(proposal: ProposalDto) {
+  handleProposalPlaced(@Payload() proposal: ProposalDto) {
     console.log(`Received a new proposal - Address: ${proposal.proposalAddress}`);
     return this.daoAuditService.handleProposalPlaced(proposal);
+  }
+
+  @MessagePattern({ cmd: 'fetch-proposal' })
+  getOrders(@Ctx() context: RmqContext) {
+    console.log(context.getMessage());
+    return this.daoAuditService.getProposals();
   }
 
 }
