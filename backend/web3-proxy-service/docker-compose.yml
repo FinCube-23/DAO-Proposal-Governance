@@ -12,3 +12,9 @@ services:
       - .:/usr/src/app
     env_file:
       - .env.local
+    networks:
+      - dao_network
+
+networks:
+  dao_network:
+    external: true
