@@ -13,7 +13,7 @@ services:
     env_file:
       - .env.local
     networks:
-      - dao_network
+      - fincube23_network
   user-management-pgsqldb:
     container_name: user-management-pgsqldb
     image: postgres
@@ -24,7 +24,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - dao_network
+      - fincube23_network
 
   pgadmin:
     container_name: pgadmin4-user-management
@@ -41,5 +41,5 @@ volumes:
 
 
 networks:
-  dao_network:
+  fincube23_network:
     external: true

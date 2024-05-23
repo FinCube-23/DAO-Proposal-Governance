@@ -13,8 +13,8 @@ services:
     env_file:
       - .env.local
     networks:
-      - dao_network
+      - fincube23_network
 
 networks:
-  dao_network:
+  fincube23_network:
     external: true

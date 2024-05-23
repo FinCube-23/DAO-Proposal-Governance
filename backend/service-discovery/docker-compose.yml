@@ -11,8 +11,8 @@ services:
     volumes:
       - .:/usr/src/app
     networks:
-      - dao_network
+      - fincube23_network
 
 networks:
-  dao_network:
+  fincube23_network:
     external: true

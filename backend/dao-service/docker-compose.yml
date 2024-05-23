@@ -14,7 +14,7 @@ services:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
     networks:
-      - dao_network
+      - fincube23_network
 
   dao-service-pgsqldb:
     container_name: dao-service-pgsqldb
@@ -26,12 +26,12 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - dao_network
+      - fincube23_network
 
 volumes:
   postgres-data:
 
 
 networks:
-  dao_network:
+  fincube23_network:
     external: true
