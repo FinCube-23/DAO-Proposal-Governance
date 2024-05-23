@@ -12,3 +12,9 @@ services:
       - .:/usr/src/app
     env_file:
       - .env.local
+    networks:
+      - fincube23_network
+
+networks:
+  fincube23_network:
+    external: true
