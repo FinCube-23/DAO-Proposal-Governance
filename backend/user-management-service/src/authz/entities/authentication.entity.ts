@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { MfsBusinessEntity } from 'src/mfs_business/entities/mfs_business.entity';
 
 @Entity('Authentication')
 export class AuthenticationEntity {
@@ -14,4 +15,7 @@ export class AuthenticationEntity {
     @Column({ type: 'varchar' })
     @ApiProperty()
     role: string;
+
+    @OneToOne(() => MfsBusinessEntity, (mfs) => mfs.user)
+    mfs: MfsBusinessEntity;
 }

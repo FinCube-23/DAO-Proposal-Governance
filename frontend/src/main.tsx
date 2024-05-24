@@ -5,11 +5,11 @@ import { Provider } from "react-redux";
 import { store } from "@redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "@redux/store";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { rootRoutes } from "./routes/root";
-import { Auth0Provider } from "@auth0/auth0-react";
+import { RouterProvider } from "react-router-dom";
 
-const router = createBrowserRouter([rootRoutes]);
+import { Auth0Provider } from "@auth0/auth0-react";
+import { coreRouter } from "@routes";
+import { Toaster } from "@/components/ui/toaster";
 
 const auth0_config = {
     domain: "" + import.meta.env.VITE_AUTH0_DOMAIN,
@@ -27,12 +27,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             authorizationParams={{
                 audience: auth0_config.audience,
                 scope: auth0_config.scope,
-                redirect_uri: auth0_config.login_redirect
+                redirect_uri: auth0_config.login_redirect,
             }}
         >
             <Provider store={store}>
                 <PersistGate loading={null} persistor={persistor}>
-                    <RouterProvider router={router} />
+                    <Toaster />
+                    <RouterProvider router={coreRouter} />
                 </PersistGate>
             </Provider>
         </Auth0Provider>
