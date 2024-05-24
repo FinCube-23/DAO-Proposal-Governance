@@ -10,12 +10,29 @@ export default function LoginButton() {
                 <Button
                     className="rounded-xl"
                     variant="destructive"
-                    onClick={() => logout()}
+                    onClick={() =>
+                        logout({
+                            logoutParams: {
+                                returnTo: import.meta.env
+                                    .VITE_AUTH0_LOGOUT_REDIRECT,
+                            },
+                        })
+                    }
                 >
                     <LogOut size={20} />
                 </Button>
             ) : (
-                <Button onClick={() => loginWithPopup()}>Log In</Button>
+                <Button
+                    onClick={() =>
+                        loginWithPopup({
+                            authorizationParams: {
+                                user_type: "USER",
+                            },
+                        })
+                    }
+                >
+                    Log In
+                </Button>
             )}
         </>
     );
