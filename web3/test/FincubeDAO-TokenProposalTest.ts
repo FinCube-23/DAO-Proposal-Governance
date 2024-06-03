@@ -56,6 +56,8 @@ describe("FinCubeDAO", function () {
       kind: 'uups'
     })
 
+    await finCubeDAO.setVotingDelay(1); // set delay to 1 second for testing
+    await finCubeDAO.setVotingPeriod(30); // set period to 30 seconds for testing
     return { finCubeDAO, owner, addr1, addr2 };
   }
 
@@ -76,7 +78,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -94,7 +96,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -112,7 +114,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
 
@@ -131,7 +133,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
       await expect(finCubeDAO.connect(owner).castVote(0, false)).to.be.revertedWith("Already voted for this proposal");
@@ -147,7 +149,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await expect(finCubeDAO.connect(addr1).castVote(0, true)).to.be.revertedWith("Not a member");
     });
@@ -162,7 +164,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      await new Promise(resolve => setTimeout(resolve, 70000));
+      await new Promise(resolve => setTimeout(resolve, 35000));
       // Cast a 'yes' vote on the proposal
       await expect(finCubeDAO.connect(owner).castVote(0, true)).to.be.revertedWith("Voting is not allowed at this time");
     });
@@ -191,7 +193,7 @@ describe("FinCubeDAO", function () {
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
       // Cast a 'yes' vote on the proposal
-      await new Promise(resolve => setTimeout(resolve, 6000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
@@ -219,7 +221,7 @@ describe("FinCubeDAO", function () {
       await finCubeDAO.connect(owner).castVote(0, true);
 
       // Execute the proposal
-      await new Promise(resolve => setTimeout(resolve, 65000));
+      await new Promise(resolve => setTimeout(resolve, 35000));
 
       // Check that the token address was set correctly
       // const tokenAddress = await (tokenAddressContract.getToken());

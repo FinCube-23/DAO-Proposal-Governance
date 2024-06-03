@@ -15,6 +15,9 @@ describe("FinCubeDAO", function () {
             initializer: 'initialize',
             kind: 'uups'
         })
+        // Set voting delay and voting period
+        await finCubeDAO.setVotingDelay(1); // set delay to 1 second for testing
+        await finCubeDAO.setVotingPeriod(30); // set period to 30 seconds for testing
 
         return { finCubeDAO, owner, addr1, addr2 };
     }
@@ -49,11 +52,7 @@ describe("FinCubeDAO", function () {
             const { finCubeDAO, owner, addr1, addr2 } = await loadFixture(deployFinCubeDAOFixture);
 
             await finCubeDAO.connect(owner).registerMember(addr1.address, "Member URI");
-            await finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address);
-
-            //5 second delay between addition of new Proposal and proposal to be active
-            await expect(finCubeDAO.connect(owner).newMemberApprovalProposal(addr2.address))
-                .to.emit(finCubeDAO, "ProposalCreated");
+            await expect(finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address)).to.emit(finCubeDAO, "ProposalCreated");
         });
 
         it("Should not create a new member proposal if not a member", async function () {
