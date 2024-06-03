@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { Web3ProxyService } from './web3-proxy.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody } from '@nestjs/swagger';
@@ -10,40 +10,40 @@ export class Web3ProxyController {
   constructor(private readonly web3ProxyService: Web3ProxyService) { }
 
   @Post('balance')
-  async getBalance(@Body('address') address: string) {
-    return this.web3ProxyService.getBalance(address);
+  async getBalance(@Req() req, @Body('address') address: string) {
+    return this.web3ProxyService.getBalance(address, req.user);
   }
 
   @Get('proposal-threshold')
   @UseGuards(AuthGuard('jwt'))
-  async getProposalThreshold(): Promise<number> {
-    return this.web3ProxyService.getProposalThreshold();
+  async getProposalThreshold(@Req() req): Promise<number> {
+    return this.web3ProxyService.getProposalThreshold(req.user);
   }
 
   @Get('proposal-count')
   @UseGuards(AuthGuard('jwt'))
-  async getOngoingProposalCount(): Promise<number> {
-    return this.web3ProxyService.getOngoingProposalCount();
+  async getOngoingProposalCount(@Req() req): Promise<number> {
+    return this.web3ProxyService.getOngoingProposalCount(req.user);
   }
 
   @Get('ongoing-proposals')
   @UseGuards(AuthGuard('jwt'))
-  async getOngoingProposals(): Promise<any> {
-    return this.web3ProxyService.getOngoingProposals();
+  async getOngoingProposals(@Req() req): Promise<any> {
+    return this.web3ProxyService.getOngoingProposals(req.user);
   }
 
   @Post('register-member')
   @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: RegisterMemberBody })
-  async registerMember(@Body('address') address: string, @Body('_memberURI') _memberURI: string): Promise<any> {
-    return this.web3ProxyService.registerMember(address, _memberURI);
+  async registerMember(@Req() req, @Body('address') address: string, @Body('_memberURI') _memberURI: string): Promise<any> {
+    return this.web3ProxyService.registerMember(address, _memberURI, req.user);
   }
 
   @Post('execute-proposal')
   @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: Proposal })
-  async executeProposal(@Body('proposalId') proposalId: number): Promise<any> {
-    return this.web3ProxyService.executeProposal(proposalId);
+  async executeProposal(@Req() req, @Body('proposalId') proposalId: number): Promise<any> {
+    return this.web3ProxyService.executeProposal(proposalId, req.user);
   }
 
 }
