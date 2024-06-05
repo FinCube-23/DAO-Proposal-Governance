@@ -4,10 +4,22 @@ type TokenPayload = {
   access: string;
 };
 
+type MFSInfo = {
+  id: number;
+  name: string;
+  org_email: string;
+  wallet_address: string;
+  native_currency: string;
+  certificate: string;
+  user_id: number;
+}
+
 type UserPayload = {
   sub?: string;
   type?: string;
   id?: number;
+  role?: string;
+  mfs?: MFSInfo | null;
 };
 
 interface AuthState {

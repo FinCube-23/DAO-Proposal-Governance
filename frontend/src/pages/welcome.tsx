@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 export default function welcome() {
   return (
     <>
-      <div className="h-screen relative w-full bg-green-300 flex flex-col items-center justify-center overflow-hidden rounded-md">
+      <div className="h-screen relative w-full flex flex-col items-center justify-center overflow-hidden rounded-md">
         <div className="w-full absolute inset-0 h-screen">
           <SparklesCore
             id="tsparticlesfullpage"
@@ -18,10 +18,11 @@ export default function welcome() {
           />
         </div>
         <div className="flex flex-col items-center gap-5">
-          <h1 className="md:text-7xl text-3xl lg:text-6xl font-bold text-center text-white relative z-20">
+          <h1 className="md:text-7xl text-3xl lg:text-6xl font-bold text-center text-white relative z-20 styled-title">
             FinCube 23
           </h1>
-          <div className="z-40"><Link to={"/dashboard"}><Button>Go to Demo Dashboard</Button></Link></div>
+          {/* <div className="z-40"><Link to={"/dashboard"}><Button>Go to Demo Dashboard</Button></Link></div> */}
+          <h2 className="text-xl text-center text-white">Secure. Swift. Seamless</h2>
         </div>
       </div>
     </>
