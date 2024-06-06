@@ -32,4 +32,9 @@ export class ProposalServiceController {
     return this.proposalService.placeProposal(proposal);
   }
 
+  @Get('get-proposals')
+  getProposals() {
+    return this.proposalService.getProposals();
+  }
+
 }

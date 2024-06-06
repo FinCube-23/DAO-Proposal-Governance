@@ -6,16 +6,18 @@ import { DaoAudit } from './entities/dao_audit.entity';
 import { ProposalDto } from './dto/proposal.dto';
 
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 export class DaoAuditService {
   private logger = new Logger(DaoAuditService.name);
-  proposal: ProposalDto[] = [];
+  public proposals: ProposalDto[];
 
   constructor(
     @InjectRepository(DaoAudit)
     private daoAuditRepository: Repository<DaoAudit>,
     @Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>,
-  ) {}
+  ) {
+    this.proposals=[];
+  }
   create(createDaoAudit: DaoAudit) {
     const new_dao_audit = this.daoAuditRepository.create(createDaoAudit);
     this.logger.log(
@@ -66,13 +68,19 @@ export class DaoAuditService {
   }
 
   handleProposalPlaced(proposal: ProposalDto) {
-    console.log(`Received a new proposal - Address: ${proposal.proposalAddress}`);
-    this.proposal.push(proposal);
-    // Code your actions............ (Not commented by LLMs) 
+    const new_proposal=new ProposalDto();
+    new_proposal.id=proposal.id;
+    new_proposal.proposalAddress=proposal.proposalAddress;
+    if (new_proposal instanceof ProposalDto) {
+      this.logger.log(`Received a new proposal - Address: ${new_proposal.proposalAddress}`);
+      this.proposals.push(new_proposal);
+    } else {
+      this.logger.error('Invalid proposal object received:', proposal);
+    }
   }
 
   getProposals() {
-    return this.proposal;
+    return this.proposals;
   }
 
 }

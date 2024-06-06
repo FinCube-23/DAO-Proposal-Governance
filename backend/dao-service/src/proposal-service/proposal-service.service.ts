@@ -5,6 +5,7 @@ import { ProposalEntity } from './entities/proposal.entity';
 
 import { ClientProxy } from '@nestjs/microservices';
 import { ProposalDto } from './dto/proposal.dto';
+import { timeout } from 'rxjs';
 
 
 @Injectable()
@@ -31,6 +32,12 @@ export class ProposalServiceService {
   placeProposal(proposal: ProposalDto) {
     this.rabbitClient.emit('proposal-placed', proposal);
     return { message: 'Proposal Placed!' };
+  }
+
+  getProposals() {
+    return this.rabbitClient
+      .send({ cmd: 'fetch-proposal' }, {})
+      .pipe(timeout(5000));
   }
 
 }

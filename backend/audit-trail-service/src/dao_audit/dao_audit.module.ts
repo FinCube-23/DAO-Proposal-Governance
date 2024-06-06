@@ -4,10 +4,11 @@ import { DaoAuditController } from './dao_audit.controller';
 import { DaoAudit } from './entities/dao_audit.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ApolloClient, InMemoryCache } from '@apollo/client';
+import { ProposalDto } from './dto/proposal.dto';
 @Module({
   controllers: [DaoAuditController],
   providers: [
-    DaoAuditService,
+    DaoAuditService, ProposalDto, 
     {
       provide: 'APOLLO_CLIENT',
       useFactory: () => {
