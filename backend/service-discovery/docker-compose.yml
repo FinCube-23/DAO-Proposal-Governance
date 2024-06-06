@@ -10,3 +10,9 @@ services:
       - 3000:3000
     volumes:
       - .:/usr/src/app
+    networks:
+      - fincube23_network
+
+networks:
+  fincube23_network:
+    external: true

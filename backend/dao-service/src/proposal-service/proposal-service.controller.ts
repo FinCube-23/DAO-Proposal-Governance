@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, } from '@nestjs/common';
 import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -15,14 +15,14 @@ export class ProposalServiceController {
   @ApiBody({ type: ProposalEntity })
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async create(@Body() proposal_entity: ProposalEntity): Promise<ProposalEntity> {
-    return this.proposalService.create(proposal_entity);
+  async create(@Req() req, @Body() proposal_entity: ProposalEntity): Promise<ProposalEntity> {
+    return this.proposalService.create(proposal_entity, req.user);
   }
 
-  @Get(':dao-id')
+  @Get(':id')
   @UseGuards(AuthGuard('jwt'))
-  async findProposal(@Param('id') id: string): Promise<ProposalEntity[]> {
-    return this.proposalService.findOne(+id);
+  async findProposal(@Req() req, @Param('id') id: string): Promise<ProposalEntity[]> {
+    return this.proposalService.findOne(+id, req.user);
   }
 
   @Post('place-proposal')

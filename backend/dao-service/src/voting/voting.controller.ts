@@ -8,6 +8,7 @@ import {
   Delete,
   NotFoundException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import { VotingService } from './voting.service';
 import { DAOEntity } from './entities/dao.entity';
@@ -22,17 +23,17 @@ export class VotingController {
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: DAOEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async create(@Body() daoEntity: DAOEntity): Promise<DAOEntity> {
-    return this.votingServiceService.create(daoEntity);
+  async create(@Req() req, @Body() daoEntity: DAOEntity): Promise<DAOEntity> {
+    return this.votingServiceService.create(req.user, daoEntity);
   }
 
-  @Get(':dao-id')
+  @Get(':id')
   @ApiResponse({ status: 200, type: DAOEntity })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async findOne(@Param('id') id: string): Promise<DAOEntity> {
-    const dao = await this.votingServiceService.findOne(+id);
+  async findOne(@Req() req, @Param('id') id: string): Promise<DAOEntity> {
+    const dao = await this.votingServiceService.findOne(req.user, +id);
     if (!dao) {
       throw new NotFoundException(`DAO doesn't exist`);
     } else {
@@ -40,23 +41,23 @@ export class VotingController {
     }
   }
 
-  @Put(':dao-id')
+  @Put(':id')
   @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: DAOEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async update(
+  async update(@Req() req,
     @Param('id') id: string,
     @Body() daoEntity: DAOEntity,
   ): Promise<DAOEntity> {
-    return this.votingServiceService.update(+id, daoEntity);
+    return this.votingServiceService.update(req.user, +id, daoEntity);
   }
 
-  @Delete(':dao-id')
+  @Delete(':id')
   @ApiResponse({ status: 200, description: 'The record has been successfully deleted.', type: DAOEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async remove(@Param('id') id: string): Promise<any> {
-    const dao = await this.votingServiceService.findOne(+id);
+  async remove(@Req() req, @Param('id') id: string): Promise<any> {
+    const dao = await this.votingServiceService.findOne(req.user, +id);
     if (!dao) {
       throw new NotFoundException(`DAO doesn't exist`);
     } else {

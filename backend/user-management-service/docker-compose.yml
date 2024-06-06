@@ -12,7 +12,8 @@ services:
       - .:/usr/src/app
     env_file:
       - .env.local
-
+    networks:
+      - fincube23_network
   user-management-pgsqldb:
     container_name: user-management-pgsqldb
     image: postgres
@@ -22,6 +23,8 @@ services:
       - '5432:5432'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fincube23_network
 
   pgadmin:
     container_name: pgadmin4-user-management
@@ -35,3 +38,8 @@ services:
 
 volumes:
   postgres_data:
+
+
+networks:
+  fincube23_network:
+    external: true

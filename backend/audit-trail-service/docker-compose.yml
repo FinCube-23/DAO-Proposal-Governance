@@ -14,8 +14,7 @@ services:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
     networks:
-      - message_q_network
-
+      - fincube23_network
   audit-trail-pgsqldb:
     container_name: audit-trail-pgsqldb
     image: postgres:16
@@ -26,7 +25,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     networks:
-      - message_q_network
+      - fincube23_network
 
   pgadmin:
     container_name: pgadmin4-audit-trail
@@ -42,5 +41,5 @@ volumes:
   postgres-data:
 
 networks:
-  message_q_network:
+  fincube23_network:
     external: true

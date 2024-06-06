@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, NotFoundException, UseGuards, Req } from '@nestjs/common';
 import { ExchangeUserService } from './exchange_user.service';
 import { ExchangeUserEntity } from './entities/exchange_user.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -32,8 +32,8 @@ export class ExchangeUserController {
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async findAll(): Promise<ExchangeUserEntity[]> {
-    return this.exchangeUserService.findAll();
+  async findAll(@Req() req): Promise<ExchangeUserEntity[]> {
+    return this.exchangeUserService.findAll(req.user);
   }
 
 
@@ -42,8 +42,8 @@ export class ExchangeUserController {
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async findOne(@Param('id') id: string): Promise<ExchangeUserEntity> {
-    const exchange_user = await this.exchangeUserService.findOne(+id);
+  async findOne(@Param('id') id: string, @Req() req): Promise<ExchangeUserEntity> {
+    const exchange_user = await this.exchangeUserService.findOne(+id, req.user);
     if (!exchange_user) {
       throw new NotFoundException(`Exchange user doesn't exist`);
     } else {
@@ -55,20 +55,20 @@ export class ExchangeUserController {
   @ApiResponse({ status: 200, description: 'The record has been successfully updated.', type: ExchangeUserEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async update(@Param('id') id: string, @Body() exchange_user_entity: ExchangeUserEntity): Promise<ExchangeUserEntity> {
-    return this.exchangeUserService.update(+id, exchange_user_entity);
+  async update(@Param('id') id: string, @Body() exchange_user_entity: ExchangeUserEntity, @Req() req): Promise<ExchangeUserEntity> {
+    return this.exchangeUserService.update(+id, exchange_user_entity, req.user);
   }
 
   @Delete(':id')
   @ApiResponse({ status: 200, description: 'The record has been successfully deleted.', type: ExchangeUserEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard('jwt'))
-  async remove(@Param('id') id: string): Promise<any> {
-    const exchange_user = await this.exchangeUserService.findOne(+id);
+  async remove(@Param('id') id: string, @Req() req): Promise<any> {
+    const exchange_user = await this.exchangeUserService.findOne(+id, req.user);
     if (!exchange_user) {
       throw new NotFoundException(`Exchange user doesn't exist`);
     } else {
-      return this.exchangeUserService.remove(+id);
+      return this.exchangeUserService.remove(+id, req.user);
     }
   }
 }
