@@ -1,6 +1,11 @@
 export class ProposalDto {
-    constructor(
-      public id: string,
-      public proposalAddress: string,
-    ) {}
-  }
+
+  public id: string;
+  public proposalAddress: string;
+  proposer_address: string;
+  metadata: string;
+  proposal_status: boolean;
+  external_proposal: boolean;
+
+}
+

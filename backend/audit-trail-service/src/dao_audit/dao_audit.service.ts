@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { DaoAudit } from './entities/dao_audit.entity';
 import { ProposalDto } from './dto/proposal.dto';
 
-
 @Injectable()
 export class DaoAuditService {
   private logger = new Logger(DaoAuditService.name);
@@ -16,7 +15,7 @@ export class DaoAuditService {
     private daoAuditRepository: Repository<DaoAudit>,
     @Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>,
   ) {
-    this.proposals=[];
+    this.proposals = [];
   }
   create(createDaoAudit: DaoAudit) {
     const new_dao_audit = this.daoAuditRepository.create(createDaoAudit);
@@ -68,11 +67,17 @@ export class DaoAuditService {
   }
 
   handleProposalPlaced(proposal: ProposalDto) {
-    const new_proposal=new ProposalDto();
-    new_proposal.id=proposal.id;
-    new_proposal.proposalAddress=proposal.proposalAddress;
+    const new_proposal = new ProposalDto();
+    new_proposal.id = proposal.id;
+    new_proposal.proposalAddress = proposal.proposalAddress;
+    new_proposal.external_proposal = proposal.external_proposal;
+    new_proposal.metadata = proposal.metadata;
+    new_proposal.proposer_address = proposal.proposer_address;
+    new_proposal.proposal_status = proposal.proposal_status;
     if (new_proposal instanceof ProposalDto) {
-      this.logger.log(`Received a new proposal - Address: ${new_proposal.proposalAddress}`);
+      this.logger.log(
+        `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
+      );
       this.proposals.push(new_proposal);
     } else {
       this.logger.error('Invalid proposal object received:', proposal);
@@ -82,5 +87,4 @@ export class DaoAuditService {
   getProposals() {
     return this.proposals;
   }
-
 }

@@ -4,7 +4,13 @@ import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
 import { ProposalDto } from './dto/proposal.dto';
-
+import {
+  Ctx,
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
@@ -32,9 +38,20 @@ export class ProposalServiceController {
     return this.proposalService.placeProposal(proposal);
   }
 
-  @Get('get-proposals')
-  getProposals() {
-    return this.proposalService.getProposals();
+  @EventPattern('proposal-placed')
+  handleProposalPlaced(@Payload() proposal: ProposalDto) {
+    return this.proposalService.handleProposalPlaced(proposal);
   }
 
+  @MessagePattern({ cmd: 'fetch-proposal' })
+  getProposal(@Ctx() context: RmqContext) {
+    console.log(`Message Queue:`, context.getMessage());
+    return this.proposalService.getProposals();
+  }
+  @Get('get-proposal')
+  async getProposals(): Promise<any> {
+    return this.proposalService.getUpdatedProposals();
+  }
 }
+
+

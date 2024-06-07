@@ -26,7 +26,11 @@ export class ProposalEntity {
 
     @Column({ type: 'boolean', default: false })
     @ApiProperty()
-    executed: boolean;
+    proposal_status: boolean;
+
+    @Column({ type: 'boolean', default: false })
+    @ApiProperty()
+    external_proposal: boolean;
 
     @ManyToOne(() => DAOEntity, dao => dao.proposals, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'dao_id' })
