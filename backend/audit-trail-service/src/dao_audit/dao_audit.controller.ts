@@ -86,10 +86,11 @@ export class DaoAuditController {
 
   @MessagePattern({ cmd: 'fetch-proposal' })
   getProposal(@Ctx() context: RmqContext) {
-    this.logger.log(
-      `Message Queue:`, context.getMessage()
-    );
+    this.logger.log(`Message Queue:`, context.getMessage());
     return this.daoAuditService.getProposals();
   }
-
+  @Get('get-proposal')
+  async getProposals(): Promise<any> {
+    return this.daoAuditService.getProposals();
+  }
 }
