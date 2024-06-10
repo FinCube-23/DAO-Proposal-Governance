@@ -89,6 +89,7 @@ export class DaoAuditController {
     this.logger.log(`Message Queue:`, context.getMessage());
     return this.daoAuditService.getProposals();
   }
+  
   @Get('get-proposal')
   async getProposals(): Promise<any> {
     return this.daoAuditService.getProposals();
