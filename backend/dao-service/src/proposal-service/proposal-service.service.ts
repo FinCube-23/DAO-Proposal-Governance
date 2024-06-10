@@ -58,7 +58,7 @@ export class ProposalServiceService {
   getProposals() {
     console.log("in get proposal of service");
     return this.rabbitClient
-      .send({ cmd: 'fetch-proposal' }, {})
+      .send({ cmd: 'fetch-update-proposal' }, {})
       .pipe(timeout(5000));
   }
 
@@ -75,12 +75,14 @@ export class ProposalServiceService {
         `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
       );
       this.update_proposals.push(new_proposal);
+      console.log("Received a new proposal and pushed");
     } else {
       console.error('Invalid proposal object received:', proposal);
     }
   }
 
-  getUpdatedProposals() {
+  async getUpdatedProposals():Promise<any> {
+    console.log("in get updated proposal of service");
     return this.update_proposals;
   }
 

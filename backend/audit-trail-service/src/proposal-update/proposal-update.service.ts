@@ -28,7 +28,7 @@ export class ProposalUpdateService {
 
   placeProposal(proposal: ProposalUpdateDto) {
     console.log("in service placeProposal");
-    this.rabbitClient.emit('proposal-placed', proposal);
+    this.rabbitClient.emit('update-proposal-placed', proposal);
     console.log("in service placeProposal emitted");
     return { message: 'Proposal Placed!' };
   }
