@@ -27,9 +27,18 @@ services:
     networks:
       - fincube23_network
 
+  pgadmin:
+    container_name: pgadmin4-audit-trail
+    image: dpage/pgadmin4:8.0
+    env_file:
+      - .env.local
+    ports:
+      - '5070:80'
+    depends_on:
+      - audit-trail-pgsqldb
+
 volumes:
   postgres-data:
-
 
 networks:
   fincube23_network:

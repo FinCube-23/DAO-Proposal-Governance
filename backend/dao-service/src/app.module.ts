@@ -6,6 +6,7 @@ import { ProposalServiceModule } from './proposal-service/proposal-service.modul
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [

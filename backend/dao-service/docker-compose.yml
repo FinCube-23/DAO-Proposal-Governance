@@ -31,7 +31,6 @@ services:
 volumes:
   postgres-data:
 
-
 networks:
   fincube23_network:
     external: true

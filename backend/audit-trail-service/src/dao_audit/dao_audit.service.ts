@@ -3,14 +3,20 @@ import { ApolloClient, gql } from '@apollo/client';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DaoAudit } from './entities/dao_audit.entity';
-@Injectable({ scope: Scope.REQUEST })
+import { ProposalDto } from './dto/proposal.dto';
+
+@Injectable()
 export class DaoAuditService {
   private logger = new Logger(DaoAuditService.name);
+  public proposals: ProposalDto[];
+
   constructor(
     @InjectRepository(DaoAudit)
     private daoAuditRepository: Repository<DaoAudit>,
     @Inject('APOLLO_CLIENT') private apolloClient: ApolloClient<any>,
-  ) {}
+  ) {
+    this.proposals = [];
+  }
   create(createDaoAudit: DaoAudit) {
     const new_dao_audit = this.daoAuditRepository.create(createDaoAudit);
     this.logger.log(
@@ -58,5 +64,27 @@ export class DaoAuditService {
       this.logger.error('Error fetching registered members:', error);
       throw error;
     }
+  }
+
+  handleProposalPlaced(proposal: ProposalDto) {
+    const new_proposal = new ProposalDto();
+    new_proposal.id = proposal.id;
+    new_proposal.proposalAddress = proposal.proposalAddress;
+    new_proposal.external_proposal = proposal.external_proposal;
+    new_proposal.metadata = proposal.metadata;
+    new_proposal.proposer_address = proposal.proposer_address;
+    new_proposal.proposal_status = proposal.proposal_status;
+    if (new_proposal instanceof ProposalDto) {
+      this.logger.log(
+        `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
+      );
+      this.proposals.push(new_proposal);
+    } else {
+      this.logger.error('Invalid proposal object received:', proposal);
+    }
+  }
+
+  getProposals() {
+    return this.proposals;
   }
 }

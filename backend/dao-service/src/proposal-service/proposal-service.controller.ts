@@ -3,6 +3,15 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
+import { ProposalDto } from './dto/proposal.dto';
+import {
+  Ctx,
+  EventPattern,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
+
 @Controller('proposal-service')
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) { }
@@ -22,6 +31,32 @@ export class ProposalServiceController {
     return this.proposalService.findOne(+id, req.user);
   }
 
+  @Post('place-proposal')
+  @ApiBody({ type: ProposalDto })
+  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: ProposalDto })
+  placeProposal(@Body() proposal: ProposalDto) {
+    return this.proposalService.placeProposal(proposal);
+  }
+
+  @EventPattern('update-proposal-placed')
+  handleProposalPlaced(@Payload() proposal: ProposalDto) {
+    console.log("in 3002 handle proposal placed");
+    return this.proposalService.handleProposalPlaced(proposal);
+  }
+
+  @MessagePattern({ cmd: 'fetch-update-proposal' })
+  getProposal(@Ctx() context: RmqContext) {
+    console.log(`Message Queue:`, context.getMessage());
+    return this.proposalService.getProposals();
+  }
+
+  
+  @Get('proposals/updated')
+  async getUpdatedProposals(): Promise<any> {
+    console.log("getting proposal");
+    return this.proposalService.getUpdatedProposals();
+  }
+
   @Get()
   @UseGuards(AuthGuard('jwt'))
   async findAllProposals(@Req() req): Promise<ProposalEntity[]> {
@@ -29,3 +64,5 @@ export class ProposalServiceController {
   }
   
 }
+
+
