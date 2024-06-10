@@ -46,7 +46,7 @@ export class ProposalUpdateService {
     new_proposal.external_proposal = proposal.external_proposal;
     new_proposal.metadata = proposal.metadata;
     new_proposal.proposer_address = proposal.proposer_address;
-    new_proposal.proposal_status = proposal.proposal_status;
+    new_proposal.transaction_info = proposal.transaction_info;
     if (new_proposal instanceof ProposalUpdateDto) {
       console.log(
         `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
