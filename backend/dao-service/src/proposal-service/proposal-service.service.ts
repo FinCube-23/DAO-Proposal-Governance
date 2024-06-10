@@ -40,4 +40,12 @@ export class ProposalServiceService {
       }
     });
   }
+  async findAll(sub: string): Promise<any> {
+    const role = await this.getUserRole(sub);
+    console.log(role);
+    if (role != 'MFS') {
+      throw new UnauthorizedException("User does not have permission");
+    }
+    return this.proposalRepository.find();
+  }
 }

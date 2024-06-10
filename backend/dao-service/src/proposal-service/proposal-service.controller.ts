@@ -21,4 +21,11 @@ export class ProposalServiceController {
   async findProposal(@Req() req, @Param('id') id: string): Promise<ProposalEntity[]> {
     return this.proposalService.findOne(+id, req.user);
   }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  async findAllProposals(@Req() req): Promise<ProposalEntity[]> {
+    return this.proposalService.findAll(req.user);
+  }
+  
 }
