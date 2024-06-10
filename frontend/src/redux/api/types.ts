@@ -5,6 +5,7 @@ export type CreateMFSPayload = {
     native_currency?: string;
     certificate?: string;
     dao_id?: number;
+    user_id: number;
 };
 
 export type CreateMFSResponse = CreateMFSPayload & {

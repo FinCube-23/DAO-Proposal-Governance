@@ -16,7 +16,6 @@ type MFSInfo = {
 
 type UserPayload = {
   sub?: string;
-  type?: string;
   id?: number;
   role?: string;
   mfs?: MFSInfo | null;

@@ -6,8 +6,14 @@ import { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import MFSProfileForm from "@components/mfs/MFSProfileForm";
 import AuthStateSyncer from "@components/AuthStateSyncer";
+import MFSSidebar from "@components/mfs/MFSSidebar";
+import MFSHeader from "@components/mfs/MFSHeader";
+import { useDispatch } from "react-redux";
+import { setUserProfile } from "@redux/slices/auth";
 
 export default function MfsLayout() {
+    const dispatch = useDispatch();
+
     const {
         isAuthenticated,
         isLoading: isAuthLoading,
@@ -30,6 +36,13 @@ export default function MfsLayout() {
         }
     }, [isAuthenticated, isAuthLoading]);
 
+    useEffect(() => {
+      if(isFetchMeSuccess){
+        dispatch(setUserProfile(myData as any))
+      }
+    }, [isFetchMeSuccess])
+    
+
     return (
         <div>
             <AuthStateSyncer />
@@ -38,7 +51,21 @@ export default function MfsLayout() {
             ) : isAuthenticated ? (
                 <>
                     {isFetchMeSuccess && (
-                        <>{!myData.mfs ? <MFSProfileForm /> : <Outlet />}</>
+                        <>
+                            {!myData.mfs ? (
+                                <MFSProfileForm user_id={myData.id} />
+                            ) : (
+                                <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+                                    <MFSSidebar />
+                                    <div className="flex flex-col">
+                                        <MFSHeader />
+                                        <div className="container mx-auto pt-6">
+                                            <Outlet />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </>
             ) : (
