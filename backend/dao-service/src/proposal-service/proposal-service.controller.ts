@@ -56,6 +56,13 @@ export class ProposalServiceController {
     console.log("getting proposal");
     return this.proposalService.getUpdatedProposals();
   }
+
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  async findAllProposals(@Req() req): Promise<ProposalEntity[]> {
+    return this.proposalService.findAll(req.user);
+  }
+  
 }
 
 
