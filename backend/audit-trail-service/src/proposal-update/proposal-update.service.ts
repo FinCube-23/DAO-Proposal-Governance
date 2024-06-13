@@ -1,35 +1,32 @@
 import { ProposalUpdateDto } from './dto/proposal-update.dto';
 import axios from 'axios';
+
+import { ApolloClient, gql } from '@apollo/client';
 import {
   Injectable,
   Inject,
   NotFoundException,
-  UnauthorizedException,
+  UnauthorizedException, Logger,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { timeout } from 'rxjs';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProposalUpdateService {
+  private readonly logger = new Logger(ProposalUpdateService.name);
   public update_proposals: ProposalUpdateDto[];
+
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
-  ) {}
-  private async getUserRole(sub: string): Promise<string> {
-    try {
-      const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
-      return response.data;
-    } catch (error) {
-      throw new UnauthorizedException("Role of user not found");;
-    }
+    @Inject('APOLLO_CLIENT1') private apolloClient: ApolloClient<any>,
+  ) {
+    this.update_proposals = [];
   }
 
-
   placeProposal(proposal: ProposalUpdateDto) {
-    console.log("in service placeProposal");
+    console.log('in service placeProposal');
     this.rabbitClient.emit('update-proposal-placed', proposal);
-    console.log("in service placeProposal emitted");
+    console.log('in service placeProposal emitted');
     return { message: 'Proposal Placed!' };
   }
 
@@ -59,5 +56,86 @@ export class ProposalUpdateService {
 
   getUpdatedProposals() {
     return this.update_proposals;
+  }
+
+  //GETTING PROPOSAL RELATED EVENTS
+  GET_PROPOSAL_CREATED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+
+  GET_PROPOSAL_EXECUTED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+
+  GET_PROPOSAL_CANCELED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+  async getProposalsCreated(): Promise<any> {
+    try {
+      this.logger.log('Fetching created proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_CREATED,
+      });
+      return result.data.proposalCreateds;
+    } catch (error) {
+      this.logger.error('Error fetching created proposals:', error);
+      throw error;
+    }
+  }
+
+  async getProposalsExecuted(): Promise<any> {
+    try {
+      this.logger.log('Fetching executed proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_EXECUTED,
+      });
+      return result.data.proposalExecuteds;
+    } catch (error) {
+      this.logger.error('Error fetching executed proposals:', error);
+      throw error;
+    }
+  }
+
+  async getProposalsCanceled(): Promise<any> {
+    try {
+      this.logger.log('Fetching canceled proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_CANCELED,
+      });
+      return result.data.proposalCanceleds;
+    } catch (error) {
+      this.logger.error('Error fetching canceled proposals:', error);
+      throw error;
+    }
   }
 }
