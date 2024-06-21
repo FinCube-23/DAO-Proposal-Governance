@@ -2,3 +2,4 @@ backend/.env.local
 backend/user-management-service/src/database_seeder/authentication.json
 backend/user-management-service/src/database_seeder/exchange_users.json
 backend/user-management-service/src/database_seeder/mfs_businesses.json
+
