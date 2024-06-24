@@ -9,7 +9,7 @@ export class ProposalDto {
   
   }
 //A superclass will have the fields common to all DTOs. The child classes will deal with specifics
-class CreatedProposalDto extends ProposalDto{
+export class CreatedProposalDto extends ProposalDto{
   proposer_address: string;
   metadata: string;
   transaction_info: ResponseTransactionStatusDto;
@@ -18,7 +18,7 @@ class CreatedProposalDto extends ProposalDto{
 }
 
 
-class UpdatedProposalDto extends ProposalDto{
+export class UpdatedProposalDto extends ProposalDto{
   transaction_info: ResponseTransactionStatusDto;
   
 }

@@ -3,7 +3,7 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import {
   Ctx,
   EventPattern,
@@ -32,16 +32,22 @@ export class ProposalServiceController {
   }
 
   @Post('place-proposal')
-  @ApiBody({ type: ProposalDto })
-  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: ProposalDto })
-  placeProposal(@Body() proposal: ProposalDto) {
+  @ApiBody({ type: CreatedProposalDto })
+  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: CreatedProposalDto })
+  placeProposal(@Body() proposal: CreatedProposalDto | UpdatedProposalDto) {
     return this.proposalService.placeProposal(proposal);
   }
 
-  @EventPattern('update-proposal-placed')
-  handleProposalPlaced(@Payload() proposal: ProposalDto) {
+  @EventPattern('create-proposal-placed')
+  handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto) {
     console.log("in 3002 handle proposal placed");
-    return this.proposalService.handleProposalPlaced(proposal);
+    return this.proposalService.handleCreatedProposalPlaced(proposal);
+  }
+
+  @EventPattern('update-proposal-placed')
+  handleUpdatedProposalPlaced(@Payload() proposal: UpdatedProposalDto) {
+    console.log("in 3002 handle proposal placed");
+    return this.proposalService.handleUpdatedProposalPlaced(proposal);
   }
 
   @MessagePattern({ cmd: 'fetch-update-proposal' })

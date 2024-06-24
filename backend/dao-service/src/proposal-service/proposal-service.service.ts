@@ -5,8 +5,9 @@ import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy } from '@nestjs/microservices';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
 @Injectable()
@@ -62,24 +63,64 @@ export class ProposalServiceService {
       .pipe(timeout(5000));
   }
 
-  handleProposalPlaced(proposal: ProposalDto) {
-    const new_proposal = new ProposalDto();
-    new_proposal.id = proposal.id;
-    new_proposal.proposalAddress = proposal.proposalAddress;
-    new_proposal.external_proposal = proposal.external_proposal;
-    new_proposal.metadata = proposal.metadata;
-    new_proposal.proposer_address = proposal.proposer_address;
-    new_proposal.transaction_info = proposal.transaction_info;
-    if (new_proposal instanceof ProposalDto) {
+  private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
+    const dto = new CreatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id; // Assuming 'id' from the graph is the address
+    dto.proposer_address = ''; // This information is not available in the current graph data
+    dto.metadata = JSON.stringify({
+      blockTimestamp: proposal.blockTimestamp,
+      proposalType: proposal.proposalType,
+    });
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', 
+    } as unknown as ResponseTransactionStatusDto;
+    dto.external_proposal = true; 
+    return dto;
+  }
+
+  private mapToUpdatedProposalDto(proposal: any): UpdatedProposalDto {
+    const dto = new UpdatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id;
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', 
+    } as unknown as ResponseTransactionStatusDto;
+    return dto;
+  }
+
+  handleCreatedProposalPlaced(proposal: CreatedProposalDto) {
+    console.log(proposal);
+    const createdProposal = this.mapToCreatedProposalDto(proposal);
+    if (
+      createdProposal instanceof CreatedProposalDto
+    ) {
       console.log(
-        `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
+        `Received a new proposal - Address: ${createdProposal.proposalAddress}`,
       );
-      this.update_proposals.push(new_proposal);
-      console.log("Received a new proposal and pushed");
+      this.update_proposals.push(createdProposal);
     } else {
-      console.error('Invalid proposal object received:', proposal);
+      console.log('Invalid proposal object received:', createdProposal);
     }
   }
+
+  handleUpdatedProposalPlaced(proposal: UpdatedProposalDto) {
+    console.log(proposal);
+    const updatedProposal = this.mapToUpdatedProposalDto(proposal);
+    if (
+      updatedProposal instanceof UpdatedProposalDto
+    ) {
+      console.log(
+        `Received a new proposal - Address: ${updatedProposal.proposalAddress}`,
+      );
+      this.update_proposals.push(updatedProposal);
+    } else {
+      console.log('Invalid proposal object received:', updatedProposal);
+    }
+  }
+
 
   async getUpdatedProposals():Promise<any> {
     console.log("in get updated proposal of service");
