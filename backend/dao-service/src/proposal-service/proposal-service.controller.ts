@@ -40,26 +40,22 @@ export class ProposalServiceController {
 
   @EventPattern('create-proposal-placed')
   handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto) {
-    console.log("in 3002 handle proposal placed");
     return this.proposalService.handleCreatedProposalPlaced(proposal);
   }
 
   @EventPattern('update-proposal-placed')
   handleUpdatedProposalPlaced(@Payload() proposal: UpdatedProposalDto) {
-    console.log("in 3002 handle proposal placed");
     return this.proposalService.handleUpdatedProposalPlaced(proposal);
   }
 
   @MessagePattern({ cmd: 'fetch-update-proposal' })
   getProposal(@Ctx() context: RmqContext) {
-    console.log(`Message Queue:`, context.getMessage());
     return this.proposalService.getProposals();
   }
 
   
   @Get('proposals/updated')
   async getUpdatedProposals(): Promise<any> {
-    console.log("getting proposal");
     return this.proposalService.getUpdatedProposals();
   }
 

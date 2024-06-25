@@ -28,16 +28,12 @@ export class ProposalUpdateService {
   }
 
   placeProposal(proposal: CreatedProposalDto) {
-    console.log('in service placeProposal');
     this.rabbitClient.emit('create-proposal-placed', proposal);
-    console.log('in service placeProposal emitted');
     return { message: 'Proposal Placed!' };
   }
 
   updateProposal(proposal : UpdatedProposalDto) {
-    console.log('in service placeProposal');
     this.rabbitClient.emit('update-proposal-placed', proposal);
-    console.log('in service placeProposal emitted');
     return { message: 'Proposal Placed!' };
   }
 
@@ -52,12 +48,12 @@ export class ProposalUpdateService {
       proposal instanceof CreatedProposalDto ||
       proposal instanceof UpdatedProposalDto
     ) {
-      console.log(
+      this.logger.error(
         `Received a new proposal - Address: ${proposal.proposalAddress}`,
       );
       this.update_proposals.push(proposal);
     } else {
-      console.log('Invalid proposal object received:', proposal);
+      this.logger.error('Invalid proposal object received:', proposal);
     }
   }
 
