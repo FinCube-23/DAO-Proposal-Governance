@@ -3,7 +3,7 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import {
   Ctx,
   EventPattern,
@@ -32,28 +32,30 @@ export class ProposalServiceController {
   }
 
   @Post('place-proposal')
-  @ApiBody({ type: ProposalDto })
-  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: ProposalDto })
-  placeProposal(@Body() proposal: ProposalDto) {
+  @ApiBody({ type: CreatedProposalDto })
+  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: CreatedProposalDto })
+  placeProposal(@Body() proposal: CreatedProposalDto | UpdatedProposalDto) {
     return this.proposalService.placeProposal(proposal);
   }
 
+  @EventPattern('create-proposal-placed')
+  handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto) {
+    return this.proposalService.handleCreatedProposalPlaced(proposal);
+  }
+
   @EventPattern('update-proposal-placed')
-  handleProposalPlaced(@Payload() proposal: ProposalDto) {
-    console.log("in 3002 handle proposal placed");
-    return this.proposalService.handleProposalPlaced(proposal);
+  handleUpdatedProposalPlaced(@Payload() proposal: UpdatedProposalDto) {
+    return this.proposalService.handleUpdatedProposalPlaced(proposal);
   }
 
   @MessagePattern({ cmd: 'fetch-update-proposal' })
   getProposal(@Ctx() context: RmqContext) {
-    console.log(`Message Queue:`, context.getMessage());
     return this.proposalService.getProposals();
   }
 
   
   @Get('proposals/updated')
   async getUpdatedProposals(): Promise<any> {
-    console.log("getting proposal");
     return this.proposalService.getUpdatedProposals();
   }
 

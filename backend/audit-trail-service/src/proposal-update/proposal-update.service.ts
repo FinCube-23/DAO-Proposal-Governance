@@ -1,35 +1,39 @@
-import { ProposalUpdateDto } from './dto/proposal-update.dto';
+import {
+  CreatedProposalDto,
+  UpdatedProposalDto,
+} from './dto/proposal-update.dto';
 import axios from 'axios';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { ApolloClient, gql } from '@apollo/client';
 import {
   Injectable,
   Inject,
   NotFoundException,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { timeout } from 'rxjs';
-import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class ProposalUpdateService {
-  public update_proposals: ProposalUpdateDto[];
+  private readonly logger = new Logger(ProposalUpdateService.name);
+  public update_proposals: (CreatedProposalDto | UpdatedProposalDto)[];
+
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
-  ) {}
-  private async getUserRole(sub: string): Promise<string> {
-    try {
-      const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
-      return response.data;
-    } catch (error) {
-      throw new UnauthorizedException("Role of user not found");;
-    }
+    @Inject('APOLLO_CLIENT1') private apolloClient: ApolloClient<any>,
+  ) {
+    this.update_proposals = [];
   }
 
+  placeProposal(proposal: CreatedProposalDto) {
+    this.rabbitClient.emit('create-proposal-placed', proposal);
+    return { message: 'Proposal Placed!' };
+  }
 
-  placeProposal(proposal: ProposalUpdateDto) {
-    console.log("in service placeProposal");
+  updateProposal(proposal : UpdatedProposalDto) {
     this.rabbitClient.emit('update-proposal-placed', proposal);
-    console.log("in service placeProposal emitted");
     return { message: 'Proposal Placed!' };
   }
 
@@ -39,25 +43,132 @@ export class ProposalUpdateService {
       .pipe(timeout(5000));
   }
 
-  handleProposalPlaced(proposal: ProposalUpdateDto) {
-    const new_proposal = new ProposalUpdateDto();
-    new_proposal.id = proposal.id;
-    new_proposal.proposalAddress = proposal.proposalAddress;
-    new_proposal.external_proposal = proposal.external_proposal;
-    new_proposal.metadata = proposal.metadata;
-    new_proposal.proposer_address = proposal.proposer_address;
-    new_proposal.transaction_info = proposal.transaction_info;
-    if (new_proposal instanceof ProposalUpdateDto) {
-      console.log(
-        `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
+  handleProposalPlaced(proposal: CreatedProposalDto | UpdatedProposalDto) {
+    if (
+      proposal instanceof CreatedProposalDto ||
+      proposal instanceof UpdatedProposalDto
+    ) {
+      this.logger.error(
+        `Received a new proposal - Address: ${proposal.proposalAddress}`,
       );
-      this.update_proposals.push(new_proposal);
+      this.update_proposals.push(proposal);
     } else {
-      console.log('Invalid proposal object received:', proposal);
+      this.logger.error('Invalid proposal object received:', proposal);
     }
   }
 
   getUpdatedProposals() {
     return this.update_proposals;
   }
+
+  private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
+    const dto = new CreatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id; // Assuming 'id' from the graph is the address
+    dto.proposer_address = ''; // This information is not available in the current graph data
+    dto.metadata = JSON.stringify({
+      blockTimestamp: proposal.blockTimestamp,
+      proposalType: proposal.proposalType,
+    });
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', // You might want to adjust this based on your needs
+    } as unknown as ResponseTransactionStatusDto;
+    dto.external_proposal = true; // Assuming all proposals from the graph are external
+    return dto;
+  }
+
+  private mapToUpdatedProposalDto(proposal: any): UpdatedProposalDto {
+    const dto = new UpdatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id;
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', // You might want to adjust this based on your needs
+    } as unknown as ResponseTransactionStatusDto;
+    return dto;
+  }
+
+  //GETTING PROPOSAL RELATED EVENTS
+  GET_PROPOSAL_CREATED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+
+  GET_PROPOSAL_EXECUTED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+
+  GET_PROPOSAL_CANCELED = gql`
+    query MyQuery {
+      proposalCreateds {
+        id
+        proposalId
+        proposalType
+        transactionHash
+        data
+        blockTimestamp
+      }
+    }
+  `;
+  async getProposalsCreated(): Promise<any> {
+    try {
+      this.logger.log('Fetching created proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_CREATED,
+      });
+      return result.data.proposalCreateds;
+    } catch (error) {
+      this.logger.error('Error fetching created proposals:', error);
+      throw error;
+    }
+  }
+
+  async getProposalsExecuted(): Promise<any> {
+    try {
+      this.logger.log('Fetching executed proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_EXECUTED,
+      });
+      return result.data.proposalExecuteds;
+    } catch (error) {
+      this.logger.error('Error fetching executed proposals:', error);
+      throw error;
+    }
+  }
+
+  async getProposalsCanceled(): Promise<any> {
+    try {
+      this.logger.log('Fetching canceled proposals');
+
+      const result = await this.apolloClient.query({
+        query: this.GET_PROPOSAL_CANCELED,
+      });
+      return result.data.proposalCanceleds;
+    } catch (error) {
+      this.logger.error('Error fetching canceled proposals:', error);
+      throw error;
+    }
+  }
+
+
 }

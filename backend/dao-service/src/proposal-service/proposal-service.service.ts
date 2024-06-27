@@ -1,17 +1,19 @@
-import { Injectable, Inject, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy } from '@nestjs/microservices';
-import { ProposalDto } from './dto/proposal.dto';
+import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
+  private readonly logger = new Logger(ProposalServiceService.name);
   constructor(
     @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy
@@ -56,39 +58,79 @@ export class ProposalServiceService {
   }
 
   getProposals() {
-    console.log("in get proposal of service");
+    this.logger.error("in get proposal of service");
     return this.rabbitClient
       .send({ cmd: 'fetch-update-proposal' }, {})
       .pipe(timeout(5000));
   }
 
-  handleProposalPlaced(proposal: ProposalDto) {
-    const new_proposal = new ProposalDto();
-    new_proposal.id = proposal.id;
-    new_proposal.proposalAddress = proposal.proposalAddress;
-    new_proposal.external_proposal = proposal.external_proposal;
-    new_proposal.metadata = proposal.metadata;
-    new_proposal.proposer_address = proposal.proposer_address;
-    new_proposal.transaction_info = proposal.transaction_info;
-    if (new_proposal instanceof ProposalDto) {
-      console.log(
-        `Received a new proposal - Address: ${new_proposal.proposalAddress}`,
+  private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
+    const dto = new CreatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id; // Assuming 'id' from the graph is the address
+    dto.proposer_address = ''; // This information is not available in the current graph data
+    dto.metadata = JSON.stringify({
+      blockTimestamp: proposal.blockTimestamp,
+      proposalType: proposal.proposalType,
+    });
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', 
+    } as unknown as ResponseTransactionStatusDto;
+    dto.external_proposal = true; 
+    return dto;
+  }
+
+  private mapToUpdatedProposalDto(proposal: any): UpdatedProposalDto {
+    const dto = new UpdatedProposalDto();
+    dto.id = proposal.proposalId;
+    dto.proposalAddress = proposal.id;
+    dto.transaction_info = {
+      transactionHash: proposal.transactionHash,
+      status: 'PENDING', 
+    } as unknown as ResponseTransactionStatusDto;
+    return dto;
+  }
+
+  handleCreatedProposalPlaced(proposal: CreatedProposalDto) {
+    this.logger.error(proposal);
+    const createdProposal = this.mapToCreatedProposalDto(proposal);
+    if (
+      createdProposal instanceof CreatedProposalDto
+    ) {
+      this.logger.error(
+        `Received a new proposal - Address: ${createdProposal.proposalAddress}`,
       );
-      this.update_proposals.push(new_proposal);
-      console.log("Received a new proposal and pushed");
+      this.update_proposals.push(createdProposal);
     } else {
-      console.error('Invalid proposal object received:', proposal);
+      this.logger.error('Invalid proposal object received:', createdProposal);
     }
   }
 
+  handleUpdatedProposalPlaced(proposal: UpdatedProposalDto) {
+    this.logger.error(proposal);
+    const updatedProposal = this.mapToUpdatedProposalDto(proposal);
+    if (
+      updatedProposal instanceof UpdatedProposalDto
+    ) {
+      this.logger.error(
+        `Received a new proposal - Address: ${updatedProposal.proposalAddress}`,
+      );
+      this.update_proposals.push(updatedProposal);
+    } else {
+      this.logger.error('Invalid proposal object received:', updatedProposal);
+    }
+  }
+
+
   async getUpdatedProposals():Promise<any> {
-    console.log("in get updated proposal of service");
+    this.logger.error("in get updated proposal of service");
     return this.update_proposals;
   }
 
   async findAll(sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
-    console.log(role);
+    this.logger.error(role);
     if (role != 'MFS') {
       throw new UnauthorizedException("User does not have permission");
     }
