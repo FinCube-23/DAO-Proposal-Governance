@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Inject, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -6,6 +6,9 @@ import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
 import { DaoAuditModule } from './dao_audit/dao_audit.module';
 import { ProposalUpdateModule } from './proposal-update/proposal-update.module';
+import { TasksService } from './background_tasks/tasks.service';
+import { TasksModule } from  './background_tasks/task.module';
+// import { ScheduleModule } from '@nestjs/schedule'; ref: https://github.com/FahimDev/hotel-nft-marketplace/blob/develop/web3-api-service/src/app.module.ts
 
 @Module({
   imports: [
@@ -17,8 +20,15 @@ import { ProposalUpdateModule } from './proposal-update/proposal-update.module';
     AuthzModule,
     DaoAuditModule,
     ProposalUpdateModule,
+    TasksModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TasksService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor(@Inject(TasksService) private readonly tasksService: TasksService) {}
+  async onModuleInit() {
+    // Lifecycle Hooks: Trigger the function when the module initializes
+    this.tasksService.listenProposalTrx();
+  }
+}
