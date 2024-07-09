@@ -18,9 +18,9 @@ export class TasksService {
   constructor() {}
 
   listenProposalTrx(){
-    const proposalTopic = process.env.PROPOSAL_TOPIC;
-    const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
-    const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
+    const proposalTopic = "0x3cd05952bf89447515ba76534b26df87104c2ba104027f22a518d767243973c1";// process.env.PROPOSAL_TOPIC;
+    const proposalEndTopic =  "0x0000000000000000000000000000000000000000000000000000000000000000";// process.env.PROPOSAL_END_TOPIC;
+    const daoContractAddress = "0x64D8506e96788aF3eb8110FEa4222E6eA8114Db9";// process.env.DAO_CONTRACT_ADDRESS;
 
     // Create the log options object.
     const ProposalCreatedEvents = {
@@ -32,6 +32,13 @@ export class TasksService {
     alchemy.ws.on(ProposalCreatedEvents, (txn) => {
         const eventObj = txn;
         this.logger.log(`New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`);
+        this.logger.log(`proposalEndTopic Value: ${txn.topics[1] }`);
+        const isProposalEndTopicZero = txn.topics[1] === proposalEndTopic;
+        if (isProposalEndTopicZero) {
+            this.logger.log('proposalEndTopic is zero for ProposalCreated event.');
+        } else {
+            this.logger.log('proposalEndTopic is non-zero for ProposalCreated event.');
+        }
     });
   }
 
