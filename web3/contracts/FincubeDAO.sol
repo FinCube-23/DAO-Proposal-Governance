@@ -12,9 +12,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     event MemberRegistered(address indexed _newMember, string _memberURI);
-    event ProposalCreated(
-        uint256 indexed proposalId,
+    // event ProposalCreated(
+    //     uint256 indexed proposalId,
+    //     ProposalType indexed proposalType,
+    //     bytes data
+    // );
+
+    event TestProposalCreated(
         ProposalType indexed proposalType,
+        uint256 indexed proposalId,
         bytes data
     );
 
@@ -251,11 +257,17 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             novotes: 0
         });
         proposalType[proposalCount] = ProposalType.NewMemberProposal;
-        emit ProposalCreated(
-            proposalCount,
+        // emit ProposalCreated(
+        //     proposalCount,
+        //     ProposalType.NewMemberProposal,
+        //     _data
+        // );
+        emit TestProposalCreated(
             ProposalType.NewMemberProposal,
+            proposalCount,
             _data
         );
+        
         unchecked {
             proposalCount++;
         }
@@ -285,9 +297,14 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             novotes: 0
         });
         proposalType[proposalCount] = ProposalType.GeneralProposal;
-        emit ProposalCreated(
-            proposalCount,
+        // emit ProposalCreated(
+        //     proposalCount,
+        //     ProposalType.GeneralProposal,
+        //     _calldata
+        // );
+        emit TestProposalCreated(
             ProposalType.GeneralProposal,
+            proposalCount,
             _calldata
         );
         unchecked {
