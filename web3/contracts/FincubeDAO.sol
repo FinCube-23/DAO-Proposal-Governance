@@ -445,6 +445,26 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         return ongoingProposals;
     }
 
+    function getProposalsByPage(uint256 cursor, uint256 howMany) public view
+    returns (Proposal[] memory values, uint256 newCursor){
+        Proposal[] memory paginateProposals = new Proposal[](howMany);
+
+        uint256 length = howMany;
+        if (length > paginateProposals.length - cursor) {
+            length = paginateProposals.length - cursor;
+        }
+
+        for (uint256 i; i < length; ) {
+            // Map to array
+            paginateProposals[i] = proposals[cursor + i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        return (values, cursor + length);
+    }
+
     /**
      * @notice Cancels a proposal that has not been executed or canceled yet.
      * @param proposalId The ID of the proposal to be canceled.
