@@ -11,3 +11,11 @@ REPORT_GAS=true npx hardhat test
 npx hardhat node
 npx hardhat ignition deploy ./ignition/modules/Lock.ts
 ```
+# Smart Contract Deployment 
+The smart contract is UUPSUpgradeable. To deploy follow:
+
+![Deploy contract flow](deploy-contract.jpg)
+
+During adding newMembers follow:
+
+![Approve member flow](member-proposal.jpg)
