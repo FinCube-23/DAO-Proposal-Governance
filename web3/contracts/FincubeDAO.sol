@@ -8,17 +8,14 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
+ * This contract is based on EIP-4824 which is considered as Common Interfaces for DAOs (Ref: https://eips.ethereum.org/EIPS/eip-4824)
+ * @author Sampad Sikder, Mashiat Amin Farin, Md. Antonin Islam, Md. Ariful Islam
  */
 
 contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     event MemberRegistered(address indexed _newMember, string _memberURI);
-    // event ProposalCreated(
-    //     uint256 indexed proposalId,
-    //     ProposalType indexed proposalType,
-    //     bytes data
-    // );
 
-    event TestProposalCreated(
+    event ProposalCreated(
         ProposalType indexed proposalType,
         uint256 indexed proposalId,
         bytes data
@@ -258,12 +255,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             novotes: 0
         });
         proposalType[proposalCount] = ProposalType.NewMemberProposal;
-        // emit ProposalCreated(
-        //     proposalCount,
-        //     ProposalType.NewMemberProposal,
-        //     _data
-        // );
-        emit TestProposalCreated(
+        emit ProposalCreated(
             ProposalType.NewMemberProposal,
             proposalCount,
             _data
@@ -298,12 +290,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             novotes: 0
         });
         proposalType[proposalCount] = ProposalType.GeneralProposal;
-        // emit ProposalCreated(
-        //     proposalCount,
-        //     ProposalType.GeneralProposal,
-        //     _calldata
-        // );
-        emit TestProposalCreated(
+        emit ProposalCreated(
             ProposalType.GeneralProposal,
             proposalCount,
             _calldata
