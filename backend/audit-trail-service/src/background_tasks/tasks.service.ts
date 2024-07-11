@@ -18,9 +18,9 @@ export class TasksService {
   constructor() {}
 
   listenProposalTrx(){
-    const proposalTopic = "0x3cd05952bf89447515ba76534b26df87104c2ba104027f22a518d767243973c1";// process.env.PROPOSAL_TOPIC;
-    const proposalEndTopic =  "0x0000000000000000000000000000000000000000000000000000000000000000";// process.env.PROPOSAL_END_TOPIC;
-    const daoContractAddress = "0x64D8506e96788aF3eb8110FEa4222E6eA8114Db9";// process.env.DAO_CONTRACT_ADDRESS;
+    const proposalTopic = process.env.PROPOSAL_TOPIC;
+    const proposalEndTopic =  process.env.PROPOSAL_END_TOPIC;
+    const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
 
     // Create the log options object.
     const ProposalCreatedEvents = {
@@ -36,8 +36,9 @@ export class TasksService {
         const isProposalEndTopicZero = txn.topics[1] === proposalEndTopic;
         if (isProposalEndTopicZero) {
             this.logger.log('proposalEndTopic is zero for ProposalCreated event.');
+            this.logger.log('New member proposal placed.');
         } else {
-            this.logger.log('proposalEndTopic is non-zero for ProposalCreated event.');
+            this.logger.warn('proposalEndTopic is non-zero for ProposalCreated event.');
         }
     });
   }

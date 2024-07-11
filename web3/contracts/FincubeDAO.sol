@@ -141,7 +141,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @notice Sets the duration for which voting is open
+     * @notice Sets the duration for which voting is open. Ref: https://www.geeksforgeeks.org/time-units-in-solidity/
      * @dev This function can only be called by the owner
      * @param _votingPeriod The new duration (in seconds) for which voting will be open
      */
@@ -151,6 +151,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
 
     /**
      * @notice Modifier to ensure that the voting delay has been set.
+     * Ref: https://www.geeksforgeeks.org/time-units-in-solidity/
      */
     modifier isVotingDelaySet() {
         require(votingDelay > 0, "Voting delay is not set");
