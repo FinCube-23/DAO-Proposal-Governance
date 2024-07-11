@@ -268,7 +268,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             proposalCount,
             _data
         );
-        
+
         unchecked {
             proposalCount++;
         }
@@ -446,9 +446,15 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         return ongoingProposals;
     }
 
-    function getProposalsByPage(uint256 cursor, uint256 howMany) public view
-    returns (Proposal[] memory values, uint256 newCursor){
-        Proposal[] memory paginateProposals = new Proposal[](howMany);
+    function getProposalsByPage(
+        uint256 cursor,
+        uint256 howMany
+    )
+        public
+        view
+        returns (Proposal[] memory paginateProposals, uint256 newCursor)
+    {
+        paginateProposals = new Proposal[](howMany);
 
         uint256 length = howMany;
         if (length > paginateProposals.length - cursor) {
@@ -463,7 +469,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             }
         }
 
-        return (values, cursor + length);
+        return (paginateProposals, cursor + length);
     }
 
     /**
