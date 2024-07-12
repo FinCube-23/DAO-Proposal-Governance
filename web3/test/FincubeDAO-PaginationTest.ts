@@ -85,5 +85,22 @@ describe("FinCubeDAO", function () {
             ({ paginateProposals, newCursor } = await finCubeDAO.getProposalsByPage(cursor, pageSize));
             expect(paginateProposals.length).to.equal(pageSize);
         });
+        for (let pageSize = 1; pageSize <= 5; pageSize++) {
+            it(`Should return correct number of proposals for page size ${pageSize}`, async function () {
+                const { finCubeDAO } = await deployFinCubeDAOFixture();
+                let cursor = 0;
+
+                let { paginateProposals, newCursor } = await finCubeDAO.getProposalsByPage(cursor, pageSize);
+
+                // Check if the number of returned proposals matches the page size
+                expect(paginateProposals.length).to.equal(pageSize);
+
+                cursor = newCursor;
+
+                // Check the next page to ensure pagination works correctly
+                ({ paginateProposals, newCursor } = await finCubeDAO.getProposalsByPage(cursor, pageSize));
+                expect(paginateProposals.length).to.equal(pageSize);
+            });
+        }
     });
 });
