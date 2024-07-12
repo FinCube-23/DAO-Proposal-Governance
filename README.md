@@ -63,7 +63,6 @@ FinCube leverages a combination of blockchain technology, smart contracts, and d
 | API-gateway   |              |  |
 | User-management-service      |     |              |
 | Web3-proxy-service          |                 | |
-| API Gateway           |                 |  |
 
 
 <! -- backend folder will contain more details regarding each of the services and the API  -->
