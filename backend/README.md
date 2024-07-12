@@ -38,11 +38,26 @@ The backend for fincube is built to manage and support the decentralized autonom
 
 The backend is structured into multiple microservices, each responsible for specific functionalities:
 
-1. **DAO Service:** Manages DAO-related data and proposals.
-2. **User Management Service:** Handles user registration, authentication, and profile management.
-3. **Web3 Proxy Service:** Interacts with blockchain smart contracts and performs necessary transactions.
-4. **Audit Trail Service:** Records and manages audit logs for DAO activities and proposals.
-5. **Currency Exchange Service:** Manages stablecoin and token exchange functionalities.
+1. **DAO Service:** DAO-service maintains the database of DAO and each DAOs can have multiple proposals under them. At the moment, we test using a singular DAO, but multiple DAOs can be managed using the system. Users can interact with proposal services given they have authentication. Proposal database needs to sync in with the Audit-Trail database. 
+2. **User Management Service:** User management service consists of user registration and login. Currently, auth0 is also integrated with registration and login. 
+During registration, the subject (sub) of user is stored in auth table along with the role of the user. Their account information is stored in mfs and exchange_user table. 
+
+During login, the authentication service retrieves the role of the user from the Authentication database. DAO-service, web3-proxy-service does inter service call to user-managment-service to get authenticated.
+
+3. **Web3 Proxy Service:** 
+
+The Web3 Proxy Service performs smart contract invocations and is configured with Alchemy API and web3JS. The private key of the admin is provided in the environment file. The functions implemented with the proxy service are:
+
+- **Proposal Threshold**
+- **Register Member (GAS | Super Admin)**
+- **Execute Proposal (GAS & Super Admin)**
+- **Get On Going Proposal Count**
+- **Get On Going Proposals**
+
+4. **Audit Trail Service:** This is currently a NestJS microservice. It has a message queue connection with DAO-service. It is another NestJS microservice. Audit trail service can post to the message queue and also receive messages from the message queue. 
+5. **API Gateway:** There is a service registry configured in API gateway(Hardcoded). Client requests from frontend are rerouted using this API gateway. Axios and expressJS are used here. The code pipes HTTP requests along with their bodies and headers.
+![API gateway](APIgateway.jpg)
+
 
 ## Services
 

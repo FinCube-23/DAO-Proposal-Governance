@@ -56,14 +56,13 @@ FinCube leverages a combination of blockchain technology, smart contracts, and d
 - **Web3 Integration**: For seamless on-ramping and off-ramping of digital assets.
 
 ### Backend Services
-| Services             | Technology Used         | Remarks                                                                                  |
-|----------------------|-------------------------|------------------------------------------------------------------------------------------|
-| Audit-trail-service     |                   |   |
-| DAO-service        |                 |  |
-| API-gateway   |              |  |
-| User-management-service      |     |              |
-| Web3-proxy-service          |                 | |
-
+| Services             | Technology Used         |                                                                             
+|----------------------|-------------------------|
+| Audit-trail-service     |        NestJS, RabbitMQ           |   
+| DAO-service        |     NestJS, PostgreSQL            |  
+| API-gateway   |           NestJS   |  
+| User-management-service      | NestJS, PostgreSQL, Auth0    |              
+| Web3-proxy-service          |       NestJS, Alchemy, Web3JS          | 
 
 <! -- backend folder will contain more details regarding each of the services and the API  -->
 
