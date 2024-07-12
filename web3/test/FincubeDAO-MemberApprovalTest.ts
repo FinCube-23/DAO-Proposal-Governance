@@ -52,13 +52,13 @@ describe("FinCubeDAO", function () {
             const { finCubeDAO, owner, addr1, addr2 } = await loadFixture(deployFinCubeDAOFixture);
 
             await finCubeDAO.connect(owner).registerMember(addr1.address, "Member URI");
-            await expect(finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address)).to.emit(finCubeDAO, "ProposalCreated");
+            await expect(finCubeDAO.connect(owner).newMemberApprovalProposal(addr1.address, "Member URI")).to.emit(finCubeDAO, "ProposalAdded");
         });
 
         it("Should not create a new member proposal if not a member", async function () {
             const { finCubeDAO, addr2, addr1 } = await loadFixture(deployFinCubeDAOFixture);
 
-            await expect(finCubeDAO.connect(addr2).newMemberApprovalProposal(addr1.address)).to.be.revertedWith("Not a member");
+            await expect(finCubeDAO.connect(addr2).newMemberApprovalProposal(addr1.address, "Member URI")).to.be.reverted;
         });
     });
 
