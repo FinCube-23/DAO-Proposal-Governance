@@ -81,10 +81,9 @@ describe("FinCubeDAO", function () {
 
             // Cast a 'yes' vote on the proposal
             await finCubeDAO.connect(owner).castVote(0, true);
-            console.log("amifsdgsf");
             // Execute the proposal
             await time.increase(30); // Fast forward time to after voting period
-            await expect( finCubeDAO.connect(owner).executeProposal(0).to.emit(finCubeDAO, "ProposalExecuted"));
+            await expect(finCubeDAO.connect(owner).executeProposal(0)).to.emit(finCubeDAO, "ProposalExecuted");
         });
     });
 
