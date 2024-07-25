@@ -8,14 +8,40 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
+
+ * This contract is a hybrid of EIP-4824 which is considered as Common Interfaces for DAOs (Ref: https://eips.ethereum.org/EIPS/eip-4824) 
+ * and OpenZeppelin's Governance (Ref: https://docs.openzeppelin.com/contracts/4.x/api/governance). Though we didn't inherit the OpenZeppelin's 
+ * contract to avoid the unnecessary functions. This is a simpler implementation of DAO with the principal functionalities of Governance.
+ * @author Sampad Sikder, Mashiat Amin Farin, Md. Antonin Islam, Md. Ariful Islam
  */
 
 contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     event MemberRegistered(address indexed _newMember, string _memberURI);
-    event ProposalCreated(
-        uint256 indexed proposalId,
+
+    event ProposalAdded(
         ProposalType indexed proposalType,
+        uint256 indexed proposalId,
         bytes data
+    );
+
+    event ProposalCreated(
+        uint256 proposalId,
+        address proposer,
+        address[] targets,
+        uint256[] values,
+        string[] signatures,
+        bytes[] calldatas,
+        uint256 voteStart,
+        uint256 voteEnd,
+        string description
+    );
+
+    event VoteCast(
+        address indexed voter,
+        uint256 proposalId,
+        uint8 support,
+        uint256 weight,
+        string reason
     );
 
     /**
@@ -71,7 +97,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @dev Represents a proposal within the DAO.
+     * @dev Represents a proposal within the DAO. We are using single call data to avoid technical complexity
+     * and to maintain the core functionality of the DAO understandable for the beginners.
      * @param proposer The address of the member who created the proposal.
      * @param voteStart The timestamp when the voting period starts.
      * @param voteDuration The duration of the voting period in seconds.
@@ -80,6 +107,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      * @param data The data associated with the proposal (e.g., new member address, token address).
      * @param yesvotes The number of "yes" votes for the proposal.
      * @param novotes The number of "no" votes for the proposal.
+     * @param proposalURI In our case we are considering Proposal URI as proposal description.
      */
     struct Proposal {
         bool executed;
@@ -91,6 +119,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         uint48 voteDuration;
         uint256 yesvotes;
         uint256 novotes;
+        string proposalURI;
     }
 
     /**
@@ -135,7 +164,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @notice Sets the duration for which voting is open
+     * @notice Sets the duration for which voting is open. Ref: https://www.geeksforgeeks.org/time-units-in-solidity/
      * @dev This function can only be called by the owner
      * @param _votingPeriod The new duration (in seconds) for which voting will be open
      */
@@ -145,6 +174,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
 
     /**
      * @notice Modifier to ensure that the voting delay has been set.
+     * Ref: https://www.geeksforgeeks.org/time-units-in-solidity/
      */
     modifier isVotingDelaySet() {
         require(votingDelay > 0, "Voting delay is not set");
@@ -225,9 +255,11 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      * @notice Creates a new proposal for approving a new member.
      * @dev This function can only be called by an existing member.
      * @param _newMember The address of the new member to be approved.
+     * @param description In our case we are considering Proposal URI as proposal description.
      */
     function newMemberApprovalProposal(
-        address _newMember
+        address _newMember,
+        string memory description
     )
         external
         onlyMember(msg.sender)
@@ -248,12 +280,13 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             data: _data,
             target: address(0xdead),
             yesvotes: 0,
-            novotes: 0
+            novotes: 0,
+            proposalURI: description
         });
         proposalType[proposalCount] = ProposalType.NewMemberProposal;
-        emit ProposalCreated(
-            proposalCount,
+        emit ProposalAdded(
             ProposalType.NewMemberProposal,
+            proposalCount,
             _data
         );
         unchecked {
@@ -264,50 +297,76 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     /**
      * @notice Creates a new proposal. This is a generalized proposal which can invoke any public function of any contract using calldata.
      * @dev This function can only be called by an existing member.
-     * @param _calldata the calldata of function to be invoked. _target the address of contract having the function
+     * @param calldatas the calldata of function to be invoked.
+     * @param targets the address of contract having the functions
+     * @param values in wei, that should be sent with the transaction. In our case this will be 0 as all of our voters are equal. If required Ether can be deposited before-end or passed along when executing the transaction
+     * @param description In our case we are considering Proposal URI as proposal description.
      */
-    function newProposal(
-        bytes memory _calldata,
-        address _target
-    ) external onlyMember(msg.sender) isVotingDelaySet isVotingPeriodSet {
+    function propose(
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description
+    )
+        external
+        onlyMember(msg.sender)
+        isVotingDelaySet
+        isVotingPeriodSet
+        returns (uint256 proposalId)
+    {
         uint48 currentTime = uint48(block.timestamp);
         uint48 start = currentTime + uint48(getVotingDelay());
         uint48 end = start + uint48(getVotingPeriod());
+        proposalId = proposalCount;
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
             voteStart: start,
             voteDuration: end,
             executed: false,
             canceled: false,
-            data: _calldata,
-            target: _target,
+            data: calldatas[0],
+            target: targets[0],
             yesvotes: 0,
-            novotes: 0
+            novotes: 0,
+            proposalURI: description
         });
         proposalType[proposalCount] = ProposalType.GeneralProposal;
+        emit ProposalAdded(
+            ProposalType.GeneralProposal,
+            proposalCount,
+            calldatas[0]
+        );
+        string[] memory tempSignatures; // This will be removed after EIP712 is integrated
         emit ProposalCreated(
             proposalCount,
-            ProposalType.GeneralProposal,
-            _calldata
+            msg.sender,
+            targets,
+            values,
+            tempSignatures,
+            calldatas,
+            start,
+            end,
+            description
         );
         unchecked {
             proposalCount++;
         }
+        return proposalId;
     }
 
     /**
      * @notice Casts a vote for a proposal.
      * @dev This function can only be called by an existing member. It also checks if the voting period is active and if the member has not already voted for this proposal.
-     * @param _proposalId The ID of the proposal to vote for.
-     * @param _isYesVote Whether the vote is a "yes" vote (true) or a "no" vote (false).
+     * @param proposalId The ID of the proposal to vote for.
+     * @param support Whether the vote is a "yes" vote (true) or a "no" vote (false).
      */
 
     function castVote(
-        uint256 _proposalId,
-        bool _isYesVote
+        uint256 proposalId,
+        bool support
     ) external onlyMember(msg.sender) {
-        ProposalVotes storage votes = proposalVotes[_proposalId];
-        Proposal storage proposal = proposals[_proposalId];
+        ProposalVotes storage votes = proposalVotes[proposalId];
+        Proposal storage proposal = proposals[proposalId];
 
         require(
             block.timestamp > proposal.voteStart &&
@@ -319,7 +378,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             "Already voted for this proposal"
         );
 
-        if (_isYesVote) {
+        if (support) {
             unchecked {
                 proposal.yesvotes++;
             }
@@ -330,6 +389,13 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             }
             votes.isNoVote[msg.sender] = true;
         }
+        emit VoteCast(
+            msg.sender,
+            proposalId,
+            support ? 1 : 0,
+            0,
+            proposal.proposalURI
+        );
     }
 
     /**
@@ -426,6 +492,32 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         }
 
         return ongoingProposals;
+    }
+
+    function getProposalsByPage(
+        uint256 cursor,
+        uint256 howMany
+    )
+        public
+        view
+        returns (Proposal[] memory paginateProposals, uint256 newCursor)
+    {
+        paginateProposals = new Proposal[](howMany);
+
+        uint256 length = howMany;
+        if (length > paginateProposals.length - cursor) {
+            length = paginateProposals.length - cursor;
+        }
+
+        for (uint256 i; i < length; ) {
+            // Map to array
+            paginateProposals[i] = proposals[cursor + i];
+            unchecked {
+                ++i;
+            }
+        }
+
+        return (paginateProposals, cursor + length);
     }
 
     /**
