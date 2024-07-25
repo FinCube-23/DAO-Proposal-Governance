@@ -25,23 +25,25 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     );
 
     event ProposalCreated(
-        uint256 proposalId, 
-        address proposer, 
-        address[] targets, 
-        uint256[] values, 
-        string[] signatures, 
-        bytes[] calldatas, 
-        uint256 voteStart, 
-        uint256 voteEnd, 
+        uint256 proposalId,
+        address proposer,
+        address[] targets,
+        uint256[] values,
+        string[] signatures,
+        bytes[] calldatas,
+        uint256 voteStart,
+        uint256 voteEnd,
         string description
     );
 
-    event VoteCast(address indexed voter, 
-        uint256 proposalId, 
-        uint8 support, 
-        uint256 weight, 
+    event VoteCast(
+        address indexed voter,
+        uint256 proposalId,
+        uint8 support,
+        uint256 weight,
         string reason
     );
+
     /**
      * @notice Initializes the contract with the owner as the first member.
      * @param _ownerURI The URI that identifies the owner member.
@@ -95,8 +97,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @dev Represents a proposal within the DAO. We are using single call data to avoid technical complexity 
-     * and to maintain the core functionality of the DAO understandable for the beginners.  
+     * @dev Represents a proposal within the DAO. We are using single call data to avoid technical complexity
+     * and to maintain the core functionality of the DAO understandable for the beginners.
      * @param proposer The address of the member who created the proposal.
      * @param voteStart The timestamp when the voting period starts.
      * @param voteDuration The duration of the voting period in seconds.
@@ -295,17 +297,12 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     /**
      * @notice Creates a new proposal. This is a generalized proposal which can invoke any public function of any contract using calldata.
      * @dev This function can only be called by an existing member.
-     * @param calldatas the calldata of function to be invoked. 
+     * @param calldatas the calldata of function to be invoked.
      * @param targets the address of contract having the functions
      * @param values in wei, that should be sent with the transaction. In our case this will be 0 as all of our voters are equal. If required Ether can be deposited before-end or passed along when executing the transaction
      * @param description In our case we are considering Proposal URI as proposal description.
      */
     function propose(
-        address[] memory targets, 
-        uint256[] memory values, 
-        bytes[] memory calldatas, 
-        string memory description
-    ) external onlyMember(msg.sender) isVotingDelaySet isVotingPeriodSet returns (uint256 proposalId) {
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory calldatas,
