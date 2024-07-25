@@ -8,6 +8,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 /**
  * @title FinCubeDAO
  * @notice This contract implements a decentralized autonomous organization (DAO) for managing a community of members and proposals.
+
  * This contract is a hybrid of EIP-4824 which is considered as Common Interfaces for DAOs (Ref: https://eips.ethereum.org/EIPS/eip-4824) 
  * and OpenZeppelin's Governance (Ref: https://docs.openzeppelin.com/contracts/4.x/api/governance). Though we didn't inherit the OpenZeppelin's 
  * contract to avoid the unnecessary functions. This is a simpler implementation of DAO with the principal functionalities of Governance.
@@ -35,15 +36,12 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         string description
     );
 
-    event VoteCast(
-        address indexed voter, 
+    event VoteCast(address indexed voter, 
         uint256 proposalId, 
         uint8 support, 
         uint256 weight, 
         string reason
     );
-
-
     /**
      * @notice Initializes the contract with the owner as the first member.
      * @param _ownerURI The URI that identifies the owner member.
@@ -308,6 +306,17 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         bytes[] memory calldatas, 
         string memory description
     ) external onlyMember(msg.sender) isVotingDelaySet isVotingPeriodSet returns (uint256 proposalId) {
+        address[] memory targets,
+        uint256[] memory values,
+        bytes[] memory calldatas,
+        string memory description
+    )
+        external
+        onlyMember(msg.sender)
+        isVotingDelaySet
+        isVotingPeriodSet
+        returns (uint256 proposalId)
+    {
         uint48 currentTime = uint48(block.timestamp);
         uint48 start = currentTime + uint48(getVotingDelay());
         uint48 end = start + uint48(getVotingPeriod());
