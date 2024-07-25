@@ -1,11 +1,11 @@
 import { time, loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-
 import { expect } from "chai";
 import { Typed, AddressLike } from "ethers";
 import hre from "hardhat";
 const { ethers } = require("hardhat");
 const { ethers: utilEthers } = require("ethers");
 import { ethers, upgrades } from "hardhat";
+
 /**
  * Converts any value to a hexadecimal representation.
  * @param {string|number|BigInt|Uint8Array|boolean} value - The value to convert to a hexadecimal string.
@@ -45,16 +45,16 @@ function hexlify(value: any) {
   // Unsupported type
   throw new Error('Unsupported type for hexlify');
 }
+
 describe("FinCubeDAO", function () {
   async function deployFinCubeDAOFixture() {
-
     const [owner, addr1, addr2] = await hre.ethers.getSigners();
 
     const FinCubeDAO = await hre.ethers.getContractFactory("FinCubeDAO");
     const finCubeDAO = await upgrades.deployProxy(FinCubeDAO, ['DAO URI', 'Owner URI'], {
       initializer: 'initialize',
       kind: 'uups'
-    })
+    });
 
     await finCubeDAO.setVotingDelay(1); // set delay to 1 second for testing
     await finCubeDAO.setVotingPeriod(30); // set period to 30 seconds for testing
@@ -63,13 +63,13 @@ describe("FinCubeDAO", function () {
 
   describe("New Token Address Proposal", function () {
     let tokenAddressContract: { interface: { encodeFunctionData: (arg0: string, arg1: string[]) => any; }; runner: { address: Typed | AddressLike; }; getToken: () => any; };
+
     beforeEach(async function () {
       const TokenAddressContract = await ethers.getContractFactory("TokenAddressContract");
       tokenAddressContract = await TokenAddressContract.deploy();
-
     });
-    it("should create a new proposal for setting a token address", async function () {
 
+    it("should create a new proposal for setting a token address", async function () {
       const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
@@ -77,7 +77,7 @@ describe("FinCubeDAO", function () {
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
@@ -86,8 +86,8 @@ describe("FinCubeDAO", function () {
       const ongoingProposals = await finCubeDAO.getOngoingProposalsCount();
       expect(ongoingProposals).to.equal(1);
     });
-    it("should create a new proposal for setting a token address and vote yes", async function () {
 
+    it("should create a new proposal for setting a token address and vote yes", async function () {
       const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
@@ -95,7 +95,7 @@ describe("FinCubeDAO", function () {
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
@@ -104,8 +104,8 @@ describe("FinCubeDAO", function () {
       const ongoingProposals = await finCubeDAO.getOngoingProposals();
       expect(ongoingProposals[0].yesvotes).to.equal(1);
     });
-    it("should create a new proposal for setting a token address and vote no", async function () {
 
+    it("should create a new proposal for setting a token address and vote no", async function () {
       const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
@@ -113,18 +113,17 @@ describe("FinCubeDAO", function () {
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
-      // Cast a 'yes' vote on the proposal
+      // Cast a 'no' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
 
-      // Check if the 'yes' vote was recorded by verifying the number of 'yes' votes for the proposal
+      // Check if the 'no' vote was recorded by verifying the number of 'no' votes for the proposal
       const ongoingProposals = await finCubeDAO.getOngoingProposals();
       expect(ongoingProposals[0].novotes).to.equal(1);
     });
 
     it("should create a new proposal for setting a token address and not allow to vote twice", async function () {
-
       const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
@@ -132,15 +131,14 @@ describe("FinCubeDAO", function () {
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
-      // Cast a 'yes' vote on the proposal
+      // Cast a 'no' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
       await expect(finCubeDAO.connect(owner).castVote(0, false)).to.be.revertedWith("Already voted for this proposal");
-
     });
-    it("should create a new proposal for setting a token address and not allow non members to vote ", async function () {
 
+    it("should create a new proposal for setting a token address and not allow non-members to vote", async function () {
       const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
@@ -148,55 +146,54 @@ describe("FinCubeDAO", function () {
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
-      // Cast a 'yes' vote on the proposal
+      // Attempt to cast a 'yes' vote on the proposal by a non-member
       await expect(finCubeDAO.connect(addr1).castVote(0, true)).to.be.revertedWith("Not a member");
     });
 
-    it("should create a new proposal for setting a token address and not allow voting outside time period ", async function () {
+    it("should create a new proposal for setting a token address and not allow voting outside the time period", async function () {
       this.timeout(90000);
-      const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
+      const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
       // Encode the function call data
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 35000));
-      // Cast a 'yes' vote on the proposal
+      // Attempt to cast a 'yes' vote on the proposal after the voting period
       await expect(finCubeDAO.connect(owner).castVote(0, true)).to.be.revertedWith("Voting is not allowed at this time");
     });
 
-    it("should create a new proposal for setting a token address and not allow voting before time ", async function () {
-
-      const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
+    it("should create a new proposal for setting a token address and not allow voting before the time period", async function () {
+      const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
       // Encode the function call data
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      // Cast a 'yes' vote on the proposal
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
+      // Attempt to cast a 'yes' vote on the proposal before the voting period
       await expect(finCubeDAO.connect(owner).castVote(0, true)).to.be.revertedWith("Voting is not allowed at this time");
     });
-    it("should create a new proposal for setting a token address and not allow executing while voting is going on ", async function () {
 
-      const { finCubeDAO, owner, addr1 } = await loadFixture(deployFinCubeDAOFixture);
+    it("should create a new proposal for setting a token address and not allow executing while voting is ongoing", async function () {
+      const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
       // Encode the function call data
       const calldata = hexlify(tokenAddressContract.interface.encodeFunctionData("set", [token]));
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      // Cast a 'yes' vote on the proposal
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 3000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
+      // Attempt to execute the proposal while voting is still ongoing
       await expect(finCubeDAO.executeProposal(0)).to.be.revertedWith("Voting still going on");
     });
 
@@ -204,34 +201,23 @@ describe("FinCubeDAO", function () {
       this.timeout(90000);
       const { finCubeDAO, owner } = await loadFixture(deployFinCubeDAOFixture);
 
-
       const token = "0x1234567890123456789012345678901234567890"; // Replace with actual token address
-
-
       // Encode the function call data
       const calldata = tokenAddressContract.interface.encodeFunctionData("set", [token]);
-      // const calldata = '0x2801617e0000000000000000000000001234567890123456789012345678901234567890'; // taken from remix and doesnt work either
 
       // Create a new proposal for setting a token address
-      await finCubeDAO.connect(owner).newProposal(calldata, tokenAddressContract.runner.address);
-      // console.log(tokenAddressContract);
+      await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       // Vote on the proposal
       await new Promise(resolve => setTimeout(resolve, 6000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
-      // Execute the proposal
+      // Execute the proposal after the voting period
       await new Promise(resolve => setTimeout(resolve, 35000));
 
-      // Check that the token address was set correctly
-      // const tokenAddress = await (tokenAddressContract.getToken());
-      // console.log(tokenAddress, token);
       await expect(finCubeDAO.connect(owner).executeProposal(0))
         .to.emit(finCubeDAO, "ProposalExecuted")
         .withArgs(0);
-      //  expect(tokenAddress).to.equal(token);
     });
-
   });
 });
-
