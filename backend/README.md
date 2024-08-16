@@ -91,6 +91,27 @@ The Web3 Proxy Service performs smart contract invocations and is configured wit
 - **API Endpoints:** N/A
 - **Technology:** NestJS
 
+## Message Queue Payload
+There are two message queues communicating between Audit-trail service and DAO service. 
+
+The proposal-queue produced by DAO service and consumed by Audit-Trail service. And the proposal-update-queue is produced by Audit-Trail service and consumed by DAO service. 
+
+The payload for the message queues is:
+```
+{
+  "id": "string",
+  "proposalAddress": "string",
+  "proposerAddress": "string",
+  "metadata": "string",
+  "transactionInfo": {
+    "status": "string",
+    "hash": "string",
+    "blockNumber": "number"
+  },
+  "externalProposal": "boolean"
+}
+```
+
 ## Installation
 
 To install and run the backend services, follow these steps:
