@@ -143,10 +143,7 @@ Please ensure your code adheres to our coding standards and includes appropriate
 [MIT](https://choosealicense.com/licenses/mit/)
 
 ## Core Contributors
-- [@FahimDev](https://www.github.com/FahimDev): technical lead and scrum master
-- [@SampadSikder](https://www.github.com/SampadSikder):
-- [@mashiat0808](https://www.github.com/mashiat0808):
-- [@antonin686](https://www.github.com/antonin686): front end engineer
+
 | Name             | Role        | Technical Contribution                                                                                  |
 |----------------------|-------------------------|------------------------------------------------------------------------------------------|
 | [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Message queue |
