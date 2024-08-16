@@ -494,6 +494,15 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         return ongoingProposals;
     }
 
+    /**
+     * @notice Retrieves a paginated list of proposals
+     * @param cursor The starting index for pagination
+     * @param howMany The number of proposals to retrieve
+     * @return paginateProposals An array of Proposal structs
+     * @return newCursor The updated cursor position for the next page
+     * @dev This function allows for efficient pagination of proposals
+     */
+
     function getProposalsByPage(
         uint256 cursor,
         uint256 howMany
