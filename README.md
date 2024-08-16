@@ -12,13 +12,18 @@ Welcome to FinCube's GitHub repository! FinCube is a revolutionary platform leve
 
 1. [Introduction](#introduction)
 2. [Features](#features)
-3. [Architecture](#architecture)
-4. [Installation](#installation)
-5. [Usage](#usage)
-6. [Advantages](#advantages)
-7. [Business Model](#business-model)
-8. [Roadmap](#roadmap)
-9. [Contributing](#contributing)
+3. [Technical Features](#technical-features)
+4. [Architecture](#architecture)
+5. [Installation](#installation)
+6. [Usage](#usage)
+7. [Advantages](#advantages)
+8. [Business Model](#business-model)
+9. [Roadmap](#roadmap)
+10. [Contributing](#contributing)
+11. [License](#license)
+12. [Authors/Devs](#authors/devs)
+
+
 
 ## Introduction
 
@@ -133,6 +138,24 @@ We welcome contributions from the community! To contribute to FinCube, follow th
 
 Please ensure your code adheres to our coding standards and includes appropriate tests.
 
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+## Core Contributors
+- [@FahimDev](https://www.github.com/FahimDev): technical lead and scrum master
+- [@SampadSikder](https://www.github.com/SampadSikder):
+- [@mashiat0808](https://www.github.com/mashiat0808):
+- [@antonin686](https://www.github.com/antonin686): front end engineer
+| Name             | Role        | Technical Contribution                                                                                  |
+|----------------------|-------------------------|------------------------------------------------------------------------------------------|
+| [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Message queue |
+| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev                | Smart contract dev, smart contract testing |
+| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev              | GraphQL, smart contract testing                            |
+| [@antonin686](https://www.github.com/antonin686)      | Frontend Dev    | Front end engineer        |
+
+
+<-- add contribution, tabular detail consider - name - role - contribution>
 
 ---
 
