@@ -44,7 +44,7 @@ FinCube addresses the inefficiencies of the current financial system, which heav
 | Blockchain Indexer   | The Graph               | Used to listen and query events from the blockchain                                      |
 | Proxy Contract       | UUPSUpgradeableProxy    | The smart contract is made UUPS upgradeable to incorporate changes on the go             |
 | Pagination           | Solidity                | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used |
-| API Gateway           |                 |  |
+| API Gateway           |   ExpressJS            | Redirecting client request to appropriate backend container |
 
 ## Architecture
 
@@ -64,14 +64,15 @@ FinCube leverages a combination of blockchain technology, smart contracts, and d
 | User-management-service      | NestJS, PostgreSQL, Auth0    |              
 | Web3-proxy-service          |       NestJS, Alchemy, Web3JS          | 
 
-<! -- backend folder will contain more details regarding each of the services and the API  -->
+Backend folder contains more details regarding each of the services and the APIs.
 
 ### Frontend Services
 
 <! -- we can add the screenshots from our project to this -->
 
 ### Web3 services
-<! --   contract er basic details  -->
+Web3 services contain the smart contracts, smart contract testcases, deployment, UUPS proxy deployment functionalities.
+
 ## Installation
 
 To get started with FinCube, follow these steps:
@@ -135,5 +136,5 @@ Please ensure your code adheres to our coding standards and includes appropriate
 
 ---
 
-Thank you for your interest in FinCube! We look forward to your contributions and feedback. For any questions or support, please reach out to our team at []().
+Thank you for your interest in FinCube! We look forward to your contributions and feedback. For any questions or support, please reach out to our team at daogovernance127@gmail.com.
 
