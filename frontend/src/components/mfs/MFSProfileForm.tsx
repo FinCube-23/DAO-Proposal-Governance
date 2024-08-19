@@ -36,7 +36,11 @@ const FormSchema = z.object({
     certificate: z.string().optional(),
 });
 
-export default function MFSProfileForm() {
+interface Props {
+    user_id: number;
+}
+
+export default function MFSProfileForm({ user_id }: Props) {
     const { toast } = useToast();
     const [
         createMFS,
@@ -63,6 +67,7 @@ export default function MFSProfileForm() {
             wallet_address: data.wallet_address,
             native_currency: data.native_currency,
             certificate: data.certificate,
+            user_id: user_id,
         });
     }
 

@@ -8,9 +8,17 @@ import { AuthenticationService } from './authentication.service';
 import { EncryptionService } from './encryption.service';
 import { RoleChecker } from './rolechecker.service';
 @Module({
-    imports: [PassportModule.register({ defaultStrategy: 'jwt' }), TypeOrmModule.forFeature([AuthenticationEntity])],
-    controllers: [AuthenticationController],
-    providers: [JwtStrategy, AuthenticationService, EncryptionService, RoleChecker],
-    exports: [PassportModule, RoleChecker],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    TypeOrmModule.forFeature([AuthenticationEntity]),
+  ],
+  controllers: [AuthenticationController],
+  providers: [
+    JwtStrategy,
+    AuthenticationService,
+    EncryptionService,
+    RoleChecker,
+  ],
+  exports: [PassportModule, RoleChecker, TypeOrmModule],
 })
-export class AuthzModule { }
+export class AuthzModule {}
