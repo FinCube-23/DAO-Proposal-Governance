@@ -32,6 +32,12 @@ export class Web3ProxyController {
     return this.web3ProxyService.getOngoingProposals(req.user);
   }
 
+  @Post('proposals-by-page')
+  @UseGuards(AuthGuard('jwt'))
+  async getProposalsByPage(@Req() req, @Body('cursor') cursor: number, @Body('howMany') howMany: number): Promise<any> {
+    return this.web3ProxyService.getProposalsByPage(cursor, howMany, req.user);
+  }
+
   @Post('register-member')
   @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: RegisterMemberBody })
@@ -44,6 +50,13 @@ export class Web3ProxyController {
   @ApiBody({ type: Proposal })
   async executeProposal(@Req() req, @Body('proposalId') proposalId: number): Promise<any> {
     return this.web3ProxyService.executeProposal(proposalId, req.user);
+  }
+
+  @Post('is-member-approved')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBody({ type: Proposal })
+  async checkIsMemberApproved(@Req() req, @Body('address') memberAddress: string): Promise<any> {
+    return this.web3ProxyService.checkIsMemberApproved(memberAddress, req.user);
   }
 
 }

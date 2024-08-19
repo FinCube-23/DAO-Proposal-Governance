@@ -19,6 +19,7 @@ export class Web3ProxyService {
     } catch (error) {
       throw new UnauthorizedException("Role of user not found");;
     }
+    return 'MFS';
   }
 
   private provider(): ethers.JsonRpcProvider {
@@ -81,4 +82,21 @@ export class Web3ProxyService {
     return await this.contract.executeProposal(proposalId);
   }
 
+  async checkIsMemberApproved(memberAddress: string, sub:string): Promise<any> {
+    const role = await this.getUserRole(sub);
+    console.log(role);
+    if (role!= 'MFS') {
+      throw new UnauthorizedException("User does not have permission");
+    }
+    return await this.contract.checkIsMemberApproved(memberAddress);
+  }
+
+   async getProposalsByPage(cursor: number, howMany: number, sub:string): Promise<any>{
+    const role = await this.getUserRole(sub);
+    console.log(role);
+    if (role!= 'MFS') {
+      throw new UnauthorizedException("User does not have permission");
+    }
+    return await this.contract.getProposalsByPage(cursor, howMany);
+   }
 }
