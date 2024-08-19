@@ -12,7 +12,7 @@ export default function Header() {
                     Are you a MFS admin? Access the admin portal from{" "}
                     <Link
                         className="text-blue-500 ml-1 hover:underline font-bold"
-                        to="/mfs"
+                        to="/mfs/login"
                     >
                         here
                     </Link>

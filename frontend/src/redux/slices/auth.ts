@@ -24,8 +24,9 @@ type UserPayload = {
 interface AuthState {
   access?: string;
   sub?: string;
-  type?: string;
+  role?: string;
   id?: number;
+  mfs?: MFSInfo | null;
 }
 
 interface IInitialState {
@@ -45,7 +46,7 @@ const authSlice = createSlice({
       action: PayloadAction<TokenPayload | null>,
     ) => {
       if (action.payload?.access) {
-        state.auth = { ...action.payload };
+        state.auth = { ...state.auth, ...action.payload };
       } else {
         state.auth = {};
       }

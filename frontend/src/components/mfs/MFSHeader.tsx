@@ -1,3 +1,4 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@components/ui/button";
 import {
     Card,
@@ -31,6 +32,8 @@ import {
 import { Link } from "react-router-dom";
 
 export default function MFSHeader() {
+    const { logout } = useAuth0();
+
     return (
         <div className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
             <Sheet>
@@ -139,7 +142,9 @@ export default function MFSHeader() {
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuItem>Support</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => logout({ logoutParams: { returnTo: import.meta.env.VITE_AUTH0_LOGOUT_REDIRECT } })}>
+                        Logout
+                    </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
         </div>

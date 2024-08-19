@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 //import { DaoEntity } from './dao/entities/dao.entity';
 import { ExchangeUserEntity } from 'src/exchange_user/entities/exchange_user.entity';
 import { ApiProperty } from '@nestjs/swagger';
@@ -13,6 +22,10 @@ export class MfsBusinessEntity {
   @Column({ type: 'varchar' })
   @ApiProperty()
   name: string;
+
+  @Column({ type: 'boolean', default: false })
+  @ApiProperty()
+  is_approved: boolean;
 
   @Column({ type: 'varchar', unique: true })
   @ApiProperty()
@@ -43,7 +56,7 @@ export class MfsBusinessEntity {
   @OneToMany(
     () => ExchangeUserEntity,
     (exchangeUser) => exchangeUser.mfsBusiness,
-    { onDelete: 'CASCADE' }
+    { onDelete: 'CASCADE' },
   )
   exchangeUsers: ExchangeUserEntity[];
 }
