@@ -10,12 +10,12 @@ import {
 } from "@components/ui/card";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function MfsDashboard() {
     const auth = useSelector(
         (state: RootState) => state.persistedReducer.authReducer.auth
     );
-    console.log(auth);
     return (
         <div className="border min-h-96 rounded-xl mt-10 pb-10">
             <div className="relative">
@@ -26,7 +26,11 @@ export default function MfsDashboard() {
                     </CardHeader>
                 </Card>
             </div>
-
+            <div className="flex justify-end relative">
+                <div className="absolute top-8 right-8" >
+                    <ConnectButton />
+                </div>
+            </div>
             <div className="flex flex-col gap-8 pt-28 px-8">
                 <div className="flex gap-8 justify-center">
                     <div className="border rounded-xl p-8 flex flex-col items-center justify-center">
