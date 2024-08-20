@@ -127,6 +127,9 @@ FinCube's revenue streams include:
 4. Implement periodic transactions and remittance features.
 5. Ensure cross-currency bill and service payments.
 
+### Sprint planning
+Sprint plans of the project is [here](https://docs.google.com/spreadsheets/d/1H1C_8erMfxNjflPygsy6K6sB8qtqSrySQkH1MoQ7cOQ/edit?usp=sharing).
+
 ## Contributing
 
 We welcome contributions from the community! To contribute to FinCube, follow these steps:
@@ -151,8 +154,6 @@ Please ensure your code adheres to our coding standards and includes appropriate
 | [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev              | GraphQL, smart contract testing                            |
 | [@antonin686](https://www.github.com/antonin686)      | Frontend Dev    | Front end engineer        |
 
-
-<-- add contribution, tabular detail consider - name - role - contribution>
 
 ---
 
