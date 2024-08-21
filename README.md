@@ -151,8 +151,8 @@ Please ensure your code adheres to our coding standards and includes appropriate
 | Name             | Role        | Technical Contribution                                                                                  |
 |----------------------|-------------------------|------------------------------------------------------------------------------------------|
 | [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Message queue |
-| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev                | Smart contract dev, smart contract testing |
-| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev              | GraphQL, smart contract testing                            |
+| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev, System designer                | Smart contract dev, smart contract testing |
+| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev, Policy analyst              | GraphQL, smart contract testing, FDX                           |
 | [@antonin686](https://www.github.com/antonin686)      | Frontend Dev    | Front end engineer        |
 
 
