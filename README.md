@@ -50,6 +50,7 @@ FinCube addresses the inefficiencies of the current financial system, which heav
 | Proxy Contract       | UUPSUpgradeableProxy    | The smart contract is made UUPS upgradeable to incorporate changes on the go             |
 | Pagination           | Solidity                | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used |
 | API Gateway           |   ExpressJS            | Redirecting client request to appropriate backend container |
+| Customized Contract Deployment          |   Shell script            | Ensure the contract compiles and runs all tests before deployment, deploys, creates and moves artifacts to backend web3-proxy container |
 
 ## Architecture
 
