@@ -32,11 +32,6 @@ export class ProposalEntity {
     @ApiProperty()
     external_proposal: boolean;
 
-    @ManyToOne(() => DAOEntity, dao => dao.proposals, { onDelete: 'CASCADE' })
-    @JoinColumn({ name: 'dao_id' })
-    @ApiProperty({ type: () => DAOEntity })
-    dao: DAOEntity;
-
 
     @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
     @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;

@@ -39,17 +39,13 @@ export class ProposalServiceService {
   }
 
 
-  async findOne(id: number, sub: string): Promise<any> {
+  async findAllProposals(sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
     console.log(role);
     if (role != 'MFS') {
       throw new UnauthorizedException("User does not have permission");
     }
-    return this.proposalRepository.find({
-      where: {
-        dao: { id: id }
-      }
-    });
+    return this.proposalRepository.find();
   }
 
   placeProposal(proposal: ProposalDto) {

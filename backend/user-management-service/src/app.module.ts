@@ -26,6 +26,6 @@ import { DatabaseSeederService } from './database_seeder/database.seeder.service
 export class AppModule implements OnModuleInit {
   constructor(private readonly databaseSeederService: DatabaseSeederService) { }
   async onModuleInit(): Promise<void> {
-    //await this.databaseSeederService.seed();
+    await this.databaseSeederService.seed();
   }
 }
