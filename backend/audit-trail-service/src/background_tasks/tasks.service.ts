@@ -4,8 +4,8 @@ require('dotenv').config();
 const { Network, Alchemy } = require("alchemy-sdk");
 
 const settings = {
-  apiKey: process.env.SEPOLIA_API_KEY, 
-  network: Network.ETH_SEPOLIA, 
+  apiKey: process.env.AMOY_API_KEY, 
+  network: Network.MATIC_AMOY, 
 };
 // Ref: https://github.com/alchemyplatform/alchemy-sdk-js/blob/master/docs-md/enums/Network.md
 
