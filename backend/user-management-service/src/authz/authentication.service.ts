@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthenticationEntity } from './entities/authentication.entity';
@@ -7,6 +7,7 @@ import { EncryptionService } from './encryption.service';
 
 @Injectable()
 export class AuthenticationService {
+  private readonly logger = new Logger(AuthenticationService.name);
   constructor(
     @InjectRepository(AuthenticationEntity)
     private authenticationRepository: Repository<AuthenticationEntity>,
@@ -19,6 +20,7 @@ export class AuthenticationService {
     secret: string,
   ): Promise<AuthenticationEntity> {
     if (!this.encryptionService.match(secret)) {
+      this.logger.error("Invalid secret key");
       throw new UnauthorizedException();
     }
     const new_user = this.authenticationRepository.create(authenticationEntity);

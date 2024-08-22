@@ -25,10 +25,10 @@ export class ProposalServiceController {
     return this.proposalService.create(proposal_entity, req.user);
   }
 
-  @Get(':id')
+  @Get()
   @UseGuards(AuthGuard('jwt'))
-  async findProposal(@Req() req, @Param('id') id: string): Promise<ProposalEntity[]> {
-    return this.proposalService.findOne(+id, req.user);
+  async findProposal(@Req() req): Promise<ProposalEntity[]> {
+    return this.proposalService.findAllProposals(req.user);
   }
 
   @Post('place-proposal')

@@ -10,6 +10,7 @@ import { timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
+
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
@@ -25,13 +26,14 @@ export class ProposalServiceService {
       const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
       return response.data;
     } catch (error) {
+      this.logger.log("Role of user not found");
       throw new UnauthorizedException("Role of user not found");;
     }
   }
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.log("User does not have permission for role: " + role);
       throw new UnauthorizedException("User does not have permission");
     }
     const new_proposal = this.proposalRepository.create(proposal);
@@ -39,17 +41,13 @@ export class ProposalServiceService {
   }
 
 
-  async findOne(id: number, sub: string): Promise<any> {
+  async findAllProposals(sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.error("User does not have permission for role: " + role);
       throw new UnauthorizedException("User does not have permission");
     }
-    return this.proposalRepository.find({
-      where: {
-        dao: { id: id }
-      }
-    });
+    return this.proposalRepository.find();
   }
 
   placeProposal(proposal: ProposalDto) {
@@ -58,7 +56,7 @@ export class ProposalServiceService {
   }
 
   getProposals() {
-    this.logger.error("in get proposal of service");
+    this.logger.log("in get proposal of service");
     return this.rabbitClient
       .send({ cmd: 'fetch-update-proposal' }, {})
       .pipe(timeout(5000));
@@ -93,7 +91,6 @@ export class ProposalServiceService {
   }
 
   handleCreatedProposalPlaced(proposal: CreatedProposalDto) {
-    this.logger.error(proposal);
     const createdProposal = this.mapToCreatedProposalDto(proposal);
     if (
       createdProposal instanceof CreatedProposalDto
@@ -108,7 +105,6 @@ export class ProposalServiceService {
   }
 
   handleUpdatedProposalPlaced(proposal: UpdatedProposalDto) {
-    this.logger.error(proposal);
     const updatedProposal = this.mapToUpdatedProposalDto(proposal);
     if (
       updatedProposal instanceof UpdatedProposalDto
@@ -130,8 +126,8 @@ export class ProposalServiceService {
 
   async findAll(sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
-    this.logger.error(role);
     if (role != 'MFS') {
+      this.logger.error("User does not have permission for role: " + role);
       throw new UnauthorizedException("User does not have permission");
     }
     return this.proposalRepository.find();
