@@ -1,6 +1,4 @@
-import { Button } from "@components/ui/button";
 import { SparklesCore } from "@components/ui/sparkles";
-import { Link } from "react-router-dom";
 
 export default function welcome() {
   return (
