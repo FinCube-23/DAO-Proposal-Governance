@@ -1,0 +1,313 @@
+{
+  "manifestVersion": "3.2",
+  "proxies": [
+    {
+      "address": "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+      "txHash": "0x767f4303ab5d7933f62037e08daeb1b290f649c33efc17a5b8aac0d64d37b8ba",
+      "kind": "uups"
+    }
+  ],
+  "impls": {
+    "18b12b3e2f97e7338396726591579064902401b9b72d0ba09ea46605ae870c2a": {
+      "address": "0xb486C0B3814C22E0Add70641d00040e04f7b9C4b",
+      "txHash": "0xee8831b9dc1db5e443e1666831f9ae72dc5cd7acbbdb69c39f6737177bb04098",
+      "layout": {
+        "solcVersion": "0.8.20",
+        "storage": [
+          {
+            "label": "memberCount",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:77"
+          },
+          {
+            "label": "proposalCount",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:78"
+          },
+          {
+            "label": "daoURI",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_string_storage",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:79"
+          },
+          {
+            "label": "votingDelay",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:80"
+          },
+          {
+            "label": "votingPeriod",
+            "offset": 0,
+            "slot": "4",
+            "type": "t_uint256",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:81"
+          },
+          {
+            "label": "members",
+            "offset": 0,
+            "slot": "5",
+            "type": "t_mapping(t_address,t_struct(Member)1689_storage)",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:134"
+          },
+          {
+            "label": "proposals",
+            "offset": 0,
+            "slot": "6",
+            "type": "t_mapping(t_uint256,t_struct(Proposal)1715_storage)",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:135"
+          },
+          {
+            "label": "proposalVotes",
+            "offset": 0,
+            "slot": "7",
+            "type": "t_mapping(t_uint256,t_struct(ProposalVotes)1725_storage)",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:136"
+          },
+          {
+            "label": "proposalType",
+            "offset": 0,
+            "slot": "8",
+            "type": "t_mapping(t_uint256,t_enum(ProposalType)1693)",
+            "contract": "FinCubeDAO",
+            "src": "contracts/FincubeDAO.sol:137"
+          }
+        ],
+        "types": {
+          "t_address": {
+            "label": "address",
+            "numberOfBytes": "20"
+          },
+          "t_bool": {
+            "label": "bool",
+            "numberOfBytes": "1"
+          },
+          "t_struct(InitializableStorage)65_storage": {
+            "label": "struct Initializable.InitializableStorage",
+            "members": [
+              {
+                "label": "_initialized",
+                "type": "t_uint64",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "_initializing",
+                "type": "t_bool",
+                "offset": 8,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_struct(OwnableStorage)14_storage": {
+            "label": "struct OwnableUpgradeable.OwnableStorage",
+            "members": [
+              {
+                "label": "_owner",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "0"
+              }
+            ],
+            "numberOfBytes": "32"
+          },
+          "t_uint64": {
+            "label": "uint64",
+            "numberOfBytes": "8"
+          },
+          "t_bytes_storage": {
+            "label": "bytes",
+            "numberOfBytes": "32"
+          },
+          "t_enum(ProposalType)1693": {
+            "label": "enum FinCubeDAO.ProposalType",
+            "members": [
+              "NewMemberProposal",
+              "GeneralProposal"
+            ],
+            "numberOfBytes": "1"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_address,t_struct(Member)1689_storage)": {
+            "label": "mapping(address => struct FinCubeDAO.Member)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_enum(ProposalType)1693)": {
+            "label": "mapping(uint256 => enum FinCubeDAO.ProposalType)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(Proposal)1715_storage)": {
+            "label": "mapping(uint256 => struct FinCubeDAO.Proposal)",
+            "numberOfBytes": "32"
+          },
+          "t_mapping(t_uint256,t_struct(ProposalVotes)1725_storage)": {
+            "label": "mapping(uint256 => struct FinCubeDAO.ProposalVotes)",
+            "numberOfBytes": "32"
+          },
+          "t_string_storage": {
+            "label": "string",
+            "numberOfBytes": "32"
+          },
+          "t_struct(Member)1689_storage": {
+            "label": "struct FinCubeDAO.Member",
+            "members": [
+              {
+                "label": "status",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "memberURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_struct(Proposal)1715_storage": {
+            "label": "struct FinCubeDAO.Proposal",
+            "members": [
+              {
+                "label": "executed",
+                "type": "t_bool",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "canceled",
+                "type": "t_bool",
+                "offset": 1,
+                "slot": "0"
+              },
+              {
+                "label": "proposer",
+                "type": "t_address",
+                "offset": 2,
+                "slot": "0"
+              },
+              {
+                "label": "data",
+                "type": "t_bytes_storage",
+                "offset": 0,
+                "slot": "1"
+              },
+              {
+                "label": "target",
+                "type": "t_address",
+                "offset": 0,
+                "slot": "2"
+              },
+              {
+                "label": "voteStart",
+                "type": "t_uint48",
+                "offset": 20,
+                "slot": "2"
+              },
+              {
+                "label": "voteDuration",
+                "type": "t_uint48",
+                "offset": 26,
+                "slot": "2"
+              },
+              {
+                "label": "yesvotes",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "3"
+              },
+              {
+                "label": "novotes",
+                "type": "t_uint256",
+                "offset": 0,
+                "slot": "4"
+              },
+              {
+                "label": "proposalURI",
+                "type": "t_string_storage",
+                "offset": 0,
+                "slot": "5"
+              }
+            ],
+            "numberOfBytes": "192"
+          },
+          "t_struct(ProposalVotes)1725_storage": {
+            "label": "struct FinCubeDAO.ProposalVotes",
+            "members": [
+              {
+                "label": "isYesVote",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "0"
+              },
+              {
+                "label": "isNoVote",
+                "type": "t_mapping(t_address,t_bool)",
+                "offset": 0,
+                "slot": "1"
+              }
+            ],
+            "numberOfBytes": "64"
+          },
+          "t_uint256": {
+            "label": "uint256",
+            "numberOfBytes": "32"
+          },
+          "t_uint48": {
+            "label": "uint48",
+            "numberOfBytes": "6"
+          }
+        },
+        "namespaces": {
+          "erc7201:openzeppelin.storage.Ownable": [
+            {
+              "contract": "OwnableUpgradeable",
+              "label": "_owner",
+              "type": "t_address",
+              "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:24",
+              "offset": 0,
+              "slot": "0"
+            }
+          ],
+          "erc7201:openzeppelin.storage.Initializable": [
+            {
+              "contract": "Initializable",
+              "label": "_initialized",
+              "type": "t_uint64",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:69",
+              "offset": 0,
+              "slot": "0"
+            },
+            {
+              "contract": "Initializable",
+              "label": "_initializing",
+              "type": "t_bool",
+              "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:73",
+              "offset": 8,
+              "slot": "0"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
