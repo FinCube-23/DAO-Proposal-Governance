@@ -151,7 +151,7 @@ export default function welcome() {
   };
 
   // setVotingDelay()
-  const setDelay = async (e: MouseEvent) => {
+  const setVotingDelay = async (e: MouseEvent) => {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
@@ -171,8 +171,8 @@ export default function welcome() {
     }
   };
 
-  // setPeriod()
-  const setPeriod = async (e: MouseEvent) => {
+  // setVotingPeriod()
+  const setVotingPeriod = async (e: MouseEvent) => {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
