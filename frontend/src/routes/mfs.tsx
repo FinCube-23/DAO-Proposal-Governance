@@ -37,26 +37,28 @@ export const mfsRoutes: RouteObject = {
           element: <ProposalView />,
         },
         {
-            path: "tests",
-            element: <Dashboard />,
+          path: "tests",
+          element: <Dashboard />,
         },
         {
-            path: "",
-            element: <MFSPrivateLayout />,
-            children: [
-                {
-                    path: "",
-                    element: <MfsDashboard />,
-                },
-                {
-                    path: "profile",
-                    element: <Profile />,
-                },
-                {
-                    path: "proposals/:address",
-                    element: <ProposalView />,
-                },
-            ],
+          path: "",
+          element: <MFSPrivateLayout />,
+          children: [
+            {
+              path: "",
+              element: <MfsDashboard />,
+            },
+            {
+              path: "profile",
+              element: <Profile />,
+            },
+            {
+              path: "proposals/:address",
+              element: <ProposalView />,
+            },
+          ],
         },
-    ],
+      ],
+    },
+  ],
 };

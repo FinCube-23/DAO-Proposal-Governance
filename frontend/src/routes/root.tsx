@@ -32,22 +32,24 @@ export const rootRoutes: RouteObject = {
           element: <ProposalView />,
         },
         {
-            path: "auth",
-            element: <Auth />
+          path: "auth",
+          element: <Auth />,
         },
         {
-            path: "dashboard",
-            element: <DaoLayout />,
-            children: [
-                {
-                    path: "",
-                    element: <DaoDashboard />, 
-                },
-                {
-                    path: "proposals/:address",
-                    element: <ProposalView />
-                }
-            ],
+          path: "dashboard",
+          element: <DaoLayout />,
+          children: [
+            {
+              path: "",
+              element: <DaoDashboard />,
+            },
+            {
+              path: "proposals/:address",
+              element: <ProposalView />,
+            },
+          ],
         },
-    ],
+      ],
+    },
+  ],
 };
