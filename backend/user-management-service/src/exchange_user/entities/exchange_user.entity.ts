@@ -2,12 +2,11 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  ManyToOne,
+  OneToOne,
   JoinColumn,
   CreateDateColumn,
   UpdateDateColumn
 } from 'typeorm';
-import { MfsBusinessEntity } from 'src/mfs_business/entities/mfs_business.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('exchange_user')
@@ -39,3 +38,4 @@ export class ExchangeUserEntity {
   // @JoinColumn({ name: 'user_id' })
   //user: UserEntity;
 }
+

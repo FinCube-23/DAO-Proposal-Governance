@@ -16,6 +16,7 @@ export class AuthenticationEntity {
     @ApiProperty()
     role: string;
 
-    @OneToOne(() => MfsBusinessEntity, (mfs) => mfs.user)
-    mfs: MfsBusinessEntity;
+    @Column({ type: 'int' })
+    @ApiProperty()
+    user_id: number;
 }

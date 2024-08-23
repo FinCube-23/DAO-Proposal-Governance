@@ -9,9 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 //import { DaoEntity } from './dao/entities/dao.entity';
-import { ExchangeUserEntity } from 'src/exchange_user/entities/exchange_user.entity';
 import { ApiProperty } from '@nestjs/swagger';
-import { AuthenticationEntity } from 'src/authz/entities/authentication.entity';
 
 @Entity('mfs_business')
 export class MfsBusinessEntity {
@@ -42,10 +40,6 @@ export class MfsBusinessEntity {
   @Column({ type: 'varchar', nullable: true })
   @ApiProperty()
   certificate: string;
-
-  @OneToOne(() => AuthenticationEntity, (user) => user.mfs)
-  @JoinColumn({ name: 'user_id' })
-  user: AuthenticationEntity;
 
   @Column({ type: 'integer', nullable: true })
   @ApiProperty()
