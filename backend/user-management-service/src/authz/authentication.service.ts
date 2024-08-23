@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthenticationEntity } from './entities/authentication.entity';
 import { EncryptionService } from './encryption.service';
-// import { MfsBusinessEntity } from '../mfs_business/entities/mfs_business.entity';
 
 @Injectable()
 export class AuthenticationService {
@@ -11,8 +10,7 @@ export class AuthenticationService {
   constructor(
     @InjectRepository(AuthenticationEntity)
     private authenticationRepository: Repository<AuthenticationEntity>,
-    private readonly encryptionService: EncryptionService,
-    // private readonly mfsBusinessRepository: Repository<MfsBusinessEntity>,
+    private readonly encryptionService: EncryptionService
   ) {}
 
   async create(
@@ -36,16 +34,8 @@ export class AuthenticationService {
 
   async me(sub: string): Promise<any> {
     const user = await this.authenticationRepository.findOne({
-      where: { sub },
-      relations: {
-        mfs: true,
-      },
+      where: { sub }
     });
-
-    // if (user.role === 'MFS') {
-    //   const mfs = await this.mfsBusinessRepository.findOne({
-    //     where: { org_email: user.email },})
-    // }
     return user;
   }
 }

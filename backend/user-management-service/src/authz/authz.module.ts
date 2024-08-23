@@ -7,6 +7,7 @@ import { AuthenticationController } from './authentication.controller';
 import { AuthenticationService } from './authentication.service';
 import { EncryptionService } from './encryption.service';
 import { RoleChecker } from './rolechecker.service';
+
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -17,7 +18,7 @@ import { RoleChecker } from './rolechecker.service';
     JwtStrategy,
     AuthenticationService,
     EncryptionService,
-    RoleChecker,
+    RoleChecker
   ],
   exports: [PassportModule, RoleChecker, TypeOrmModule],
 })

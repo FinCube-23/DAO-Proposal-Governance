@@ -13,13 +13,13 @@ export class DatabaseSeederService {
         , @InjectRepository(AuthenticationEntity) private authenticationRepository: Repository<AuthenticationEntity>) { }
 
     async seed(): Promise<void> {
-        // const exchangeUsers = await this.readSeedDataFromFile('exchange_users.json');
-        // const mfsBusinesses = await this.readSeedDataFromFile('mfs_businesses.json');
-        // const authentication = await this.readSeedDataFromFile('authentication.json');
+        const exchangeUsers = await this.readSeedDataFromFile('exchange_users.json');
+        const mfsBusinesses = await this.readSeedDataFromFile('mfs_businesses.json');
+        const authentication = await this.readSeedDataFromFile('authentication.json');
 
-        // await this.mfsBusinessRepository.save(mfsBusinesses);
-        // await this.exchangeUserRepository.save(exchangeUsers);
-        // await this.authenticationRepository.save(authentication);
+        await this.mfsBusinessRepository.save(mfsBusinesses);
+        await this.exchangeUserRepository.save(exchangeUsers);
+        await this.authenticationRepository.save(authentication);
     }
 
     private async readSeedDataFromFile(fileName: string): Promise<any[]> {
