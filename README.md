@@ -44,12 +44,13 @@ FinCube addresses the inefficiencies of the current financial system, which heav
 ## Technical Features
 | Features             | Technology Used         | Remarks                                                                                  |
 |----------------------|-------------------------|------------------------------------------------------------------------------------------|
-| Containerization     | Docker                  | Docker is used to containerize services                                                  |
+| Containerization     | Docker                  | Docker is used to containerize services [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)                                                 |
 | Message Queue        | RabbitMQ                | There are multiple services which need to communicate with each other at the same time. Some of them may not be active at the same time. So for interservice communication, Message Queue is used |
 | Blockchain Indexer   | The Graph               | Used to listen and query events from the blockchain                                      |
 | Proxy Contract       | UUPSUpgradeableProxy    | The smart contract is made UUPS upgradeable to incorporate changes on the go             |
 | Pagination           | Solidity                | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used |
-| API Gateway           |   ExpressJS            | Redirecting client request to appropriate backend container |
+| API Gateway           |   ExpressJS            | Redirecting client request to appropriate backend container  [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)    |
+| Automated Contract Deployment          |   Shell script            | Ensure the contract compiles and runs all tests before deployment, deploys, creates and moves artifacts to backend web3-proxy container, increasing customization for deployment |
 
 ## Architecture
 
@@ -150,8 +151,8 @@ Please ensure your code adheres to our coding standards and includes appropriate
 | Name             | Role        | Technical Contribution                                                                                  |
 |----------------------|-------------------------|------------------------------------------------------------------------------------------|
 | [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Message queue |
-| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev                | Smart contract dev, smart contract testing |
-| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev              | GraphQL, smart contract testing                            |
+| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev, System designer                | Smart contract dev, smart contract testing |
+| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev, Policy analyst              | GraphQL, smart contract testing, FDX                           |
 | [@antonin686](https://www.github.com/antonin686)      | Frontend Dev    | Front end engineer        |
 
 

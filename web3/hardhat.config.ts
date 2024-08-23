@@ -33,6 +33,11 @@ const config: HardhatUserConfig = {
       gasPrice: 50000000000,
       accounts: [`0x${process.env.WALLET_PRIVATE_KEY}`],
     },
+    amoy: {
+      url: `${process.env.AMOY_ENDPOINT}/${process.env.AMOY_API_KEY}`,
+      gasPrice: 50000000000,
+      accounts: [`0x${process.env.WALLET_PRIVATE_KEY}`],
+    },
   },
 
   // https://hardhat.org/hardhat-runner/docs/guides/verifying
@@ -45,7 +50,21 @@ const config: HardhatUserConfig = {
 
       // Sepolia
       sepolia: process.env.ETHERSCAN_API_KEY,
+
+      // Amoy
+      amoy: process.env.POLYGONSCAN_MUMBAI_API_KEY,
     },
+    // Ref: https://docs.polygonscan.com/getting-started/endpoint-urls
+    customChains: [
+      {
+        network: "amoy",
+        chainId: 80002,
+        urls: {
+          apiURL: "https://api-amoy.polygonscan.com/api",
+          browserURL: "https://amoy.polygonscan.com/"
+        }
+      }
+    ]
   },
 
 };

@@ -10,6 +10,7 @@ export class Web3ProxyController {
   constructor(private readonly web3ProxyService: Web3ProxyService) { }
 
   @Post('balance')
+  @UseGuards(AuthGuard('jwt'))
   async getBalance(@Req() req, @Body('address') address: string) {
     return this.web3ProxyService.getBalance(address, req.user);
   }
