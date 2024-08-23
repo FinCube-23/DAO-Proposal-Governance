@@ -17,12 +17,10 @@ export class AuthenticationService {
     authenticationEntity: AuthenticationEntity,
     secret: string,
   ): Promise<AuthenticationEntity> {
-    console.log("In service");
     if (!this.encryptionService.match(secret)) {
       this.logger.error("Invalid secret key");
       throw new UnauthorizedException();
     }
-    console.log("Passed matching");
     const new_user = this.authenticationRepository.create(authenticationEntity);
     return this.authenticationRepository.save(new_user);
   }

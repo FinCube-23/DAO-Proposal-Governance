@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ExchangeUserService } from './exchange_user.service';
 import { ExchangeUserController } from './exchange_user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';

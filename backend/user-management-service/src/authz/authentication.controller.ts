@@ -14,7 +14,6 @@ export class AuthenticationController {
   @Post()
   @ApiBody({ type: AuthenticationEntity })
   async create(@Req() req, @Body() authenticationEntity: AuthenticationEntity): Promise<AuthenticationEntity> {
-    console.log("In controller: "+ req.body);
     return this.authenticationService.create(authenticationEntity, req.body.secret);
   }
 
