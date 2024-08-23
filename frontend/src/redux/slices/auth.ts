@@ -12,6 +12,7 @@ type MFSInfo = {
   native_currency: string;
   certificate: string;
   user_id: number;
+  is_approved: boolean;
 }
 
 type UserPayload = {

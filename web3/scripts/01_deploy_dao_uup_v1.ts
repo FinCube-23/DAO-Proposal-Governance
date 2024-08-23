@@ -33,9 +33,23 @@ async function main() {
         initializer: "initialize",
       });
     await finCubeDAO.waitForDeployment();
-    console.log("Fincube-DAO deployed to: ", await finCubeDAO.getAddress());
+    console.log("Fincube-DAO proxy deployed to: ", await finCubeDAO.getAddress());
     // Storing the Smart Contract Address.
     await trackDataSaver("fincubeDAO_contract_address", "FinCubeDAOContract", await finCubeDAO.getAddress());
+
+    const implementationAddress = await upgrades.erc1967.getImplementationAddress(
+      await finCubeDAO.getAddress()
+    );
+    console.log(
+      "FinCube-DAO Contract implementation address is : ",
+      implementationAddress
+    );
+    // Storing the Smart Contract Implementation Address.
+    await trackDataSaver(
+      "fincubeDAO_V2_upgraded_contract_implementation_address",
+      "FinCubeDAOImplementationAddress",
+      implementationAddress
+    );
 }
 
 main()
@@ -45,5 +59,5 @@ main()
     process.exit(1);
   });
 
-// command: npx hardhat run scripts/01_deploy_dao_uup_v1.ts --network sepolia
-// verify command: npx hardhat verify --network sepolia 0xDeployedContractAddress
+// command: npx hardhat run scripts/01_deploy_dao_uup_v1.ts --network amoy
+// verify command: npx hardhat verify --network amoy 0xDeployedContractAddress
