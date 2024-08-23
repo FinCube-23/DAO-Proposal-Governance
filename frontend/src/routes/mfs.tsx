@@ -6,6 +6,7 @@ import { Dashboard } from "@pages/mfs/test";
 import Registration from "@pages/mfs/registration";
 import MFSPrivateLayout from "@layouts/MFSPrivateLayout";
 import Login from "@pages/mfs/login";
+import Profile from "@pages/mfs/profile";
 
 export const mfsRoutes: RouteObject = {
     path: "/mfs",
@@ -30,6 +31,10 @@ export const mfsRoutes: RouteObject = {
                 {
                     path: "",
                     element: <MfsDashboard />,
+                },
+                {
+                    path: "profile",
+                    element: <Profile />,
                 },
                 {
                     path: "proposals/:address",

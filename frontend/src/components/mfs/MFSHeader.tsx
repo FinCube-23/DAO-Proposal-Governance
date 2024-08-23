@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@components/ui/button";
+import { Link } from "react-router-dom";
 import {
     Card,
     CardHeader,
@@ -29,13 +30,15 @@ import {
     CircleUser,
     Search,
 } from "lucide-react";
-import { Link } from "react-router-dom";
 import { clearAuth } from "@redux/slices/auth";
 import { useDispatch } from "react-redux";
+import { useState } from "react";
+import ProfileDialog from "./ProfileDialog";
 
 export default function MFSHeader() {
     const { logout } = useAuth0();
     const dispatch = useDispatch();
+    const [isProfileDialogOpen, setIsProfileDialogOpen] = useState<boolean>(false);
 
     const handleLogout = () => {
         dispatch(clearAuth());
@@ -151,7 +154,9 @@ export default function MFSHeader() {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Link to="/mfs/profile">Profile</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Support</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
