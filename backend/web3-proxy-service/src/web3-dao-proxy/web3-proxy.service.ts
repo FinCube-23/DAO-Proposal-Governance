@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, Logger } from '@nestjs/common';
 import { DAOContract } from './entities/DAO-contract-entity';
 import { RPCProvider } from "./entities/RPC-Provider-entity";
 import { ethers } from 'ethers';
@@ -6,7 +6,7 @@ import axios from 'axios';
 @Injectable()
 export class Web3ProxyService {
   private contract: ethers.Contract;
-
+  private readonly logger = new Logger(Web3ProxyService.name);
   constructor(private readonly daoContract: DAOContract, private readonly JSONRPCProvider: RPCProvider) {
     const provider = new ethers.JsonRpcProvider(this.JSONRPCProvider.ALCHEMY_ENDPOINT);
     const wallet = new ethers.Wallet(this.daoContract.signer, provider);
@@ -17,9 +17,9 @@ export class Web3ProxyService {
       const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
       return response.data;
     } catch (error) {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("Role of user not found");;
     }
-    return 'MFS';
   }
 
   private provider(): ethers.JsonRpcProvider {
@@ -28,7 +28,6 @@ export class Web3ProxyService {
   }
   async getBalance(address: string, sub: string): Promise<number> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
       throw new UnauthorizedException("User does not have permission");
     }
@@ -39,8 +38,8 @@ export class Web3ProxyService {
 
   async getProposalThreshold(sub: string): Promise<number> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("User does not have permission");
     }
     return await this.contract.proposalThreshold();
@@ -48,17 +47,17 @@ export class Web3ProxyService {
 
   async getOngoingProposalCount(sub: string): Promise<number> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("User does not have permission");
     }
     return await this.contract.getOngoingProposalsCount();
   }
 
   async getOngoingProposals(sub: string): Promise<any> {
-    const role = await this.getUserRole(sub);
-    console.log(role);
+    const role = await this.getUserRole(sub);;
     if (role != 'MFS') {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("User does not have permission");
     }
     return await this.contract.getOngoingProposals();
@@ -66,8 +65,8 @@ export class Web3ProxyService {
 
   async registerMember(address: string, _memberURI: string, sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("User does not have permission");
     }
     return await this.contract.registerMember(address, _memberURI);
@@ -75,8 +74,8 @@ export class Web3ProxyService {
 
   async executeProposal(proposalId: number, sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role != 'MFS') {
+      this.logger.error("Error getting user role");
       throw new UnauthorizedException("User does not have permission");
     }
     return await this.contract.executeProposal(proposalId);
@@ -84,7 +83,6 @@ export class Web3ProxyService {
 
   async checkIsMemberApproved(memberAddress: string, sub:string): Promise<any> {
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role!= 'MFS') {
       throw new UnauthorizedException("User does not have permission");
     }
@@ -93,7 +91,6 @@ export class Web3ProxyService {
 
    async getProposalsByPage(cursor: number, howMany: number, sub:string): Promise<any>{
     const role = await this.getUserRole(sub);
-    console.log(role);
     if (role!= 'MFS') {
       throw new UnauthorizedException("User does not have permission");
     }
