@@ -1,25 +1,9 @@
 import { Link } from "react-router-dom";
 import LoginButton from "./auth/LoginButton";
-import { useAuth0 } from "@auth0/auth0-react";
-
+import AuthButton from "./auth/AuthButton";
 export default function Header() {
-    const { isAuthenticated, isLoading } = useAuth0();
-
     return (
         <div className="w-full z-50 fixed top-0">
-            {!isLoading && !isAuthenticated && (
-                <div className="w-full flex justify-center">
-                    Are you a MFS admin? Access the admin portal from{" "}
-                    <Link
-                        className="text-blue-500 ml-1 hover:underline font-bold"
-                        to="/mfs/login"
-                    >
-                        here
-                    </Link>
-                    .
-                </div>
-            )}
-
             <nav className="navbar-gradient p-4">
                 <div className="container mx-auto flex justify-between items-center">
                     <div>
@@ -35,7 +19,7 @@ export default function Header() {
                                     href="#"
                                     className="text-white hover:text-gray-300"
                                 >
-                                    <LoginButton />
+                                    <AuthButton />
                                 </a>
                             </li>
                         </ul>

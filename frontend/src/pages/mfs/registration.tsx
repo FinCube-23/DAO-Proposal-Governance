@@ -12,9 +12,9 @@ export default function Registration() {
     const navigate = useNavigate();
     useEffect(() => {
         if (!auth) {
-            navigate("/mfs/login");
+            navigate("/");
         }
-    }, []);
+    }, [auth]);
 
     return <>{auth && <MFSProfileForm user_id={auth.id || 0} />}</>;
 }

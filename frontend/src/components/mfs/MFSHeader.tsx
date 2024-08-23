@@ -1,5 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@components/ui/button";
+import { Link } from "react-router-dom";
 import {
     Card,
     CardHeader,
@@ -29,11 +30,25 @@ import {
     CircleUser,
     Search,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { clearAuth } from "@redux/slices/auth";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import ProfileDialog from "./ProfileDialog";
 
 export default function MFSHeader() {
     const { logout } = useAuth0();
+    const dispatch = useDispatch();
+    const [isProfileDialogOpen, setIsProfileDialogOpen] = useState<boolean>(false);
 
+    const handleLogout = () => {
+        dispatch(clearAuth());
+
+        logout({
+            logoutParams: {
+                returnTo: import.meta.env.VITE_AUTH0_LOGOUT_REDIRECT,
+            },
+        });
+    };
     return (
         <div className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
             <Sheet>
@@ -139,10 +154,12 @@ export default function MFSHeader() {
                 <DropdownMenuContent align="end">
                     <DropdownMenuLabel>My Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
+                    <DropdownMenuItem>
+                        <Link to="/mfs/profile">Profile</Link>
+                    </DropdownMenuItem>
                     <DropdownMenuItem>Support</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout({ logoutParams: { returnTo: import.meta.env.VITE_AUTH0_LOGOUT_REDIRECT } })}>
+                    <DropdownMenuItem onClick={handleLogout}>
                         Logout
                     </DropdownMenuItem>
                 </DropdownMenuContent>

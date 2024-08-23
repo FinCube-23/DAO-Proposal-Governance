@@ -1,7 +1,7 @@
-import AuthStateSyncer from "@components/AuthStateSyncer";
+// import AuthStateSyncer from "@components/AuthStateSyncer";
 import Header from "@components/Header";
 import { Outlet } from "react-router-dom";
-
+import { Toaster } from "@/components/ui/sonner"
 import "@rainbow-me/rainbowkit/styles.css";
 import { sepolia } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
@@ -20,12 +20,13 @@ export default function RootLayout() {
     return (
         <>
             <div>
-                <AuthStateSyncer />
+                {/* <AuthStateSyncer /> */}
                 <Header />
                 <WagmiProvider config={config}>
                     <QueryClientProvider client={queryClient}>
                         <RainbowKitProvider>
                             <Outlet />
+                            <Toaster />
                         </RainbowKitProvider>
                     </QueryClientProvider>
                 </WagmiProvider>

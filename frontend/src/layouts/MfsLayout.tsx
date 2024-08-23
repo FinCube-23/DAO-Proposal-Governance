@@ -1,7 +1,7 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import Loader from "@components/Loader";
 import { Outlet, useNavigate } from "react-router-dom";
-import AuthStateSyncer from "@components/AuthStateSyncer";
+// import AuthStateSyncer from "@components/AuthStateSyncer";
 import { useEffect } from "react";
 
 import "@rainbow-me/rainbowkit/styles.css";
@@ -25,13 +25,13 @@ export default function MfsLayout() {
 
     useEffect(() => {
         if (!isAuthLoading && !isAuthenticated) {
-            navigate("/mfs/login");
+            navigate("/");
         }
     }, [isAuthLoading, isAuthenticated]);
 
     return (
         <div>
-            <AuthStateSyncer />
+            {/* <AuthStateSyncer /> */}
             {isAuthLoading ? (
                 <Loader />
             ) : (
