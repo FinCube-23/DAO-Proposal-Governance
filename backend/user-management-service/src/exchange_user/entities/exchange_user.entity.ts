@@ -24,9 +24,9 @@ export class ExchangeUserEntity {
   @ApiProperty()
   email: string;
 
-  @ManyToOne(() => MfsBusinessEntity)
-  @JoinColumn({ name: 'mfs_id' })
-  mfsBusiness: MfsBusinessEntity;
+  @Column({type: 'int', nullable: false})
+  @ApiProperty()
+  mfs_id: number;
 
   @Column({ type: 'float' })
   @ApiProperty()
