@@ -24,27 +24,6 @@ export default function welcome() {
 
   // SETTER FUNCTIONS
 
-  // registerMember()
-  const register = async (e: MouseEvent) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
-        functionName: "registerMember",
-        args: [""], // pass arguments
-      });
-
-      const hash = await writeContract(config, request);
-
-      await waitForTransactionReceipt(config, { hash });
-
-      alert("Registration successful");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   // newMemberApprovalProposal()
   const approveMember = async (e: MouseEvent) => {
     e.preventDefault();

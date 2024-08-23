@@ -10,6 +10,22 @@ import {
 } from "@components/ui/card";
 import { Proposal } from "@services/proposal/types";
 import { Box, Coins, Flag, Vote, WalletCards } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from "@wagmi/core";
+import { config } from "@layouts/MfsLayout";
 
 const proposals: Proposal[] = [
   {
@@ -33,6 +49,27 @@ const proposals: Proposal[] = [
 ];
 
 export default function DaoDashboard() {
+  // registerMember()
+  const register = async (e: MouseEvent) => {
+    e.preventDefault();
+    try {
+      const { request } = await simulateContract(config, {
+        abi: [], // Fill
+        address: "0x", // Fill
+        functionName: "registerMember",
+        args: [""], // pass arguments
+      });
+
+      const hash = await writeContract(config, request);
+
+      await waitForTransactionReceipt(config, { hash });
+
+      alert("Registration successful");
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5">
       <Card>
@@ -94,9 +131,25 @@ export default function DaoDashboard() {
                 <div className="bg-green-100 p-2 rounded-lg">
                   <Coins className="text-green-500" />
                 </div>
-                <div>
-                  <Button>New Member</Button>
-                </div>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button>New Member</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                      <DialogTitle className="text-center">
+                        Register Member
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form>
+                      <p>Address: </p>
+                      <p>Member URI: </p>
+                    </form>
+                    <DialogFooter>
+                      <Button type="submit">Register</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardHeader>
             <CardContent>

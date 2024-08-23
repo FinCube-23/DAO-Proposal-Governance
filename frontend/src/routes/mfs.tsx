@@ -6,36 +6,37 @@ import { Dashboard } from "@pages/mfs/test";
 import Registration from "@pages/mfs/registration";
 import MFSPrivateLayout from "@layouts/MFSPrivateLayout";
 import Login from "@pages/mfs/login";
+import Register from "@pages/mfs/register";
 
 export const mfsRoutes: RouteObject = {
-    path: "/mfs",
-    element: <MfsLayout />,
-    children: [
+  path: "/mfs",
+  element: <MfsLayout />,
+  children: [
+    {
+      path: "registration",
+      element: <Registration />,
+    },
+    {
+      path: "login",
+      element: <Login />,
+    },
+    {
+      path: "tests",
+      element: <Dashboard />,
+    },
+    {
+      path: "",
+      element: <MFSPrivateLayout />,
+      children: [
         {
-            path: "registration",
-            element: <Registration />,
+          path: "",
+          element: <MfsDashboard />,
         },
         {
-            path: "login",
-            element: <Login />,
+          path: "proposals/:address",
+          element: <ProposalView />,
         },
-        {
-            path: "tests",
-            element: <Dashboard />,
-        },
-        {
-            path: "",
-            element: <MFSPrivateLayout />,
-            children: [
-                {
-                    path: "",
-                    element: <MfsDashboard />,
-                },
-                {
-                    path: "proposals/:address",
-                    element: <ProposalView />,
-                },
-            ],
-        },
-    ],
+      ],
+    },
+  ],
 };

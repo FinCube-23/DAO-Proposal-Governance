@@ -7,30 +7,30 @@ import DaoLayout from "@layouts/DaoLayout";
 import Tests from "@pages/tests";
 
 export const rootRoutes: RouteObject = {
-    path: "/",
-    element: <RootLayout />,
-    children: [
+  path: "/",
+  element: <RootLayout />,
+  children: [
+    {
+      path: "",
+      element: <Welcome />,
+    },
+    {
+      path: "tests",
+      element: <Tests />,
+    },
+    {
+      path: "dashboard",
+      element: <DaoLayout />,
+      children: [
         {
-            path: "",
-            element: <Welcome />,
+          path: "",
+          element: <DaoDashboard />,
         },
         {
-            path: "tests",
-            element: <Tests />
+          path: "proposals/:address",
+          element: <ProposalView />,
         },
-        {
-            path: "dashboard",
-            element: <DaoLayout />,
-            children: [
-                {
-                    path: "",
-                    element: <DaoDashboard />, 
-                },
-                {
-                    path: "proposals/:address",
-                    element: <ProposalView />
-                }
-            ],
-        },
-    ],
+      ],
+    },
+  ],
 };
