@@ -8,11 +8,11 @@ interface Props {
     setOpen: any;
 }
 export default function AuthDialog({ isOpen, setOpen }: Props) {
-    const { loginWithPopup } = useAuth0();
+    const { loginWithRedirect } = useAuth0();
 
     function handleLogin(type: string) {
         setOpen(false);
-        loginWithPopup({
+        loginWithRedirect({
             authorizationParams: {
                 user_type: type,
                 redirect_uri: import.meta.env.VITE_AUTH0_LOGIN_REDIRECT

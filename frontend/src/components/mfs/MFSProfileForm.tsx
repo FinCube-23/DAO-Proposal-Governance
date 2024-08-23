@@ -25,6 +25,7 @@ import { useCreateMFSMutation } from "@redux/services/mfs";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { useEffect } from "react";
 import { useToast } from "@components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: "MFS Name is required" }),
@@ -42,6 +43,7 @@ interface Props {
 
 export default function MFSProfileForm({ user_id }: Props) {
     const { toast } = useToast();
+    const navigate = useNavigate();
     const [
         createMFS,
         { isLoading: isCreateMFSLoading, isSuccess: isCreateMFSSuccess },
@@ -59,8 +61,6 @@ export default function MFSProfileForm({ user_id }: Props) {
     });
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        console.log(data);
-
         createMFS({
             name: data.name,
             org_email: data.org_email,
@@ -74,6 +74,7 @@ export default function MFSProfileForm({ user_id }: Props) {
     useEffect(() => {
         if (isCreateMFSSuccess) {
             toast({ title: "MFS Profile created successfully" });
+            navigate("/auth");
         }
     }, [isCreateMFSSuccess]);
 

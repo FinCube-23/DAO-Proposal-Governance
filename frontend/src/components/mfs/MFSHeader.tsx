@@ -30,10 +30,22 @@ import {
     Search,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { clearAuth } from "@redux/slices/auth";
+import { useDispatch } from "react-redux";
 
 export default function MFSHeader() {
     const { logout } = useAuth0();
+    const dispatch = useDispatch();
 
+    const handleLogout = () => {
+        dispatch(clearAuth());
+
+        logout({
+            logoutParams: {
+                returnTo: import.meta.env.VITE_AUTH0_LOGOUT_REDIRECT,
+            },
+        });
+    };
     return (
         <div className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
             <Sheet>
@@ -142,7 +154,7 @@ export default function MFSHeader() {
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuItem>Support</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => logout({ logoutParams: { returnTo: import.meta.env.VITE_AUTH0_LOGOUT_REDIRECT } })}>
+                    <DropdownMenuItem onClick={handleLogout}>
                         Logout
                     </DropdownMenuItem>
                 </DropdownMenuContent>
