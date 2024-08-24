@@ -18,14 +18,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   simulateContract,
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
 import { config } from "@layouts/MfsLayout";
+import { ChangeEvent, FormEvent, useState } from "react";
 
 const proposals: Proposal[] = [
   {
@@ -49,25 +48,38 @@ const proposals: Proposal[] = [
 ];
 
 export default function DaoDashboard() {
+  const [data, setData] = useState({ address: "", uri: "" });
+
+  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const form = e.target;
+    const name = form.name;
+    const value = form.value;
+    setData({
+      ...data,
+      [name]: value,
+    });
+  };
+
   // registerMember()
-  const register = async (e: MouseEvent) => {
+  const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
-        functionName: "registerMember",
-        args: [""], // pass arguments
-      });
+    // try {
+    //   const { request } = await simulateContract(config, {
+    //     abi: [], // Fill
+    //     address: "0x", // Fill
+    //     functionName: "registerMember",
+    //     args: [""], // pass arguments
+    //   });
 
-      const hash = await writeContract(config, request);
+    //   const hash = await writeContract(config, request);
 
-      await waitForTransactionReceipt(config, { hash });
+    //   await waitForTransactionReceipt(config, { hash });
 
-      alert("Registration successful");
-    } catch (e) {
-      console.log(e);
-    }
+    //   alert("Registration successful");
+    // } catch (e) {
+    //   console.log(e);
+    // }
+    console.log(data);
   };
 
   return (
@@ -141,13 +153,31 @@ export default function DaoDashboard() {
                         Register Member
                       </DialogTitle>
                     </DialogHeader>
-                    <form>
-                      <p>Address: </p>
-                      <p>Member URI: </p>
+                    <form onSubmit={register}>
+                      <div className="flex items-center my-3">
+                        <p className="mr-3">Address: </p>
+                        <input
+                          onChange={handleInput}
+                          type="text"
+                          name="address"
+                          className="px-2 py-1 rounded bg-black border border-white"
+                          placeholder="wallet address"
+                        />
+                      </div>
+                      <div className="flex items-center my-3">
+                        <p className="mr-3">Member URI: </p>
+                        <input
+                          onChange={handleInput}
+                          type="text"
+                          name="uri"
+                          className="px-2 py-1 rounded bg-black border border-white"
+                          placeholder="URI"
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button type="submit">Register</Button>
+                      </DialogFooter>
                     </form>
-                    <DialogFooter>
-                      <Button type="submit">Register</Button>
-                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
