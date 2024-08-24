@@ -25,6 +25,7 @@ import {
 } from "@wagmi/core";
 import { config } from "@layouts/MfsLayout";
 import { ChangeEvent, FormEvent, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const proposals: Proposal[] = [
   {
@@ -49,6 +50,7 @@ const proposals: Proposal[] = [
 
 export default function DaoDashboard() {
   const [data, setData] = useState({ address: "", uri: "" });
+  const navigate = useNavigate();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -126,9 +128,32 @@ export default function DaoDashboard() {
                 <Vote className="text-green-500" />
                 <p>12 Proposal(s) created</p>{" "}
               </div>
-              <div>
-                <Button>New Proposal</Button>
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>New Proposal</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                  <DialogHeader>
+                    <DialogTitle className="text-center">
+                      Proposal Type
+                    </DialogTitle>
+                  </DialogHeader>
+                  <div className="flex flex-col items-center">
+                    <Button
+                      onClick={() => navigate("/general-proposal")}
+                      className="my-2 w-60 hover:bg-green-400"
+                    >
+                      General Proposal
+                    </Button>
+                    <Button
+                      onClick={() => navigate("/approval-proposal")}
+                      className="my-2 w-60 hover:bg-orange-400"
+                    >
+                      New Member Approval Proposal
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </div>
           </Card>
           {/* Proposal List */}
