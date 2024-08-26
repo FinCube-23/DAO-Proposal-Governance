@@ -28,6 +28,7 @@ import { config } from "@layouts/MfsLayout";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import contractABI from "../contractABI/contractABI.json";
+import { useAccount } from "wagmi";
 
 // const proposals: Proposal[] = [
 //   {
@@ -54,6 +55,7 @@ export default function DaoDashboard() {
   const [data, setData] = useState({ address: "", uri: "" });
   const [proposals, setProposals] = useState([]);
   const navigate = useNavigate();
+  const account = useAccount();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -61,6 +63,7 @@ export default function DaoDashboard() {
     const value = form.value;
     setData({
       ...data,
+      address: `${account.address}`,
       [name]: value,
     });
   };
@@ -68,23 +71,22 @@ export default function DaoDashboard() {
   // registerMember()
   const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // try {
-    //   const { request } = await simulateContract(config, {
-    //     abi: [], // Fill
-    //     address: "0x", // Fill
-    //     functionName: "registerMember",
-    //     args: [""], // pass arguments
-    //   });
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        functionName: "registerMember",
+        args: [data.address, data.uri], // pass arguments
+      });
 
-    //   const hash = await writeContract(config, request);
+      const hash = await writeContract(config, request);
 
-    //   await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
-    //   alert("Registration successful");
-    // } catch (e) {
-    //   console.log(e);
-    // }
-    console.log(data);
+      alert("Registration successful");
+    } catch (e) {
+      console.error("Failed to register:", e);
+    }
   };
 
   // getOngoingProposals()
@@ -98,7 +100,7 @@ export default function DaoDashboard() {
 
       setProposals(response as []);
     } catch (e) {
-      console.log(e);
+      console.error("Failed to get ongoing proposals:", e);
     }
   };
 
@@ -201,16 +203,6 @@ export default function DaoDashboard() {
                       </DialogTitle>
                     </DialogHeader>
                     <form onSubmit={register}>
-                      <div className="flex items-center my-3">
-                        <p className="mr-3">Address: </p>
-                        <input
-                          onChange={handleInput}
-                          type="text"
-                          name="address"
-                          className="px-2 py-1 rounded bg-black border border-white"
-                          placeholder="wallet address"
-                        />
-                      </div>
                       <div className="flex items-center my-3">
                         <p className="mr-3">Member URI: </p>
                         <input
