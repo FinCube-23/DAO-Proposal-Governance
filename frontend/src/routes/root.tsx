@@ -8,6 +8,7 @@ import Tests from "@pages/tests";
 import Auth from "@pages/auth";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
+import CastVote from "@pages/castVote";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -28,6 +29,10 @@ export const rootRoutes: RouteObject = {
     {
       path: "approval-proposal",
       element: <NewMemberApprovalProposal></NewMemberApprovalProposal>,
+    },
+    {
+      path: "cast-vote",
+      element: <CastVote></CastVote>,
     },
     {
       path: "dashboard",
