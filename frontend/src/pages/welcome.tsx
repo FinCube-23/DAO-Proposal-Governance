@@ -23,27 +23,6 @@ export default function welcome() {
 
   // SETTER FUNCTIONS
 
-  // propose()
-  const propose = async (e: MouseEvent) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "propose",
-        args: [""], // pass arguments
-      });
-
-      const hash = await writeContract(config, request);
-
-      await waitForTransactionReceipt(config, { hash });
-
-      alert("Members proposed!");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   // castVote()
   const castVote = async (e: MouseEvent) => {
     e.preventDefault();

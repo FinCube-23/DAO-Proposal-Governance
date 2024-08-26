@@ -3,6 +3,12 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { encodeFunctionData } from "viem";
 import contractABI from "../contractABI/contractABI.json";
+import {
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from "@wagmi/core";
+import { config } from "@layouts/MfsLayout";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -26,9 +32,8 @@ const GeneralProposal = () => {
     setDescription(e.target.value);
   };
 
-  const propose = (e: FormEvent<HTMLFormElement>) => {
+  const propose = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     const data = encodeFunctionData({
       abi: contractABI,
       functionName: "propose",
@@ -46,8 +51,27 @@ const GeneralProposal = () => {
       calldatas: [data],
       description,
     };
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        functionName: "propose",
+        args: [
+          proposalData.targets,
+          proposalData.values,
+          proposalData.calldatas,
+          proposalData.description,
+        ], // pass arguments
+      });
 
-    console.log(proposalData);
+      const hash = await writeContract(config, request);
+
+      await waitForTransactionReceipt(config, { hash });
+
+      alert("Members proposed!");
+    } catch (e) {
+      console.error("Failed to propose members:", e);
+    }
   };
 
   return (
