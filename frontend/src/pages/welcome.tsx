@@ -8,11 +8,11 @@ import {
   writeContract,
 } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
+import contractABI from "../contractABI/contractABI.json";
 
 export default function welcome() {
   // getter function states
   const [proposalCount, setProposalCount] = useState(0);
-  const [proposals, setProposals] = useState([]);
   const [proposalsByPage, setProposalsByPage] = useState({
     paginateProposals: [],
     newCursor: 0,
@@ -28,8 +28,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "newMemberApprovalProposal",
         args: [""], // pass arguments
       });
@@ -49,8 +49,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "propose",
         args: [""], // pass arguments
       });
@@ -70,8 +70,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "castVote",
         args: [""], // pass arguments
       });
@@ -91,8 +91,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "executeProposal",
         args: [""], // pass arguments
       });
@@ -112,8 +112,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "cancelProposal",
         args: [""], // pass arguments
       });
@@ -133,8 +133,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "setVotingDelay",
         args: [""], // pass arguments
       });
@@ -154,8 +154,8 @@ export default function welcome() {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "setVotingPeriod",
         args: [""], // pass arguments
       });
@@ -176,8 +176,8 @@ export default function welcome() {
   const getProposalCount = async () => {
     try {
       const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "getOngoingProposalsCount",
       });
 
@@ -187,27 +187,12 @@ export default function welcome() {
     }
   };
 
-  // getOngoingProposals()
-  const getProposals = async () => {
-    try {
-      const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
-        functionName: "getOngoingProposals",
-      });
-
-      setProposals(response as []);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   // getProposalsByPage()
   const getProposalsByPage = async () => {
     try {
       const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "getProposalsByPage",
       });
 
@@ -223,8 +208,8 @@ export default function welcome() {
   const getThreshhold = async () => {
     try {
       const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "proposalThreshold",
       });
 
@@ -238,8 +223,8 @@ export default function welcome() {
   const getDelay = async () => {
     try {
       const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "getVotingDelay",
       });
 
@@ -253,8 +238,8 @@ export default function welcome() {
   const getPeriod = async () => {
     try {
       const response = await readContract(config, {
-        abi: [], // Fill
-        address: "0x", // Fill
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
         functionName: "getVotingPeriod",
       });
 

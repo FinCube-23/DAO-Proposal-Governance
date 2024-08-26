@@ -19,37 +19,40 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
+  readContract,
   simulateContract,
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
 import { config } from "@layouts/MfsLayout";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import contractABI from "../contractABI/contractABI.json";
 
-const proposals: Proposal[] = [
-  {
-    title: "Renovation Project",
-    description: "Renovating the community center",
-    status: "ongoing",
-    address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-  },
-  {
-    title: "Education Program",
-    description: "Funding educational workshops",
-    status: "executed",
-    address: "0x3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2",
-  },
-  {
-    title: "Park Cleanup",
-    description: "Organizing a community park cleanup event",
-    status: "canceled",
-    address: "0x5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
-  },
-];
+// const proposals: Proposal[] = [
+//   {
+//     title: "Renovation Project",
+//     description: "Renovating the community center",
+//     status: "ongoing",
+//     address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
+//   },
+//   {
+//     title: "Education Program",
+//     description: "Funding educational workshops",
+//     status: "executed",
+//     address: "0x3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2",
+//   },
+//   {
+//     title: "Park Cleanup",
+//     description: "Organizing a community park cleanup event",
+//     status: "canceled",
+//     address: "0x5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
+//   },
+// ];
 
 export default function DaoDashboard() {
   const [data, setData] = useState({ address: "", uri: "" });
+  const [proposals, setProposals] = useState([]);
   const navigate = useNavigate();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -83,6 +86,25 @@ export default function DaoDashboard() {
     // }
     console.log(data);
   };
+
+  // getOngoingProposals()
+  const getProposals = async () => {
+    try {
+      const response = await readContract(config, {
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        functionName: "getOngoingProposals",
+      });
+
+      setProposals(response as []);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  useEffect(() => {
+    getProposals();
+  }, []);
 
   return (
     <div className="flex flex-col gap-5">
@@ -126,7 +148,7 @@ export default function DaoDashboard() {
             <div className="flex justify-between items-center p-3">
               <div className="flex items-center gap-3">
                 <Vote className="text-green-500" />
-                <p>12 Proposal(s) created</p>{" "}
+                <p>{proposals.length} Proposal(s) created</p>{" "}
               </div>
               <Dialog>
                 <DialogTrigger asChild>

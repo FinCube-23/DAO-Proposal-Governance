@@ -6,6 +6,7 @@ import ProposalView from "@pages/dao/proposal/proposalView";
 import DaoLayout from "@layouts/DaoLayout";
 import Tests from "@pages/tests";
 import Auth from "@pages/auth";
+import GeneralProposal from "@pages/generalProposal";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -18,6 +19,10 @@ export const rootRoutes: RouteObject = {
     {
       path: "tests",
       element: <Tests />,
+    },
+    {
+      path: "general-proposal",
+      element: <GeneralProposal></GeneralProposal>,
     },
     {
       path: "dashboard",
