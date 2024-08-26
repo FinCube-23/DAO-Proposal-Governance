@@ -147,23 +147,22 @@ export default function DaoDashboard() {
   // setVotingPeriod()
   const setVotingPeriod = async (e: any) => {
     e.preventDefault();
-    // try {
-    //   const { request } = await simulateContract(config, {
-    //     abi: contractABI, // Fill
-    //     address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-    //     functionName: "setVotingPeriod",
-    //     args: [""], // pass arguments
-    //   });
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        functionName: "setVotingPeriod",
+        args: [Number(period)], // pass arguments
+      });
 
-    //   const hash = await writeContract(config, request);
+      const hash = await writeContract(config, request);
 
-    //   await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
-    //   alert("Period set!");
-    // } catch (e) {
-    //   console.log(e);
-    // }
-    console.log(Number(period));
+      alert("Period set!");
+    } catch (e) {
+      console.error("Failed to set period:", e);
+    }
   };
 
   // registerMember()
