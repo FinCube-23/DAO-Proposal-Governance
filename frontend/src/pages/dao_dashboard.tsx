@@ -61,8 +61,20 @@ export default function DaoDashboard() {
     _ownerURI: "",
   });
   const [proposals, setProposals] = useState([]);
+  const [period, setPeriod] = useState("");
+  const [delay, setDelay] = useState("");
   const navigate = useNavigate();
   const account = useAccount();
+
+  const handleInitInput = (e: ChangeEvent<HTMLInputElement>) => {
+    const form = e.target;
+    const name = form.name;
+    const value = form.value;
+    setInitData({
+      ...initData,
+      [name]: value,
+    });
+  };
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -71,16 +83,6 @@ export default function DaoDashboard() {
     setRegistrationData({
       ...registrationData,
       _newMember: `${account.address}`,
-      [name]: value,
-    });
-  };
-
-  const handleInitInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const form = e.target;
-    const name = form.name;
-    const value = form.value;
-    setInitData({
-      ...initData,
       [name]: value,
     });
   };
@@ -119,6 +121,49 @@ export default function DaoDashboard() {
     } catch (e) {
       console.error("Failed to initialize:", e);
     }
+  };
+
+  // setVotingDelay()
+  const setVotingDelay = async (e: any) => {
+    e.preventDefault();
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI, // Fill
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        functionName: "setVotingDelay",
+        args: [Number(delay)], // pass arguments
+      });
+
+      const hash = await writeContract(config, request);
+
+      await waitForTransactionReceipt(config, { hash });
+
+      alert("Delay set!");
+    } catch (e) {
+      console.error("Failed to set delay:", e);
+    }
+  };
+
+  // setVotingPeriod()
+  const setVotingPeriod = async (e: any) => {
+    e.preventDefault();
+    // try {
+    //   const { request } = await simulateContract(config, {
+    //     abi: contractABI, // Fill
+    //     address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+    //     functionName: "setVotingPeriod",
+    //     args: [""], // pass arguments
+    //   });
+
+    //   const hash = await writeContract(config, request);
+
+    //   await waitForTransactionReceipt(config, { hash });
+
+    //   alert("Period set!");
+    // } catch (e) {
+    //   console.log(e);
+    // }
+    console.log(Number(period));
   };
 
   // registerMember()
@@ -230,68 +275,92 @@ export default function DaoDashboard() {
                 <div className="bg-green-100 p-2 rounded-lg">
                   <Coins className="text-green-500" />
                 </div>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>New Member</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle className="text-center">
-                        Register Member
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={register}>
-                      <div className="flex items-center my-3">
-                        <p className="mr-3">Member URI: </p>
-                        <input
-                          onChange={handleRegistrationInput}
-                          type="text"
-                          name="_memberURI"
-                          className="px-2 py-1 rounded bg-black border border-white"
-                          placeholder="URI"
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit">Register</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button>Start Initialization</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <DialogHeader>
-                      <DialogTitle className="text-center">
-                        Enter information
-                      </DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={initialize}>
-                      <div className="flex flex-col gap-y-2">
-                        <p className="mr-3">DAO URI: </p>
-                        <input
-                          onChange={handleInitInput}
-                          type="text"
-                          name="_daoURI"
-                          className="px-2 py-1 rounded bg-black border border-white"
-                          placeholder="URI"
-                        />
-                        <p className="mr-3">Owner URI: </p>
-                        <input
-                          onChange={handleInitInput}
-                          type="text"
-                          name="_ownerURI"
-                          className="px-2 py-1 rounded bg-black border border-white"
-                          placeholder="URI"
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit">Initialize</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+                <div className="flex flex-col">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>New Member</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-center">
+                          Register Member
+                        </DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={register}>
+                        <div className="flex items-center my-3">
+                          <p className="mr-3">Member URI: </p>
+                          <input
+                            onChange={handleRegistrationInput}
+                            type="text"
+                            name="_memberURI"
+                            className="px-2 py-1 rounded bg-black border border-white"
+                            placeholder="URI"
+                          />
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">Register</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button>Start Initialization</Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                      <DialogHeader>
+                        <DialogTitle className="text-center">
+                          Enter information
+                        </DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={initialize}>
+                        <div className="flex flex-col gap-y-2">
+                          <p className="mr-3">DAO URI: </p>
+                          <input
+                            onChange={handleInitInput}
+                            type="text"
+                            name="_daoURI"
+                            className="px-2 py-1 rounded bg-black border border-white"
+                            placeholder="URI"
+                          />
+                          <p className="mr-3">Owner URI: </p>
+                          <input
+                            onChange={handleInitInput}
+                            type="text"
+                            name="_ownerURI"
+                            className="px-2 py-1 rounded bg-black border border-white"
+                            placeholder="URI"
+                          />
+                        </div>
+                        <DialogFooter>
+                          <Button type="submit">Initialize</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                  <div>
+                    <input
+                      type="text"
+                      className="text-black"
+                      placeholder="set voting delay"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setDelay(e.target.value)
+                      }
+                    />
+                    <Button onClick={setVotingDelay}>Set Voting Delay</Button>
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      className="text-black"
+                      placeholder="set voting period"
+                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setPeriod(e.target.value)
+                      }
+                    />
+                    <Button onClick={setVotingPeriod}>Set Voting Period</Button>
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent>

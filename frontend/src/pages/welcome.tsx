@@ -128,48 +128,6 @@ export default function welcome() {
     }
   };
 
-  // setVotingDelay()
-  const setVotingDelay = async (e: MouseEvent) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "setVotingDelay",
-        args: [""], // pass arguments
-      });
-
-      const hash = await writeContract(config, request);
-
-      await waitForTransactionReceipt(config, { hash });
-
-      alert("Delay set!");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  // setVotingPeriod()
-  const setVotingPeriod = async (e: MouseEvent) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "setVotingPeriod",
-        args: [""], // pass arguments
-      });
-
-      const hash = await writeContract(config, request);
-
-      await waitForTransactionReceipt(config, { hash });
-
-      alert("Period set!");
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
   // GETTER FUNCTIONS
 
   // getOngoingProposalsCount()
