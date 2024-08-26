@@ -7,6 +7,7 @@ import DaoLayout from "@layouts/DaoLayout";
 import Tests from "@pages/tests";
 import Auth from "@pages/auth";
 import GeneralProposal from "@pages/generalProposal";
+import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -23,6 +24,10 @@ export const rootRoutes: RouteObject = {
     {
       path: "general-proposal",
       element: <GeneralProposal></GeneralProposal>,
+    },
+    {
+      path: "approval-proposal",
+      element: <NewMemberApprovalProposal></NewMemberApprovalProposal>,
     },
     {
       path: "dashboard",
