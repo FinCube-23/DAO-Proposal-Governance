@@ -9,6 +9,7 @@ import Auth from "@pages/auth";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 import CastVote from "@pages/castVote";
+import UserLogin from "@pages/userLogin";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -33,6 +34,10 @@ export const rootRoutes: RouteObject = {
     {
       path: "cast-vote",
       element: <CastVote></CastVote>,
+    },
+    {
+      path: "user-login",
+      element: <UserLogin></UserLogin>,
     },
     {
       path: "dashboard",

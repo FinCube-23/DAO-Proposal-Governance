@@ -61,8 +61,8 @@ export default function DaoDashboard() {
     _ownerURI: "",
   });
   const [proposals, setProposals] = useState([]);
-  const [period, setPeriod] = useState("");
-  const [delay, setDelay] = useState("");
+  // const [period, setPeriod] = useState("");
+  // const [delay, setDelay] = useState("");
   const navigate = useNavigate();
   const account = useAccount();
 
@@ -102,68 +102,68 @@ export default function DaoDashboard() {
     }
   };
 
-  // initialize()
-  const initialize = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "initialize",
-        args: [initData._daoURI, initData._ownerURI], // pass arguments
-      });
+  // // initialize()
+  // const initialize = async (e: FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI, // Fill
+  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+  //       functionName: "initialize",
+  //       args: [initData._daoURI, initData._ownerURI], // pass arguments
+  //     });
 
-      const hash = await writeContract(config, request);
+  //     const hash = await writeContract(config, request);
 
-      await waitForTransactionReceipt(config, { hash });
+  //     await waitForTransactionReceipt(config, { hash });
 
-      alert("Initialization successful");
-    } catch (e) {
-      console.error("Failed to initialize:", e);
-    }
-  };
+  //     alert("Initialization successful");
+  //   } catch (e) {
+  //     console.error("Failed to initialize:", e);
+  //   }
+  // };
 
-  // setVotingDelay()
-  const setVotingDelay = async (e: any) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "setVotingDelay",
-        args: [Number(delay)], // pass arguments
-      });
+  // // setVotingDelay()
+  // const setVotingDelay = async (e: any) => {
+  //   e.preventDefault();
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI, // Fill
+  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+  //       functionName: "setVotingDelay",
+  //       args: [Number(delay)], // pass arguments
+  //     });
 
-      const hash = await writeContract(config, request);
+  //     const hash = await writeContract(config, request);
 
-      await waitForTransactionReceipt(config, { hash });
+  //     await waitForTransactionReceipt(config, { hash });
 
-      alert("Delay set!");
-    } catch (e) {
-      console.error("Failed to set delay:", e);
-    }
-  };
+  //     alert("Delay set!");
+  //   } catch (e) {
+  //     console.error("Failed to set delay:", e);
+  //   }
+  // };
 
-  // setVotingPeriod()
-  const setVotingPeriod = async (e: any) => {
-    e.preventDefault();
-    try {
-      const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "setVotingPeriod",
-        args: [Number(period)], // pass arguments
-      });
+  // // setVotingPeriod()
+  // const setVotingPeriod = async (e: any) => {
+  //   e.preventDefault();
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI, // Fill
+  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+  //       functionName: "setVotingPeriod",
+  //       args: [Number(period)], // pass arguments
+  //     });
 
-      const hash = await writeContract(config, request);
+  //     const hash = await writeContract(config, request);
 
-      await waitForTransactionReceipt(config, { hash });
+  //     await waitForTransactionReceipt(config, { hash });
 
-      alert("Period set!");
-    } catch (e) {
-      console.error("Failed to set period:", e);
-    }
-  };
+  //     alert("Period set!");
+  //   } catch (e) {
+  //     console.error("Failed to set period:", e);
+  //   }
+  // };
 
   // registerMember()
   const register = async (e: FormEvent<HTMLFormElement>) => {
@@ -302,63 +302,6 @@ export default function DaoDashboard() {
                       </form>
                     </DialogContent>
                   </Dialog>
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button>Start Initialization</Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle className="text-center">
-                          Enter information
-                        </DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={initialize}>
-                        <div className="flex flex-col gap-y-2">
-                          <p className="mr-3">DAO URI: </p>
-                          <input
-                            onChange={handleInitInput}
-                            type="text"
-                            name="_daoURI"
-                            className="px-2 py-1 rounded bg-black border border-white"
-                            placeholder="URI"
-                          />
-                          <p className="mr-3">Owner URI: </p>
-                          <input
-                            onChange={handleInitInput}
-                            type="text"
-                            name="_ownerURI"
-                            className="px-2 py-1 rounded bg-black border border-white"
-                            placeholder="URI"
-                          />
-                        </div>
-                        <DialogFooter>
-                          <Button type="submit">Initialize</Button>
-                        </DialogFooter>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                  <div>
-                    <input
-                      type="text"
-                      className="text-black"
-                      placeholder="set voting delay"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setDelay(e.target.value)
-                      }
-                    />
-                    <Button onClick={setVotingDelay}>Set Voting Delay</Button>
-                  </div>
-                  <div>
-                    <input
-                      type="text"
-                      className="text-black"
-                      placeholder="set voting period"
-                      onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                        setPeriod(e.target.value)
-                      }
-                    />
-                    <Button onClick={setVotingPeriod}>Set Voting Period</Button>
-                  </div>
                 </div>
               </div>
             </CardHeader>
