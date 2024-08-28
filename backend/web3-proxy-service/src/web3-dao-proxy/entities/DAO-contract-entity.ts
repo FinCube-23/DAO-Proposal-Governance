@@ -3,5 +3,5 @@ const artifacts = require('../../../artifacts/contracts/FincubeDAO.sol/FinCubeDA
 export class DAOContract {
     address: any = process.env.CONTRACT_ADDRESS;
     abi: any = artifacts.abi;
-    signer: any = process.env.PRIVATE_KEY;
+    signer: any = process.env.WALLET_PRIVATE_KEY;
 }

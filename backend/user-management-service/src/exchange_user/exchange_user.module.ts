@@ -6,8 +6,8 @@ import { ExchangeUserEntity } from 'src/exchange_user/entities/exchange_user.ent
 import { AuthzModule } from 'src/authz/authz.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ExchangeUserEntity]), AuthzModule],
+  imports: [TypeOrmModule.forFeature([ExchangeUserEntity]), AuthzModule ],
   controllers: [ExchangeUserController],
-  providers: [ExchangeUserService],
+  providers: [ExchangeUserService]
 })
 export class ExchangeUserModule { }
