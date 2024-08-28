@@ -23,13 +23,13 @@ export class TasksService {
     const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
 
     // Create the log options object.
-    const ProposalCreatedEvents = {
+    const ProposalAddedEvents = {
         address: daoContractAddress,
         topics: [proposalTopic, proposalEndTopic],
     };
 
     // Open the websocket and listen for events!
-    alchemy.ws.on(ProposalCreatedEvents, (txn) => {
+    alchemy.ws.on(ProposalAddedEvents, (txn) => {
         const eventObj = txn;
         this.logger.log(`New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`);
         this.logger.log(`proposalEndTopic Value: ${txn.topics[1] }`);
