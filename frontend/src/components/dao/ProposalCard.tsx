@@ -35,7 +35,13 @@ export default function ProposalCard({ proposal, proposalId }: any) {
           </Badge>
         </div>
         <div className="font-bold text-2xl">{proposal.proposalURI}</div>
-        <div className="text-muted-foreground">{proposal.data}</div>
+        <a
+          target="_"
+          href={`https://amoy.polygonscan.com/address/${proposal.data}`}
+          className="text-muted-foreground hover:underline"
+        >
+          {proposal.data}
+        </a>
       </CardHeader>
 
       <CardFooter>
@@ -43,10 +49,10 @@ export default function ProposalCard({ proposal, proposalId }: any) {
           <div className="text-muted-foreground">Published by</div>
           <a
             target="_"
-            href={`https://amoy.polygonscan.com/address/0xCB6F2B16a15560197342e6afa6b3A5620884265B`}
+            href={`https://amoy.polygonscan.com/address/${proposal.proposer}`}
             className="text-green-500 hover:underline cursor-pointer"
           >
-            <p className="overflow-tranc">{proposal?.proposer}</p>
+            <p className="overflow-tranc">{proposal.proposer}</p>
           </a>
         </div>
       </CardFooter>
