@@ -29,13 +29,27 @@ import { useNavigate } from "react-router-dom";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
+import { number, string } from "zod";
+
+interface Proposal {
+  executed: boolean;
+  canceled: boolean;
+  proposer: string;
+  data: string;
+  target: string;
+  voteStart: number;
+  voteDuration: number;
+  yesvotes: number;
+  novotes: number;
+  proposalURI: string;
+}
 
 export default function DaoDashboard() {
   const [registrationData, setRegistrationData] = useState({
     _newMember: "",
     _memberURI: "",
   });
-  const [proposalsByPage, setProposalsByPage] = useState([]);
+  const [proposalsByPage, setProposalsByPage] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const account = useAccount();
@@ -175,9 +189,18 @@ export default function DaoDashboard() {
           {loading ? (
             <p>Loading proposals...</p>
           ) : (
-            proposalsByPage.map((proposal, idx) => (
-              <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
-            ))
+            proposalsByPage.map((proposal, idx) => {
+              const proposer = proposal.proposer;
+              if (proposer !== "0x0000000000000000000000000000000000000000") {
+                return (
+                  <ProposalCard
+                    key={idx}
+                    proposal={proposal}
+                    proposalId={idx}
+                  />
+                );
+              }
+            })
           )}
         </div>
         <div className="md:col-span-5">
