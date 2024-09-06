@@ -41,10 +41,12 @@ export default function ProposalCard({ proposal, proposalId }: any) {
       <CardFooter>
         <div className="flex gap-1 text-sm">
           <div className="text-muted-foreground">Published by</div>
-          <a href="#" className="text-green-500 hover:underline cursor-pointer">
-            <p className="overflow-tranc">
-              0xCB6F2B16a15560197342e6afa6b3A5620884265B
-            </p>
+          <a
+            target="_"
+            href={`https://amoy.polygonscan.com/address/0xCB6F2B16a15560197342e6afa6b3A5620884265B`}
+            className="text-green-500 hover:underline cursor-pointer"
+          >
+            <p className="overflow-tranc">{proposal?.proposer}</p>
           </a>
         </div>
       </CardFooter>

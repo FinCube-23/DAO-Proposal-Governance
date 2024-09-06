@@ -48,7 +48,7 @@ export const rootRoutes: RouteObject = {
           element: <DaoDashboard />,
         },
         {
-          path: "proposals/:address",
+          path: "proposals/:id",
           element: <ProposalView />,
         },
         {
@@ -64,7 +64,7 @@ export const rootRoutes: RouteObject = {
               element: <DaoDashboard />,
             },
             {
-              path: "proposals/:address",
+              path: "proposals/:id",
               element: <ProposalView />,
             },
           ],

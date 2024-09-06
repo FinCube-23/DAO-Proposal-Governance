@@ -33,7 +33,7 @@ export const mfsRoutes: RouteObject = {
           element: <MfsDashboard />,
         },
         {
-          path: "proposals/:address",
+          path: "proposals/:id",
           element: <ProposalView />,
         },
         {
@@ -53,7 +53,7 @@ export const mfsRoutes: RouteObject = {
               element: <Profile />,
             },
             {
-              path: "proposals/:address",
+              path: "proposals/:id",
               element: <ProposalView />,
             },
           ],

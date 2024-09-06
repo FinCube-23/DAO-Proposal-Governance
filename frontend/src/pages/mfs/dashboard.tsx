@@ -11,13 +11,28 @@ import {
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { useAccount, useConnect } from "wagmi";
+import { useEffect } from "react";
+import { toast, Toaster } from "sonner";
 
 export default function MfsDashboard() {
+  const { address } = useAccount();
+  const { connectors } = useConnect();
+
+  useEffect(() => {
+    if (address) {
+      toast.success("Wallet connected!");
+    } else if (!connectors) {
+      toast.error("Failed to connect wallet");
+    }
+  }, [address, connectors]);
+
   const auth = useSelector(
     (state: RootState) => state.persistedReducer.authReducer.auth
   );
   return (
     <div className="border min-h-96 rounded-xl mt-10 pb-10">
+      <Toaster></Toaster>
       <div className="relative">
         <Card className="w-64 absolute -top-8 left-8">
           <CardHeader>

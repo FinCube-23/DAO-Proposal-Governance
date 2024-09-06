@@ -61,7 +61,6 @@ export default function DaoDashboard() {
       });
 
       const result = response[0];
-      console.log(result);
 
       setProposalsByPage(result as []);
     } catch (e) {
