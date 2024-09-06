@@ -9,12 +9,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
-export default function VotingBreakdown() {
+export default function VotingBreakdown({ proposalId }: any) {
   const [hasVoted, setHasVoted] = useState(false);
 
-  const handleVoteClick = () => {
+  const handleVote = () => {
     setHasVoted(true);
+    toast.success(`Voter with ID: ${proposalId} voted successfully!`);
   };
 
   return (
@@ -28,7 +30,7 @@ export default function VotingBreakdown() {
       <VotingProgressBar total={4} yes={2} no={1} />
       <div className="flex justify-end">
         {!hasVoted && (
-          <Button className="bg-green-400 font-bold" onClick={handleVoteClick}>
+          <Button className="bg-green-400 font-bold" onClick={handleVote}>
             Vote
           </Button>
         )}

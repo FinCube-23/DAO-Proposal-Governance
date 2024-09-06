@@ -46,7 +46,7 @@ export default function ProposalView() {
       <ProposalCard proposal={proposal} proposalId={id} showStatus={false} />
       <div className="flex flex-col-reverse md:grid md:grid-cols-12">
         <div className="md:col-span-7">
-          <ProposalStatCard proposal={proposal} />
+          <ProposalStatCard proposal={proposal} proposalId={id} />
         </div>
         <div className="md:col-span-4"></div>
       </div>

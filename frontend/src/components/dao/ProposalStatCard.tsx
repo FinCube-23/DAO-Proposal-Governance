@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
-import { Proposal } from "@services/proposal/types";
 import VotingBreakdown from "./VotingBreakdown";
 import VoterList from "./VoterList";
 import VotingInfo from "./VotingInfo";
@@ -25,11 +24,7 @@ const convertStatusToVariant = (status: string) => {
   }
 };
 
-interface Props {
-  proposal: Proposal;
-}
-
-export const ProposalStatCard = ({ proposal }: Props) => {
+export const ProposalStatCard = ({ proposal, proposalId }: any) => {
   return (
     <Card>
       <CardHeader>
@@ -48,7 +43,7 @@ export const ProposalStatCard = ({ proposal }: Props) => {
             <TabsTrigger value="info">Info</TabsTrigger>
           </TabsList>
           <TabsContent value="breakdown" className="mt-4">
-            <VotingBreakdown />
+            <VotingBreakdown proposalId={proposalId} />
           </TabsContent>
           <TabsContent value="voters" className="mt-4">
             <VoterList />

@@ -29,7 +29,8 @@ import { useNavigate } from "react-router-dom";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
-import { number, string } from "zod";
+import { any, number, string } from "zod";
+import { toast } from "sonner";
 
 interface Proposal {
   executed: boolean;
@@ -97,9 +98,9 @@ export default function DaoDashboard() {
 
       await waitForTransactionReceipt(config, { hash });
 
-      alert("Registration successful");
-    } catch (e) {
-      alert("Registration successful!");
+      toast.success("Registration sucessful!");
+    } catch (e: any) {
+      toast.error(e.message);
       console.error("Failed to register:", e);
     }
   };
