@@ -5,7 +5,17 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/MfsLayout";
+import { config } from "@layouts/RootLayout";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Button } from "@components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -45,25 +55,58 @@ const NewMemberApprovalProposal = () => {
   };
 
   return (
-    <div className="container mx-auto mt-20">
-      <h1 className="text-white">New Member Approval Proposal</h1>
-      <form onSubmit={approveMember}>
-        <p>New Member Address: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          name="_newMember"
-          onChange={handleInput}
-        />
-        <p>Description: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          name="description"
-          onChange={handleInput}
-        />
-        <button type="submit">Approve member</button>
-      </form>
+    <div className="container mt-20">
+      <div className="mb-3 flex justify-end">
+        <ConnectButton />
+      </div>
+      <div className="mt-20">
+        <h1 className="text-3xl font-bold text-white mb-8 text-center">
+          New Member Approval Proposal
+        </h1>
+        <form
+          onSubmit={approveMember}
+          className="w-1/3 mx-auto space-y-6 border border-gray-600 p-6 rounded-xl"
+        >
+          <p>New Member Address: </p>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            name="_newMember"
+            onChange={handleInput}
+            placeholder="enter address"
+          />
+          <p>Description: </p>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            name="description"
+            onChange={handleInput}
+            placeholder="enter description"
+          />
+          <div className="flex justify-center">
+            <Dialog>
+              <DialogTrigger asChild>
+                <div className="flex justify-center">
+                  <Button>Approve Member</Button>
+                </div>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle className="text-green-400">
+                    Member approved!
+                  </DialogTitle>
+                  <DialogDescription>
+                    Transaction Hash:{" "}
+                    <span className="text-orange-400">
+                      0xa01358717730026c0f0a30f...c810bf6511c7f2e1a8e9f955e
+                    </span>
+                  </DialogDescription>
+                </DialogHeader>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

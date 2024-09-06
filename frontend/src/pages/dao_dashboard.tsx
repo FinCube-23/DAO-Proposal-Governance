@@ -24,57 +24,21 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/MfsLayout";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
-
-// const proposals: Proposal[] = [
-//   {
-//     title: "Renovation Project",
-//     description: "Renovating the community center",
-//     status: "ongoing",
-//     address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-//   },
-//   {
-//     title: "Education Program",
-//     description: "Funding educational workshops",
-//     status: "executed",
-//     address: "0x3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2",
-//   },
-//   {
-//     title: "Park Cleanup",
-//     description: "Organizing a community park cleanup event",
-//     status: "canceled",
-//     address: "0x5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4",
-//   },
-// ];
+import { config } from "@layouts/RootLayout";
 
 export default function DaoDashboard() {
   const [registrationData, setRegistrationData] = useState({
     _newMember: "",
     _memberURI: "",
   });
-  const [initData, setInitData] = useState({
-    _daoURI: "",
-    _ownerURI: "",
-  });
-  const [proposals, setProposals] = useState([]);
-  // const [period, setPeriod] = useState("");
-  // const [delay, setDelay] = useState("");
+  const [proposalsByPage, setProposalsByPage] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const account = useAccount();
-
-  const handleInitInput = (e: ChangeEvent<HTMLInputElement>) => {
-    const form = e.target;
-    const name = form.name;
-    const value = form.value;
-    setInitData({
-      ...initData,
-      [name]: value,
-    });
-  };
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -87,93 +51,33 @@ export default function DaoDashboard() {
     });
   };
 
-  // getOngoingProposals()
-  const getProposals = async () => {
+  const getProposalsByPage = async () => {
     try {
       const response = await readContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "getOngoingProposals",
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getProposalsByPage",
+        args: [0, 10],
       });
 
-      setProposals(response as []);
+      const result = response[0];
+      console.log(result);
+
+      setProposalsByPage(result as []);
     } catch (e) {
-      console.error("Failed to get ongoing proposals:", e);
+      console.log(e);
+      setLoading(false);
     }
   };
 
-  // // initialize()
-  // const initialize = async (e: FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI, // Fill
-  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-  //       functionName: "initialize",
-  //       args: [initData._daoURI, initData._ownerURI], // pass arguments
-  //     });
-
-  //     const hash = await writeContract(config, request);
-
-  //     await waitForTransactionReceipt(config, { hash });
-
-  //     alert("Initialization successful");
-  //   } catch (e) {
-  //     console.error("Failed to initialize:", e);
-  //   }
-  // };
-
-  // // setVotingDelay()
-  // const setVotingDelay = async (e: any) => {
-  //   e.preventDefault();
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI, // Fill
-  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-  //       functionName: "setVotingDelay",
-  //       args: [Number(delay)], // pass arguments
-  //     });
-
-  //     const hash = await writeContract(config, request);
-
-  //     await waitForTransactionReceipt(config, { hash });
-
-  //     alert("Delay set!");
-  //   } catch (e) {
-  //     console.error("Failed to set delay:", e);
-  //   }
-  // };
-
-  // // setVotingPeriod()
-  // const setVotingPeriod = async (e: any) => {
-  //   e.preventDefault();
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI, // Fill
-  //       address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-  //       functionName: "setVotingPeriod",
-  //       args: [Number(period)], // pass arguments
-  //     });
-
-  //     const hash = await writeContract(config, request);
-
-  //     await waitForTransactionReceipt(config, { hash });
-
-  //     alert("Period set!");
-  //   } catch (e) {
-  //     console.error("Failed to set period:", e);
-  //   }
-  // };
-
-  // registerMember()
   const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "registerMember",
-        args: [registrationData._newMember, registrationData._memberURI], // pass arguments
+        args: [registrationData._newMember, registrationData._memberURI],
       });
 
       const hash = await writeContract(config, request);
@@ -182,12 +86,14 @@ export default function DaoDashboard() {
 
       alert("Registration successful");
     } catch (e) {
+      alert("Registration successful!");
       console.error("Failed to register:", e);
     }
   };
 
   useEffect(() => {
-    getProposals();
+    getProposalsByPage();
+    setLoading(false);
   }, []);
 
   return (
@@ -204,10 +110,10 @@ export default function DaoDashboard() {
         </CardHeader>
         <CardContent>
           <p>
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Fugiat,
-            corrupti fuga! Laudantium vero libero ipsa possimus quos a provident
-            sunt cupiditate neque, ipsam totam facere temporibus nihil.
-            Sapiente, praesentium magni!
+            Welcome to FinCube DAO! You are a registered member. Through this
+            dashboard, you can submit proposals and participate in voting.
+            Empower your voice and help shape the future of our decentralized
+            community!
           </p>
         </CardContent>
         <CardFooter>
@@ -232,7 +138,11 @@ export default function DaoDashboard() {
             <div className="flex justify-between items-center p-3">
               <div className="flex items-center gap-3">
                 <Vote className="text-green-500" />
-                <p>{proposals.length} Proposal(s) created</p>{" "}
+                <p>
+                  {loading
+                    ? "Loading proposals..."
+                    : `${proposalsByPage.length} Proposal(s) created`}
+                </p>
               </div>
               <Dialog>
                 <DialogTrigger asChild>
@@ -263,9 +173,13 @@ export default function DaoDashboard() {
             </div>
           </Card>
           {/* Proposal List */}
-          {proposals.map((proposal: Proposal, idx: number) => (
-            <ProposalCard key={idx} proposal={proposal} />
-          ))}
+          {loading ? (
+            <p>Loading proposals...</p>
+          ) : (
+            proposalsByPage.map((proposal, idx) => (
+              <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+            ))
+          )}
         </div>
         <div className="md:col-span-5">
           <Card>

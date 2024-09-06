@@ -5,7 +5,7 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/MfsLayout";
+import { config } from "@layouts/RootLayout";
 
 const CastVote = () => {
   const [data, setData] = useState({

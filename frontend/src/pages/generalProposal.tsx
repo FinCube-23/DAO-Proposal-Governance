@@ -1,6 +1,4 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { encodeFunctionData } from "viem";
 import contractABI from "../contractABI/contractABI.json";
 import {
@@ -8,7 +6,17 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/MfsLayout";
+import { config } from "@layouts/RootLayout";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Button } from "@components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -53,15 +61,15 @@ const GeneralProposal = () => {
     };
     try {
       const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "propose",
         args: [
           proposalData.targets,
           proposalData.values,
           proposalData.calldatas,
           proposalData.description,
-        ], // pass arguments
+        ],
       });
 
       const hash = await writeContract(config, request);
@@ -75,39 +83,87 @@ const GeneralProposal = () => {
   };
 
   return (
-    <div className="container mx-auto mt-20">
-      <h1 className="text-white">General Proposal</h1>
-      <ConnectButton />
-      <form onSubmit={propose}>
-        <p>Targets: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          value={targets}
-          onChange={handleTargetsChange}
-        />
-        <p>Values: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          value={values}
-          onChange={handleValuesChange}
-        />
-        <p>Calldatas: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          value={calldatas}
-          onChange={handleCalldatasChange}
-        />
-        <p>Description: </p>
-        <input
-          className="text-black p-2"
-          type="text"
-          value={description}
-          onChange={handleDescriptionChange}
-        />
-        <button type="submit">Propose</button>
+    <div className="container mt-20">
+      <div className="mb-3 flex justify-end">
+        <ConnectButton />
+      </div>
+      <h1 className="text-3xl font-bold text-white mb-8 text-center">
+        General Proposal
+      </h1>
+      <form
+        onSubmit={propose}
+        className="w-1/3 mx-auto space-y-6 border border-gray-600 p-6 rounded-xl"
+      >
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Targets:
+          </label>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            value={targets}
+            onChange={handleTargetsChange}
+            placeholder="Enter target addresses"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Values:
+          </label>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            value={values}
+            onChange={handleValuesChange}
+            placeholder="Enter values"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Calldatas:
+          </label>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            value={calldatas}
+            onChange={handleCalldatasChange}
+            placeholder="Enter calldata"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-white">
+            Description:
+          </label>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            value={description}
+            onChange={handleDescriptionChange}
+            placeholder="Enter proposal description"
+          />
+        </div>
+        <div className="text-center">
+          <Dialog>
+            <DialogTrigger asChild>
+              <div className="flex justify-center">
+                <Button>Confirm</Button>
+              </div>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-green-400">
+                  Members proposed!
+                </DialogTitle>
+                <DialogDescription>
+                  Transaction Hash:{" "}
+                  <span className="text-orange-400">
+                    0xa01358717730026c0f0a30f...c810bf6511c7f2e1a8e9f955e
+                  </span>
+                </DialogDescription>
+              </DialogHeader>
+            </DialogContent>
+          </Dialog>
+        </div>
       </form>
     </div>
   );

@@ -13,10 +13,6 @@ import contractABI from "../contractABI/contractABI.json";
 export default function welcome() {
   // getter function states
   const [proposalCount, setProposalCount] = useState(0);
-  const [proposalsByPage, setProposalsByPage] = useState({
-    paginateProposals: [],
-    newCursor: 0,
-  });
   const [proposalThreshold, setProposalThreshhold] = useState(0);
   const [delay, setDelay] = useState(0);
   const [period, setPeriod] = useState(0);
@@ -98,23 +94,6 @@ export default function welcome() {
       });
 
       setProposalCount(response as number);
-    } catch (e) {
-      console.log(e);
-    }
-  };
-
-  // getProposalsByPage()
-  const getProposalsByPage = async () => {
-    try {
-      const response = await readContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
-        functionName: "getProposalsByPage",
-      });
-
-      setProposalsByPage(
-        response as { paginateProposals: []; newCursor: number }
-      );
     } catch (e) {
       console.log(e);
     }
