@@ -146,7 +146,7 @@ const GeneralProposal = () => {
           <Dialog>
             <DialogTrigger asChild>
               <div className="flex justify-center">
-                <Button>Confirm</Button>
+                <Button>Propose</Button>
               </div>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">

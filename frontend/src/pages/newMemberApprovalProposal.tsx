@@ -73,7 +73,7 @@ const NewMemberApprovalProposal = () => {
             type="text"
             name="_newMember"
             onChange={handleInput}
-            placeholder="enter address"
+            placeholder="Enter address"
           />
           <p>Description: </p>
           <input
@@ -81,13 +81,13 @@ const NewMemberApprovalProposal = () => {
             type="text"
             name="description"
             onChange={handleInput}
-            placeholder="enter description"
+            placeholder="Enter description"
           />
           <div className="flex justify-center">
             <Dialog>
               <DialogTrigger asChild>
                 <div className="flex justify-center">
-                  <Button>Approve Member</Button>
+                  <Button>Approve</Button>
                 </div>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">

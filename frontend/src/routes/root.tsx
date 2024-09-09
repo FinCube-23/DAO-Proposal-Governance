@@ -32,10 +32,6 @@ export const rootRoutes: RouteObject = {
       element: <NewMemberApprovalProposal></NewMemberApprovalProposal>,
     },
     {
-      path: "cast-vote",
-      element: <CastVote></CastVote>,
-    },
-    {
       path: "user-login",
       element: <UserLogin></UserLogin>,
     },

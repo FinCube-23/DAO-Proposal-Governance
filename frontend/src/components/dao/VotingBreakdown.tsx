@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import VotingProgressBar from "./VotingProgressBar";
 import { Button } from "@components/ui/button";
 import {
@@ -12,11 +12,14 @@ import {
 import { toast } from "sonner";
 
 export default function VotingBreakdown({ proposalId }: any) {
-  const [hasVoted, setHasVoted] = useState(false);
+  const [vote, setVote] = useState<boolean | null>(null);
 
-  const handleVote = () => {
-    setHasVoted(true);
-    toast.success(`Voter with ID: ${proposalId} voted successfully!`);
+  const handleVote = (value: boolean) => {
+    setVote(value);
+    toast.success(
+      `You voted ${value ? "YES" : "NO"} for proposal ID: ${proposalId}`
+    );
+    console.log(vote);
   };
 
   return (
@@ -29,34 +32,33 @@ export default function VotingBreakdown({ proposalId }: any) {
       </div>
       <VotingProgressBar total={4} yes={2} no={1} />
       <div className="flex justify-end">
-        {!hasVoted && (
-          <Button className="bg-green-400 font-bold" onClick={handleVote}>
-            Vote
-          </Button>
-        )}
-      </div>
-      {hasVoted && (
         <Dialog>
           <DialogTrigger asChild>
-            <div className="flex justify-end">
-              <Button className="bg-blue-400">Execute</Button>
-            </div>
+            <Button className="bg-green-400 font-bold">Vote</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
-              <DialogTitle className="text-green-400">
-                Vote casted successfully!
+              <DialogTitle className="text-center text-orange-400">
+                Cast your vote
               </DialogTitle>
-              <DialogDescription>
-                Transaction Hash:{" "}
-                <span className="text-orange-400">
-                  0xa01358717730026c0f0a30f...c810bf6511c7f2e1a8e9f955e
-                </span>
-              </DialogDescription>
             </DialogHeader>
+            <div className="flex justify-center mt-4">
+              <Button
+                className="bg-green-400 font-bold mx-4"
+                onClick={() => handleVote(true)}
+              >
+                YES
+              </Button>
+              <Button
+                className="bg-red-400 font-bold mx-4"
+                onClick={() => handleVote(false)}
+              >
+                NO
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
-      )}
+      </div>
     </div>
   );
 }
