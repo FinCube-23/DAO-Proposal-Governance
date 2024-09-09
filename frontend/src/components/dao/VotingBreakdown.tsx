@@ -1,25 +1,48 @@
-import { useState } from "react";
+import { useRef } from "react";
 import VotingProgressBar from "./VotingProgressBar";
 import { Button } from "@components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+// import {
+//   simulateContract,
+//   waitForTransactionReceipt,
+//   writeContract,
+// } from "@wagmi/core";
+// import contractABI from "../../contractABI/contractABI.json";
+// import { config } from "@layouts/RootLayout";
 
 export default function VotingBreakdown({ proposalId }: any) {
-  const [vote, setVote] = useState<boolean | null>(null);
+  const voteRef = useRef({ proposalId: "", support: false });
 
-  const handleVote = (value: boolean) => {
-    setVote(value);
-    toast.success(
-      `You voted ${value ? "YES" : "NO"} for proposal ID: ${proposalId}`
-    );
-    console.log(vote);
+  const castVote = async (value: boolean) => {
+    voteRef.current = { proposalId, support: value };
+    try {
+      // const { request } = await simulateContract(config, {
+      //   abi: contractABI,
+      //   address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+      //   functionName: "registerMember",
+      //   args: [voteRef.current.proposalId, voteRef.current.support],
+      // });
+      // const hash = await writeContract(config, request);
+
+      // await waitForTransactionReceipt(config, { hash });
+
+      toast.success(
+        `You voted ${
+          value ? "SUPPORT" : "AGAINST"
+        } for proposal ID: ${proposalId}`
+      );
+      console.log(voteRef.current);
+    } catch (e: any) {
+      toast.error(e.message);
+      console.error(e);
+    }
   };
 
   return (
@@ -39,21 +62,21 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
               <DialogTitle className="text-center text-orange-400">
-                Cast your vote
+                Cast your vote?
               </DialogTitle>
             </DialogHeader>
             <div className="flex justify-center mt-4">
               <Button
                 className="bg-green-400 font-bold mx-4"
-                onClick={() => handleVote(true)}
+                onClick={() => castVote(true)}
               >
-                YES
+                SUPPORT
               </Button>
               <Button
                 className="bg-red-400 font-bold mx-4"
-                onClick={() => handleVote(false)}
+                onClick={() => castVote(false)}
               >
-                NO
+                AGAINST
               </Button>
             </div>
           </DialogContent>
