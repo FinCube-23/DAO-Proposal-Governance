@@ -1,18 +1,10 @@
 import ProposalCard from "@components/dao/ProposalCard";
 import { ProposalStatCard } from "@components/dao/ProposalStatCard";
-import { Proposal } from "@services/proposal/types";
 import { useParams } from "react-router-dom";
 import contractABI from "../../../contractABI/contractABI.json";
 import { readContract } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import { useEffect, useState } from "react";
-
-const proposal: Proposal = {
-  title: "Renovation Project",
-  description: "Renovating the community center",
-  status: "ongoing",
-  address: "0x1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0",
-};
 
 export default function ProposalView() {
   const { id } = useParams();

@@ -190,18 +190,21 @@ export default function DaoDashboard() {
           {loading ? (
             <p>Loading proposals...</p>
           ) : (
-            proposalsByPage.map((proposal, idx) => {
-              const proposer = proposal.proposer;
-              if (proposer !== "0x0000000000000000000000000000000000000000") {
-                return (
-                  <ProposalCard
-                    key={idx}
-                    proposal={proposal}
-                    proposalId={idx}
-                  />
-                );
-              }
-            })
+            proposalsByPage
+              .slice() // Create a shallow copy of the array
+              .reverse() // Reverse the array
+              .map((proposal, idx) => {
+                const proposer = proposal.proposer;
+                if (proposer !== "0x0000000000000000000000000000000000000000") {
+                  return (
+                    <ProposalCard
+                      key={idx}
+                      proposal={proposal}
+                      proposalId={idx}
+                    />
+                  );
+                }
+              })
           )}
         </div>
         <div className="md:col-span-5">

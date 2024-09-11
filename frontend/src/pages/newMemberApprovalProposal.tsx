@@ -8,14 +8,7 @@ import {
 import { config } from "@layouts/RootLayout";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -48,8 +41,9 @@ const NewMemberApprovalProposal = () => {
 
       await waitForTransactionReceipt(config, { hash });
 
-      alert("Member approved!");
-    } catch (e) {
+      toast.success("Member approved!");
+    } catch (e: any) {
+      toast.error(e.message);
       console.error("Failed to approve member:", e);
     }
   };
@@ -84,26 +78,7 @@ const NewMemberApprovalProposal = () => {
             placeholder="Enter description"
           />
           <div className="flex justify-center">
-            <Dialog>
-              <DialogTrigger asChild>
-                <div className="flex justify-center">
-                  <Button>Approve</Button>
-                </div>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle className="text-green-400">
-                    Member approved!
-                  </DialogTitle>
-                  <DialogDescription>
-                    Transaction Hash:{" "}
-                    <span className="text-orange-400">
-                      0xa01358717730026c0f0a30f...c810bf6511c7f2e1a8e9f955e
-                    </span>
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
+            <Button>Approve</Button>
           </div>
         </form>
       </div>

@@ -17,6 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -76,8 +77,9 @@ const GeneralProposal = () => {
 
       await waitForTransactionReceipt(config, { hash });
 
-      alert("Members proposed!");
-    } catch (e) {
+      toast.success("General proposal placed successfully!");
+    } catch (e: any) {
+      toast.error(e.message);
       console.error("Failed to propose members:", e);
     }
   };

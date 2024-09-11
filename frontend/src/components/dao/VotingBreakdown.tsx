@@ -9,13 +9,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-// import {
-//   simulateContract,
-//   waitForTransactionReceipt,
-//   writeContract,
-// } from "@wagmi/core";
-// import contractABI from "../../contractABI/contractABI.json";
-// import { config } from "@layouts/RootLayout";
+import {
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from "@wagmi/core";
+import { config } from "@layouts/RootLayout";
+import contractABI from "../../contractABI/contractABI.json";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
@@ -23,15 +23,15 @@ export default function VotingBreakdown({ proposalId }: any) {
   const castVote = async (value: boolean) => {
     voteRef.current = { proposalId, support: value };
     try {
-      // const { request } = await simulateContract(config, {
-      //   abi: contractABI,
-      //   address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
-      //   functionName: "registerMember",
-      //   args: [voteRef.current.proposalId, voteRef.current.support],
-      // });
-      // const hash = await writeContract(config, request);
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "registerMember",
+        args: [voteRef.current.proposalId, voteRef.current.support],
+      });
+      const hash = await writeContract(config, request);
 
-      // await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
       toast.success(
         `You voted ${
