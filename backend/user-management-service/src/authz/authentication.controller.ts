@@ -27,4 +27,10 @@ export class AuthenticationController {
   async findRole(@Param('sub') sub: string): Promise<string> {
     return this.authenticationService.findOne(sub);
   }
+
+  @Post('register-id')
+  @ApiBody({ type: AuthenticationEntity })
+  async registerId(@Req() req, @Body() authenticationEntity: AuthenticationEntity): Promise<AuthenticationEntity> {
+    return this.authenticationService.registerId(req.user, req.body.id);
+  }
 }

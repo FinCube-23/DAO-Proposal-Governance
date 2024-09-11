@@ -11,7 +11,7 @@ export class AuthenticationService {
     @InjectRepository(AuthenticationEntity)
     private authenticationRepository: Repository<AuthenticationEntity>,
     private readonly encryptionService: EncryptionService
-  ) {}
+  ) { }
 
   async create(
     authenticationEntity: AuthenticationEntity,
@@ -37,5 +37,20 @@ export class AuthenticationService {
       where: { sub }
     });
     return user;
+  }
+
+  async registerId(sub: string, id: number): Promise<any> {
+    const user = await this.authenticationRepository.findOne({
+      where: { sub },
+    });
+    try {
+      user.id = id;
+
+      await this.authenticationRepository.save(user);
+
+      return user;
+    } catch (error) {
+      throw new UnauthorizedException("User not found")
+    }
   }
 }

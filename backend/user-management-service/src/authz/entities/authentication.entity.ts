@@ -16,7 +16,6 @@ export class AuthenticationEntity {
     @ApiProperty()
     role: string;
 
-    @Column({ type: 'int' })
-    @ApiProperty()
+    @Column({ type: 'int', nullable: true })
     user_id: number;
 }
