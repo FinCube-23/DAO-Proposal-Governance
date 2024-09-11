@@ -1,3 +1,6 @@
+# User Management Service
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
@@ -25,6 +28,13 @@
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+
+## Overview
+User management service is a service that provides authentication and authorization service for users. This service is configured with auth0 and registers auth0 users to the system with permissions. The sub of auth0 is used as auth0 identifier for each users. User level permissions are managed by this service. 
+
+## User Registration Flow
+![User-Registration-Flow](user-registration-flow.jpg)
+
 
 ## Installation
 

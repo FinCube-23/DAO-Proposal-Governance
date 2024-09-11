@@ -11,15 +11,21 @@ The backend for fincube is built to manage and support the decentralized autonom
 
 ## Table of Contents
 
-- [Technologies](#technologies)
-- [Architecture](#architecture)
-- [Services](#services)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Services](#running-the-services)
-- [API Documentation](#api-documentation)
-- [Contributing](#contributing)
-- [License](#license)
+- [FinCube Backend](#fincube-backend)
+  - [Overview](#overview)
+  - [Table of Contents](#table-of-contents)
+  - [Technologies](#technologies)
+  - [Architecture](#architecture)
+  - [Services](#services)
+    - [DAO Service](#dao-service)
+    - [User Management Service](#user-management-service)
+    - [Web3 Proxy Service](#web3-proxy-service)
+    - [Audit Trail Service](#audit-trail-service)
+    - [API Gateway](#api-gateway)
+  - [Message Queue Payload](#message-queue-payload)
+  - [Installation](#installation)
+  - [Configuration](#configuration)
+    - [Example `.env` file for DAO Service:](#example-env-file-for-dao-service)
 
 ## Technologies
 
