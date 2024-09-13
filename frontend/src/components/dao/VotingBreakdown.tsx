@@ -40,8 +40,17 @@ export default function VotingBreakdown({ proposalId }: any) {
       );
       console.log(voteRef.current);
     } catch (e: any) {
-      toast.error(e.message);
-      console.error(e);
+      let errorMessage = e.message;
+
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
     }
   };
 

@@ -31,10 +31,10 @@ const NewMemberApprovalProposal = () => {
     e.preventDefault();
     try {
       const { request } = await simulateContract(config, {
-        abi: contractABI, // Fill
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F", // Fill
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "newMemberApprovalProposal",
-        args: [data._newMember, data.description], // pass arguments
+        args: [data._newMember, data.description],
       });
 
       const hash = await writeContract(config, request);
@@ -43,8 +43,17 @@ const NewMemberApprovalProposal = () => {
 
       toast.success("Member approved!");
     } catch (e: any) {
-      toast.error(e.message);
-      console.error("Failed to approve member:", e);
+      let errorMessage = e.message;
+
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
     }
   };
 

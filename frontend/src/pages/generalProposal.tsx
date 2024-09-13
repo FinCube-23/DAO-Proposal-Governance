@@ -71,8 +71,17 @@ const GeneralProposal = () => {
 
       toast.success("General proposal placed successfully!");
     } catch (e: any) {
-      toast.error(e.message);
-      console.error("Failed to propose members:", e);
+      let errorMessage = e.message;
+
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
     }
   };
 

@@ -26,7 +26,7 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider>
               <Outlet />
-              <Toaster />
+              <Toaster richColors />
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>
