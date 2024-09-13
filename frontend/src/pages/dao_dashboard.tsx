@@ -8,7 +8,6 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import { Proposal } from "@services/proposal/types";
 import { Box, Coins, Flag, Vote, WalletCards } from "lucide-react";
 import {
   Dialog,
@@ -29,10 +28,9 @@ import { useNavigate } from "react-router-dom";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
-import { any, number, string } from "zod";
 import { toast } from "sonner";
 
-interface Proposal {
+export interface Proposal {
   executed: boolean;
   canceled: boolean;
   proposer: string;
@@ -68,7 +66,7 @@ export default function DaoDashboard() {
 
   const getProposalsByPage = async () => {
     try {
-      const response = await readContract(config, {
+      const response: any = await readContract(config, {
         abi: contractABI,
         address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "getProposalsByPage",
@@ -78,6 +76,9 @@ export default function DaoDashboard() {
       const result = response[0];
 
       setProposalsByPage(result as []);
+      console.log("====================================");
+      console.log(result);
+      console.log("====================================");
     } catch (e) {
       console.log(e);
       setLoading(false);
@@ -190,21 +191,18 @@ export default function DaoDashboard() {
           {loading ? (
             <p>Loading proposals...</p>
           ) : (
-            proposalsByPage
-              .slice() // Create a shallow copy of the array
-              .reverse() // Reverse the array
-              .map((proposal, idx) => {
-                const proposer = proposal.proposer;
-                if (proposer !== "0x0000000000000000000000000000000000000000") {
-                  return (
-                    <ProposalCard
-                      key={idx}
-                      proposal={proposal}
-                      proposalId={idx}
-                    />
-                  );
-                }
-              })
+            proposalsByPage.map((proposal, idx) => {
+              const proposer = proposal.proposer;
+              if (proposer !== "0x0000000000000000000000000000000000000000") {
+                return (
+                  <ProposalCard
+                    key={idx}
+                    proposal={proposal}
+                    proposalId={proposal.proposer}
+                  />
+                );
+              }
+            })
           )}
         </div>
         <div className="md:col-span-5">

@@ -1,6 +1,5 @@
 import { Badge } from "@components/ui/badge";
 import { Card, CardHeader, CardFooter } from "@components/ui/card";
-import { Proposal } from "@services/proposal/types";
 import { useNavigate } from "react-router-dom";
 
 // interface Props {
