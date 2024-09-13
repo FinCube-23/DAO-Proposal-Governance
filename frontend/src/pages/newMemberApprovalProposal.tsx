@@ -68,6 +68,7 @@ const NewMemberApprovalProposal = () => {
             name="_newMember"
             onChange={handleInput}
             placeholder="Enter address"
+            required
           />
           <p>Description: </p>
           <input
@@ -76,6 +77,7 @@ const NewMemberApprovalProposal = () => {
             name="description"
             onChange={handleInput}
             placeholder="Enter description"
+            required
           />
           <div className="flex justify-center">
             <Button>Approve</Button>

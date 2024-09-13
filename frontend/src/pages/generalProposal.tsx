@@ -8,16 +8,8 @@ import {
 } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Button } from "@components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { Button } from "@components/ui/button";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -101,6 +93,7 @@ const GeneralProposal = () => {
             Targets:
           </label>
           <input
+            required
             className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
             type="text"
             value={targets}
@@ -113,6 +106,7 @@ const GeneralProposal = () => {
             Values:
           </label>
           <input
+            required
             className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
             type="text"
             value={values}
@@ -125,6 +119,7 @@ const GeneralProposal = () => {
             Calldatas:
           </label>
           <input
+            required
             className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
             type="text"
             value={calldatas}
@@ -137,6 +132,7 @@ const GeneralProposal = () => {
             Description:
           </label>
           <input
+            required
             className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
             type="text"
             value={description}
@@ -145,26 +141,7 @@ const GeneralProposal = () => {
           />
         </div>
         <div className="text-center">
-          <Dialog>
-            <DialogTrigger asChild>
-              <div className="flex justify-center">
-                <Button>Propose</Button>
-              </div>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-green-400">
-                  Members proposed!
-                </DialogTitle>
-                <DialogDescription>
-                  Transaction Hash:{" "}
-                  <span className="text-orange-400">
-                    0xa01358717730026c0f0a30f...c810bf6511c7f2e1a8e9f955e
-                  </span>
-                </DialogDescription>
-              </DialogHeader>
-            </DialogContent>
-          </Dialog>
+          <Button type="submit">Propose</Button>
         </div>
       </form>
     </div>
