@@ -3,7 +3,8 @@ import { ProposalUpdateService } from './proposal-update.service';
 import { ProposalUpdateController } from './proposal-update.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
-
+require('dotenv').config();
+-
 @Module({
   controllers: [ProposalUpdateController],
   providers: [
@@ -13,7 +14,7 @@ import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
       useFactory: () => {
         return new ApolloClient({
           link: new HttpLink({
-            uri: 'https://api.studio.thegraph.com/proxy/67924/fcgraph/v0.0.3',
+            uri: process.env.SUBGRAPH_QUERY_ENDPOINT,
             fetch,
           }),
           cache: new InMemoryCache(),
