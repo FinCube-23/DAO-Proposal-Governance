@@ -14,6 +14,8 @@ import {
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { Ctx, RmqContext, MessagePattern, Payload} from '@nestjs/microservices';
+
 
 @Controller('proposal-update')
 export class ProposalUpdateController {
@@ -25,6 +27,13 @@ export class ProposalUpdateController {
     return this.proposalUpdateService.getUpdatedProposals();
   }
 
+  // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
+  @MessagePattern('queue-pending-proposal')
+  getProposal(@Payload() proposal: any, @Ctx() context: RmqContext): string {
+    return this.proposalUpdateService.handlePendingProposal(proposal, context);
+  }
+
+  // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
   @Post('create-proposal')
   @ApiBody({ type: CreatedProposalDto })
   @ApiResponse({
@@ -36,6 +45,7 @@ export class ProposalUpdateController {
     return this.proposalUpdateService.placeProposal(proposal);
   }
 
+  // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
   @Post('update-proposal')
   @ApiBody({ type: UpdatedProposalDto })
   @ApiResponse({

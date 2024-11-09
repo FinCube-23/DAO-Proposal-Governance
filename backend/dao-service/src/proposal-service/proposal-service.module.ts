@@ -11,11 +11,11 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     TypeOrmModule.forFeature([ProposalEntity]),
     ClientsModule.register([
       {
-        name: 'PROPOSAL_SERVICE',
+        name: 'PROPOSAL_SERVICE', // Injectable 
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://rabbitmq:5672'],
-          queue: 'proposal-queue',
+          queue: 'proposal-queue', // Routing Key
         },
       },
     ]),

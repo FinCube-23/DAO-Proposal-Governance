@@ -4,11 +4,10 @@ import { Repository } from 'typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-
 
 
 @Injectable()
@@ -51,15 +50,13 @@ export class ProposalServiceService {
   }
 
   placeProposal(proposal: ProposalDto) {
-    this.rabbitClient.emit('proposal-placed', proposal);
     return { message: 'Proposal Placed!' };
   }
 
-  getProposals() {
-    this.logger.log("in get proposal of service");
-    return this.rabbitClient
-      .send({ cmd: 'fetch-update-proposal' }, {})
-      .pipe(timeout(5000));
+  // 💬 Publishing Message in the queue
+  handlePendingProposal(proposal: CreatedProposalDto): any {
+    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ proposal.transaction_info.transactionHash);
+    return this.rabbitClient.send('queue-pending-proposal', proposal);
   }
 
   private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
@@ -90,20 +87,25 @@ export class ProposalServiceService {
     return dto;
   }
 
-  handleCreatedProposalPlaced(proposal: CreatedProposalDto) {
+  // 📡 Listening Event from Publisher
+  handleCreatedProposalPlaced(proposal: CreatedProposalDto, @Ctx() context: RmqContext) {
     const createdProposal = this.mapToCreatedProposalDto(proposal);
     if (
       createdProposal instanceof CreatedProposalDto
     ) {
-      this.logger.error(
+      this.logger.log(
         `Received a new proposal - Address: ${createdProposal.proposalAddress}`,
       );
+      console.log(`Pattern: ${context.getPattern()}`);
       this.update_proposals.push(createdProposal);
+      const originalMsg = context.getMessage();
+      console.log(originalMsg);
     } else {
       this.logger.error('Invalid proposal object received:', createdProposal);
     }
   }
 
+  // 📡 Listening Event from Publisher
   handleUpdatedProposalPlaced(proposal: UpdatedProposalDto) {
     const updatedProposal = this.mapToUpdatedProposalDto(proposal);
     if (
@@ -117,7 +119,6 @@ export class ProposalServiceService {
       this.logger.error('Invalid proposal object received:', updatedProposal);
     }
   }
-
 
   async getUpdatedProposals():Promise<any> {
     this.logger.error("in get updated proposal of service");
