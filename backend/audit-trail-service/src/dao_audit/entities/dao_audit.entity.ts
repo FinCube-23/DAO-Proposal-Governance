@@ -20,6 +20,10 @@ export class DaoAudit {
   @ApiProperty()
   trx_sender: string;
 
+  @Column({ type: 'varchar' })
+  @ApiProperty()
+  trx_metadata: string;
+
   @Column({ type: 'integer', nullable: true })
   @ApiProperty()
   trx_status: number;

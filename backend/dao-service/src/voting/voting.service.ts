@@ -1,14 +1,13 @@
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { DAOEntity } from './entities/dao.entity';
+import { VotingEntity } from './entities/vote.entity';
 import axios from 'axios';
 @Injectable()
 export class VotingService {
   private readonly logger = new Logger(VotingService.name);
   constructor(
-    @InjectRepository(DAOEntity) private daoRepository: Repository<DAOEntity>) 
-   { }
+    @InjectRepository(VotingEntity) private daoRepository: Repository<VotingEntity>) { }
 
   private async getUserRole(sub: string): Promise<string> {
     try {
@@ -20,20 +19,20 @@ export class VotingService {
     }
   }
 
-  async create(sub: string, dao: Partial<DAOEntity>): Promise<DAOEntity> {
+  async create(sub: string, dao: Partial<VotingEntity>): Promise<VotingEntity> {
     const role = await this.getUserRole(sub);
     if (role != 'MFS') {
-      this.logger.error("User does not have permission "+ role);
+      this.logger.error("User does not have permission " + role);
       throw new UnauthorizedException("User does not have permission");
     }
     const new_dao = this.daoRepository.create(dao);
     return this.daoRepository.save(new_dao);
   }
 
-  async findOne(sub: string, id: number): Promise<DAOEntity> {
+  async findOne(sub: string, id: number): Promise<VotingEntity> {
     const role = await this.getUserRole(sub);
     if (role != 'MFS') {
-      this.logger.error("User does not have permission "+ role);
+      this.logger.error("User does not have permission " + role);
       throw new UnauthorizedException("User does not have permission");
     }
     return this.daoRepository.findOne({ where: { id } });
@@ -41,11 +40,11 @@ export class VotingService {
 
   async update(sub: string,
     id: number,
-    updated_dao: Partial<DAOEntity>,
-  ): Promise<DAOEntity> {
+    updated_dao: Partial<VotingEntity>,
+  ): Promise<VotingEntity> {
     const role = await this.getUserRole(sub);
     if (role != 'MFS') {
-      this.logger.error("User does not have permission "+ role);
+      this.logger.error("User does not have permission " + role);
       throw new UnauthorizedException("User does not have permission");
     }
     await this.daoRepository.update(id, updated_dao);
