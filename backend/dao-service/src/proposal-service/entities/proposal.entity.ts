@@ -7,7 +7,6 @@ import {
     CreateDateColumn,
     UpdateDateColumn
 } from 'typeorm';
-import { DAOEntity } from 'src/voting/entities/dao.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('Proposal')
@@ -31,6 +30,11 @@ export class ProposalEntity {
     @Column({ type: 'boolean', default: false })
     @ApiProperty()
     external_proposal: boolean;
+
+
+    @Column({ type: 'varchar', default: false })
+    @ApiProperty()
+    trx_hash: string;
 
 
     @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
