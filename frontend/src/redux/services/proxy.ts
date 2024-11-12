@@ -20,7 +20,6 @@ export const proxyApis = api.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["proxy"],
     }),
     // get proposal threshold
     getProposalThreshold: build.query<GetProposalThresholdResponse, void>({
@@ -30,7 +29,6 @@ export const proxyApis = api.injectEndpoints({
           method: "GET",
         };
       },
-      providesTags: ["proxy"],
     }),
     // get proposal count
     getProposalCount: build.query<GetProposalCountResponse, void>({
@@ -62,7 +60,6 @@ export const proxyApis = api.injectEndpoints({
         method: "POST",
         body: payload,
       }),
-      invalidatesTags: ["proxy"],
     }),
     // execute proposal
     executeProposal: build.mutation<ExecuteProposalResponse, void>({
