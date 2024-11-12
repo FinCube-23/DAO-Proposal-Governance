@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 import { ProposalEntity } from 'src/proposal-service/entities/proposal.entity';
 @Entity('dao')
-export class DAOEntity {
+export class VotingEntity {
   @PrimaryGeneratedColumn()
   @ApiProperty()
   id: number;
