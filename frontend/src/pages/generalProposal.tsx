@@ -19,12 +19,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@components/ui/dialog";
+import { useAccount } from "wagmi";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
   const [values, setValues] = useState("");
   const [calldatas, setCalldatas] = useState("");
   const [description, setDescription] = useState("");
+  const { address } = useAccount();
   const [createProposal] = useCreateProposalMutation();
 
   const handleTargetsChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -90,9 +92,9 @@ const GeneralProposal = () => {
 
       const backendData = {
         id: 0,
-        hash: hash,
-        proposal_address: "",
-        metadata: "",
+        proposal_address: `${address}`,
+        metadata: proposalData.description,
+        trx_hash: hash,
         proposal_status: true,
         external_proposal: true,
       };
@@ -133,12 +135,14 @@ const GeneralProposal = () => {
         <div className="flex justify-end">
           <Dialog>
             <DialogTrigger asChild>
-              <button
+              <Button
+                variant="outline"
+                size="icon"
                 title="view sample data"
                 className="border border-white px-2 rounded-full"
               >
-                Sample Data
-              </button>
+                i
+              </Button>
             </DialogTrigger>
 
             <DialogContent>

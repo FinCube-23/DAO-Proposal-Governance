@@ -30,6 +30,7 @@ export default function MfsDashboard() {
   const auth = useSelector(
     (state: RootState) => state.persistedReducer.authReducer.auth
   );
+
   return (
     <div className="border min-h-96 rounded-xl mt-10 pb-10">
       <Toaster></Toaster>
