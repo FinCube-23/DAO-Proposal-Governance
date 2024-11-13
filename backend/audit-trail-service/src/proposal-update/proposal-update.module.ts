@@ -3,12 +3,13 @@ import { ProposalUpdateService } from './proposal-update.service';
 import { ProposalUpdateController } from './proposal-update.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
+import { ProposalUpdateRepository } from './proposal-update.repository';
 require('dotenv').config();
 
 @Module({
   controllers: [ProposalUpdateController],
   providers: [
-    ProposalUpdateService,
+    ProposalUpdateService, ProposalUpdateRepository,
     {
       provide: 'APOLLO_CLIENT1',
       useFactory: () => {

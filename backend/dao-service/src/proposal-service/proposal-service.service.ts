@@ -20,6 +20,7 @@ export class ProposalServiceService {
   ) { 
     this.update_proposals = [];
   }
+  
   private async getUserRole(sub: string): Promise<string> {
     try {
       const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
@@ -29,6 +30,7 @@ export class ProposalServiceService {
       throw new UnauthorizedException("Role of user not found");;
     }
   }
+
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
     const role = await this.getUserRole(sub);
     if (role != 'MFS') {

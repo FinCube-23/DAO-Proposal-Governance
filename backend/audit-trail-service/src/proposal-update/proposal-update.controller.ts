@@ -57,42 +57,5 @@ export class ProposalUpdateController {
     return this.proposalUpdateService.updateProposal(proposal);
   }
 
-  @Post('executed-proposals')
-  @ApiResponse({
-    status: 200,
-    description: 'Executed proposals have been fetched and pushed.',
-  })
-  async pushExecutedProposals() {
-    try {
-      const executedProposals =
-        await this.proposalUpdateService.getProposalsExecuted();
-      for (const proposal of executedProposals) {
-        await this.proposalUpdateService.placeProposal(proposal);
-      }
-      return { message: 'Executed proposals have been fetched and pushed.' };
-    } catch (error) {
-      this.logger.error('Error pushing executed proposals:', error);
-      throw error;
-    }
-  }
-
-  @Post('canceled-proposals')
-  @ApiResponse({
-    status: 200,
-    description: 'Canceled proposals have been fetched and pushed.',
-  })
-  async pushCanceledProposals() {
-    try {
-      const canceledProposals =
-        await this.proposalUpdateService.getProposalsCanceled();
-      for (const proposal of canceledProposals) {
-        await this.proposalUpdateService.placeProposal(proposal);
-      }
-      return { message: 'Canceled proposals have been fetched and pushed.' };
-    } catch (error) {
-      this.logger.error('Error pushing canceled proposals:', error);
-      throw error;
-    }
-  }
 }
 
