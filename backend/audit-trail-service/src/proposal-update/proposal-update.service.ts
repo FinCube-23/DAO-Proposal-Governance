@@ -1,6 +1,5 @@
 import {
-  CreatedProposalDto,
-  UpdatedProposalDto,
+  CreatedProposalDto, ProposeEnvelopeDto
 } from './dto/proposal-update.dto';
 import {
   Injectable,
@@ -13,7 +12,7 @@ import { ProposalUpdateRepository } from './proposal-update.repository';
 @Injectable()
 export class ProposalUpdateService {
   private readonly logger = new Logger(ProposalUpdateService.name);
-  public update_proposals: (CreatedProposalDto | UpdatedProposalDto)[];
+  public update_proposals: (CreatedProposalDto)[];
 
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
@@ -24,7 +23,7 @@ export class ProposalUpdateService {
 
   // 📡 Listening MessagePattern Call
   handlePendingProposal(proposal: CreatedProposalDto, @Ctx() context: RmqContext): string {
-    this.logger.log("Got the pending proposal hash " + proposal.transaction_info.transactionHash);
+    this.logger.log("Got the pending proposal hash " + proposal.transaction_data.transactionHash);
     const originalMsg = context.getMessage();
     const replyTo = originalMsg.properties.replyTo;
     this.logger.log('Replying To Producer Service: ' + replyTo);
@@ -33,14 +32,9 @@ export class ProposalUpdateService {
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   placeProposal(proposal: CreatedProposalDto) {
+    // const envelope = ProposeEnvelopeDto;
+    const envelope = this.proposalUpdateRepository.getProposalsAdded();
     this.rabbitClient.emit('create-proposal-placed', proposal);
-    const sample = this.proposalUpdateRepository.getProposalsAdded();
-    return { message: 'Proposal Placed!' };
-  }
-
-  // 💬 Pushing Event in the Message Queue in EventPattern
-  updateProposal(proposal : UpdatedProposalDto) {
-    this.rabbitClient.emit('update-proposal-placed', proposal);
     return { message: 'Proposal Placed!' };
   }
 

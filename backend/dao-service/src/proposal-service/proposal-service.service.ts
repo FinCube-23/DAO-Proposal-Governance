@@ -5,7 +5,7 @@ import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
-import { ProposalDto, UpdatedProposalDto, CreatedProposalDto } from './dto/proposal.dto';
+import { ProposalDto, CreatedProposalDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
@@ -57,35 +57,19 @@ export class ProposalServiceService {
 
   // 💬 Publishing Message in the queue
   handlePendingProposal(proposal: CreatedProposalDto): any {
-    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ proposal.transaction_info.transactionHash);
+    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ proposal.transaction_data.transactionHash);
     return this.rabbitClient.send('queue-pending-proposal', proposal);
   }
 
   private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
     const dto = new CreatedProposalDto();
-    dto.id = proposal.proposalId;
-    dto.proposalAddress = proposal.id; // Assuming 'id' from the graph is the address
-    dto.proposer_address = ''; // This information is not available in the current graph data
-    dto.metadata = JSON.stringify({
-      blockTimestamp: proposal.blockTimestamp,
-      proposalType: proposal.proposalType,
-    });
-    dto.transaction_info = {
-      transactionHash: proposal.transactionHash,
-      status: 'PENDING', 
-    } as unknown as ResponseTransactionStatusDto;
-    dto.external_proposal = true; 
-    return dto;
-  }
-
-  private mapToUpdatedProposalDto(proposal: any): UpdatedProposalDto {
-    const dto = new UpdatedProposalDto();
-    dto.id = proposal.proposalId;
-    dto.proposalAddress = proposal.id;
-    dto.transaction_info = {
-      transactionHash: proposal.transactionHash,
-      status: 'PENDING', 
-    } as unknown as ResponseTransactionStatusDto;
+    dto.id = proposal.proposalId; // Assuming 'id' from the graph is the address
+    dto.proposalId = proposal.proposalId; 
+    dto.description = proposal.description; 
+    dto.voteStart = proposal.voteStart;
+    dto.voteEnd = proposal.voteEnd;
+    dto.external_proposal = proposal.external_proposal; 
+    dto.transaction_data = proposal.transaction_data as unknown as ResponseTransactionStatusDto;
     return dto;
   }
 
@@ -96,7 +80,7 @@ export class ProposalServiceService {
       createdProposal instanceof CreatedProposalDto
     ) {
       this.logger.log(
-        `Received a new proposal - Address: ${createdProposal.proposalAddress}`,
+        `Received a new proposal - id: ${createdProposal.proposalId}`,
       );
       console.log(`Pattern: ${context.getPattern()}`);
       this.update_proposals.push(createdProposal);
@@ -104,21 +88,6 @@ export class ProposalServiceService {
       console.log(originalMsg);
     } else {
       this.logger.error('Invalid proposal object received:', createdProposal);
-    }
-  }
-
-  // 📡 Listening Event from Publisher
-  handleUpdatedProposalPlaced(proposal: UpdatedProposalDto) {
-    const updatedProposal = this.mapToUpdatedProposalDto(proposal);
-    if (
-      updatedProposal instanceof UpdatedProposalDto
-    ) {
-      this.logger.error(
-        `Received a new proposal - Address: ${updatedProposal.proposalAddress}`,
-      );
-      this.update_proposals.push(updatedProposal);
-    } else {
-      this.logger.error('Invalid proposal object received:', updatedProposal);
     }
   }
 

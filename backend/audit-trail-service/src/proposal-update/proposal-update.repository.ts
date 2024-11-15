@@ -28,8 +28,8 @@ export class ProposalUpdateRepository {
             const resultCreated = await this.apolloClient.query({
                 query: this.GET_PROPOSAL_CREATED,
             });
-            this.logger.log('added proposals =>' + result.data.proposalAddeds);
-            this.logger.log('created proposals =>' + resultCreated.data.proposalCreateds);
+            this.logger.log('added proposals =>' + result.data.proposalAddeds.proposalType);
+            this.logger.log('created proposals =>' + resultCreated.data.proposalCreateds.proposalId);
 
             return result.data.proposalCreateds;
         } catch (error) {
@@ -66,7 +66,26 @@ export class ProposalUpdateRepository {
             transactionHash
             description
         }
+    }
+    `;
+
+    GET_PROPOSAL_EXECUTED = gql`
+    query MyQuery {
+        proposalExecuteds(
+            where: {transactionHash_in: [
+            "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
+            "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"
+            ]}){
+            proposalId
         }
+        memberApproveds(
+            where: {transactionHash_in: [
+            "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
+            "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"  
+            ]}){
+            member
+        }
+    }
     `;
 
 }

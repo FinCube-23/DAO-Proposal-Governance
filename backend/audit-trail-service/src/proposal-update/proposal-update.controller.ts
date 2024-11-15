@@ -9,8 +9,7 @@ import {
 } from '@nestjs/common';
 import { ProposalUpdateService } from './proposal-update.service';
 import {
-  CreatedProposalDto,
-  UpdatedProposalDto,
+  CreatedProposalDto
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -43,18 +42,6 @@ export class ProposalUpdateController {
   })
   placeProposal(@Body() proposal: CreatedProposalDto) {
     return this.proposalUpdateService.placeProposal(proposal);
-  }
-
-  // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
-  @Post('update-proposal')
-  @ApiBody({ type: UpdatedProposalDto })
-  @ApiResponse({
-    status: 200,
-    description: 'The message has been successfully pushed.',
-    type: CreatedProposalDto,
-  })
-  updateProposal(@Body() proposal: UpdatedProposalDto) {
-    return this.proposalUpdateService.updateProposal(proposal);
   }
 
 }

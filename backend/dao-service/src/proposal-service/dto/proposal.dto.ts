@@ -1,25 +1,31 @@
+import { EventMessageDto } from 'src/shared/common/dto/event-message.dto';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { TraceContextDto } from 'src/shared/common/dto/trace-context.dto';
 
 export class ProposalDto {
-
   public id: string;
-  public proposalAddress: string;
- 
-
+  public proposalId: string;
 }
+
 //A superclass will have the fields common to all DTOs. The child classes will deal with specifics
-export class CreatedProposalDto extends ProposalDto{
-proposer_address: string;
-metadata: string;
-transaction_info: ResponseTransactionStatusDto;
-external_proposal: boolean;
-
+export class CreatedProposalDto extends ProposalDto {
+  description: string;
+  voteStart: string;
+  voteEnd: string;
+  transaction_data: ResponseTransactionStatusDto;
+  external_proposal: boolean;
 }
 
+export class ProposeEnvelopeDto {
+  event_data: EventMessageDto;
+  trace_context: TraceContextDto;
+  payload: CreatedProposalDto;
+}
 
-export class UpdatedProposalDto extends ProposalDto{
-transaction_info: ResponseTransactionStatusDto;
-
+export class ExecuteEnvelopeDto {
+  event_data: EventMessageDto;
+  trace_context: TraceContextDto;
+  payload: ProposalDto;
 }
 
 
