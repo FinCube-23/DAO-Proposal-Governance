@@ -9,7 +9,8 @@ import {
 } from '@nestjs/common';
 import { ProposalUpdateService } from './proposal-update.service';
 import {
-  CreatedProposalDto
+  CreatedProposalDto,
+  MessageEnvelopeDto
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -28,8 +29,8 @@ export class ProposalUpdateController {
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
   @MessagePattern('queue-pending-proposal')
-  getProposal(@Payload() proposal: any, @Ctx() context: RmqContext): string {
-    return this.proposalUpdateService.handlePendingProposal(proposal, context);
+  getProposal(@Payload() data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): string {
+    return this.proposalUpdateService.handlePendingProposal(data_packet, context);
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
@@ -40,8 +41,8 @@ export class ProposalUpdateController {
     description: 'The message has been successfully pushed.',
     type: CreatedProposalDto,
   })
-  placeProposal(@Body() proposal: CreatedProposalDto) {
-    return this.proposalUpdateService.placeProposal(proposal);
+  async placeProposal(@Body() proposal: CreatedProposalDto) {
+    return await this.proposalUpdateService.updateProposal(proposal);
   }
 
 }

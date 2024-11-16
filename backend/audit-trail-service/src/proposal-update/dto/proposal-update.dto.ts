@@ -1,7 +1,7 @@
 import { WEB3STATUS, web3StatusCode } from 'src/shared/common/constants';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { TraceContextDto } from 'src/shared/common/dto/trace-context.dto';
-import { EventMessageDto } from  'src/shared/common/dto/event-message.dto';
+import { EventMessageDto, MessageDto } from  'src/shared/common/dto/event-message.dto';
 
 export class ProposalDto {
   public id: string;
@@ -10,6 +10,7 @@ export class ProposalDto {
 
 //A superclass will have the fields common to all DTOs. The child classes will deal with specifics
 export class CreatedProposalDto extends ProposalDto {
+  proposer_address: string;
   description: string;
   voteStart: string;
   voteEnd: string;
@@ -28,3 +29,14 @@ export class ExecuteEnvelopeDto {
   trace_context: TraceContextDto;
   payload: ProposalDto;
 }
+
+export class PendingTransactionDto {
+  trx_hash: string;
+  trx_singer: string;
+}
+
+export class MessageEnvelopeDto {
+  trace_context: TraceContextDto;
+  payload: PendingTransactionDto;
+}
+

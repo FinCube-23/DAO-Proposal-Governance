@@ -3,11 +3,10 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
-import { ProposalDto, CreatedProposalDto } from './dto/proposal.dto';
+import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
 import {
   Ctx,
   EventPattern,
-  MessagePattern,
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
@@ -31,25 +30,17 @@ export class ProposalServiceController {
     return this.proposalService.findAllProposals(req.user);
   }
 
-  @Post('place-proposal')
-  @ApiBody({ type: CreatedProposalDto })
-  @ApiResponse({ status: 200, description: 'The message has been successfully pushed.', type: CreatedProposalDto })
-  placeProposal(@Body() proposal: CreatedProposalDto) {
-    return this.proposalService.placeProposal(proposal);
-  }
-
   // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
   @EventPattern('create-proposal-placed')
   handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto, @Ctx() context: RmqContext) {
-    console.log('GG');
     this.proposalService.handleCreatedProposalPlaced(proposal, context);
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
   @Post('push-pending-proposal')
-  @ApiBody({ type: CreatedProposalDto })
+  @ApiBody({ type: MessageEnvelopeDto })
   @ApiResponse({ status: 200, description: 'The message has been successfully queued.', type: CreatedProposalDto })
-  pushPendingProposal(@Body() proposal: CreatedProposalDto): any  {
+  pushPendingProposal(@Body() proposal: PendingTransactionDto): any  {
     return this.proposalService.handlePendingProposal(proposal);
   }
 

@@ -9,6 +9,7 @@ export class ProposalDto {
 
 //A superclass will have the fields common to all DTOs. The child classes will deal with specifics
 export class CreatedProposalDto extends ProposalDto {
+  proposer_address: string;
   description: string;
   voteStart: string;
   voteEnd: string;
@@ -28,4 +29,13 @@ export class ExecuteEnvelopeDto {
   payload: ProposalDto;
 }
 
+export class PendingTransactionDto {
+  trx_hash: string;
+  trx_singer: string;
+}
+
+export class MessageEnvelopeDto {
+  trace_context: TraceContextDto;
+  payload: PendingTransactionDto;
+}
 

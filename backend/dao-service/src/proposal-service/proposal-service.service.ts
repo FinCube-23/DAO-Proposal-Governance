@@ -5,7 +5,7 @@ import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
-import { ProposalDto, CreatedProposalDto } from './dto/proposal.dto';
+import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
@@ -51,20 +51,27 @@ export class ProposalServiceService {
     return this.proposalRepository.find();
   }
 
-  placeProposal(proposal: ProposalDto) {
-    return { message: 'Proposal Placed!' };
+  // 💬 Publishing Message in the queue
+  handlePendingProposal(proposal: PendingTransactionDto): any {
+    const envelop = this.mapToMessageEnvelopDto(proposal);
+    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ envelop.payload.trx_hash);
+    return this.rabbitClient.send('queue-pending-proposal', proposal);
   }
 
-  // 💬 Publishing Message in the queue
-  handlePendingProposal(proposal: CreatedProposalDto): any {
-    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ proposal.transaction_data.transactionHash);
-    return this.rabbitClient.send('queue-pending-proposal', proposal);
+  private mapToMessageEnvelopDto(proposal: PendingTransactionDto): MessageEnvelopeDto {
+    const dto = new MessageEnvelopeDto();
+    dto.trace_context.trace_id = "provided-by-api-gateway-service";
+    dto.trace_context.span_id = "api-service+this-service";
+    dto.payload.trx_hash = proposal.trx_hash;
+    dto.payload.trx_singer = proposal.trx_singer;
+    return dto;
   }
 
   private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
     const dto = new CreatedProposalDto();
     dto.id = proposal.proposalId; // Assuming 'id' from the graph is the address
     dto.proposalId = proposal.proposalId; 
+    dto.proposer_address = proposal.proposer_address;
     dto.description = proposal.description; 
     dto.voteStart = proposal.voteStart;
     dto.voteEnd = proposal.voteEnd;

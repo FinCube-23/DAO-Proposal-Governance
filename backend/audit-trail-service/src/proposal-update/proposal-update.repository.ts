@@ -60,6 +60,7 @@ export class ProposalUpdateRepository {
         ) {
             id
             proposalId
+            proposer
             blockNumber
             voteStart
             voteEnd
