@@ -9,12 +9,16 @@ import { config } from "@layouts/RootLayout";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
+import { useCreateProposalMutation } from "@redux/services/proposal";
+import { useAccount } from "wagmi";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
     _newMember: "",
     description: "",
   });
+  const [createProposal] = useCreateProposalMutation();
+  const { address } = useAccount();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -38,6 +42,18 @@ const NewMemberApprovalProposal = () => {
       });
 
       const hash = await writeContract(config, request);
+
+      const backendData = {
+        id: 0,
+        proposal_address: `${address}`,
+        metadata: data.description,
+        trx_hash: hash,
+        proposal_status: false,
+        external_proposal: false,
+      };
+
+      // backend proposal service call
+      await createProposal(backendData);
 
       await waitForTransactionReceipt(config, { hash });
 
