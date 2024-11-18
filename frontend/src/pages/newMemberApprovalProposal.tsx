@@ -48,8 +48,8 @@ const NewMemberApprovalProposal = () => {
         proposal_address: `${address}`,
         metadata: data.description,
         trx_hash: hash,
-        proposal_status: true,
-        external_proposal: true,
+        proposal_status: false,
+        external_proposal: false,
       };
 
       // backend proposal service call
