@@ -33,15 +33,12 @@ const GeneralProposal = () => {
     setTargets(e.target.value);
   };
 
-  const data = {
-    targets: [
-      "0xAbc123...0001", // Replace with actual wallet addresses
-      "0xDef456...0002",
-    ],
-    values: [100, 200], // Example integer values
+  const dummyData = {
+    targets: ["0xAbc123...0001", "0xDef456...0002"],
+    values: [100, 200],
     calldatas:
       "0xe0a8f6f50000000000000000000000000000000000000000000000000000000000000001",
-    description: "This is a sample transaction description", // Example string description
+    description: "This is a sample transaction description",
   };
 
   const handleValuesChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -95,8 +92,8 @@ const GeneralProposal = () => {
         proposal_address: `${address}`,
         metadata: proposalData.description,
         trx_hash: hash,
-        proposal_status: true,
-        external_proposal: true,
+        proposal_status: false,
+        external_proposal: false,
       };
 
       // backend proposal service call
@@ -156,7 +153,7 @@ const GeneralProposal = () => {
               {/* Container with controlled overflow */}
               <div style={{ maxHeight: "300px", overflowY: "auto" }}>
                 <pre className="text-xs whitespace-pre-wrap break-words">
-                  {JSON.stringify(data, null, 2)}
+                  {JSON.stringify(dummyData, null, 2)}
                 </pre>
               </div>
             </DialogContent>
