@@ -76,9 +76,6 @@ export default function DaoDashboard() {
       const result = response[0];
 
       setProposalsByPage(result as []);
-      console.log("====================================");
-      console.log(result);
-      console.log("====================================");
     } catch (e) {
       console.log(e);
       setLoading(false);
