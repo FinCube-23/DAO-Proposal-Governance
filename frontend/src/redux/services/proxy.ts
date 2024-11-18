@@ -4,7 +4,6 @@ import {
   ExecuteProposalResponse,
   GetBalanceResponse,
   GetOngoingProposalsResponse,
-  GetProposalCountResponse,
   GetProposalThresholdResponse,
   RegisterMemberPayload,
   RegisterMemberResponse,
@@ -31,7 +30,7 @@ export const proxyApis = api.injectEndpoints({
       },
     }),
     // get proposal count
-    getProposalCount: build.query<GetProposalCountResponse, void>({
+    getProposalCount: build.query<number, void>({
       query: () => {
         return {
           url: `${PROXY_ENDPOINT.BASE}/proposal-count`,
