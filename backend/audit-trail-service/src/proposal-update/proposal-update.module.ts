@@ -4,6 +4,7 @@ import { ProposalUpdateController } from './proposal-update.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { ProposalUpdateRepository } from './proposal-update.repository';
+import { DaoAuditModule } from 'src/dao_audit/dao_audit.module';
 require('dotenv').config();
 
 @Module({
@@ -33,8 +34,7 @@ require('dotenv').config();
           queue: 'proposal-update-queue', // Routing Key
         },
       },
-    ]),
-  ],
+    ])],
   exports: ['APOLLO_CLIENT1'],
 })
-export class ProposalUpdateModule {}
+export class ProposalUpdateModule { }

@@ -18,13 +18,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       }),
 
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      audience: process.env.AUTH0_AUDIENCE,
+      audience: `${process.env.AUTH0_AUDIENCE}`,
       issuer: `${process.env.AUTH0_ISSUER_URL}`,
       algorithms: ['RS256'],
     });
   }
 
   validate(payload: any): string {
+    console.log(payload);
     return payload.sub;
   }
 }

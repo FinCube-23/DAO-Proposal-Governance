@@ -8,6 +8,7 @@ import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
 import { timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { TraceContextDto } from 'src/shared/common/dto/trace-context.dto';
 
 
 @Injectable()
@@ -17,10 +18,10 @@ export class ProposalServiceService {
   constructor(
     @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy
-  ) { 
+  ) {
     this.update_proposals = [];
   }
-  
+
   private async getUserRole(sub: string): Promise<string> {
     try {
       const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
@@ -31,13 +32,28 @@ export class ProposalServiceService {
     }
   }
 
+  // 💬 MessagePattern expects a response | This is a publisher
+
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
-    const role = await this.getUserRole(sub);
-    if (role != 'MFS') {
-      this.logger.log("User does not have permission for role: " + role);
-      throw new UnauthorizedException("User does not have permission");
-    }
+    // Testing without auth
+    // const role = await this.getUserRole(sub);
+    // if (role != 'MFS') {
+    //   this.logger.log("User does not have permission for role: " + role);
+    //   throw new UnauthorizedException("User does not have permission");
+    // }
+
+    this.logger.log("New proposal placed: " + proposal.id);
     const new_proposal = this.proposalRepository.create(proposal);
+    const pending_proposal = this.mapToCreatedProposalDto(proposal);
+    const envelop = this.mapCreatedProposalToMessageEnvelop(pending_proposal);
+    try {
+      this.logger.log("Triggering queue-pending-proposal for: Transaction: " + envelop.payload.trx_hash);
+      this.rabbitClient.send('queue-pending-proposal', envelop);
+    } catch (err) {
+      this.logger.error("Error triggering queue-pending-proposal: " + err);
+      throw new Error("Error triggering queue-pending-proposal");
+    }
+
     return this.proposalRepository.save(new_proposal);
   }
 
@@ -54,29 +70,50 @@ export class ProposalServiceService {
   // 💬 Publishing Message in the queue
   handlePendingProposal(proposal: PendingTransactionDto): any {
     const envelop = this.mapToMessageEnvelopDto(proposal);
-    this.logger.log("Triggering queue-pending-proposal for: Transaction: "+ envelop.payload.trx_hash);
+    this.logger.log("Triggering queue-pending-proposal for: Transaction: " + envelop.payload.trx_hash);
     return this.rabbitClient.send('queue-pending-proposal', proposal);
   }
 
+  private mapCreatedProposalToMessageEnvelop(pendingProposal: CreatedProposalDto): MessageEnvelopeDto {
+    const dto = new MessageEnvelopeDto();
+    const trace_context = new TraceContextDto();
+    trace_context.trace_id = "provided-by-api-gateway-service";
+    trace_context.span_id = "api-service+this-service";
+    dto.trace_context = trace_context;
+    const payload = new PendingTransactionDto();
+    payload.trx_hash = pendingProposal.transaction_data.transactionHash;
+    payload.trx_singer = pendingProposal.proposer_address;
+    dto.payload = payload;
+    return dto;
+  }
   private mapToMessageEnvelopDto(proposal: PendingTransactionDto): MessageEnvelopeDto {
     const dto = new MessageEnvelopeDto();
-    dto.trace_context.trace_id = "provided-by-api-gateway-service";
-    dto.trace_context.span_id = "api-service+this-service";
-    dto.payload.trx_hash = proposal.trx_hash;
-    dto.payload.trx_singer = proposal.trx_singer;
+    const trace_context = new TraceContextDto();
+    trace_context.trace_id = "provided-by-api-gateway-service";
+    trace_context.span_id = "api-service+this-service";
+    dto.trace_context = trace_context;
+    const payload = new PendingTransactionDto();
+    payload.trx_hash = proposal.trx_hash;
+    payload.trx_singer = proposal.trx_singer;
+    dto.payload = payload;
     return dto;
   }
 
   private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
     const dto = new CreatedProposalDto();
     dto.id = proposal.proposalId; // Assuming 'id' from the graph is the address
-    dto.proposalId = proposal.proposalId; 
+    dto.proposalId = proposal.proposalId;
     dto.proposer_address = proposal.proposer_address;
-    dto.description = proposal.description; 
+    dto.description = proposal.metadata || proposal.description; //TODO: Needs to be a seperate function while recieving
     dto.voteStart = proposal.voteStart;
     dto.voteEnd = proposal.voteEnd;
-    dto.external_proposal = proposal.external_proposal; 
-    dto.transaction_data = proposal.transaction_data as unknown as ResponseTransactionStatusDto;
+    dto.external_proposal = proposal.external_proposal;
+    const transactionData = new ResponseTransactionStatusDto();
+    transactionData.web3Status = 0;
+    transactionData.message = proposal.description;
+    transactionData.blockNumber = 0; // Assuming block number is 0 for now
+    transactionData.transactionHash = proposal.trx_hash;
+    dto.transaction_data = proposal.transaction_data || transactionData;
     return dto;
   }
 
@@ -98,7 +135,7 @@ export class ProposalServiceService {
     }
   }
 
-  async getUpdatedProposals():Promise<any> {
+  async getUpdatedProposals(): Promise<any> {
     this.logger.error("in get updated proposal of service");
     return this.update_proposals;
   }

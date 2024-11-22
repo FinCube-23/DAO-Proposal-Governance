@@ -15,8 +15,9 @@ import {
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) { }
 
+  // 💬 MessagePattern expects a response | This is a publisher
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  //@UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: ProposalEntity })
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -40,7 +41,7 @@ export class ProposalServiceController {
   @Post('push-pending-proposal')
   @ApiBody({ type: MessageEnvelopeDto })
   @ApiResponse({ status: 200, description: 'The message has been successfully queued.', type: CreatedProposalDto })
-  pushPendingProposal(@Body() proposal: PendingTransactionDto): any  {
+  pushPendingProposal(@Body() proposal: PendingTransactionDto): any {
     return this.proposalService.handlePendingProposal(proposal);
   }
 
@@ -49,12 +50,6 @@ export class ProposalServiceController {
     return this.proposalService.getUpdatedProposals();
   }
 
-  @Get()
-  @UseGuards(AuthGuard('jwt'))
-  async findAllProposals(@Req() req): Promise<ProposalEntity[]> {
-    return this.proposalService.findAll(req.user);
-  }
-  
 }
 
 

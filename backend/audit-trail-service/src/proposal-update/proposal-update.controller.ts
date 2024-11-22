@@ -14,13 +14,13 @@ import {
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-import { Ctx, RmqContext, MessagePattern, Payload} from '@nestjs/microservices';
+import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
 
 
 @Controller('proposal-update')
 export class ProposalUpdateController {
   private readonly logger = new Logger(ProposalUpdateController.name);
-  constructor(private readonly proposalUpdateService: ProposalUpdateService) {}
+  constructor(private readonly proposalUpdateService: ProposalUpdateService) { }
 
   @Get('get-proposals')
   getProposals() {
@@ -29,8 +29,8 @@ export class ProposalUpdateController {
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
   @MessagePattern('queue-pending-proposal')
-  getProposal(@Payload() data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): string {
-    return this.proposalUpdateService.handlePendingProposal(data_packet, context);
+  async getProposal(@Payload() data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): Promise<string> {
+    return await this.proposalUpdateService.handlePendingProposal(data_packet, context);
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
@@ -44,6 +44,13 @@ export class ProposalUpdateController {
   async placeProposal(@Body() proposal: CreatedProposalDto) {
     return await this.proposalUpdateService.updateProposal(proposal);
   }
+
+  // @Get('Get-Proposal/:txhash')
+  // async getProposalsForTest(@Param('txhash') txHash: string): Promise<any> {
+  //   const proposals = await this.proposalUpdateService.getProposalsForTest(txHash);
+  //   //console.log(proposals);
+  //   return proposals;
+  // }
 
 }
 

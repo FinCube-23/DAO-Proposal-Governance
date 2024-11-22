@@ -6,8 +6,9 @@ import {
   Inject,
   Logger,
 } from '@nestjs/common';
-import { ClientProxy, Ctx, RmqContext} from '@nestjs/microservices';
+import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
+
 
 @Injectable()
 export class ProposalUpdateService {
@@ -22,45 +23,60 @@ export class ProposalUpdateService {
   }
 
   // 📡 Listening MessagePattern Call
-  handlePendingProposal(data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): string {
+  async handlePendingProposal(data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): Promise<string> {
     this.logger.log("Got the pending proposal hash " + data_packet.payload.trx_hash);
-    this.logger.log("Trace id: "+data_packet.trace_context.trace_id+" | Span id: "+ data_packet.trace_context.span_id);
+    this.logger.log("Trace id: " + data_packet.trace_context.trace_id + " | Span id: " + data_packet.trace_context.span_id);
     // @Sampad insert the transaction hash to DB.
+    const new_dao_audit = {
+      transactionHash: data_packet.payload.trx_hash,
+      trx_sender: data_packet.payload.trx_singer,
+    };
+
+    //ToDo
+    //this.daoAuditService.create(new_dao_audit);
+
+    // Get pending proposal from The Graph
+    const pendingProposal = await this.proposalUpdateRepository.getProposalsCreateds(data_packet.payload.trx_hash);
+    this.logger.log("Recieved pending proposal: " + pendingProposal[0])
     const originalMsg = context.getMessage();
     const replyTo = originalMsg.properties.replyTo;
     this.logger.log('Replying To Producer Service: ' + replyTo);
-    return "0xSuccess"
+    return "0xSuccess";
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updateProposal(proposal: CreatedProposalDto) {
     // const envelope = new ProposeEnvelopeDto();
-    const envelope = await this.proposalUpdateRepository.getProposalsAdded();
+    const envelope = await this.proposalUpdateRepository.getProposalsAdded(proposal.transaction_data.transactionHash);
     const gg = await this.mapToMessageEnvelopDto(envelope);  // For testing...
     proposal = gg.payload;
     await this.rabbitClient.emit('create-proposal-placed', proposal);
     return { message: 'Proposal Placed!' };
   }
 
+  // async getProposalsForTest(transactionHash: string): Promise<any> {
+  //   const proposals = await this.proposalUpdateRepository.getProposalsAdded(transactionHash);
+  //   return proposals;
+  // }
   getUpdatedProposals() {
     return this.update_proposals;
   }
 
   private async mapToMessageEnvelopDto(proposal: any): Promise<ProposeEnvelopeDto> {
     const dto = new ProposeEnvelopeDto();
-    
+
     // Initialize nested objects first
     dto.event_data = {
       event_name: "pattern",
       published_at: new Date(),
       publisher_service: 'audit-trail-service'
     };
-  
+
     dto.trace_context = {
       trace_id: "CRON-JOB-GENERATED",
       span_id: "audit-trail-service(uuid)+dao-service(uuid)"
     };
-  
+
     dto.payload = {
       id: proposal?.id || '0xSample-Index',
       proposalId: proposal?.proposalId || '34',
@@ -76,7 +92,7 @@ export class ProposalUpdateService {
       description: proposal?.description || 'This is a test proposal',
       external_proposal: false,
     };
-  
+
     return dto;
   }
 
