@@ -17,7 +17,7 @@ export class ProposalServiceController {
 
   // 💬 MessagePattern expects a response | This is a publisher
   @Post()
-  //@UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'))
   @ApiBody({ type: ProposalEntity })
   @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })

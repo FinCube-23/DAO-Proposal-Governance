@@ -13,7 +13,7 @@ export class MfsBusinessService {
     @InjectRepository(AuthenticationEntity)
     private authenticationRepository: Repository<AuthenticationEntity>,
     private readonly roleChecker: RoleChecker, // Corrected the name here
-  ) {}
+  ) { }
 
   async create(
     mfs_business: Partial<MfsBusinessEntity>,
