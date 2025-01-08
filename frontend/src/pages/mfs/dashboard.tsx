@@ -2,6 +2,8 @@ import { AnnualTransferLine } from "@components/mfs/AnnualTransferLine";
 import DisplayCard from "@components/mfs/DisplayCard";
 import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
+import contractABI from "../../contractABI/contractABI.json";
+import { config } from "@layouts/RootLayout";
 import {
   Card,
   CardDescription,
@@ -12,20 +14,21 @@ import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useConnect } from "wagmi";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
   useLazyGetProposalCountQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
+import { readContract } from "@wagmi/core";
 
 export default function MfsDashboard() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const { connectors } = useConnect();
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getProposalCount] = useLazyGetProposalCountQuery();
-  // const [proposalCount, setProposalCount] = useState(0);
-  // const [proposalThreshold, setProposalThreshold] = useState(0);
+  const [proposalCount, setProposalCount] = useState("Unauthorized");
+  const [proposalThreshold, setProposalThreshold] = useState("Unauthorized");
 
   useEffect(() => {
     if (address) {
@@ -40,8 +43,8 @@ export default function MfsDashboard() {
     const fetchProposalCount = async () => {
       try {
         const response = await getProposalCount();
-        // setProposalCount(response);
-        console.log(response);
+        setProposalCount(response.data.toString());
+        console.log(response.data);
       } catch (e) {
         console.error(e);
       }
@@ -51,7 +54,7 @@ export default function MfsDashboard() {
     const fetchProposalThreshold = async () => {
       try {
         const response = await getProposalThreshold();
-        // setProposalThreshold(response);
+        setProposalThreshold(response.data.toString());
         console.log(response);
       } catch (e) {
         console.error(e);
@@ -66,8 +69,39 @@ export default function MfsDashboard() {
     (state: RootState) => state.persistedReducer.authReducer.auth
   );
 
+  useEffect(() => {
+    const checkIsMemberApproved = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          functionName: "checkIsMemberApproved",
+          args: [address],
+        });
+
+        console.log(response);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    if (isConnected) {
+      checkIsMemberApproved();
+    }
+  }, [isConnected, address]);
+
   return (
     <div className="border min-h-96 rounded-xl mt-10 pb-10">
+      {!isConnected && (
+        <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50">
+          <div className="bg-black p-20 rounded-xl shadow-lg border border-gray-800">
+            <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
+            <p>Please connect your wallet to continue.</p>
+            <div className="mt-4 flex justify-center">
+              <ConnectButton />
+            </div>
+          </div>
+        </div>
+      )}{" "}
       <Toaster></Toaster>
       <div className="relative">
         <Card className="w-64 absolute -top-8 left-8">
@@ -93,10 +127,13 @@ export default function MfsDashboard() {
             </div>
           </div>
           <div>
-            <DisplayCard title="Total Number of Proposals" value="10" />
+            <DisplayCard
+              title="Total Number of Proposals"
+              value={proposalCount}
+            />
           </div>
           <div>
-            <DisplayCard title="Proposal Threshold" value="10" />
+            <DisplayCard title="Proposal Threshold" value={proposalThreshold} />
           </div>
         </div>
 
