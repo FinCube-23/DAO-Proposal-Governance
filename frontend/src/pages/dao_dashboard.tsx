@@ -44,6 +44,17 @@ export interface Proposal {
   proposalURI: string;
 }
 
+interface DaoInfo {
+  "@context": string;
+  name: string;
+  description: string;
+  membersURI: string;
+  proposalsURI: string;
+  activityLogURI: string;
+  governanceURI: string;
+  contractsURI: string;
+}
+
 export default function DaoDashboard() {
   const [registrationData, setRegistrationData] = useState({
     _newMember: "",
@@ -53,6 +64,19 @@ export default function DaoDashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const account = useAccount();
+  const [daoURI, setDaoURI] = useState<DaoInfo>({
+    "@context": "",
+    name: "",
+    description: "",
+    membersURI: "",
+    proposalsURI: "",
+    activityLogURI: "",
+    governanceURI: "",
+    contractsURI: "",
+  });
+  const [ongoingProposalCount, setOngoingProposalCount] = useState("");
+  const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
+  const [toggle, setToggle] = useState(false);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -80,6 +104,34 @@ export default function DaoDashboard() {
     } catch (e) {
       console.log(e);
       setLoading(false);
+    }
+  };
+
+  const getOngoingProposals = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getOngoingProposals",
+      });
+      console.log(response);
+      setOngoingProposals(response);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getOngoingProposalCount = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getOngoingProposalsCount",
+      });
+      const result = response.toString();
+      setOngoingProposalCount(result);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -114,7 +166,26 @@ export default function DaoDashboard() {
   };
 
   useEffect(() => {
+    const getDAOInfo = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          functionName: "daoURI",
+        });
+        const parsedObj = JSON.parse(response);
+
+        setDaoURI(parsedObj);
+        console.log("DaoURI", parsedObj.name);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
     getProposalsByPage();
+    getOngoingProposals();
+    getOngoingProposalCount();
+    getDAOInfo();
     setLoading(false);
   }, []);
 
@@ -123,7 +194,11 @@ export default function DaoDashboard() {
       <WalletAuth></WalletAuth>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">DAO Title Dashboard</CardTitle>
+          <CardTitle className="text-2xl hover:underline">
+            <a href={`${daoURI["@context"]}`} target="_">
+              {daoURI.name}
+            </a>
+          </CardTitle>
           <CardDescription>
             <a
               href="#"
@@ -132,12 +207,7 @@ export default function DaoDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>
-            Welcome to FinCube DAO! You are a registered member. Through this
-            dashboard, you can submit proposals and participate in voting.
-            Empower your voice and help shape the future of our decentralized
-            community!
-          </p>
+          <p>{daoURI.description}</p>
         </CardContent>
         <CardFooter>
           <div className="flex gap-3 text-sm">
@@ -164,7 +234,7 @@ export default function DaoDashboard() {
                 <p>
                   {loading
                     ? "Loading proposals..."
-                    : `${proposalsByPage.length} Proposal(s) created`}
+                    : `Proposal(s) created: ${proposalsByPage.length} || Ongoing proposals: ${ongoingProposalCount}`}
                 </p>
               </div>
               <Dialog>
@@ -195,9 +265,39 @@ export default function DaoDashboard() {
               </Dialog>
             </div>
           </Card>
-          {/* Proposal List */}
+          <div className="flex">
+            <Button onClick={() => setToggle(false)} className="mr-2">
+              ALl proposals
+            </Button>
+            <Button onClick={() => setToggle(true)}>Ongoing proposals</Button>
+          </div>
           {loading ? (
-            <p>Loading proposals...</p>
+            <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+              Loading proposals
+            </p>
+          ) : toggle ? (
+            ongoingProposals.length === 0 ? (
+              <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+                No ongoing proposals found
+              </p>
+            ) : (
+              ongoingProposals.map((proposal, idx) => {
+                const proposer = proposal.proposer;
+                if (proposer !== "0x0000000000000000000000000000000000000000") {
+                  return (
+                    <ProposalCard
+                      key={idx}
+                      proposal={proposal}
+                      proposalId={proposal.proposer}
+                    />
+                  );
+                }
+              })
+            )
+          ) : proposalsByPage.length === 0 ? (
+            <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+              No ongoing proposals found
+            </p>
           ) : (
             proposalsByPage.map((proposal, idx) => {
               const proposer = proposal.proposer;

@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import VotingProgressBar from "./VotingProgressBar";
 import { Button } from "@components/ui/button";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
+  readContract,
   simulateContract,
   waitForTransactionReceipt,
   writeContract,
@@ -19,6 +20,8 @@ import contractABI from "../../contractABI/contractABI.json";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
+  const [votingPeriod, setVotingPeriod] = useState("");
+  const [votingDelay, setVotingDelay] = useState("");
 
   const castVote = async (value: boolean) => {
     voteRef.current = { proposalId, support: value };
@@ -54,6 +57,43 @@ export default function VotingBreakdown({ proposalId }: any) {
     }
   };
 
+  const getVotingPeriod = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getVotingPeriod",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVotingPeriod(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getVotingDelay = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getVotingDelay",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVotingDelay(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  useEffect(() => {
+    getVotingDelay();
+    getVotingPeriod();
+  });
+
   return (
     <div>
       <div className="flex justify-between">
@@ -63,7 +103,23 @@ export default function VotingBreakdown({ proposalId }: any) {
         </div>
       </div>
       <VotingProgressBar total={4} yes={2} no={1} />
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center">
+        <div>
+          <Button
+            disabled
+            size="sm"
+            className="border-2 border-blue-400 bg-black font-bold text-white mr-2"
+          >
+            Voting Period: {votingPeriod}
+          </Button>
+          <Button
+            disabled
+            size="sm"
+            className="border-2 border-orange-400 bg-black font-bold text-white"
+          >
+            Voting Delay: {votingDelay}
+          </Button>
+        </div>
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-green-400 font-bold">Vote</Button>
