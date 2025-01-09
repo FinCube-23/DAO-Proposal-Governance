@@ -30,6 +30,7 @@ export default function MfsDashboard() {
   const [getProposalCount] = useLazyGetProposalCountQuery();
   const [proposalCount, setProposalCount] = useState("Unauthorized");
   const [proposalThreshold, setProposalThreshold] = useState("Unauthorized");
+  const [isMemberApproved, setIsMemberApproved] = useState(false);
 
   useEffect(() => {
     if (address) {
@@ -81,6 +82,7 @@ export default function MfsDashboard() {
         });
 
         console.log(response);
+        setIsMemberApproved(true);
       } catch (e) {
         console.error(e);
       }
@@ -103,7 +105,16 @@ export default function MfsDashboard() {
         </Card>
       </div>
       <div className="flex justify-end relative">
-        <div className="absolute top-8 right-8">
+        <div className="absolute top-8 right-8 flex items-center">
+          {!isMemberApproved ? (
+            <p className="mr-2 bg-red-600 font-bold p-2 rounded-2xl text-xs">
+              Not approved
+            </p>
+          ) : (
+            <p className="mr-2 bg-green-600 font-bold p-2 rounded-2xl text-xs">
+              Approved
+            </p>
+          )}
           <ConnectButton />
         </div>
       </div>
