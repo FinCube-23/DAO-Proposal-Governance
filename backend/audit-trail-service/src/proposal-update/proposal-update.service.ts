@@ -1,174 +1,116 @@
 import {
-  CreatedProposalDto,
-  UpdatedProposalDto,
+  CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto, ProposeEnvelopeDto, MessageResponse
 } from './dto/proposal-update.dto';
-import axios from 'axios';
-import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { ApolloClient, gql } from '@apollo/client';
 import {
   Injectable,
   Inject,
-  NotFoundException,
-  UnauthorizedException,
   Logger,
 } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { timeout } from 'rxjs';
+import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
+import { ProposalUpdateRepository } from './proposal-update.repository';
+
 
 @Injectable()
 export class ProposalUpdateService {
   private readonly logger = new Logger(ProposalUpdateService.name);
-  public update_proposals: (CreatedProposalDto | UpdatedProposalDto)[];
+  public update_proposals: (CreatedProposalDto)[];
 
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
-    @Inject('APOLLO_CLIENT1') private apolloClient: ApolloClient<any>,
+    private readonly proposalUpdateRepository: ProposalUpdateRepository,
   ) {
     this.update_proposals = [];
   }
 
-  placeProposal(proposal: CreatedProposalDto) {
-    this.rabbitClient.emit('create-proposal-placed', proposal);
-    return { message: 'Proposal Placed!' };
-  }
-
-  updateProposal(proposal : UpdatedProposalDto) {
-    this.rabbitClient.emit('update-proposal-placed', proposal);
-    return { message: 'Proposal Placed!' };
-  }
-
-  getProposals() {
-    return this.rabbitClient
-      .send({ cmd: 'fetch-proposal' }, {})
-      .pipe(timeout(5000));
-  }
-
-  handleProposalPlaced(proposal: CreatedProposalDto | UpdatedProposalDto) {
-    if (
-      proposal instanceof CreatedProposalDto ||
-      proposal instanceof UpdatedProposalDto
-    ) {
-      this.logger.error(
-        `Received a new proposal - Address: ${proposal.proposalAddress}`,
-      );
-      this.update_proposals.push(proposal);
-    } else {
-      this.logger.error('Invalid proposal object received:', proposal);
+  // 📡 Listening MessagePattern Call
+  async handlePendingProposal(data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
+    this.logger.log("Got the pending proposal hash " + data_packet.trx_hash);
+    try {
+      const new_dao_audit = {
+        transactionHash: data_packet.trx_hash,
+        trx_sender: data_packet.proposer_address,
+      };
+      const originalMsg = context.getMessage();
+      const replyTo = originalMsg.properties.replyTo;
+      this.logger.log('Replying To Producer Service: ' + replyTo);
+      // Return properly structured response with dummy values
+      return {
+        status: 'SUCCESS',
+        message_id: data_packet.trx_hash, // Should use trace_id as message_id for now
+        timestamp: new Date().toISOString(),
+        data: {
+          db_record_id: 123, // Dummy value until ORM is integrated
+          current_status: 'INDEXING'
+        }
+      };
     }
+    catch (error) {
+      this.logger.error('Error processing pending proposal:', {
+        error: error.message,
+        transactionHash: data_packet?.trx_hash
+      });
+      return {
+        status: 'FAILED',
+        message_id: data_packet?.trx_hash || 'unknown',
+        timestamp: new Date().toISOString(),
+        data: {
+          db_record_id: 0,
+          current_status: 'UNKNOWN'
+        },
+        error: {
+          code: 'PROCESSING_ERROR',
+          message: error.message,
+          details: {
+            transactionHash: data_packet?.trx_hash,
+            errorStack: error.stack
+          }
+        }
+      };
+    }
+  }
+
+  // 💬 Pushing Event in the Message Queue in EventPattern
+  async updateProposal(proposal: CreatedProposalDto) {
+    await this.rabbitClient.emit('create-proposal-placed', proposal);
+    return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }
 
   getUpdatedProposals() {
     return this.update_proposals;
   }
 
-  private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
-    const dto = new CreatedProposalDto();
-    dto.id = proposal.proposalId;
-    dto.proposalAddress = proposal.id; // Assuming 'id' from the graph is the address
-    dto.proposer_address = ''; // This information is not available in the current graph data
-    dto.metadata = JSON.stringify({
-      blockTimestamp: proposal.blockTimestamp,
-      proposalType: proposal.proposalType,
-    });
-    dto.transaction_info = {
-      transactionHash: proposal.transactionHash,
-      status: 'PENDING', // You might want to adjust this based on your needs
-    } as unknown as ResponseTransactionStatusDto;
-    dto.external_proposal = true; // Assuming all proposals from the graph are external
+  private async mapToMessageEnvelopDto(proposal: any): Promise<ProposeEnvelopeDto> {
+    const dto = new ProposeEnvelopeDto();
+
+    // Initialize nested objects first
+    dto.event_data = {
+      event_name: "pattern",
+      published_at: new Date(),
+      publisher_service: 'audit-trail-service'
+    };
+
+    dto.trace_context = {
+      trace_id: "CRON-JOB-GENERATED",
+      span_id: "audit-trail-service(uuid)+dao-service(uuid)"
+    };
+
+    dto.payload = {
+      id: proposal?.id || '0xSample-Index',
+      proposalId: proposal?.proposalId || '34',
+      transaction_data: {
+        blockNumber: proposal?.blockNumber || 786,
+        web3Status: 0,
+        transactionHash: proposal?.transactionHash || '0xtrxHash',
+        message: 'Test Packet',
+      },
+      proposer_address: proposal?.proposer || '0xWallet',
+      voteStart: proposal?.voteStart || '171963',
+      voteEnd: proposal?.voteEnd || '25339',
+      description: proposal?.description || 'This is a test proposal',
+      external_proposal: false,
+    };
+
     return dto;
   }
-
-  private mapToUpdatedProposalDto(proposal: any): UpdatedProposalDto {
-    const dto = new UpdatedProposalDto();
-    dto.id = proposal.proposalId;
-    dto.proposalAddress = proposal.id;
-    dto.transaction_info = {
-      transactionHash: proposal.transactionHash,
-      status: 'PENDING', // You might want to adjust this based on your needs
-    } as unknown as ResponseTransactionStatusDto;
-    return dto;
-  }
-
-  //GETTING PROPOSAL RELATED EVENTS
-  GET_PROPOSAL_CREATED = gql`
-    query MyQuery {
-      proposalCreateds {
-        id
-        proposalId
-        proposalType
-        transactionHash
-        data
-        blockTimestamp
-      }
-    }
-  `;
-
-  GET_PROPOSAL_EXECUTED = gql`
-    query MyQuery {
-      proposalCreateds {
-        id
-        proposalId
-        proposalType
-        transactionHash
-        data
-        blockTimestamp
-      }
-    }
-  `;
-
-  GET_PROPOSAL_CANCELED = gql`
-    query MyQuery {
-      proposalCreateds {
-        id
-        proposalId
-        proposalType
-        transactionHash
-        data
-        blockTimestamp
-      }
-    }
-  `;
-  async getProposalsCreated(): Promise<any> {
-    try {
-      this.logger.log('Fetching created proposals');
-
-      const result = await this.apolloClient.query({
-        query: this.GET_PROPOSAL_CREATED,
-      });
-      return result.data.proposalCreateds;
-    } catch (error) {
-      this.logger.error('Error fetching created proposals:', error);
-      throw error;
-    }
-  }
-
-  async getProposalsExecuted(): Promise<any> {
-    try {
-      this.logger.log('Fetching executed proposals');
-
-      const result = await this.apolloClient.query({
-        query: this.GET_PROPOSAL_EXECUTED,
-      });
-      return result.data.proposalExecuteds;
-    } catch (error) {
-      this.logger.error('Error fetching executed proposals:', error);
-      throw error;
-    }
-  }
-
-  async getProposalsCanceled(): Promise<any> {
-    try {
-      this.logger.log('Fetching canceled proposals');
-
-      const result = await this.apolloClient.query({
-        query: this.GET_PROPOSAL_CANCELED,
-      });
-      return result.data.proposalCanceleds;
-    } catch (error) {
-      this.logger.error('Error fetching canceled proposals:', error);
-      throw error;
-    }
-  }
-
 
 }

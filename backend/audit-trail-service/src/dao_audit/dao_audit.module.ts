@@ -8,7 +8,7 @@ import { ProposalDto } from './dto/proposal.dto';
 @Module({
   controllers: [DaoAuditController],
   providers: [
-    DaoAuditService, ProposalDto, 
+    DaoAuditService, ProposalDto,
     {
       provide: 'APOLLO_CLIENT',
       useFactory: () => {
@@ -22,4 +22,4 @@ import { ProposalDto } from './dto/proposal.dto';
   exports: ['APOLLO_CLIENT'],
   imports: [TypeOrmModule.forFeature([DaoAudit])],
 })
-export class DaoAuditModule {}
+export class DaoAuditModule { }

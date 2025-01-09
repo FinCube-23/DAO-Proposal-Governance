@@ -12,7 +12,7 @@ async function bootstrap() {
     transport: Transport.RMQ,
     options: {
       urls: ['amqp://rabbitmq:5672'],
-      queue: 'proposal-queue',
+      queue: 'proposal-queue',  //Routing Key
     },
   });
 
