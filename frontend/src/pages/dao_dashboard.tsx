@@ -29,6 +29,7 @@ import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
+import WalletAuth from "@components/auth/WalletAuth";
 
 export interface Proposal {
   executed: boolean;
@@ -119,6 +120,7 @@ export default function DaoDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
+      <WalletAuth></WalletAuth>
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">DAO Title Dashboard</CardTitle>
