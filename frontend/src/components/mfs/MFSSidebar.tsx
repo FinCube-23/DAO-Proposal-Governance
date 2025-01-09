@@ -1,4 +1,3 @@
-import { Badge } from "@components/ui/badge";
 import { Button } from "@components/ui/button";
 import {
   Card,
@@ -7,42 +6,19 @@ import {
   CardDescription,
   CardContent,
 } from "@components/ui/card";
-import {
-  Package2,
-  Bell,
-  Home,
-  ShoppingCart,
-  Package,
-  Users,
-  LineChart,
-} from "lucide-react";
+import { Package2, Bell, Home, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 
 export const MFS_SIDEBAR_LINKS = [
   {
-    name: "Dashboard",
+    name: "DAO Dashboard",
     href: "/dashboard",
     icon: Home,
   },
   {
-    name: "Orders",
-    href: "/mfs/orders",
-    icon: ShoppingCart,
-  },
-  {
-    name: "Products",
-    href: "/mfs/products",
+    name: "MFS",
+    href: "/mfs",
     icon: Package,
-  },
-  {
-    name: "Customers",
-    href: "/mfs/customers",
-    icon: Users,
-  },
-  {
-    name: "Analytics",
-    href: "/mfs/customers",
-    icon: LineChart,
   },
 ];
 

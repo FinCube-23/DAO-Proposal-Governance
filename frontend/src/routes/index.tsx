@@ -1,6 +1,10 @@
-
+import { createBrowserRouter } from "react-router-dom";
 import { rootRoutes } from "@/routes/root";
 import { mfsRoutes } from "@routes/mfs";
-import { createBrowserRouter } from "react-router-dom";
+import { adminRoutes } from "@routes/admin";
 
-export const coreRouter = createBrowserRouter([rootRoutes, mfsRoutes]);
+export const coreRouter = createBrowserRouter([
+  rootRoutes,
+  mfsRoutes,
+  adminRoutes,
+]);

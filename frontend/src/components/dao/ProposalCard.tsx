@@ -39,7 +39,7 @@ export default function ProposalCard({ proposal, proposalId }: any) {
           href={`https://amoy.polygonscan.com/address/${proposal.data}`}
           className="text-muted-foreground hover:underline"
         >
-          {proposal.data}
+          {proposal.data.slice(0, 42)}
         </a>
       </CardHeader>
 
