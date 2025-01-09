@@ -12,7 +12,6 @@ import {
 } from "@components/ui/card";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useAccount, useConnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
@@ -21,6 +20,8 @@ import {
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
 import { readContract } from "@wagmi/core";
+import WalletAuth from "@components/auth/WalletAuth";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 export default function MfsDashboard() {
   const { address, isConnected } = useAccount();
@@ -87,21 +88,11 @@ export default function MfsDashboard() {
     if (isConnected) {
       checkIsMemberApproved();
     }
-  }, [isConnected, address]);
+  }, [address, isConnected]);
 
   return (
     <div className="border min-h-96 rounded-xl mt-10 pb-10">
-      {!isConnected && (
-        <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-black p-20 rounded-xl shadow-lg border border-gray-800">
-            <h2 className="text-2xl font-bold mb-4">Wallet Not Connected</h2>
-            <p>Please connect your wallet to continue.</p>
-            <div className="mt-4 flex justify-center">
-              <ConnectButton />
-            </div>
-          </div>
-        </div>
-      )}{" "}
+      <WalletAuth></WalletAuth>
       <Toaster></Toaster>
       <div className="relative">
         <Card className="w-64 absolute -top-8 left-8">
