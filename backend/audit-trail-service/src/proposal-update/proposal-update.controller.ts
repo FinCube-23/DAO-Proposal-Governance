@@ -10,7 +10,9 @@ import {
 import { ProposalUpdateService } from './proposal-update.service';
 import {
   CreatedProposalDto,
-  MessageEnvelopeDto
+  MessageEnvelopeDto,
+  PendingTransactionDto,
+  MessageResponse
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
@@ -29,7 +31,7 @@ export class ProposalUpdateController {
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
   @MessagePattern('queue-pending-proposal')
-  async getProposal(@Payload() data_packet: MessageEnvelopeDto, @Ctx() context: RmqContext): Promise<string> {
+  async getProposal(@Payload() data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
     return await this.proposalUpdateService.handlePendingProposal(data_packet, context);
   }
 
@@ -44,13 +46,6 @@ export class ProposalUpdateController {
   async placeProposal(@Body() proposal: CreatedProposalDto) {
     return await this.proposalUpdateService.updateProposal(proposal);
   }
-
-  // @Get('Get-Proposal/:txhash')
-  // async getProposalsForTest(@Param('txhash') txHash: string): Promise<any> {
-  //   const proposals = await this.proposalUpdateService.getProposalsForTest(txHash);
-  //   //console.log(proposals);
-  //   return proposals;
-  // }
 
 }
 

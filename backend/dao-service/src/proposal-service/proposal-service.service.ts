@@ -6,7 +6,7 @@ import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
-import { timeout } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { TraceContextDto } from 'src/shared/common/dto/trace-context.dto';
 
@@ -33,7 +33,6 @@ export class ProposalServiceService {
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
-
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
     // Testing without auth
     // const role = await this.getUserRole(sub);
@@ -41,22 +40,17 @@ export class ProposalServiceService {
     //   this.logger.log("User does not have permission for role: " + role);
     //   throw new UnauthorizedException("User does not have permission");
     // }
-
-    this.logger.log("New proposal placed: " + proposal.id);
-    const new_proposal = this.proposalRepository.create(proposal);
-    const pending_proposal = this.mapToCreatedProposalDto(proposal);
-    const envelop = this.mapCreatedProposalToMessageEnvelop(pending_proposal);
     try {
-      this.logger.log("Triggering queue-pending-proposal for: Transaction: " + envelop.payload.trx_hash);
-      this.rabbitClient.send('queue-pending-proposal', envelop);
+      this.logger.log("New proposal placed: " + proposal.id);
+      const new_proposal = this.proposalRepository.create(proposal);
+      const pendingTrx = { "trx_hash": new_proposal.trx_hash, "proposer_address": new_proposal.proposer_address };
+      await this.handlePendingProposal(pendingTrx);
+      return this.proposalRepository.save(new_proposal);
     } catch (err) {
       this.logger.error("Error triggering queue-pending-proposal: " + err);
       throw new Error("Error triggering queue-pending-proposal");
     }
-
-    return this.proposalRepository.save(new_proposal);
   }
-
 
   async findAllProposals(sub: string): Promise<any> {
     const role = await this.getUserRole(sub);
@@ -68,35 +62,18 @@ export class ProposalServiceService {
   }
 
   // 💬 Publishing Message in the queue
-  handlePendingProposal(proposal: PendingTransactionDto): any {
-    const envelop = this.mapToMessageEnvelopDto(proposal);
-    this.logger.log("Triggering queue-pending-proposal for: Transaction: " + envelop.payload.trx_hash);
-    return this.rabbitClient.send('queue-pending-proposal', proposal);
-  }
-
-  private mapCreatedProposalToMessageEnvelop(pendingProposal: CreatedProposalDto): MessageEnvelopeDto {
-    const dto = new MessageEnvelopeDto();
-    const trace_context = new TraceContextDto();
-    trace_context.trace_id = "provided-by-api-gateway-service";
-    trace_context.span_id = "api-service+this-service";
-    dto.trace_context = trace_context;
-    const payload = new PendingTransactionDto();
-    payload.trx_hash = pendingProposal.transaction_data.transactionHash;
-    payload.trx_singer = pendingProposal.proposer_address;
-    dto.payload = payload;
-    return dto;
-  }
-  private mapToMessageEnvelopDto(proposal: PendingTransactionDto): MessageEnvelopeDto {
-    const dto = new MessageEnvelopeDto();
-    const trace_context = new TraceContextDto();
-    trace_context.trace_id = "provided-by-api-gateway-service";
-    trace_context.span_id = "api-service+this-service";
-    dto.trace_context = trace_context;
-    const payload = new PendingTransactionDto();
-    payload.trx_hash = proposal.trx_hash;
-    payload.trx_singer = proposal.trx_singer;
-    dto.payload = payload;
-    return dto;
+  async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
+    this.logger.log("Triggering queue-pending-proposal for Transaction: " + proposal.trx_hash);
+    // Convert Observable to Promise and await the response
+    const messageResponse = await firstValueFrom(
+      this.rabbitClient.send('queue-pending-proposal', proposal)
+    );
+    if (messageResponse.status == 'SUCCESS') {
+      this.logger.log("New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : " + messageResponse.data.db_record_id);
+      return messageResponse;
+    } else {
+      throw new Error(messageResponse.error?.message || 'Proposal processing failed');
+    }
   }
 
   private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
@@ -124,7 +101,7 @@ export class ProposalServiceService {
       createdProposal instanceof CreatedProposalDto
     ) {
       this.logger.log(
-        `Received a new proposal - id: ${createdProposal.proposalId}`,
+        `Received a proposal transaction update - hash: ${createdProposal.transaction_data.transactionHash}`,
       );
       console.log(`Pattern: ${context.getPattern()}`);
       this.update_proposals.push(createdProposal);
@@ -133,11 +110,6 @@ export class ProposalServiceService {
     } else {
       this.logger.error('Invalid proposal object received:', createdProposal);
     }
-  }
-
-  async getUpdatedProposals(): Promise<any> {
-    this.logger.error("in get updated proposal of service");
-    return this.update_proposals;
   }
 
   async findAll(sub: string): Promise<any> {

@@ -28,26 +28,13 @@ export class ProposalServiceController {
   @Get()
   @UseGuards(AuthGuard('jwt'))
   async findProposal(@Req() req): Promise<ProposalEntity[]> {
-    return this.proposalService.findAllProposals(req.user);
+    return await this.proposalService.findAllProposals(req.user);
   }
 
   // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
   @EventPattern('create-proposal-placed')
   handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto, @Ctx() context: RmqContext) {
     this.proposalService.handleCreatedProposalPlaced(proposal, context);
-  }
-
-  // 💬 MessagePattern expects a response | This is a publisher
-  @Post('push-pending-proposal')
-  @ApiBody({ type: MessageEnvelopeDto })
-  @ApiResponse({ status: 200, description: 'The message has been successfully queued.', type: CreatedProposalDto })
-  pushPendingProposal(@Body() proposal: PendingTransactionDto): any {
-    return this.proposalService.handlePendingProposal(proposal);
-  }
-
-  @Get('proposals/updated')
-  async getUpdatedProposals(): Promise<any> {
-    return this.proposalService.getUpdatedProposals();
   }
 
 }

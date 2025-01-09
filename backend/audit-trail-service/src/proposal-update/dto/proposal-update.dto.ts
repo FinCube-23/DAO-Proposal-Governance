@@ -32,7 +32,7 @@ export class ExecuteEnvelopeDto {
 
 export class PendingTransactionDto {
   trx_hash: string;
-  trx_singer: string;
+  proposer_address: string;
 }
 
 export class MessageEnvelopeDto {
@@ -40,3 +40,17 @@ export class MessageEnvelopeDto {
   payload: PendingTransactionDto;
 }
 
+export class MessageResponse {
+  status: string;
+  message_id: string;
+  timestamp: string;
+  data: {
+    db_record_id: number;
+    current_status: string;
+  };
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+}

@@ -31,7 +31,7 @@ export class ExecuteEnvelopeDto {
 
 export class PendingTransactionDto {
   trx_hash: string;
-  trx_singer: string;
+  proposer_address: string;
 }
 
 export class MessageEnvelopeDto {
