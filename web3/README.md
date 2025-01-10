@@ -36,3 +36,17 @@ The smart contract is UUPSUpgradeable. To deploy follow:
 During adding newMembers follow:
 
 ![Approve member flow](member-proposal.jpg)
+
+# Members JSON-LD schema:
+{
+    "@context": "<http://www.daostar.org/schemas>",
+    "type": "DAO",
+    "name": "<name of the DAO>",
+    "location: "BGD",
+    "members": [
+        {
+            "type": "EthereumAddress",
+            "id": "<address or other identifier>"
+        }
+    ]
+}

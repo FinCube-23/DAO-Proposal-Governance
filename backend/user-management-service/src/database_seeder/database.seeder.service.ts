@@ -3,16 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
-import { ExchangeUserEntity } from 'src/exchange_user/entities/exchange_user.entity';
-import { MfsBusinessEntity } from 'src/mfs_business/entities/mfs_business.entity';
+import { ExchangeUser } from 'src/exchange_user/entities/exchange_user.entity';
+import { MfsBusiness } from 'src/mfs_business/entities/mfs_business.entity';
 
 @Injectable()
 export class DatabaseSeederService {
   constructor(
-    @InjectRepository(ExchangeUserEntity)
-    private exchangeUserRepository: Repository<ExchangeUserEntity>,
-    @InjectRepository(MfsBusinessEntity)
-    private mfsBusinessRepository: Repository<MfsBusinessEntity>,
+    @InjectRepository(ExchangeUser)
+    private exchangeUserRepository: Repository<ExchangeUser>,
+    @InjectRepository(MfsBusiness)
+    private mfsBusinessRepository: Repository<MfsBusiness>,
   ) {}
 
   async seed(): Promise<void> {

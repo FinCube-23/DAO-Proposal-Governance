@@ -1,21 +1,19 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MfsBusinessEntity } from './entities/mfs_business.entity';
-// import { RoleChecker } from 'src/authz/rolechecker.service';
-// import { AuthenticationEntity } from 'src/authz/entities/authentication.entity';
+import { MfsBusiness } from './entities/mfs_business.entity';
 
 @Injectable()
 export class MfsBusinessService {
   constructor(
-    @InjectRepository(MfsBusinessEntity)
-    private readonly mfsBusinessRepository: Repository<MfsBusinessEntity>,
+    @InjectRepository(MfsBusiness)
+    private readonly mfsBusinessRepository: Repository<MfsBusiness>,
   ) {}
 
   async create(
-    mfs_business: Partial<MfsBusinessEntity>,
+    mfs_business: Partial<MfsBusiness>,
     user_id: number,
-  ): Promise<MfsBusinessEntity> {
+  ): Promise<MfsBusiness> {
     // const user = await this.authenticationRepository.findOne({
     //   where: { id: user_id },
     // });
@@ -26,7 +24,7 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.save({ ...new_mfs_business,  });
   }
 
-  async findAll(sub: string): Promise<MfsBusinessEntity[]> {
+  async findAll(sub: string): Promise<MfsBusiness[]> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();
@@ -34,7 +32,7 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.find();
   }
 
-  async findOne(id: number, sub: string): Promise<MfsBusinessEntity> {
+  async findOne(id: number, sub: string): Promise<MfsBusiness> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();
@@ -42,22 +40,22 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.findOne({ where: { id } });
   }
 
-  async findByEmail(
-    org_email: string,
+  async findByOrgName(
+    org_name: string,
     sub: string,
-  ): Promise<MfsBusinessEntity> {
+  ): Promise<MfsBusiness> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();
     // }
-    return this.mfsBusinessRepository.findOne({ where: { org_email } });
+    return this.mfsBusinessRepository.findOne({ where: { org_name } });
   }
 
   async update(
     id: number,
-    exchange_user: Partial<MfsBusinessEntity>,
+    exchange_user: Partial<MfsBusiness>,
     sub: string,
-  ): Promise<MfsBusinessEntity> {
+  ): Promise<MfsBusiness> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();

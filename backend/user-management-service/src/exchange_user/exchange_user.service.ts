@@ -1,17 +1,17 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ExchangeUserEntity } from './entities/exchange_user.entity';
+import { ExchangeUser } from './entities/exchange_user.entity';
 @Injectable()
 export class ExchangeUserService {
-  constructor(@InjectRepository(ExchangeUserEntity) private exchangeUserRepository: Repository<ExchangeUserEntity>) { }
+  constructor(@InjectRepository(ExchangeUser) private exchangeUserRepository: Repository<ExchangeUser>) { }
 
-  async create(exchange_user: Partial<ExchangeUserEntity>): Promise<ExchangeUserEntity> {
+  async create(exchange_user: Partial<ExchangeUser>): Promise<ExchangeUser> {
     const new_user = this.exchangeUserRepository.create(exchange_user);
     return this.exchangeUserRepository.save(new_user);
   }
 
-  async findAll(sub: string): Promise<ExchangeUserEntity[]> {
+  async findAll(sub: string): Promise<ExchangeUser[]> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'USER') {
     //   throw new UnauthorizedException();
@@ -19,7 +19,7 @@ export class ExchangeUserService {
     return this.exchangeUserRepository.find();
   }
 
-  async findOne(id: number, sub: string): Promise<ExchangeUserEntity> {
+  async findOne(id: number, sub: string): Promise<ExchangeUser> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'USER') {
     //   throw new UnauthorizedException();
@@ -27,7 +27,7 @@ export class ExchangeUserService {
     return this.exchangeUserRepository.findOne({ where: { id } });
   }
 
-  async findByEmail(email: string, sub: string): Promise<ExchangeUserEntity> {
+  async findByEmail(email: string, sub: string): Promise<ExchangeUser> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'USER') {
     //   throw new UnauthorizedException();
@@ -35,7 +35,7 @@ export class ExchangeUserService {
     return this.exchangeUserRepository.findOne({ where: { email } });
   }
 
-  async update(id: number, exchange_user: Partial<ExchangeUserEntity>, sub: string): Promise<ExchangeUserEntity> {
+  async update(id: number, exchange_user: Partial<ExchangeUser>, sub: string): Promise<ExchangeUser> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'USER') {
     //   throw new UnauthorizedException();

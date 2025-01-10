@@ -8,9 +8,10 @@ import {
   UpdateDateColumn
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from 'src/users/entities/user.entity';
 
-@Entity('exchange_user')
-export class ExchangeUserEntity {
+@Entity('exchange_users')
+export class ExchangeUser {
   @PrimaryGeneratedColumn()
   @ApiProperty()
   id: number;
@@ -23,19 +24,15 @@ export class ExchangeUserEntity {
   @ApiProperty()
   email: string;
 
-  @Column({type: 'int', nullable: false})
-  @ApiProperty()
-  mfs_id: number;
-
   @Column({ type: 'float' })
   @ApiProperty()
   balance: number;
 
+  @OneToOne(() => User, (user) => user.exchangeUser)
+  @ApiProperty({ type: () => User })
+  user: User;
+
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
-
-  //@ManyToOne(() => UserEntity, (user) => user.exchangeUsers)
-  // @JoinColumn({ name: 'user_id' })
-  //user: UserEntity;
 }
 
