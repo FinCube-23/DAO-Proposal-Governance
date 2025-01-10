@@ -59,4 +59,10 @@ export class MfsBusiness {
 
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
+
+  constructor(partial: Partial<MfsBusiness>) {
+    Object.assign(this, partial);
+    this.created_at = new Date();
+    this.updated_at = new Date();
+  }
 }

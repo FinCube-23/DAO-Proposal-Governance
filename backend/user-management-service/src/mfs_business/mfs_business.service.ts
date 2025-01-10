@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MfsBusiness } from './entities/mfs_business.entity';
+import { User } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class MfsBusinessService {
@@ -11,17 +12,9 @@ export class MfsBusinessService {
   ) {}
 
   async create(
-    mfs_business: Partial<MfsBusiness>,
-    user_id: number,
+    mfs_business: MfsBusiness,
   ): Promise<MfsBusiness> {
-    // const user = await this.authenticationRepository.findOne({
-    //   where: { id: user_id },
-    // });
-    // if (!user) {
-    //   throw new Error('User not found'); 
-    // }
-    const new_mfs_business = this.mfsBusinessRepository.create(mfs_business);
-    return this.mfsBusinessRepository.save({ ...new_mfs_business,  });
+    return this.mfsBusinessRepository.save(mfs_business);
   }
 
   async findAll(sub: string): Promise<MfsBusiness[]> {
@@ -40,10 +33,7 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.findOne({ where: { id } });
   }
 
-  async findByOrgName(
-    org_name: string,
-    sub: string,
-  ): Promise<MfsBusiness> {
+  async findByOrgName(org_name: string, sub: string): Promise<MfsBusiness> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();
