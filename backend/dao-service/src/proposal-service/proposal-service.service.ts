@@ -8,7 +8,6 @@ import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { TraceContextDto } from 'src/shared/common/dto/trace-context.dto';
 
 
 @Injectable()

@@ -108,11 +108,15 @@ The payload for the message queues is:
  ```json
 {
   "id": 0,
+  "proposal_onchain_id": 0,
+  "proposal_type": "membership",
+  "metadata": "Extra fields of the proposals will be formatted as json and stringify. memberURI can be considered also",
   "proposer_address": "0x8152f498e91df80be19a28c83d8596f59fba80bd",
-  "metadata": "This is a sample message pattern DTO. So you will be expecting a response with a Primary Key of Audit Trail DB Table.",
-  "proposal_status": false,
+  "proposal_executed_by": "string",
   "external_proposal": false,
-  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7"
+  "proposal_status": "pending",
+  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7",
+  "trx_status": 0
 }
 ```
 
