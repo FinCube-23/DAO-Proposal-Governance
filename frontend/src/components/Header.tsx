@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom";
-import LoginButton from "./auth/LoginButton";
 import AuthButton from "./auth/AuthButton";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 export default function Header() {
   return (
     <div className="w-full z-50 fixed top-0">

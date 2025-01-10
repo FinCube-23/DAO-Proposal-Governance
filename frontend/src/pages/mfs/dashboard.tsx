@@ -12,7 +12,7 @@ import {
 } from "@components/ui/card";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
@@ -110,7 +110,11 @@ export default function MfsDashboard() {
       <div className="flex flex-col gap-8 pt-28 px-8">
         <div className="flex gap-8 justify-center">
           <div>
-            <DisplayCard title="Liquidity Ratio" value="0.7m USD" />
+            <DisplayCard
+              title="Liquidity Ratio"
+              value="0.7m USD"
+              dataSource="On-chain"
+            />
           </div>
           <div className="">
             <div className="w-64">
@@ -121,10 +125,15 @@ export default function MfsDashboard() {
             <DisplayCard
               title="Total Number of Proposals"
               value={proposalCount}
+              dataSource="On-chain"
             />
           </div>
           <div>
-            <DisplayCard title="Proposal Threshold" value={proposalThreshold} />
+            <DisplayCard
+              title="Proposal Threshold"
+              value={proposalThreshold}
+              dataSource="On-chain"
+            />
           </div>
         </div>
 

@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import { Box, Coins, Flag, Vote, WalletCards } from "lucide-react";
+import { Box, Coins, Flag, Vote, WalletCards, History } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -77,6 +77,8 @@ export default function DaoDashboard() {
   const [ongoingProposalCount, setOngoingProposalCount] = useState("");
   const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
   const [toggle, setToggle] = useState(false);
+  const [version, setVersion] = useState("");
+  const [pageNumber, setPageNumber] = useState(0);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -89,20 +91,20 @@ export default function DaoDashboard() {
     });
   };
 
-  const getProposalsByPage = async () => {
+  const getProposalsByPage = async (page: any) => {
+    setLoading(true);
     try {
-      const response: any = await readContract(config, {
+      const response = await readContract(config, {
         abi: contractABI,
         address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "getProposalsByPage",
-        args: [0, 10],
+        args: [page, page + 3],
       });
 
-      const result = response[0];
-
-      setProposalsByPage(result as []);
+      setProposalsByPage(response[0] || []);
     } catch (e) {
       console.log(e);
+    } finally {
       setLoading(false);
     }
   };
@@ -130,6 +132,22 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
       setOngoingProposalCount(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getVersion = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "UPGRADE_INTERFACE_VERSION",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVersion(result);
     } catch (e) {
       console.error(e);
     }
@@ -182,12 +200,23 @@ export default function DaoDashboard() {
       }
     };
 
-    getProposalsByPage();
+    getProposalsByPage(pageNumber);
     getOngoingProposals();
     getOngoingProposalCount();
     getDAOInfo();
+    getVersion();
     setLoading(false);
-  }, []);
+  }, [pageNumber]);
+
+  const handleNextPage = () => {
+    setPageNumber((prevPage) => prevPage + 3);
+  };
+
+  const handlePrevPage = () => {
+    if (pageNumber > 0) {
+      setPageNumber((prevPage) => prevPage - 3);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-5">
@@ -222,6 +251,10 @@ export default function DaoDashboard() {
               <WalletCards className="text-green-500" />
               Wallet-based
             </div>
+            <div className="flex gap-1">
+              <History className="text-green-500" />
+              {version}
+            </div>
           </div>
         </CardFooter>
       </Card>
@@ -234,7 +267,7 @@ export default function DaoDashboard() {
                 <p>
                   {loading
                     ? "Loading proposals..."
-                    : `Proposal(s) created: ${proposalsByPage.length} || Ongoing proposals: ${ongoingProposalCount}`}
+                    : `Ongoing proposals: ${ongoingProposalCount}`}
                 </p>
               </div>
               <Dialog>
@@ -358,6 +391,24 @@ export default function DaoDashboard() {
           </Card>
         </div>
       </div>
+      {!toggle && (
+        <div className="flex justify-center mt-5">
+          <button
+            onClick={handlePrevPage}
+            disabled={pageNumber === 0}
+            className="px-2 m-2 bg-green-500 font-bold text-white rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+          <button
+            onClick={handleNextPage}
+            disabled={pageNumber >= 2}
+            className="px-2 m-2 bg-green-500 text-white rounded font-bold disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
