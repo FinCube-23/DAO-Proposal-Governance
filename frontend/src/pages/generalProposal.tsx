@@ -1,5 +1,4 @@
 import { ChangeEvent, FormEvent, useState } from "react";
-import { encodeFunctionData } from "viem";
 import contractABI from "../contractABI/contractABI.json";
 import {
   simulateContract,
@@ -20,6 +19,7 @@ import {
   DialogTrigger,
 } from "@components/ui/dialog";
 import { useAccount } from "wagmi";
+import { unknown } from "zod";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -78,7 +78,7 @@ const GeneralProposal = () => {
         proposal_address: `${address}`,
         metadata: data.description,
         trx_hash: hash,
-        proposal_status: false,
+        proposal_status: "unknown",
         external_proposal: false,
       };
 

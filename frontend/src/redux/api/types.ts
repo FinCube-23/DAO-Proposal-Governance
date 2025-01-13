@@ -49,7 +49,7 @@ export type CreateProposalPayload = {
   proposal_address: string;
   metadata: string;
   trx_hash: string;
-  proposal_status: boolean;
+  proposal_status: unknown;
   external_proposal: boolean;
 };
 

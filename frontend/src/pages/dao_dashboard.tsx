@@ -79,6 +79,8 @@ export default function DaoDashboard() {
   const [toggle, setToggle] = useState(false);
   const [version, setVersion] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
+  const [votingPeriod, setVotingPeriod] = useState("");
+  const [votingDelay, setVotingDelay] = useState("");
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -89,6 +91,38 @@ export default function DaoDashboard() {
       _newMember: `${account.address}`,
       [name]: value,
     });
+  };
+
+  const getVotingPeriod = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getVotingPeriod",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVotingPeriod(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getVotingDelay = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        functionName: "getVotingDelay",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVotingDelay(result);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const getProposalsByPage = async (page: any) => {
@@ -205,6 +239,8 @@ export default function DaoDashboard() {
     getOngoingProposalCount();
     getDAOInfo();
     getVersion();
+    getVotingDelay();
+    getVotingPeriod();
     setLoading(false);
   }, [pageNumber]);
 
@@ -254,6 +290,12 @@ export default function DaoDashboard() {
             <div className="flex gap-1">
               <History className="text-green-500" />
               {version}
+            </div>
+            <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2">
+              Voting Period: {votingPeriod} second(s)
+            </div>
+            <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2">
+              Voting Delay: {votingDelay} second(s)
             </div>
           </div>
         </CardFooter>
