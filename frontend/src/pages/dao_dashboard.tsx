@@ -288,27 +288,31 @@ export default function DaoDashboard() {
           <p>{daoURI.description}</p>
         </CardContent>
         <CardFooter>
-          <div className="flex gap-3 text-sm">
-            <div className="flex gap-1">
-              <Flag className="text-green-500" /> December 2023
+          <div className="flex gap-10 text-sm justify-center items-center">
+            <div className="flex gap-5">
+              <div className="flex gap-1">
+                <Flag className="text-green-500" /> December 2023
+              </div>
+              <div className="flex gap-1">
+                <Box className="text-green-500" />
+                Polygon
+              </div>
+              <div className="flex gap-1">
+                <WalletCards className="text-green-500" />
+                Wallet-based
+              </div>
+              <div className="flex gap-1">
+                <History className="text-green-500" />
+                {version}
+              </div>
             </div>
-            <div className="flex gap-1">
-              <Box className="text-green-500" />
-              Polygon
-            </div>
-            <div className="flex gap-1">
-              <WalletCards className="text-green-500" />
-              Wallet-based
-            </div>
-            <div className="flex gap-1">
-              <History className="text-green-500" />
-              {version}
-            </div>
-            <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2">
-              Voting Period: {votingPeriod} second(s)
-            </div>
-            <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2">
-              Voting Delay: {votingDelay} second(s)
+            <div className="flex gap-3">
+              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-1">
+                Voting Period: {votingPeriod} second(s)
+              </div>
+              <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2 py-1">
+                Voting Delay: {votingDelay} second(s)
+              </div>
             </div>
           </div>
         </CardFooter>
