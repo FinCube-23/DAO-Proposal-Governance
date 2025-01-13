@@ -4,6 +4,13 @@ import { AuthMeResponse } from "@redux/api/types";
 
 export const authApis = api.injectEndpoints({
   endpoints: (build) => ({
+    login: build.mutation<void, { email: string; password: string }>({
+      query: (payload) => ({
+        url: AUTH_ENDPOINTS.BASE + "/login",
+        method: "POST",
+        body: payload,
+      }),
+    }),
     fetchMe: build.query<AuthMeResponse, void>({
       query: () => {
         return {
@@ -16,4 +23,4 @@ export const authApis = api.injectEndpoints({
   }),
 });
 
-export const { useLazyFetchMeQuery } = authApis;
+export const { useLazyFetchMeQuery, useLoginMutation } = authApis;

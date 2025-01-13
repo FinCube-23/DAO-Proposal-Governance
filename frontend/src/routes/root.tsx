@@ -4,12 +4,8 @@ import Welcome from "@pages/welcome";
 import DaoDashboard from "@pages/dao_dashboard";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import DaoLayout from "@layouts/DaoLayout";
-import Tests from "@pages/tests";
 import Auth from "@pages/auth";
-import GeneralProposal from "@pages/generalProposal";
-import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
-import CastVote from "@pages/castVote";
-import UserLogin from "@pages/userLogin";
+import Login from "@pages/login";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -20,20 +16,8 @@ export const rootRoutes: RouteObject = {
       element: <Welcome />,
     },
     {
-      path: "tests",
-      element: <Tests />,
-    },
-    {
-      path: "general-proposal",
-      element: <GeneralProposal></GeneralProposal>,
-    },
-    {
-      path: "approval-proposal",
-      element: <NewMemberApprovalProposal></NewMemberApprovalProposal>,
-    },
-    {
-      path: "user-login",
-      element: <UserLogin></UserLogin>,
+      path: "login",
+      element: <Login />,
     },
     {
       path: "dashboard",
