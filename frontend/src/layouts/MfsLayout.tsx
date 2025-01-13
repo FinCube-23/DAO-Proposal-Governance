@@ -7,7 +7,11 @@ import { useEffect } from "react";
 import "@rainbow-me/rainbowkit/styles.css";
 import { polygonAmoy } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  darkTheme,
+  getDefaultConfig,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const config = getDefaultConfig({
@@ -37,7 +41,15 @@ export default function MfsLayout() {
       ) : (
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider>
+            <RainbowKitProvider
+              theme={darkTheme({
+                accentColor: "#7b3fe4",
+                accentColorForeground: "white",
+                borderRadius: "large",
+                fontStack: "rounded",
+                overlayBlur: "large",
+              })}
+            >
               <Outlet />
             </RainbowKitProvider>
           </QueryClientProvider>

@@ -12,7 +12,7 @@ import {
 } from "@components/ui/card";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
@@ -20,7 +20,7 @@ import {
   useLazyGetProposalCountQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
-import { getEnsName, readContract } from "@wagmi/core";
+import { readContract } from "@wagmi/core";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
