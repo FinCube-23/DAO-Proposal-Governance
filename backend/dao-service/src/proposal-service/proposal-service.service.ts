@@ -40,10 +40,11 @@ export class ProposalServiceService {
     //   throw new UnauthorizedException("User does not have permission");
     // }
     try {
-      this.logger.log("New proposal placed: " + proposal.id);
+      const pendingTrx = { "trx_hash": proposal.trx_hash, "proposer_address": proposal.proposer_address };
+      const audit_record = await this.handlePendingProposal(pendingTrx);
+      proposal.audit_id = audit_record.data.db_record_id;
       const new_proposal = this.proposalRepository.create(proposal);
-      const pendingTrx = { "trx_hash": new_proposal.trx_hash, "proposer_address": new_proposal.proposer_address };
-      await this.handlePendingProposal(pendingTrx);
+      this.logger.log("New proposal placed: " + new_proposal.id);
       return this.proposalRepository.save(new_proposal);
     } catch (err) {
       this.logger.error("Error triggering queue-pending-proposal: " + err);

@@ -4,7 +4,8 @@ import { ProposalUpdateController } from './proposal-update.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { ProposalUpdateRepository } from './proposal-update.repository';
-import { DaoAuditModule } from 'src/dao_audit/dao_audit.module';
+import { TransactionsService } from 'src/transactions/transactions.service';
+import { TransactionsModule } from 'src/transactions/transactions.module';
 require('dotenv').config();
 
 @Module({
@@ -25,7 +26,7 @@ require('dotenv').config();
     },
   ],
   imports: [
-    ClientsModule.register([
+    TransactionsModule, ClientsModule.register([
       {
         name: 'PROPOSAL_UPDATE_SERVICE', // Injectable
         transport: Transport.RMQ,

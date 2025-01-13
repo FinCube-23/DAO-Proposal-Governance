@@ -67,6 +67,10 @@ export class ProposalEntity {
     @ApiProperty()
     trx_hash: string;
 
+    @Column({ type: 'int', nullable: true })
+    @ApiProperty()
+    audit_id: number;
+
     @Column({ type: 'int', default: 0 })
     @ApiProperty()
     trx_status: number;
