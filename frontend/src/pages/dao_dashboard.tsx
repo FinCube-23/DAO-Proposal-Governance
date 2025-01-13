@@ -8,7 +8,16 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import { Box, Coins, Flag, Vote, WalletCards, History } from "lucide-react";
+import {
+  Box,
+  Coins,
+  Flag,
+  Vote,
+  WalletCards,
+  History,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -455,16 +464,16 @@ export default function DaoDashboard() {
           <button
             onClick={handlePrevPage}
             disabled={pageNumber === 0}
-            className="px-2 m-2 bg-green-500 font-bold text-white rounded disabled:opacity-50"
+            className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
           >
-            Previous
+            <ArrowLeft />
           </button>
           <button
             onClick={handleNextPage}
             disabled={pageNumber >= 2}
-            className="px-2 m-2 bg-green-500 text-white rounded font-bold disabled:opacity-50"
+            className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
           >
-            Next
+            <ArrowRight />
           </button>
         </div>
       )}
