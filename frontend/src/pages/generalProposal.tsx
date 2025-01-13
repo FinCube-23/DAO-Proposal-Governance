@@ -55,34 +55,20 @@ const GeneralProposal = () => {
 
   const propose = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const data = encodeFunctionData({
-      abi: contractABI,
-      functionName: "propose",
-      args: [
-        [targets], // Targets as an array of addresses
-        values.split(",").map(Number), // Values as an array of numbers
-        [calldatas], // Calldatas as an array of bytes
-        description,
-      ],
-    });
 
-    const proposalData = {
+    const data = {
       targets: [targets],
       values: values.split(",").map(Number),
-      calldatas: [data],
+      calldatas: calldatas.split(",").map(String),
       description,
     };
+
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "propose",
-        args: [
-          proposalData.targets,
-          proposalData.values,
-          proposalData.calldatas,
-          proposalData.description,
-        ],
+        args: [data.targets, data.values, data.calldatas, data.description],
       });
 
       const hash = await writeContract(config, request);
@@ -90,7 +76,7 @@ const GeneralProposal = () => {
       const backendData = {
         id: 0,
         proposal_address: `${address}`,
-        metadata: proposalData.description,
+        metadata: data.description,
         trx_hash: hash,
         proposal_status: false,
         external_proposal: false,
