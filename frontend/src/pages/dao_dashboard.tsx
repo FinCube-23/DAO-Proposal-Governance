@@ -30,6 +30,10 @@ import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
 import WalletAuth from "@components/auth/WalletAuth";
+import {
+  useLazyGetOngoingProposalsQuery,
+  useRegisterMemberMutation,
+} from "@redux/services/proxy";
 
 export interface Proposal {
   executed: boolean;
@@ -81,6 +85,8 @@ export default function DaoDashboard() {
   const [pageNumber, setPageNumber] = useState(0);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
+  const [registerMember] = useRegisterMemberMutation();
+  const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -143,7 +149,7 @@ export default function DaoDashboard() {
     }
   };
 
-  const getOngoingProposals = async () => {
+  const fetchOngoingProposals = async () => {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
@@ -151,6 +157,8 @@ export default function DaoDashboard() {
         functionName: "getOngoingProposals",
       });
       console.log(response);
+      // await getOngoingProposals();
+
       setOngoingProposals(response);
     } catch (e) {
       console.error(e);
@@ -201,6 +209,11 @@ export default function DaoDashboard() {
 
       await waitForTransactionReceipt(config, { hash });
 
+      // await registerMember({
+      //   id: Number(registrationData._newMember),
+      //   name: registrationData._memberURI,
+      // });
+
       toast.success("Registration sucessful!");
     } catch (e: any) {
       let errorMessage = e.message;
@@ -235,7 +248,7 @@ export default function DaoDashboard() {
     };
 
     getProposalsByPage(pageNumber);
-    getOngoingProposals();
+    fetchOngoingProposals();
     getOngoingProposalCount();
     getDAOInfo();
     getVersion();

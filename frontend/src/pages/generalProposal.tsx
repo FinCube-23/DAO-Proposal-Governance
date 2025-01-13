@@ -19,7 +19,6 @@ import {
   DialogTrigger,
 } from "@components/ui/dialog";
 import { useAccount } from "wagmi";
-import { unknown } from "zod";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");

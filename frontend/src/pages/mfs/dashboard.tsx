@@ -16,10 +16,11 @@ import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
+  useLazyGetBalanceQuery,
   useLazyGetProposalCountQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
-import { readContract } from "@wagmi/core";
+import { getEnsName, readContract } from "@wagmi/core";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
@@ -28,6 +29,7 @@ export default function MfsDashboard() {
   const { connectors } = useConnect();
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getProposalCount] = useLazyGetProposalCountQuery();
+  const [getBalance] = useLazyGetBalanceQuery();
   const [proposalCount, setProposalCount] = useState("Unauthorized");
   const [proposalThreshold, setProposalThreshold] = useState("Unauthorized");
 
@@ -51,6 +53,15 @@ export default function MfsDashboard() {
       }
     };
 
+    // const fetchBalance = async() => {
+    //   try{
+    //     await getBalance();
+    //   }
+    //   catch(e) {
+    //     console.error(e);
+    //   }
+    // }
+
     // getProposalThreshold
     const fetchProposalThreshold = async () => {
       try {
@@ -64,7 +75,8 @@ export default function MfsDashboard() {
 
     fetchProposalCount();
     fetchProposalThreshold();
-  }, [getProposalCount, getProposalThreshold]);
+    // fetchBalance();
+  }, [getProposalCount, getProposalThreshold, getBalance]);
 
   const auth = useSelector(
     (state: RootState) => state.persistedReducer.authReducer.auth
