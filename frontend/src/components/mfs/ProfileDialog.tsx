@@ -1,4 +1,3 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { Badge } from "@components/ui/badge";
 import { Button } from "@components/ui/button";
 import {
@@ -20,10 +19,10 @@ interface Props {
 
 export default function ProfileDialog({ isOpen, setOpen }: Props) {
     const auth = useSelector(
-        (state: RootState) => state.persistedReducer.authReducer.auth
+        (state: RootState) => state.persistedReducer.authReducer
     );
 
-    console.log("auth", auth?.mfs);
+    console.log("auth", auth?.profile?.mfsBusiness);
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             <DialogContent>
@@ -34,7 +33,7 @@ export default function ProfileDialog({ isOpen, setOpen }: Props) {
                 <div className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
                         <Label>MFS Name</Label>
-                        <Input disabled={true} value={auth?.mfs?.name} />
+                        <Input disabled={true} value={auth?.profile?.mfsBusiness?} />
                     </div>
                     <div className="flex flex-col gap-2">
                         <Label>Email</Label>

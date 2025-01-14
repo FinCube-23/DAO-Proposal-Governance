@@ -6,6 +6,7 @@ import ProposalView from "@pages/dao/proposal/proposalView";
 import DaoLayout from "@layouts/DaoLayout";
 import Auth from "@pages/auth";
 import Login from "@pages/login";
+import Register from "@pages/register";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -20,6 +21,10 @@ export const rootRoutes: RouteObject = {
       element: <Login />,
     },
     {
+      path: "register",
+      element: <Register />,
+    },
+    {
       path: "dashboard",
       element: <DaoLayout />,
       children: [
@@ -30,10 +35,6 @@ export const rootRoutes: RouteObject = {
         {
           path: "proposals/:id",
           element: <ProposalView />,
-        },
-        {
-          path: "auth",
-          element: <Auth />,
         },
         {
           path: "dashboard",

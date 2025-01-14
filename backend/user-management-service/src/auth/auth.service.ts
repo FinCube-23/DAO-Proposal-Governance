@@ -8,13 +8,10 @@ import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 export class AuthService {
   constructor(
     private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {}
 
-  async signIn(
-    email: string,
-    pass: string,
-  ): Promise<{ access_token: string }> {
+  async signIn(email: string, pass: string): Promise<{ access_token: string }> {
     const user = await this.usersService.findOne(email);
     if (user?.password !== pass) {
       throw new UnauthorizedException();
@@ -25,11 +22,14 @@ export class AuthService {
     };
   }
 
-  async signUp(createUserDto: CreateUserDto): Promise<{ access_token: string }> {
-    const user = await this.usersService.create(new User({...createUserDto}));
-    const payload = { sub: user.id, email: user.email };
+  async signUp(
+    createUserDto: CreateUserDto,
+  ): Promise<{ data: { message: string } }> {
+    const user = await this.usersService.create(new User({ ...createUserDto }));
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      data: {
+        message: 'User created successfully',
+      },
     };
   }
 }

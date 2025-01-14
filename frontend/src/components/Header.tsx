@@ -1,7 +1,15 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@redux/reducer";
+import { LogOut } from "lucide-react";
+import { clearAuthState } from "@redux/slices/auth";
 export default function Header() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const authStore = useSelector(
+        (state: RootState) => state.persistedReducer.authReducer
+    );
     return (
         <div className="w-full z-50 fixed top-0">
             <nav className="navbar-gradient p-4">
@@ -11,13 +19,24 @@ export default function Header() {
                             {import.meta.env.VITE_APP_NAME || "Brand"}
                         </Link>
                     </div>
-
                     <div>
                         <ul className="flex space-x-4">
                             <li>
-                                <Button onClick={() => navigate("/login")}>
-                                    Login
-                                </Button>
+                                {authStore.access ? (
+                                    <Button
+                                        className="rounded-xl"
+                                        variant="destructive"
+                                        onClick={() => {
+                                            dispatch(clearAuthState());
+                                        }}
+                                    >
+                                        <LogOut size={20} />
+                                    </Button>
+                                ) : (
+                                    <Button onClick={() => navigate("/login")}>
+                                        Login
+                                    </Button>
+                                )}
                             </li>
                         </ul>
                     </div>

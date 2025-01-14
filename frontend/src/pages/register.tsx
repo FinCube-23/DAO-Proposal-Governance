@@ -5,29 +5,29 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import LoginForm from "@components/auth/LoginForm";
+import RegisterForm from "@components/auth/RegisterForm";
 import { Link } from "react-router-dom";
 
-export default function Login() {
+export default function Register() {
     return (
         <div className="h-screen flex justify-center items-center w-full">
             <div className="flex flex-col gap-6">
                 <Card className="w-[28rem] p-6">
                     <CardHeader>
-                        <CardTitle className="text-2xl">Login</CardTitle>
+                        <CardTitle className="text-2xl">Register</CardTitle>
                         <CardDescription>
-                            Enter your email below to login to your account
+                            Enter your information below to register your account
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <LoginForm />
+                        <RegisterForm />
                         <div className="mt-4 text-center text-sm">
-                            Don&apos;t have an account?{" "}
+                            Already have an account?{" "}
                             <Link
                                 to="/register"
                                 className="underline underline-offset-4"
                             >
-                                Register
+                                Login
                             </Link>
                         </div>
                     </CardContent>
