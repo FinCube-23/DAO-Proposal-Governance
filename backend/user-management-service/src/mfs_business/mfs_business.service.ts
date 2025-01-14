@@ -33,12 +33,12 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.findOne({ where: { id } });
   }
 
-  async findByOrgName(org_name: string, sub: string): Promise<MfsBusiness> {
+  async findByEmail(email: string): Promise<MfsBusiness> {
     // const role = await this.roleChecker.findOne(sub);
     // if (role != 'MFS') {
     //   throw new UnauthorizedException();
     // }
-    return this.mfsBusinessRepository.findOne({ where: { org_name } });
+    return this.mfsBusinessRepository.findOne({ where: { email } });
   }
 
   async update(

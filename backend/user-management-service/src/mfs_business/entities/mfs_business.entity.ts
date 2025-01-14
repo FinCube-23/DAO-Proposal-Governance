@@ -5,7 +5,6 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToOne,
-  JoinColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/users/entities/user.entity';
@@ -18,7 +17,11 @@ export class MfsBusiness {
 
   @Column({ type: 'varchar', length: 255, unique: true })
   @ApiProperty()
-  org_name: string;
+  name: string;
+
+  @Column({ type: 'varchar', length: 255, unique: true })
+  @ApiProperty()
+  email: string;
 
   @Column({ type: 'varchar', length: 255 })
   @ApiProperty()
@@ -52,10 +55,6 @@ export class MfsBusiness {
   @OneToOne(() => User, (user) => user.mfsBusiness)
   @ApiProperty({ type: () => User })
   user: User;
-
-  @Column({ type: 'integer', nullable: true })
-  @ApiProperty()
-  proposal_id: number;
 
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;

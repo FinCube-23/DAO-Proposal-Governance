@@ -11,18 +11,19 @@ import { Label } from "@components/ui/label";
 import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
+import MFSProfileForm from "./MFSProfileForm";
 
 interface Props {
     isOpen: boolean;
     setOpen: any;
+    type: "details" | "form";
 }
 
-export default function ProfileDialog({ isOpen, setOpen }: Props) {
+export default function ProfileDialog({ isOpen, setOpen, type }: Props) {
     const auth = useSelector(
         (state: RootState) => state.persistedReducer.authReducer
     );
 
-    console.log("auth", auth?.profile?.mfsBusiness);
     return (
         <Dialog open={isOpen} onOpenChange={setOpen}>
             <DialogContent>
@@ -30,39 +31,11 @@ export default function ProfileDialog({ isOpen, setOpen }: Props) {
                     <DialogTitle className="text-xl">MFS Profile</DialogTitle>
                     <DialogDescription className="text-sm text-muted-foreground">View your profile information</DialogDescription>
                 </DialogHeader>
-                <div className="flex flex-col gap-5">
-                    <div className="flex flex-col gap-2">
-                        <Label>MFS Name</Label>
-                        <Input disabled={true} value={auth?.profile?.mfsBusiness?} />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label>Email</Label>
-                        <Input disabled={true} value={auth?.mfs?.org_email} />
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <Label>Native Currency</Label>
-                        <Input
-                            disabled={true}
-                            value={auth?.mfs?.native_currency}
-                        />
-                    </div>
-                    <div>
-                        Is Approved:{" "}
-                        {auth?.mfs?.is_approved ? (
-                            <Badge variant="success">Yes</Badge>
-                        ) : (
-                            <Badge variant="danger">No</Badge>
-                        )}
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button
-                        variant="destructive"
-                        onClick={() => setOpen(false)}
-                    >
-                        Close
-                    </Button>
-                </DialogFooter>
+                {type === "details" ? (
+                    <></>
+                ): (
+                    <MFSProfileForm />
+                )}
             </DialogContent>
         </Dialog>
     );

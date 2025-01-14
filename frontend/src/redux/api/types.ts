@@ -7,12 +7,14 @@ interface Response {
 // MFS
 export type CreateMFSPayload = {
     name: string;
-    org_email: string;
-    wallet_address?: string;
-    native_currency?: string;
-    certificate?: string;
-    dao_id?: number;
-    user_id: number;
+    email: string;
+    context: string;
+    type: string;
+    location: string;
+    is_approved: boolean;
+    wallet_address: string;
+    native_currency: string;
+    certificate: string;
 };
 
 export type CreateMFSResponse = CreateMFSPayload & {
