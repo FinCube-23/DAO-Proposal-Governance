@@ -97,26 +97,44 @@ The Web3 Proxy Service performs smart contract invocations and is configured wit
 - **API Endpoints:** N/A
 - **Technology:** NestJS
 
-## Message Queue Payload
+## Message Broker Payloads
 There are two message queues communicating between Audit-trail service and DAO service. 
+ - From DAO Service to Audit Trail Service the queue is in `Message Pattern`. Here DAO Service is the publisher and Audit Trail Service is the consumer. As this is a `Message Pattern` Queue the DAO Service will also receive a response from Audit Trail Service.     
 
-The proposal-queue produced by DAO service and consumed by Audit-Trail service. And the proposal-update-queue is produced by Audit-Trail service and consumed by DAO service. 
+Endpoint: `[POST]<DOMAIN>/proposal-service` (Bearer Token Required)
 
 The payload for the message queues is:
-```
+
+ ```json
 {
-  "id": "string",
-  "proposalAddress": "string",
-  "proposerAddress": "string",
-  "metadata": "string",
-  "transactionInfo": {
-    "status": "string",
-    "hash": "string",
-    "blockNumber": "number"
-  },
-  "externalProposal": "boolean"
+  "id": 0,
+  "proposal_onchain_id": 0,
+  "proposal_type": "membership",
+  "metadata": "Extra fields of the proposals will be formatted as json and stringify. memberURI can be considered also",
+  "proposer_address": "0x8152f498e91df80be19a28c83d8596f59fba80bd",
+  "proposal_executed_by": "string",
+  "external_proposal": false,
+  "proposal_status": "pending",
+  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7",
+  "trx_status": 0
 }
 ```
+
+- The another queue is in `Event Pattern` where Audit-Trail service is acting as Publisher and DAO service is the consumer. 
+
+Endpoint: `[POST]<DOMAIN>/proposal-update/create-proposal`
+
+The payload for the message queues is:
+```json
+{
+    "web3Status": 200,
+    "message": "This is a drill",
+    "blockNumber": 123321,
+    "transactionHash": "0xTesting"
+}
+```
+
+![Sequence Diagram for Inter-Service Communication with Message-Broker](DAO-Audit-Message-Broker.fincube.png)
 
 ## Installation
 

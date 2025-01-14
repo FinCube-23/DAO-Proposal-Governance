@@ -17,7 +17,7 @@ import { ApiBody, ApiResponse } from '@nestjs/swagger';
 
 @Controller('mfs-business')
 export class MfsBusinessController {
-  constructor(private readonly mfsBusinessService: MfsBusinessService) {}
+  constructor(private readonly mfsBusinessService: MfsBusinessService) { }
 
   @Post()
   @ApiBody({ type: MfsBusinessEntity })
