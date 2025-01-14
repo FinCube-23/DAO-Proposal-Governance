@@ -9,6 +9,7 @@ import {
 import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
 import { TransactionsService } from 'src/transactions/transactions.service';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
 @Injectable()
@@ -73,7 +74,7 @@ export class ProposalUpdateService {
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
-  async updateProposal(proposal: CreatedProposalDto) {
+  async updateProposal(proposal: ResponseTransactionStatusDto) {
     await this.rabbitClient.emit('create-proposal-placed', proposal);
     return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }

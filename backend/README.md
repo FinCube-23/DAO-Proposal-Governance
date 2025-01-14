@@ -127,15 +127,10 @@ Endpoint: `[POST]<DOMAIN>/proposal-update/create-proposal`
 The payload for the message queues is:
 ```json
 {
-  "proposer_address": "0xCBDC",
-  "description": "This is an event ",
-  "voteStart": "date-and-time",
-  "voteEnd": "date-and-time",
-  "transaction_data": {
-	  "transactionHash": "0x9bedc4ae2294b431826aae10e11fd1795e690b7a6b92cc007ae7ca8f6b185c6c",
-    "web3Status": 200 
-  },
-  "external_proposal": false
+    "web3Status": 200,
+    "message": "This is a drill",
+    "blockNumber": 123321,
+    "transactionHash": "0xTesting"
 }
 ```
 

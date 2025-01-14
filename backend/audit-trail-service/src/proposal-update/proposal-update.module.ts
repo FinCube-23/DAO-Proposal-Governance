@@ -36,6 +36,6 @@ require('dotenv').config();
         },
       },
     ])],
-  exports: ['APOLLO_CLIENT1'],
+  exports: ['APOLLO_CLIENT1', ProposalUpdateService],
 })
 export class ProposalUpdateModule { }

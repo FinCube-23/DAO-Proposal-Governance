@@ -10,6 +10,7 @@ import {
   Payload,
   RmqContext,
 } from '@nestjs/microservices';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
@@ -33,8 +34,8 @@ export class ProposalServiceController {
 
   // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
   @EventPattern('create-proposal-placed')
-  handleCreatedProposalPlaced(@Payload() proposal: CreatedProposalDto, @Ctx() context: RmqContext) {
-    this.proposalService.handleCreatedProposalPlaced(proposal, context);
+  handleCreatedProposalPlaced(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+    this.proposalService.handleCreatedProposalPlacedEvent(proposal, context);
   }
 
 }

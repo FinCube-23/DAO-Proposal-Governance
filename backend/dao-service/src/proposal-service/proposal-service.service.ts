@@ -33,12 +33,6 @@ export class ProposalServiceService {
 
   // 💬 MessagePattern expects a response | This is a publisher
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
-    // Testing without auth
-    // const role = await this.getUserRole(sub);
-    // if (role != 'MFS') {
-    //   this.logger.log("User does not have permission for role: " + role);
-    //   throw new UnauthorizedException("User does not have permission");
-    // }
     try {
       const pendingTrx = { "trx_hash": proposal.trx_hash, "proposer_address": proposal.proposer_address };
       const audit_record = await this.handlePendingProposal(pendingTrx);
@@ -76,39 +70,36 @@ export class ProposalServiceService {
     }
   }
 
-  private mapToCreatedProposalDto(proposal: any): CreatedProposalDto {
-    const dto = new CreatedProposalDto();
-    dto.id = proposal.proposalId; // Assuming 'id' from the graph is the address
-    dto.proposalId = proposal.proposalId;
-    dto.proposer_address = proposal.proposer_address;
-    dto.description = proposal.metadata || proposal.description; //TODO: Needs to be a seperate function while recieving
-    dto.voteStart = proposal.voteStart;
-    dto.voteEnd = proposal.voteEnd;
-    dto.external_proposal = proposal.external_proposal;
-    const transactionData = new ResponseTransactionStatusDto();
-    transactionData.web3Status = 0;
-    transactionData.message = proposal.description;
-    transactionData.blockNumber = 0; // Assuming block number is 0 for now
-    transactionData.transactionHash = proposal.trx_hash;
-    dto.transaction_data = proposal.transaction_data || transactionData;
-    return dto;
+  async updateTransactionStatus(trxHash: string, newStatus: number) {
+    try {
+      const transaction = await this.proposalRepository.findOne({
+        where: { trx_hash: trxHash }
+      });
+      this.logger.log(`Transaction status found! Getting updated at at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
+      if (!transaction) {
+        throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
+      }
+      transaction.trx_status = newStatus;
+      this.logger.log(`Transaction status updated at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
+      return await this.proposalRepository.save(transaction);
+    } catch (err) {
+      this.logger.error(`Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`);
+      throw new Error("Transaction status couldn't get updated.");
+    }
   }
 
   // 📡 Listening Event from Publisher
-  handleCreatedProposalPlaced(proposal: CreatedProposalDto, @Ctx() context: RmqContext) {
-    const createdProposal = this.mapToCreatedProposalDto(proposal);
-    if (
-      createdProposal instanceof CreatedProposalDto
-    ) {
+  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+    try {
       this.logger.log(
-        `Received a proposal transaction update - hash: ${createdProposal.transaction_data.transactionHash}`,
+        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
+      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status);
       console.log(`Pattern: ${context.getPattern()}`);
-      this.update_proposals.push(createdProposal);
       const originalMsg = context.getMessage();
       console.log(originalMsg);
-    } else {
-      this.logger.error('Invalid proposal object received:', createdProposal);
+    } catch (error) {
+      this.logger.error('Invalid proposal object received:', error);
     }
   }
 
