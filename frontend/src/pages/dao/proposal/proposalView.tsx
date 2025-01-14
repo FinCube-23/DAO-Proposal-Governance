@@ -44,7 +44,7 @@ export default function ProposalView() {
     };
 
     getProposal();
-  }, []);
+  }, [id]);
 
   return (
     <div className="flex flex-col gap-5">

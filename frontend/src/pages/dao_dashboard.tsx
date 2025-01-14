@@ -367,10 +367,18 @@ export default function DaoDashboard() {
             </div>
           </Card>
           <div className="flex">
-            <Button onClick={() => setToggle(false)} className="mr-2">
-              ALl proposals
+            <Button
+              onClick={() => setToggle(false)}
+              className={`${toggle && "bg-gray-400"} mr-2`}
+            >
+              All proposals
             </Button>
-            <Button onClick={() => setToggle(true)}>Ongoing proposals</Button>
+            <Button
+              onClick={() => setToggle(true)}
+              className={`${!toggle && "bg-gray-400"}`}
+            >
+              Ongoing proposals
+            </Button>
           </div>
           {loading ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
@@ -412,6 +420,24 @@ export default function DaoDashboard() {
                 );
               }
             })
+          )}
+          {!toggle && (
+            <div className="flex justify-center mt-5">
+              <button
+                onClick={handlePrevPage}
+                disabled={pageNumber === 0}
+                className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
+              >
+                <ArrowLeft />
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={pageNumber >= 2}
+                className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
+              >
+                <ArrowRight />
+              </button>
+            </div>
           )}
         </div>
         <div className="md:col-span-5">
@@ -459,24 +485,6 @@ export default function DaoDashboard() {
           </Card>
         </div>
       </div>
-      {!toggle && (
-        <div className="flex justify-center mt-5">
-          <button
-            onClick={handlePrevPage}
-            disabled={pageNumber === 0}
-            className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
-          >
-            <ArrowLeft />
-          </button>
-          <button
-            onClick={handleNextPage}
-            disabled={pageNumber >= 2}
-            className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
-          >
-            <ArrowRight />
-          </button>
-        </div>
-      )}
     </div>
   );
 }
