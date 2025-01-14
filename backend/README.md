@@ -108,11 +108,15 @@ The payload for the message queues is:
  ```json
 {
   "id": 0,
+  "proposal_onchain_id": 0,
+  "proposal_type": "membership",
+  "metadata": "Extra fields of the proposals will be formatted as json and stringify. memberURI can be considered also",
   "proposer_address": "0x8152f498e91df80be19a28c83d8596f59fba80bd",
-  "metadata": "This is a sample message pattern DTO. So you will be expecting a response with a Primary Key of Audit Trail DB Table.",
-  "proposal_status": false,
+  "proposal_executed_by": "string",
   "external_proposal": false,
-  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7"
+  "proposal_status": "pending",
+  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7",
+  "trx_status": 0
 }
 ```
 
@@ -123,15 +127,10 @@ Endpoint: `[POST]<DOMAIN>/proposal-update/create-proposal`
 The payload for the message queues is:
 ```json
 {
-  "proposer_address": "0xCBDC",
-  "description": "This is an event ",
-  "voteStart": "date-and-time",
-  "voteEnd": "date-and-time",
-  "transaction_data": {
-	  "transactionHash": "0x9bedc4ae2294b431826aae10e11fd1795e690b7a6b92cc007ae7ca8f6b185c6c",
-    "web3Status": 200 
-  },
-  "external_proposal": false
+    "web3Status": 200,
+    "message": "This is a drill",
+    "blockNumber": 123321,
+    "transactionHash": "0xTesting"
 }
 ```
 

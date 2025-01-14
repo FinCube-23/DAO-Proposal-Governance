@@ -17,6 +17,7 @@ import {
 import { Logger } from '@nestjs/common';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
 @Controller('proposal-update')
@@ -41,9 +42,9 @@ export class ProposalUpdateController {
   @ApiResponse({
     status: 200,
     description: 'The message has been successfully pushed.',
-    type: CreatedProposalDto,
+    type: ResponseTransactionStatusDto,
   })
-  async placeProposal(@Body() proposal: CreatedProposalDto) {
+  async placeProposal(@Body() proposal: ResponseTransactionStatusDto) {
     return await this.proposalUpdateService.updateProposal(proposal);
   }
 

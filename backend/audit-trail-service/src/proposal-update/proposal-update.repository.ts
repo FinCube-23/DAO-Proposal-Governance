@@ -8,7 +8,6 @@ import {
     Logger,
 } from '@nestjs/common';
 import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
-import { DaoAudit } from 'src/dao_audit/entities/dao_audit.entity';
 
 @Injectable()
 export class ProposalUpdateRepository {

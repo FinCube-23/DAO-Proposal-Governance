@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common';
 import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
+import { TransactionsService } from 'src/transactions/transactions.service';
+import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
 
 @Injectable()
@@ -17,6 +19,7 @@ export class ProposalUpdateService {
 
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
+    private transactionService: TransactionsService,
     private readonly proposalUpdateRepository: ProposalUpdateRepository,
   ) {
     this.update_proposals = [];
@@ -27,9 +30,10 @@ export class ProposalUpdateService {
     this.logger.log("Got the pending proposal hash " + data_packet.trx_hash);
     try {
       const new_dao_audit = {
-        transactionHash: data_packet.trx_hash,
-        trx_sender: data_packet.proposer_address,
+        "trx_hash": data_packet.trx_hash,
+        "trx_sender": data_packet.proposer_address,
       };
+      const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
       const originalMsg = context.getMessage();
       const replyTo = originalMsg.properties.replyTo;
       this.logger.log('Replying To Producer Service: ' + replyTo);
@@ -39,7 +43,7 @@ export class ProposalUpdateService {
         message_id: data_packet.trx_hash, // Should use trace_id as message_id for now
         timestamp: new Date().toISOString(),
         data: {
-          db_record_id: 123, // Dummy value until ORM is integrated
+          db_record_id: dbRecordedTRX.id,
           current_status: 'INDEXING'
         }
       };
@@ -70,7 +74,7 @@ export class ProposalUpdateService {
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
-  async updateProposal(proposal: CreatedProposalDto) {
+  async updateProposal(proposal: ResponseTransactionStatusDto) {
     await this.rabbitClient.emit('create-proposal-placed', proposal);
     return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }
