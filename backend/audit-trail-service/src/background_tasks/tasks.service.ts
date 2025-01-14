@@ -44,12 +44,12 @@ export class TasksService {
         this.logger.log('proposalEndTopic is zero for ProposalCreated event.');
         this.logger.log('New member proposal placed at on-chain.');
         // Updating Audit DB Transaction Status
-        this.transactionService.updateStatus(txn.transactionHash, txn.status);
+        this.transactionService.updateStatus(txn.transactionHash, 1);
         // Emitting Transaction Status to other Services
         this.proposalUpdateService.updateProposal({
-          "web3Status": txn.status,
+          "web3Status": 1,
           "message": "Brain Station 23 PLC.",
-          "blockNumber": 123321,
+          "blockNumber": txn.blockNumber,
           "transactionHash": txn.transactionHash
         });
         this.logger.log('New member proposal transaction update event nas been emitted and DB has been updated!');
