@@ -17,6 +17,7 @@ import {
   History,
   ArrowLeft,
   ArrowRight,
+  Loader,
 } from "lucide-react";
 import {
   Dialog,
@@ -94,8 +95,9 @@ export default function DaoDashboard() {
   const [pageNumber, setPageNumber] = useState(0);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
-  const [registerMember] = useRegisterMemberMutation();
-  const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
+  // const [registerMember] = useRegisterMemberMutation();
+  // const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
+  const [pageLoading, setPageLoading] = useState(false);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -267,12 +269,22 @@ export default function DaoDashboard() {
   }, [pageNumber]);
 
   const handleNextPage = () => {
+    setPageLoading(true);
     setPageNumber((prevPage) => prevPage + 3);
+
+    setTimeout(() => {
+      setPageLoading(false); // Reset loading state after 2 seconds
+    }, 800);
   };
 
   const handlePrevPage = () => {
     if (pageNumber > 0) {
+      setPageLoading(true);
       setPageNumber((prevPage) => prevPage - 3);
+
+      setTimeout(() => {
+        setPageLoading(false); // Reset loading state after 2 seconds
+      }, 800);
     }
   };
 
@@ -421,18 +433,25 @@ export default function DaoDashboard() {
               }
             })
           )}
+          {/* Show loading text */}
+          {pageLoading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div className="animate-spin border-4 border-t-transparent rounded-full w-10 h-10"></div>
+            </div>
+          )}
+
           {!toggle && (
             <div className="flex justify-center mt-5">
               <button
                 onClick={handlePrevPage}
-                disabled={pageNumber === 0}
+                disabled={pageNumber === 0 || pageLoading}
                 className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
               >
                 <ArrowLeft />
               </button>
               <button
                 onClick={handleNextPage}
-                disabled={pageNumber >= 2}
+                disabled={pageLoading}
                 className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
               >
                 <ArrowRight />
