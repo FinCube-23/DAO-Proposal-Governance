@@ -7,12 +7,14 @@ interface Response {
 // MFS
 export type CreateMFSPayload = {
   name: string;
-  org_email: string;
-  wallet_address?: string;
-  native_currency?: string;
-  certificate?: string;
-  dao_id?: number;
-  user_id: number;
+  email: string;
+  context: string;
+  type: string;
+  location: string;
+  is_approved: boolean;
+  wallet_address: string;
+  native_currency: string;
+  certificate: string;
 };
 
 export type CreateMFSResponse = CreateMFSPayload & {
@@ -20,11 +22,38 @@ export type CreateMFSResponse = CreateMFSPayload & {
 };
 
 // Auth
-export type AuthMeResponse = {
+export type FetchMeResponse = {
+  created_at: string;
+  updated_at: string;
   id: number;
-  sub: string;
+  name: string;
+  email: string;
+  password: string;
   role: string;
-  mfs: unknown;
+  mfsBusiness: null;
+  exchangeUser: null;
+};
+
+export type LoginPayload = {
+  email: string;
+  password: string;
+};
+
+export type LoginResponse = {
+  access_token: string;
+};
+
+export type RegisterPayload = {
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+};
+
+export type RegisterResponse = {
+  data: {
+    message: string;
+  };
 };
 
 // DAO

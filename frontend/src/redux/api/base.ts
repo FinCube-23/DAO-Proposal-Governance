@@ -5,12 +5,10 @@ import { RootState } from "@redux/store";
 const baseQuery = fetchBaseQuery({
   baseUrl: import.meta.env.VITE_BASE_URL || "http://localhost:3000",
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).persistedReducer.authReducer.auth
-      ?.access;
+    const token = (getState() as RootState).persistedReducer.authReducer.access;
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
     }
-    headers.set("ngrok-skip-browser-warning", "true");
     return headers;
   },
   timeout: 5000, // Consider reducing this timeout if appropriate

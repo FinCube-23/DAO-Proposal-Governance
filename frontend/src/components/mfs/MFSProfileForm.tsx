@@ -37,11 +37,7 @@ const FormSchema = z.object({
     certificate: z.string().optional(),
 });
 
-interface Props {
-    user_id: number;
-}
-
-export default function MFSProfileForm({ user_id }: Props) {
+export default function MFSProfileForm() {
     const { toast } = useToast();
     const navigate = useNavigate();
     const [
@@ -61,14 +57,13 @@ export default function MFSProfileForm({ user_id }: Props) {
     });
 
     function onSubmit(data: z.infer<typeof FormSchema>) {
-        createMFS({
-            name: data.name,
-            org_email: data.org_email,
-            wallet_address: data.wallet_address,
-            native_currency: data.native_currency,
-            certificate: data.certificate,
-            user_id: user_id,
-        });
+        // createMFS({
+        //     name: data.name,
+        //     org_email: data.org_email,
+        //     wallet_address: data.wallet_address,
+        //     native_currency: data.native_currency,
+        //     certificate: data.certificate,
+        // });
     }
 
     useEffect(() => {

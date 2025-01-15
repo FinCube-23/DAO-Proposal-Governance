@@ -1,7 +1,4 @@
-import { useAuth0 } from "@auth0/auth0-react";
-import Loader from "@components/Loader";
 import { Outlet, useNavigate } from "react-router-dom";
-// import AuthStateSyncer from "@components/AuthStateSyncer";
 import { useEffect } from "react";
 
 import "@rainbow-me/rainbowkit/styles.css";
@@ -13,6 +10,8 @@ import {
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { RootState } from "@redux/store";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
@@ -23,38 +22,34 @@ export const config = getDefaultConfig({
 const queryClient = new QueryClient();
 
 export default function MfsLayout() {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth0();
-
   const navigate = useNavigate();
+  const authStoreState = useSelector(
+    (state: RootState) => state.persistedReducer.authReducer
+  );
 
   useEffect(() => {
-    if (!isAuthLoading && !isAuthenticated) {
+    if (!authStoreState.access && authStoreState.profile?.role != "mfs") {
       navigate("/");
     }
-  }, [isAuthLoading, isAuthenticated]);
+  }, [authStoreState, navigate]);
 
   return (
     <div>
-      {/* <AuthStateSyncer /> */}
-      {isAuthLoading ? (
-        <Loader />
-      ) : (
-        <WagmiProvider config={config}>
-          <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider
-              theme={darkTheme({
-                accentColor: "#7b3fe4",
-                accentColorForeground: "white",
-                borderRadius: "large",
-                fontStack: "rounded",
-                overlayBlur: "large",
-              })}
-            >
-              <Outlet />
-            </RainbowKitProvider>
-          </QueryClientProvider>
-        </WagmiProvider>
-      )}
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider
+            theme={darkTheme({
+              accentColor: "#7b3fe4",
+              accentColorForeground: "white",
+              borderRadius: "large",
+              fontStack: "rounded",
+              overlayBlur: "large",
+            })}
+          >
+            <Outlet />
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
     </div>
   );
 }
