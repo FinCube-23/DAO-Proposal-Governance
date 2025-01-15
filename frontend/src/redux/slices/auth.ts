@@ -1,69 +1,51 @@
+import { FetchMeResponse } from "@redux/api/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type TokenPayload = {
-  access: string;
+    access: string;
 };
 
 type MFSInfo = {
-  id: number;
-  name: string;
-  org_email: string;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  user_id: number;
-  is_approved: boolean;
-}
-
-type UserPayload = {
-  sub?: string;
-  id?: number;
-  role?: string;
-  mfs?: MFSInfo | null;
+    id: number;
+    name: string;
+    org_email: string;
+    wallet_address: string;
+    native_currency: string;
+    certificate: string;
+    user_id: number;
+    is_approved: boolean;
 };
 
-interface AuthState {
-  access?: string;
-  sub?: string;
-  role?: string;
-  id?: number;
-  mfs?: MFSInfo | null;
+type ProfilePayload = FetchMeResponse;
+
+interface AuthStoreState {
+    access: string | null;
+    profile: ProfilePayload | null;
+    mfsInfo: MFSInfo | null;
 }
 
-interface IInitialState {
-  auth: AuthState | null;
-}
-
-const initialState: IInitialState = {
-  auth: {},
+const initialState: AuthStoreState = {
+    access: null,
+    profile: null,
+    mfsInfo: null,
 };
 
 const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    setAuthData: (
-      state: IInitialState,
-      action: PayloadAction<TokenPayload | null>,
-    ) => {
-      if (action.payload?.access) {
-        state.auth = { ...state.auth, ...action.payload };
-      } else {
-        state.auth = {};
-      }
-    },
-    setUserProfile: (
-      state: IInitialState,
-      action: PayloadAction<UserPayload>,
-    ) => {
-      state.auth = { ...state.auth, ...action.payload };
-    },
-    clearAuth: (state: IInitialState) => {
-      state.auth = {};
-    },
+      setTokens: (state, action: PayloadAction<TokenPayload | null>) => {
+          state.access = action.payload?.access || null;
+      },
+      setProfile: (state, action: PayloadAction<ProfilePayload | null>) => {
+          state.profile = action.payload;
+      },
+      clearAuthState: (state) => {
+          Object.assign(state, initialState);
+      },
   },
 });
 
-export const { setAuthData, setUserProfile, clearAuth } = authSlice.actions;
+export const { setTokens, setProfile, clearAuthState } = authSlice.actions;
 
 export default authSlice.reducer;

@@ -8,65 +8,51 @@ import {
   Delete,
   NotFoundException,
   UseGuards,
+  Request,
   Req,
 } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
-import { AuthGuard } from '@nestjs/passport';
-import { MfsBusinessEntity } from './entities/mfs_business.entity';
+import { MfsBusiness } from './entities/mfs_business.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
-
+import { AuthGuard } from 'src/auth/auth.guard';
 @Controller('mfs-business')
 export class MfsBusinessController {
-  constructor(private readonly mfsBusinessService: MfsBusinessService) { }
+  constructor(private readonly mfsBusinessService: MfsBusinessService) {}
 
   @Post()
-  @ApiBody({ type: MfsBusinessEntity })
+  @ApiBody({ type: MfsBusiness })
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully created.',
-    type: MfsBusinessEntity,
+    type: MfsBusiness,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard)
   async create(
-    @Body() mfs_business_entity: MfsBusinessEntity | any,
-  ): Promise<MfsBusinessEntity> {
+    @Body() mfs_business_body: MfsBusiness,
+    @Request() req,
+  ): Promise<MfsBusiness> {
+
+    console.log(mfs_business_body);
     return this.mfsBusinessService.create(
-      mfs_business_entity,
-      mfs_business_entity.user_id,
+      new MfsBusiness({ ...mfs_business_body, user: req.user }),
     );
   }
-  //redundant api call
-  // @Post()
-  // @ApiBody({ type: String, description: "email" })
-  // async findByEmail(@Body() email: string): Promise<MfsBusinessEntity> {
-  //   const mfs_business = await this.mfsBusinessService.findByEmail(email);
-  //   if (!mfs_business) {
-  //     throw new NotFoundException('MFS business not found');
-  //   } else {
-  //     return mfs_business;
-  //   }
-  // }
 
   @Get()
-  @ApiResponse({ status: 200, type: [MfsBusinessEntity] })
+  @ApiResponse({ status: 200, type: [MfsBusiness] })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @UseGuards(AuthGuard('jwt'))
-  async findAll(@Req() req): Promise<MfsBusinessEntity[]> {
+  async findAll(@Req() req): Promise<MfsBusiness[]> {
     console.log(req.user);
     return this.mfsBusinessService.findAll(req.user);
   }
 
   @Get(':id')
-  @ApiResponse({ status: 200, type: MfsBusinessEntity })
+  @ApiResponse({ status: 200, type: MfsBusiness })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @UseGuards(AuthGuard('jwt'))
-  async findOne(
-    @Param('id') id: string,
-    @Req() req,
-  ): Promise<MfsBusinessEntity> {
+  async findOne(@Param('id') id: string, @Req() req): Promise<MfsBusiness> {
     const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
     if (!mfs_business) {
       throw new NotFoundException(`MFS business doesn't exist`);
@@ -79,15 +65,14 @@ export class MfsBusinessController {
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated.',
-    type: MfsBusinessEntity,
+    type: MfsBusiness,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @UseGuards(AuthGuard('jwt'))
   async update(
     @Param('id') id: string,
-    @Body() mfs_business_entity: MfsBusinessEntity,
+    @Body() mfs_business_entity: MfsBusiness,
     @Req() req,
-  ): Promise<MfsBusinessEntity> {
+  ): Promise<MfsBusiness> {
     return this.mfsBusinessService.update(+id, mfs_business_entity, req.user);
   }
 
@@ -95,10 +80,9 @@ export class MfsBusinessController {
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully deleted.',
-    type: MfsBusinessEntity,
+    type: MfsBusiness,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  @UseGuards(AuthGuard('jwt'))
   async remove(@Param('id') id: string, @Req() req): Promise<any> {
     const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
     if (!mfs_business) {
