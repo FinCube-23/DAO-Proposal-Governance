@@ -17,7 +17,6 @@ import {
   History,
   ArrowLeft,
   ArrowRight,
-  Loader,
 } from "lucide-react";
 import {
   Dialog,
@@ -40,10 +39,10 @@ import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
 import WalletAuth from "@components/auth/WalletAuth";
-import {
-  useLazyGetOngoingProposalsQuery,
-  useRegisterMemberMutation,
-} from "@redux/services/proxy";
+// import {
+//   useLazyGetOngoingProposalsQuery,
+//   useRegisterMemberMutation,
+// } from "@redux/services/proxy";
 
 export interface Proposal {
   executed: boolean;
@@ -98,6 +97,7 @@ export default function DaoDashboard() {
   // const [registerMember] = useRegisterMemberMutation();
   // const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [pageLoading, setPageLoading] = useState(false);
+  const [proposalsPerPage, setProposalsPerPage] = useState(0);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -145,14 +145,21 @@ export default function DaoDashboard() {
   const getProposalsByPage = async (page: any) => {
     setLoading(true);
     try {
-      const response = await readContract(config, {
+      const response: any = await readContract(config, {
         abi: contractABI,
         address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
         functionName: "getProposalsByPage",
         args: [page, page + 3],
       });
 
-      setProposalsByPage(response[0] || []);
+      const filteredProposals = response[0].filter(
+        (proposal: any) =>
+          proposal.proposer !== "0x0000000000000000000000000000000000000000"
+      );
+
+      setProposalsPerPage(filteredProposals.length);
+      setProposalsByPage(filteredProposals);
+      setPageLoading(false);
     } catch (e) {
       console.log(e);
     } finally {
@@ -271,20 +278,13 @@ export default function DaoDashboard() {
   const handleNextPage = () => {
     setPageLoading(true);
     setPageNumber((prevPage) => prevPage + 3);
-
-    setTimeout(() => {
-      setPageLoading(false); // Reset loading state after 2 seconds
-    }, 800);
+    console.log(pageNumber);
   };
 
   const handlePrevPage = () => {
     if (pageNumber > 0) {
       setPageLoading(true);
       setPageNumber((prevPage) => prevPage - 3);
-
-      setTimeout(() => {
-        setPageLoading(false); // Reset loading state after 2 seconds
-      }, 800);
     }
   };
 
@@ -402,36 +402,22 @@ export default function DaoDashboard() {
                 No ongoing proposals found
               </p>
             ) : (
-              ongoingProposals.map((proposal, idx) => {
-                const proposer = proposal.proposer;
-                if (proposer !== "0x0000000000000000000000000000000000000000") {
-                  return (
-                    <ProposalCard
-                      key={idx}
-                      proposal={proposal}
-                      proposalId={proposal.proposer}
-                    />
-                  );
-                }
-              })
+              ongoingProposals.map((proposal, idx) => (
+                <ProposalCard
+                  key={idx}
+                  proposal={proposal}
+                  proposalId={proposal.proposer}
+                />
+              ))
             )
           ) : proposalsByPage.length === 0 ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
               No ongoing proposals found
             </p>
           ) : (
-            proposalsByPage.map((proposal, idx) => {
-              const proposer = proposal.proposer;
-              if (proposer !== "0x0000000000000000000000000000000000000000") {
-                return (
-                  <ProposalCard
-                    key={idx}
-                    proposal={proposal}
-                    proposalId={proposal.proposer}
-                  />
-                );
-              }
-            })
+            proposalsByPage.map((proposal, idx) => (
+              <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+            ))
           )}
           {/* Show loading text */}
           {pageLoading && (
@@ -444,14 +430,14 @@ export default function DaoDashboard() {
             <div className="flex justify-center mt-5">
               <button
                 onClick={handlePrevPage}
-                disabled={pageNumber === 0 || pageLoading}
+                disabled={pageNumber === 0}
                 className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
               >
                 <ArrowLeft />
               </button>
               <button
                 onClick={handleNextPage}
-                disabled={pageLoading}
+                disabled={proposalsPerPage < 3}
                 className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
               >
                 <ArrowRight />

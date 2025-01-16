@@ -11,17 +11,8 @@ import VotingBreakdown from "./VotingBreakdown";
 import VoterList from "./VoterList";
 import VotingInfo from "./VotingInfo";
 
-const convertStatusToVariant = (status: string) => {
-  switch (status) {
-    case "ongoing":
-      return "warning";
-    case "executed":
-      return "success";
-    case "canceled":
-      return "danger";
-    default:
-      return "default";
-  }
+const convertStatusToVariant = (status: boolean) => {
+  return status ? "success" : "warning";
 };
 
 export const ProposalStatCard = ({ proposal, proposalId }: any) => {
@@ -30,8 +21,10 @@ export const ProposalStatCard = ({ proposal, proposalId }: any) => {
       <CardHeader>
         <CardTitle className="text-2xl">Status</CardTitle>
         <CardDescription>
-          <Badge variant={convertStatusToVariant(proposal.status)}>
-            <p className="capitalize">{proposal.status}</p>
+          <Badge variant={convertStatusToVariant(proposal.executed)}>
+            <p className="capitalize">
+              {proposal.executed ? "Confirmed" : "Pending"}
+            </p>
           </Badge>
         </CardDescription>
       </CardHeader>

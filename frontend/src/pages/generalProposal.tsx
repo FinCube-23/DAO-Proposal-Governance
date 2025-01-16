@@ -19,6 +19,8 @@ import {
   DialogTrigger,
 } from "@components/ui/dialog";
 import { useAccount } from "wagmi";
+import { useDispatch } from "react-redux";
+import { setPending } from "@redux/slices/statusSlice"; // Import the action to update the pending status
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -27,6 +29,8 @@ const GeneralProposal = () => {
   const [description, setDescription] = useState("");
   const { address } = useAccount();
   const [createProposal] = useCreateProposalMutation();
+  const [trxStatus, setTrxStatus] = useState("");
+  const dispatch = useDispatch();
 
   const handleTargetsChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTargets(e.target.value);
@@ -55,6 +59,8 @@ const GeneralProposal = () => {
   const propose = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    dispatch(setPending(true));
+    setTrxStatus("Pending");
     const data = {
       targets: [targets],
       values: values.split(",").map(Number),
@@ -74,18 +80,26 @@ const GeneralProposal = () => {
 
       const backendData = {
         id: 0,
-        proposal_address: `${address}`,
+        proposal_onchain_id: 0,
+        proposal_type: "membership",
         metadata: data.description,
-        trx_hash: hash,
-        proposal_status: "unknown",
+        proposer_address: `${address}`,
+        proposal_executed_by: `${address}`,
         external_proposal: false,
+        proposal_status: "pending",
+        trx_hash: hash,
+        trx_status: 0,
       };
+
+      // check for transaction status
 
       // backend proposal service call
       await createProposal(backendData);
 
       await waitForTransactionReceipt(config, { hash });
 
+      dispatch(setPending(false));
+      setTrxStatus("Confirmed");
       toast.success("General proposal placed successfully!");
     } catch (e: any) {
       let errorMessage = e.message;
@@ -104,6 +118,22 @@ const GeneralProposal = () => {
 
   return (
     <div className="container mt-20">
+      <p
+        className={`absolute top-20 right-20 p-3 rounded-full font-bold text-xs
+                   ${
+                     trxStatus === "Pending"
+                       ? "bg-yellow-500 text-white shadow-lg"
+                       : ""
+                   }
+                    ${
+                      trxStatus === "Confirmed"
+                        ? "bg-green-500 text-white shadow-lg"
+                        : ""
+                    }
+                    transition-all duration-300 transform`}
+      >
+        {trxStatus}
+      </p>
       <div className="mb-3 flex justify-end">
         <ConnectButton />
       </div>
@@ -126,7 +156,6 @@ const GeneralProposal = () => {
                 i
               </Button>
             </DialogTrigger>
-
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Sample Input Data</DialogTitle>

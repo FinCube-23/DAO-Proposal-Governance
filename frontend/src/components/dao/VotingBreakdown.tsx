@@ -78,9 +78,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           args: [0, 10],
         });
 
-        const result = response[0].find(
-          (proposal: Proposal) => proposal.proposer === proposalId
-        );
+        const result = response[0][proposalId];
 
         setProposal(result as Proposal);
         console.log(result as Proposal);
