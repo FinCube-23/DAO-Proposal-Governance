@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, } from '@nestjs/common';
 import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
 import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
 import {
@@ -18,9 +18,9 @@ export class ProposalServiceController {
 
   // 💬 MessagePattern expects a response | This is a publisher
   @Post()
- // @UseGuards(AuthGuard('jwt'))
-  @ApiBody({ type: ProposalEntity })
-  @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
+  @ApiTags("Proposal Off-chain")
+  @ApiOperation({summary: "Inserts new proposal data at off-chain DB and emit message to Audit Trail Service",})
+  @ApiOkResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Req() req, @Body() proposal_entity: ProposalEntity): Promise<ProposalEntity> {
     return this.proposalService.create(proposal_entity, req.user);
