@@ -17,6 +17,7 @@ import {
   History,
   ArrowLeft,
   ArrowRight,
+  Info,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,6 +40,8 @@ import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
 import WalletAuth from "@components/auth/WalletAuth";
+import { useLazyGetProposalQuery } from "@redux/services/proposal";
+import Loader from "@components/Loader";
 // import {
 //   useLazyGetOngoingProposalsQuery,
 //   useRegisterMemberMutation,
@@ -98,6 +101,9 @@ export default function DaoDashboard() {
   // const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [pageLoading, setPageLoading] = useState(false);
   const [proposalsPerPage, setProposalsPerPage] = useState(0);
+  const [getProposal] = useLazyGetProposalQuery();
+  const [isMemberApproved, setIsMemberApproved] = useState(false);
+  const { isConnected, address } = useAccount();
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -139,31 +145,6 @@ export default function DaoDashboard() {
       setVotingDelay(result);
     } catch (e) {
       console.error(e);
-    }
-  };
-
-  const getProposalsByPage = async (page: any) => {
-    setLoading(true);
-    try {
-      const response: any = await readContract(config, {
-        abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
-        functionName: "getProposalsByPage",
-        args: [page, page + 3],
-      });
-
-      const filteredProposals = response[0].filter(
-        (proposal: any) =>
-          proposal.proposer !== "0x0000000000000000000000000000000000000000"
-      );
-
-      setProposalsPerPage(filteredProposals.length);
-      setProposalsByPage(filteredProposals);
-      setPageLoading(false);
-    } catch (e) {
-      console.log(e);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -265,6 +246,53 @@ export default function DaoDashboard() {
       }
     };
 
+    const getProposalsByPage = async (page: any) => {
+      setLoading(true);
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          functionName: "getProposalsByPage",
+          args: [page, page + 3],
+        });
+
+        const filteredProposals = response[0].filter(
+          (proposal: any) =>
+            proposal.proposer !== "0x0000000000000000000000000000000000000000"
+        );
+
+        setProposalsPerPage(filteredProposals.length);
+        setProposalsByPage(filteredProposals);
+        setPageLoading(false);
+
+        // const proposalsFromBE = await getProposal();
+        // console.log(proposalsFromBE);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const checkIsMemberApproved = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          functionName: "checkIsMemberApproved",
+          args: [address],
+        });
+
+        console.log(response);
+        setIsMemberApproved(true);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    if (isConnected) {
+      checkIsMemberApproved();
+    }
+
     getProposalsByPage(pageNumber);
     fetchOngoingProposals();
     getOngoingProposalCount();
@@ -272,8 +300,9 @@ export default function DaoDashboard() {
     getVersion();
     getVotingDelay();
     getVotingPeriod();
+    checkIsMemberApproved();
     setLoading(false);
-  }, [pageNumber]);
+  }, [pageNumber, getProposal, address, isConnected]);
 
   const handleNextPage = () => {
     setPageLoading(true);
@@ -338,6 +367,13 @@ export default function DaoDashboard() {
           </div>
         </CardFooter>
       </Card>
+      <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
+        <Info />{" "}
+        <p>
+          You are not an approved member to place a new proposal or register a
+          new member
+        </p>
+      </div>
       <div className="flex flex-col-reverse md:grid md:grid-cols-12 gap-5">
         <div className="md:col-span-7 flex flex-col gap-5">
           <Card>
@@ -381,13 +417,13 @@ export default function DaoDashboard() {
           <div className="flex">
             <Button
               onClick={() => setToggle(false)}
-              className={`${toggle && "bg-gray-400"} mr-2`}
+              className={`${!toggle && "border-4 border-orange-600"} mr-2`}
             >
               All proposals
             </Button>
             <Button
               onClick={() => setToggle(true)}
-              className={`${!toggle && "bg-gray-400"}`}
+              className={`${toggle && "border-4 border-orange-600"}`}
             >
               Ongoing proposals
             </Button>
@@ -422,7 +458,8 @@ export default function DaoDashboard() {
           {/* Show loading text */}
           {pageLoading && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div className="animate-spin border-4 border-t-transparent rounded-full w-10 h-10"></div>
+              {/* <div className="animate-spin border-4 border-t-transparent rounded-full w-10 h-10"></div> */}
+              <Loader />
             </div>
           )}
 

@@ -74,7 +74,6 @@ export type GetDAOResponse = CreateDAOPayload & Response;
 
 // Proposal
 export type CreateProposalPayload = {
-  id: number;
   proposal_onchain_id: number;
   proposal_type: string;
   metadata: string;

@@ -1,11 +1,10 @@
 import { combineReducers } from "redux";
-import statusReducer from "@redux/slices/statusSlice";
 
 import { store } from "./store";
 
 import authReducer from "@redux/slices/auth";
 
-const rootReducer = combineReducers({ authReducer, status: statusReducer });
+const rootReducer = combineReducers({ authReducer });
 
 export type RootState = ReturnType<typeof store.getState>;
 

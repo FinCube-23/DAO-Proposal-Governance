@@ -119,11 +119,11 @@ export default function MfsDashboard() {
       <div className="flex justify-end relative">
         <div className="absolute top-8 right-8 flex items-center">
           {!isMemberApproved ? (
-            <p className="mr-2 bg-red-600 font-bold p-2 rounded-2xl text-xs">
+            <p className="mr-2 border-2 border-red-600 font-bold p-2 rounded-2xl text-xs">
               Not approved
             </p>
           ) : (
-            <p className="mr-2 bg-green-600 font-bold p-2 rounded-2xl text-xs">
+            <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
               Approved
             </p>
           )}

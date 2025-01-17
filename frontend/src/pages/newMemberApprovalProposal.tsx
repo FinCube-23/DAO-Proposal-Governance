@@ -44,16 +44,20 @@ const NewMemberApprovalProposal = () => {
       const hash = await writeContract(config, request);
 
       const backendData = {
-        id: 0,
-        proposal_address: `${address}`,
+        proposal_onchain_id: 0,
+        proposal_type: "membership",
         metadata: data.description,
-        trx_hash: hash,
-        proposal_status: false,
+        proposer_address: `${address}`,
+        proposal_executed_by: `${address}`,
         external_proposal: false,
+        proposal_status: "pending",
+        trx_hash: hash,
+        trx_status: 0,
       };
 
       // backend proposal service call
-      await createProposal(backendData);
+      const response = await createProposal(backendData);
+      console.log("ACP Praduman: Bhennchod! Eije backend response:", response);
 
       await waitForTransactionReceipt(config, { hash });
 
