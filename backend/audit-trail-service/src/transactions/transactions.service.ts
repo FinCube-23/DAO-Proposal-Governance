@@ -15,7 +15,7 @@ export class TransactionsService {
     async create(transactionPacket: Partial<TransactionEntity>): Promise<TransactionEntity> {
         try {
             const new_transaction = this.transactionRepository.create(transactionPacket);
-            this.logger.log(`New transaction recorded in Audit Trail DB, where PK: ${new_transaction.id}`);
+            this.logger.log(`New transaction initialized at Audit Trail DB, where transaction hash: ${new_transaction.trx_hash}`);
             return this.transactionRepository.save(new_transaction);
         } catch (err) {
             this.logger.error(`Transaction couldn't logged in Web2 DB where transaction hash is ${transactionPacket.trx_hash}. Error: ${err}`);

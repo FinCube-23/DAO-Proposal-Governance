@@ -17,10 +17,6 @@ export class TransactionEntity  {
     @ApiProperty()
     trx_hash: string;
 
-    @Column({ type: 'varchar' })
-    @ApiProperty()
-    trx_sender: string;
-
     @Column({ type: 'varchar', nullable: true })
     @ApiProperty()
     trx_metadata: string;
