@@ -34,15 +34,36 @@ export class ProposalServiceService {
   // 💬 MessagePattern expects a response | This is a publisher
   async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
     try {
-      const pendingTrx = { "trx_hash": proposal.trx_hash, "proposer_address": proposal.proposer_address };
+      // First verify we have the required fields
+      if (!proposal.trx_hash || !proposal.proposer_address) {
+        throw new Error('Transaction hash and proposer address are required');
+      }
+
+      const pendingTrx = {
+        trx_hash: proposal.trx_hash,
+        proposer_address: proposal.proposer_address
+      };
+
+      // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
       const audit_record = await this.handlePendingProposal(pendingTrx);
+      
+      if (!audit_record?.data?.db_record_id) {
+        throw new Error('Failed to get valid audit record ID');
+      }
+
+      // Updating new proposal with audit ID
       proposal.audit_id = audit_record.data.db_record_id;
       const new_proposal = this.proposalRepository.create(proposal);
-      this.logger.log("New proposal placed: " + new_proposal.id);
-      return this.proposalRepository.save(new_proposal);
+      
+      const saved_proposal = await this.proposalRepository.save(new_proposal);
+      this.logger.log(`New proposal created with ID: ${saved_proposal.id}`);
+      
+      return saved_proposal;
+
     } catch (err) {
-      this.logger.error("Error triggering queue-pending-proposal: " + err);
-      throw new Error("Error triggering queue-pending-proposal");
+      this.logger.error(`Failed to create proposal: ${err.message}`);
+      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      throw new Error(`Failed to create proposal`);
     }
   }
 
@@ -72,19 +93,23 @@ export class ProposalServiceService {
 
   async updateTransactionStatus(trxHash: string, newStatus: number) {
     try {
-      const transaction = await this.proposalRepository.findOne({
-        where: { trx_hash: trxHash }
-      });
-      this.logger.log(`Transaction status found! Getting updated at at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
-      if (!transaction) {
+      const result = await this.proposalRepository
+        .createQueryBuilder()
+        .update()
+        .set({ trx_status: newStatus })
+        .where("trx_hash = :trxHash", { trxHash })
+        .returning('*')
+        .execute();
+
+      if (result.affected === 0) {
         throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
       }
-      transaction.trx_status = newStatus;
-      this.logger.log(`Transaction status updated at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
-      return await this.proposalRepository.save(transaction);
+
+      this.logger.log(`Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`);
+      return result.raw[0];
     } catch (err) {
-      this.logger.error(`Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`);
-      throw new Error("Transaction status couldn't get updated.");
+      this.logger.error(`Failed to update transaction status for hash: ${trxHash}. Error: ${err}`);
+      throw new Error(`Failed to update transaction status.`);
     }
   }
 
