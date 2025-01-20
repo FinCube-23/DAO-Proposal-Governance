@@ -4,12 +4,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@redux/reducer";
 import { LogOut } from "lucide-react";
 import { clearAuthState } from "@redux/slices/auth";
+import { useDisconnect } from "wagmi";
 export default function Header() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const authStore = useSelector(
     (state: RootState) => state.persistedReducer.authReducer
   );
+  const { disconnect } = useDisconnect();
+
   return (
     <div className="w-full z-50 fixed top-0">
       <nav className="navbar-gradient p-4">
@@ -27,13 +30,21 @@ export default function Header() {
                     className="rounded-xl"
                     variant="destructive"
                     onClick={() => {
+                      disconnect();
                       dispatch(clearAuthState());
+                      navigate("/");
                     }}
                   >
                     <LogOut size={20} />
                   </Button>
                 ) : (
-                  <Button onClick={() => navigate("/login")}>Login</Button>
+                  <Button
+                    onClick={() => {
+                      navigate("/login");
+                    }}
+                  >
+                    Login
+                  </Button>
                 )}
               </li>
             </ul>

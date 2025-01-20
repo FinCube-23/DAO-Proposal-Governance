@@ -55,11 +55,11 @@ const NewMemberApprovalProposal = () => {
         trx_status: 0,
       };
 
+      await waitForTransactionReceipt(config, { hash });
+
       // backend proposal service call
       const response = await createProposal(backendData);
-      console.log("ACP Praduman: Bhennchod! Eije backend response:", response);
-
-      await waitForTransactionReceipt(config, { hash });
+      console.log("Backend response:", response);
 
       toast.success("Member approved!");
     } catch (e: any) {

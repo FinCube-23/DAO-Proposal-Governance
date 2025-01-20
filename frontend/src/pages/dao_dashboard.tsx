@@ -104,6 +104,42 @@ export default function DaoDashboard() {
   const [getProposal] = useLazyGetProposalQuery();
   const [isMemberApproved, setIsMemberApproved] = useState(false);
   const { isConnected, address } = useAccount();
+  const [votingStatus, setVotingStatus] = useState("Voting not started");
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(0);
+  const [timeLeft, setTimeLeft] = useState("");
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs}h ${mins}m ${secs}s`;
+  };
+
+  useEffect(() => {
+    const checkTime = () => {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const remainingTime = Number(votingPeriod) - currentTime;
+
+      if (currentTime < Number(votingDelay)) {
+        setVotingStatus("Voting not started");
+        setTimeLeft(formatTime(Number(votingDelay) - currentTime));
+      } else if (
+        currentTime >= Number(votingDelay) &&
+        currentTime < Number(votingPeriod)
+      ) {
+        setVotingStatus("Voting in progress");
+        setVotingStatus(formatTime(remainingTime));
+      } else {
+        setVotingStatus("Voting ended");
+        setTimeLeft("");
+      }
+    };
+
+    const interval = setInterval(checkTime, 1000);
+
+    return () => clearInterval(interval);
+  }, [votingDelay, votingPeriod]);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -357,12 +393,16 @@ export default function DaoDashboard() {
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-1">
-                Voting Period: {votingPeriod} second(s)
+              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-2 text-xl">
+                {/* Voting Period: {votingPeriod} second(s) */}
+                Voting Status: {votingStatus}
               </div>
-              <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2 py-1">
-                Voting Delay: {votingDelay} second(s)
-              </div>
+              {votingStatus !== "Voting ended" && (
+                <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2 py-2 text-xl">
+                  {/* Voting Delay: {votingDelay} second(s) */}
+                  Time Left: {timeLeft}
+                </div>
+              )}
             </div>
           </div>
         </CardFooter>

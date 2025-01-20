@@ -25,10 +25,10 @@ export default function RootLayout() {
     <>
       <div>
         {/* <AuthStateSyncer /> */}
-        <Header />
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider theme={darkTheme()}>
+              <Header />
               <Outlet />
               <Toaster richColors />
             </RainbowKitProvider>
