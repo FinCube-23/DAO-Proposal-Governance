@@ -3,7 +3,7 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
-import { ProposalDto, CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto } from './dto/proposal.dto';
+import { ProposalDto } from './dto/proposal.dto';
 import {
   Ctx,
   EventPattern,
@@ -22,7 +22,7 @@ export class ProposalServiceController {
   @ApiOperation({summary: "Inserts new proposal data at off-chain DB and emit message to Audit Trail Service",})
   @ApiOkResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async create(@Req() req, @Body() proposal_entity: ProposalEntity): Promise<ProposalEntity> {
+  async create(@Req() req, @Body() proposal_entity: ProposalDto): Promise<ProposalEntity> {
     return this.proposalService.create(proposal_entity, req.user);
   }
 
