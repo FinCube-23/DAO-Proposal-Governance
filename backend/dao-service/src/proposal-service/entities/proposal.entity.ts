@@ -81,7 +81,7 @@ export class ProposalEntity {
     })
     proposal_status: ProposalStatus;
 
-    @Column({ type: 'varchar', default: false })
+    @Column({ type: 'varchar' })
     @ApiProperty({
         description: "This field only hold the transaction hash when the proposal is placed.",
         example: "0xe53c868443504e899c093736281f99a9d0b99d66a7b2ecd53575209fe69a8d2a",
