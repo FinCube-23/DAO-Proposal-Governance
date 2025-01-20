@@ -5,7 +5,7 @@ import { ProposalEntity } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
-import { ProposalDto, PendingTransactionDto } from './dto/proposal.dto';
+import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse } from './dto/proposal.dto';
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
@@ -19,16 +19,6 @@ export class ProposalServiceService {
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy
   ) {
     this.update_proposals = [];
-  }
-
-  private async getUserRole(sub: string): Promise<string> {
-    try {
-      const response = await axios.get(`http://user_management_api:3000/authentication/${sub}`);
-      return response.data;
-    } catch (error) {
-      this.logger.log("Role of user not found");
-      throw new UnauthorizedException("Role of user not found");;
-    }
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
@@ -46,7 +36,7 @@ export class ProposalServiceService {
 
       // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
       const audit_record = await this.handlePendingProposal(pendingTrx);
-      
+
       if (!audit_record?.data?.db_record_id) {
         throw new Error('Failed to get valid audit record ID');
       }
@@ -54,10 +44,10 @@ export class ProposalServiceService {
       // Updating new proposal with audit ID
       proposal.audit_id = audit_record.data.db_record_id;
       const new_proposal = this.proposalRepository.create(proposal);
-      
+
       const saved_proposal = await this.proposalRepository.save(new_proposal);
       this.logger.log(`New proposal created with ID: ${saved_proposal.id}`);
-      
+
       return saved_proposal;
 
     } catch (err) {
@@ -67,13 +57,40 @@ export class ProposalServiceService {
     }
   }
 
-  async findAllProposals(sub: string): Promise<any> {
-    const role = await this.getUserRole(sub);
-    if (role != 'MFS') {
-      this.logger.error("User does not have permission for role: " + role);
-      throw new UnauthorizedException("User does not have permission");
+  async findById(id: number): Promise<ProposalEntity> {
+    const proposal = await this.proposalRepository.findOne({
+      where: { id }
+    });
+
+    if (!proposal) {
+      throw new NotFoundException(`Proposal with ID ${id} not found`);
     }
-    return this.proposalRepository.find();
+
+    return proposal;
+  }
+
+  async findAll(page: number = 1, limit: number = 10): Promise<PaginatedProposalResponse> {
+    // Calculate records to skip: e.g., page 3 with limit 10 = skip 20 records (returns records 21-30)
+    const skip = (page - 1) * limit;
+
+    const [proposals, total] = await this.proposalRepository
+      .createQueryBuilder('proposal')
+      .select([
+        'proposal.id',
+        'proposal.proposal_type',
+        'proposal.proposer_address',
+        'proposal.proposal_status'
+      ])
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      data: proposals,
+      total,
+      page,
+      limit
+    };
   }
 
   // 💬 Publishing Message in the queue
@@ -126,15 +143,6 @@ export class ProposalServiceService {
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
-  }
-
-  async findAll(sub: string): Promise<any> {
-    const role = await this.getUserRole(sub);
-    if (role != 'MFS') {
-      this.logger.error("User does not have permission for role: " + role);
-      throw new UnauthorizedException("User does not have permission");
-    }
-    return this.proposalRepository.find();
   }
 
 }
