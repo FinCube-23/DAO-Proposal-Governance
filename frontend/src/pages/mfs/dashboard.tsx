@@ -30,8 +30,8 @@ export default function MfsDashboard() {
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getProposalCount] = useLazyGetProposalCountQuery();
   const [getBalance] = useLazyGetBalanceQuery();
-  const [proposalCount, setProposalCount] = useState("Unauthorized");
-  const [proposalThreshold, setProposalThreshold] = useState("Unauthorized");
+  const [proposalCount, setProposalCount] = useState("");
+  const [proposalThreshold, setProposalThreshold] = useState("");
   const [isMemberApproved, setIsMemberApproved] = useState(false);
 
   useEffect(() => {
@@ -46,9 +46,15 @@ export default function MfsDashboard() {
     // getProposalCount
     const fetchProposalCount = async () => {
       try {
-        const response = await getProposalCount();
-        setProposalCount(response.data.toString());
-        console.log(response.data);
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "proposalCount",
+        });
+        const result = response.toString();
+
+        console.log(result);
+        setProposalCount(result);
       } catch (e) {
         console.error(e);
       }
@@ -66,9 +72,15 @@ export default function MfsDashboard() {
     // getProposalThreshold
     const fetchProposalThreshold = async () => {
       try {
-        const response = await getProposalThreshold();
-        setProposalThreshold(response.data.toString());
-        console.log(response);
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "proposalThreshold",
+        });
+        const result = response.toString();
+
+        console.log(result);
+        setProposalThreshold(result);
       } catch (e) {
         console.error(e);
       }
