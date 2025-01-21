@@ -65,6 +65,12 @@
   }
 }
 
+[data-state="open"]:focus,
+[data-state="open"]:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 .pulse-border {
   border: 2px soild;
 }

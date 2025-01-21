@@ -12,6 +12,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { RootState } from "@redux/store";
+import MFSRegistrationModal from "@components/auth/MFSRegistrationModal";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
