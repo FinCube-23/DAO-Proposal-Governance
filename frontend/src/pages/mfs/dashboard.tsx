@@ -3,6 +3,7 @@ import DisplayCard from "@components/mfs/DisplayCard";
 import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
+import StableCoinABI from "../../contractABI/StableCoinABI.json";
 import { config } from "@layouts/RootLayout";
 import {
   Card,
@@ -16,6 +17,7 @@ import { useAccount, useConnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
+  useLazyGetBalanceQuery,
   useLazyGetProposalCountQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
@@ -28,9 +30,11 @@ export default function MfsDashboard() {
   const { connectors } = useConnect();
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getProposalCount] = useLazyGetProposalCountQuery();
-  const [proposalCount, setProposalCount] = useState("Unauthorized");
-  const [proposalThreshold, setProposalThreshold] = useState("Unauthorized");
+  const [getBalance] = useLazyGetBalanceQuery();
+  const [proposalCount, setProposalCount] = useState("");
+  const [proposalThreshold, setProposalThreshold] = useState("");
   const [isMemberApproved, setIsMemberApproved] = useState(false);
+  const [coinBalance, setCoinBalance] = useState(0);
 
   useEffect(() => {
     if (address) {
@@ -44,20 +48,48 @@ export default function MfsDashboard() {
     // getProposalCount
     const fetchProposalCount = async () => {
       try {
-        const response = await getProposalCount();
-        setProposalCount(response.data.toString());
-        console.log(response.data);
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "proposalCount",
+        });
+        const result = response.toString();
+
+        console.log(result);
+        setProposalCount(result);
       } catch (e) {
         console.error(e);
       }
     };
 
-    // getProposalThreshold
+    // fetchUSDCBalance
+    const getUSDCBalance = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: StableCoinABI,
+          address: "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
+          functionName: "balanceOf",
+          args: [address],
+        });
+        const result = response.toString();
+        console.log("USDC Balance:", result);
+        setCoinBalance(result);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
     const fetchProposalThreshold = async () => {
       try {
-        const response = await getProposalThreshold();
-        setProposalThreshold(response.data.toString());
-        console.log(response);
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "proposalThreshold",
+        });
+        const result = response.toString();
+
+        console.log(result);
+        setProposalThreshold(result);
       } catch (e) {
         console.error(e);
       }
@@ -65,7 +97,8 @@ export default function MfsDashboard() {
 
     fetchProposalCount();
     fetchProposalThreshold();
-  }, [getProposalCount, getProposalThreshold]);
+    getUSDCBalance();
+  }, [getProposalCount, getProposalThreshold, getBalance, address]);
 
   const auth = useSelector(
     (state: RootState) => state.persistedReducer.authReducer.auth
@@ -76,7 +109,7 @@ export default function MfsDashboard() {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "checkIsMemberApproved",
           args: [address],
         });
@@ -107,11 +140,11 @@ export default function MfsDashboard() {
       <div className="flex justify-end relative">
         <div className="absolute top-8 right-8 flex items-center">
           {!isMemberApproved ? (
-            <p className="mr-2 bg-red-600 font-bold p-2 rounded-2xl text-xs">
+            <p className="mr-2 border-2 border-red-600 font-bold p-2 rounded-2xl text-xs">
               Not approved
             </p>
           ) : (
-            <p className="mr-2 bg-green-600 font-bold p-2 rounded-2xl text-xs">
+            <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
               Approved
             </p>
           )}
@@ -121,7 +154,11 @@ export default function MfsDashboard() {
       <div className="flex flex-col gap-8 pt-28 px-8">
         <div className="flex gap-8 justify-center">
           <div>
-            <DisplayCard title="Liquidity Ratio" value="0.7m USD" />
+            <DisplayCard
+              title="USDC Balance"
+              value={`${coinBalance} USDC`}
+              dataSource="On-chain"
+            />
           </div>
           <div className="">
             <div className="w-64">
@@ -132,10 +169,15 @@ export default function MfsDashboard() {
             <DisplayCard
               title="Total Number of Proposals"
               value={proposalCount}
+              dataSource="On-chain"
             />
           </div>
           <div>
-            <DisplayCard title="Proposal Threshold" value={proposalThreshold} />
+            <DisplayCard
+              title="Proposal Threshold"
+              value={proposalThreshold}
+              dataSource="On-chain"
+            />
           </div>
         </div>
 

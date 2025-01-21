@@ -7,7 +7,6 @@ import {
   CardTitle,
 } from "@components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
-import VotingBreakdown from "./VotingBreakdown";
 import VoterList from "./VoterList";
 import VotingInfo from "./VotingInfo";
 
@@ -22,33 +21,33 @@ const convertToDate = (time: number) => {
   return formattedDate;
 };
 
-export const ProposalStatCard = ({ proposal, proposalId }: any) => {
+export const OffchainStatCard = ({ proposal, proposalId }: any) => {
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl">Proposal Status</CardTitle>
+          <CardTitle className="text-2xl">Status</CardTitle>
           <div>
-            <p className="font-bold">
+            {/* <p className="font-bold">
               Vote Started At:{" "}
-              <span className="text-blue-400">
+              <span className="text-green-400">
                 {convertToDate(proposal.voteStart)}
               </span>
-            </p>
-            <p className="text-left font-bold">
+            </p> */}
+            {/* <p className="text-left font-bold">
               Vote Ended On:{" "}
-              <span className="text-blue-400">
-                {convertToDate(proposal.voteDuration)}
+              <span className="text-green-400">
+                {convertToDate(proposal.voteStart)}
               </span>
-            </p>
+            </p> */}
           </div>
         </div>
         <CardDescription>
-          <Badge variant={convertStatusToVariant(proposal.executed)}>
+          {/* <Badge variant={convertStatusToVariant(proposal.executed)}>
             <p className="capitalize">
               {proposal.executed ? "Confirmed" : "Pending"}
             </p>
-          </Badge>
+          </Badge> */}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,9 +57,7 @@ export const ProposalStatCard = ({ proposal, proposalId }: any) => {
             <TabsTrigger value="voters">Voters</TabsTrigger>
             <TabsTrigger value="info">Info</TabsTrigger>
           </TabsList>
-          <TabsContent value="breakdown" className="mt-4">
-            <VotingBreakdown proposalId={proposalId} />
-          </TabsContent>
+          <TabsContent value="breakdown" className="mt-4"></TabsContent>
           <TabsContent value="voters" className="mt-4">
             <VoterList />
           </TabsContent>

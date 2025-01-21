@@ -3,13 +3,14 @@ import { PROPOSAL_ENDPOINT } from "@redux/api/endpoints";
 import {
   CreateProposalPayload,
   CreateProposalResponse,
+  GetOffchainProposalResponse,
   GetProposalResponse,
 } from "@redux/api/types";
 
 export const proposalApis = api.injectEndpoints({
   endpoints: (build) => ({
-    // get proposal
-    getProposal: build.query<GetProposalResponse, void>({
+    // get proposals
+    getProposals: build.query<GetProposalResponse, void>({
       query: () => {
         return {
           url: PROPOSAL_ENDPOINT.BASE,
@@ -19,6 +20,13 @@ export const proposalApis = api.injectEndpoints({
       providesTags: ["proposal"],
     }),
     // create proposal
+    getProposal: build.query<GetOffchainProposalResponse, number>({
+      query: (id) => ({
+        url: `${PROPOSAL_ENDPOINT.BASE}/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["proposal"],
+    }),
     createProposal: build.mutation<
       CreateProposalResponse,
       CreateProposalPayload
@@ -33,5 +41,8 @@ export const proposalApis = api.injectEndpoints({
   }),
 });
 
-export const { useLazyGetProposalQuery, useCreateProposalMutation } =
-  proposalApis;
+export const {
+  useLazyGetProposalsQuery,
+  useCreateProposalMutation,
+  useLazyGetProposalQuery,
+} = proposalApis;

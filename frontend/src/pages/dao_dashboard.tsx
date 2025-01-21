@@ -8,7 +8,17 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import { Box, Coins, Flag, Vote, WalletCards } from "lucide-react";
+import {
+  Box,
+  Coins,
+  Flag,
+  Vote,
+  WalletCards,
+  History,
+  ArrowLeft,
+  ArrowRight,
+  Info,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,7 +39,10 @@ import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
-import WalletAuth from "@components/auth/WalletAuth";
+import { useLazyGetProposalsQuery } from "@redux/services/proposal";
+import Loader from "@components/Loader";
+import OffchainCard from "@components/dao/OffChainCard";
+// import OffchainCard from "@components/dao/OffChainCard";
 
 export interface Proposal {
   executed: boolean;
@@ -44,6 +57,17 @@ export interface Proposal {
   proposalURI: string;
 }
 
+interface DaoInfo {
+  "@context": string;
+  name: string;
+  description: string;
+  membersURI: string;
+  proposalsURI: string;
+  activityLogURI: string;
+  governanceURI: string;
+  contractsURI: string;
+}
+
 export default function DaoDashboard() {
   const [registrationData, setRegistrationData] = useState({
     _newMember: "",
@@ -53,6 +77,64 @@ export default function DaoDashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const account = useAccount();
+  const [daoURI, setDaoURI] = useState<DaoInfo>({
+    "@context": "",
+    name: "",
+    description: "",
+    membersURI: "",
+    proposalsURI: "",
+    activityLogURI: "",
+    governanceURI: "",
+    contractsURI: "",
+  });
+  const [ongoingProposalCount, setOngoingProposalCount] = useState("");
+  const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
+  const [toggle, setToggle] = useState(0);
+  const [version, setVersion] = useState("");
+  const [pageNumber, setPageNumber] = useState(0);
+  const [votingPeriod, setVotingPeriod] = useState("");
+  const [votingDelay, setVotingDelay] = useState("");
+  const [pageLoading, setPageLoading] = useState(false);
+  const [proposalsPerPage, setProposalsPerPage] = useState(0);
+  const [getProposals] = useLazyGetProposalsQuery();
+  const [isMemberApproved, setIsMemberApproved] = useState(false);
+  const { isConnected, address } = useAccount();
+  const [votingStatus, setVotingStatus] = useState("Voting not started");
+  const [timeLeft, setTimeLeft] = useState("");
+  const [registerStatus, setRegisterStatus] = useState(false);
+  const [proposalsFromBE, setProposalsFromBE] = useState([]);
+
+  const formatTime = (seconds: number) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs}h ${mins}m ${secs}s`;
+  };
+
+  useEffect(() => {
+    const checkTime = () => {
+      const currentTime = Math.floor(Date.now() / 1000);
+      const remainingTime = Number(votingPeriod) - currentTime;
+
+      if (currentTime < Number(votingDelay)) {
+        setVotingStatus("Voting not started");
+        setTimeLeft(formatTime(Number(votingDelay) - currentTime));
+      } else if (
+        currentTime >= Number(votingDelay) &&
+        currentTime < Number(votingPeriod)
+      ) {
+        setVotingStatus("Voting in progress");
+        setVotingStatus(formatTime(remainingTime));
+      } else {
+        setVotingStatus("Voting ended");
+        setTimeLeft("");
+      }
+    };
+
+    const interval = setInterval(checkTime, 1000);
+
+    return () => clearInterval(interval);
+  }, [votingDelay, votingPeriod]);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -65,30 +147,91 @@ export default function DaoDashboard() {
     });
   };
 
-  const getProposalsByPage = async () => {
+  const getVotingPeriod = async () => {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
-        functionName: "getProposalsByPage",
-        args: [0, 10],
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "getVotingPeriod",
       });
+      const result = response.toString();
 
-      const result = response[0];
-
-      setProposalsByPage(result as []);
+      console.log(result);
+      setVotingPeriod(result);
     } catch (e) {
-      console.log(e);
-      setLoading(false);
+      console.error(e);
+    }
+  };
+
+  const getVotingDelay = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "getVotingDelay",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVotingDelay(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchOngoingProposals = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "getOngoingProposals",
+      });
+      console.log(response);
+      // await getOngoingProposals();
+
+      setOngoingProposals(response);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getOngoingProposalCount = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "getOngoingProposalsCount",
+      });
+      const result = response.toString();
+      setOngoingProposalCount(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getVersion = async () => {
+    try {
+      const response: any = await readContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "UPGRADE_INTERFACE_VERSION",
+      });
+      const result = response.toString();
+
+      console.log(result);
+      setVersion(result);
+    } catch (e) {
+      console.error(e);
     }
   };
 
   const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setRegisterStatus(true);
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "registerMember",
         args: [registrationData._newMember, registrationData._memberURI],
       });
@@ -96,6 +239,11 @@ export default function DaoDashboard() {
       const hash = await writeContract(config, request);
 
       await waitForTransactionReceipt(config, { hash });
+
+      // await registerMember({
+      //   id: Number(registrationData._newMember),
+      //   name: registrationData._memberURI,
+      // });
 
       toast.success("Registration sucessful!");
     } catch (e: any) {
@@ -111,19 +259,124 @@ export default function DaoDashboard() {
       }
       toast.error(errorMessage);
     }
+    setRegisterStatus(false);
   };
 
   useEffect(() => {
-    getProposalsByPage();
+    const getDAOInfo = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "daoURI",
+        });
+        const parsedObj = JSON.parse(response);
+
+        setDaoURI(parsedObj);
+        console.log("DaoURI", parsedObj.name);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    const getProposalsByPage = async (page: any) => {
+      setLoading(true);
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "getProposalsByPage",
+          args: [page, page + 3],
+        });
+
+        const filteredProposals = response[0].filter(
+          (proposal: any) =>
+            proposal.proposer !== "0x0000000000000000000000000000000000000000"
+        );
+
+        setProposalsPerPage(filteredProposals.length);
+        setProposalsByPage(filteredProposals);
+        setPageLoading(false);
+
+        const { data } = await getProposals(page, page + 3);
+
+        setProposalsFromBE(data?.data || []);
+        console.log("====================================");
+        console.log(data.data);
+        console.log("====================================");
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const checkIsMemberApproved = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "checkIsMemberApproved",
+          args: [address],
+        });
+
+        console.log(response);
+        setIsMemberApproved(true);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    if (isConnected) {
+      checkIsMemberApproved();
+    }
+
+    getProposalsByPage(pageNumber);
+    fetchOngoingProposals();
+    getOngoingProposalCount();
+    getDAOInfo();
+    getVersion();
+    getVotingDelay();
+    getVotingPeriod();
+    checkIsMemberApproved();
     setLoading(false);
-  }, []);
+  }, [pageNumber, getProposals, address, isConnected]);
+
+  const handleNextPage = () => {
+    setPageLoading(true);
+    setPageNumber((prevPage) => prevPage + 3);
+    console.log(pageNumber);
+  };
+
+  const handlePrevPage = () => {
+    if (pageNumber > 0) {
+      setPageLoading(true);
+      setPageNumber((prevPage) => prevPage - 3);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-5">
-      <WalletAuth></WalletAuth>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">DAO Title Dashboard</CardTitle>
+          <CardTitle>
+            <div className="flex justify-between items-center">
+              <a
+                className="text-2xl hover:underline"
+                href={`${daoURI["@context"]}`}
+                target="_"
+              >
+                {daoURI.name}
+              </a>
+              <div className="flex gap-3">
+                <div className="border-2 border-blue-600 rounded-xl font-bold p-1 text-xs">
+                  Voting Period: {votingPeriod} second(s)
+                </div>
+                <div className="border-2 border-orange-600 rounded-xl font-bold p-1 text-xs">
+                  Voting Delay: {votingDelay} second(s)
+                </div>
+              </div>
+            </div>
+          </CardTitle>
           <CardDescription>
             <a
               href="#"
@@ -132,29 +385,48 @@ export default function DaoDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>
-            Welcome to FinCube DAO! You are a registered member. Through this
-            dashboard, you can submit proposals and participate in voting.
-            Empower your voice and help shape the future of our decentralized
-            community!
-          </p>
+          <p>{daoURI.description}</p>
         </CardContent>
         <CardFooter>
-          <div className="flex gap-3 text-sm">
-            <div className="flex gap-1">
-              <Flag className="text-green-500" /> December 2023
+          <div className="flex gap-10 text-sm justify-center items-center">
+            <div className="flex gap-5">
+              <div className="flex gap-1">
+                <Flag className="text-green-500" /> December 2023
+              </div>
+              <div className="flex gap-1">
+                <Box className="text-green-500" />
+                Polygon
+              </div>
+              <div className="flex gap-1">
+                <WalletCards className="text-green-500" />
+                Wallet-based
+              </div>
+              <div className="flex gap-1">
+                <History className="text-green-500" />
+                {version}
+              </div>
             </div>
-            <div className="flex gap-1">
-              <Box className="text-green-500" />
-              Polygon
-            </div>
-            <div className="flex gap-1">
-              <WalletCards className="text-green-500" />
-              Wallet-based
+            <div className="flex gap-3">
+              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold p-2 text-xl">
+                {/* Voting Period: {votingPeriod} second(s) */}
+                Voting Status: {votingStatus}
+              </div>
+              {votingStatus !== "Voting ended" && (
+                <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold p-2 text-xl">
+                  Time Left: {timeLeft}
+                </div>
+              )}
             </div>
           </div>
         </CardFooter>
       </Card>
+      <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
+        <Info />{" "}
+        <p>
+          You are not an approved member to place a new proposal or register a
+          new member
+        </p>
+      </div>
       <div className="flex flex-col-reverse md:grid md:grid-cols-12 gap-5">
         <div className="md:col-span-7 flex flex-col gap-5">
           <Card>
@@ -164,7 +436,7 @@ export default function DaoDashboard() {
                 <p>
                   {loading
                     ? "Loading proposals..."
-                    : `${proposalsByPage.length} Proposal(s) created`}
+                    : `Ongoing proposals: ${ongoingProposalCount}`}
                 </p>
               </div>
               <Dialog>
@@ -195,22 +467,94 @@ export default function DaoDashboard() {
               </Dialog>
             </div>
           </Card>
-          {/* Proposal List */}
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setToggle(0)}
+              className={`${
+                toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              All proposals
+            </Button>
+            <Button
+              onClick={() => setToggle(1)}
+              className={`${
+                toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Ongoing proposals
+            </Button>
+            <Button
+              onClick={() => setToggle(2)}
+              className={`${
+                toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Off-chain proposals
+            </Button>
+          </div>
           {loading ? (
-            <p>Loading proposals...</p>
+            <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+              Loading proposals
+            </p>
+          ) : toggle === 0 ? (
+            proposalsByPage.length === 0 ? (
+              <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+                No proposals found
+              </p>
+            ) : (
+              proposalsByPage.map((proposal, idx) => (
+                <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+              ))
+            )
+          ) : toggle === 1 ? (
+            ongoingProposals.length === 0 ? (
+              <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+                No ongoing proposals found
+              </p>
+            ) : (
+              ongoingProposals.map((proposal, idx) => (
+                <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+              ))
+            )
+          ) : proposalsFromBE.length === 0 ? (
+            <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+              No proposals found on the Backend
+            </p>
           ) : (
-            proposalsByPage.map((proposal, idx) => {
-              const proposer = proposal.proposer;
-              if (proposer !== "0x0000000000000000000000000000000000000000") {
-                return (
-                  <ProposalCard
-                    key={idx}
-                    proposal={proposal}
-                    proposalId={proposal.proposer}
-                  />
-                );
-              }
-            })
+            proposalsFromBE.map((proposal, idx) => (
+              <OffchainCard
+                key={idx}
+                proposal={proposal}
+                proposalId={proposal.id}
+              />
+            ))
+          )}
+          {/* Show loading text */}
+          {pageLoading && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              {/* <div className="animate-spin border-4 border-t-transparent rounded-full w-10 h-10"></div> */}
+              <Loader />
+            </div>
+          )}
+
+          {!toggle && (
+            <div className="flex justify-center mt-5">
+              <button
+                onClick={handlePrevPage}
+                disabled={pageNumber === 0}
+                className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
+              >
+                <ArrowLeft />
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={proposalsPerPage < 3}
+                className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
+              >
+                <ArrowRight />
+              </button>
+            </div>
           )}
         </div>
         <div className="md:col-span-5">
@@ -243,7 +587,9 @@ export default function DaoDashboard() {
                           />
                         </div>
                         <DialogFooter>
-                          <Button type="submit">Register</Button>
+                          <Button type="submit" isLoading={registerStatus}>
+                            Register
+                          </Button>
                         </DialogFooter>
                       </form>
                     </DialogContent>

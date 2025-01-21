@@ -7,17 +7,8 @@ import { useNavigate } from "react-router-dom";
 //   showStatus?: boolean;
 // }
 
-const convertStatusToVariant = (status: string) => {
-  switch (status) {
-    case "ongoing":
-      return "warning";
-    case "executed":
-      return "success";
-    case "canceled":
-      return "danger";
-    default:
-      return "default";
-  }
+const convertStatusToVariant = (status: boolean) => {
+  return status ? "success" : "warning";
 };
 
 export default function ProposalCard({ proposal, proposalId }: any) {
@@ -28,9 +19,12 @@ export default function ProposalCard({ proposal, proposalId }: any) {
       onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
     >
       <CardHeader>
-        <div className="mb-2">
+        <div className="flex justify-between mb-2">
+          <Badge className="border-2 border-blue-400">On-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.executed)}>
-            <p className="capitalize">{proposal.executed}</p>
+            <p className="capitalize">
+              {proposal.executed ? "Confirmed" : "Pending"}
+            </p>
           </Badge>
         </div>
         <div className="font-bold text-2xl">{proposal.proposalURI}</div>

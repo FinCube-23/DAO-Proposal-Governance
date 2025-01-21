@@ -4,9 +4,11 @@ import Welcome from "@pages/welcome";
 import DaoDashboard from "@pages/dao_dashboard";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import DaoLayout from "@layouts/DaoLayout";
-import Auth from "@pages/auth";
 import Login from "@pages/login";
 import Register from "@pages/register";
+import GeneralProposal from "@pages/generalProposal";
+import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
+import OffchainCardView from "@components/dao/OffchainCardView";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -15,6 +17,14 @@ export const rootRoutes: RouteObject = {
     {
       path: "",
       element: <Welcome />,
+    },
+    {
+      path: "general-proposal",
+      element: <GeneralProposal></GeneralProposal>,
+    },
+    {
+      path: "approval-proposal",
+      element: <NewMemberApprovalProposal></NewMemberApprovalProposal>,
     },
     {
       path: "login",
@@ -47,6 +57,10 @@ export const rootRoutes: RouteObject = {
             {
               path: "proposals/:id",
               element: <ProposalView />,
+            },
+            {
+              path: "off-chain-proposals/:id",
+              element: <OffchainCardView />,
             },
           ],
         },

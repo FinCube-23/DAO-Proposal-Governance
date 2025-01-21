@@ -1,16 +1,13 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import contractABI from "../contractABI/contractABI.json";
-import {
-  simulateContract,
-  waitForTransactionReceipt,
-  writeContract,
-} from "@wagmi/core";
+import { simulateContract, writeContract } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
+import { useNavigate } from "react-router-dom";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -19,6 +16,9 @@ const NewMemberApprovalProposal = () => {
   });
   const [createProposal] = useCreateProposalMutation();
   const { address } = useAccount();
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [trxStatus, setTrxStatus] = useState("pending");
+  const navigate = useNavigate();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -33,31 +33,36 @@ const NewMemberApprovalProposal = () => {
   // newMemberApprovalProposal()
   const approveMember = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setLoadingStatus(true);
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "newMemberApprovalProposal",
         args: [data._newMember, data.description],
       });
 
       const hash = await writeContract(config, request);
-
-      const backendData = {
-        id: 0,
-        proposal_address: `${address}`,
-        metadata: data.description,
-        trx_hash: hash,
-        proposal_status: false,
-        external_proposal: false,
-      };
+      setTrxStatus("processing");
 
       // backend proposal service call
-      await createProposal(backendData);
+      const backendData = {
+        proposal_onchain_id: 0,
+        proposal_type: "membership",
+        metadata: data.description,
+        proposer_address: `${address}`,
+        proposal_executed_by: `${address}`,
+        external_proposal: false,
+        proposal_status: "pending",
+        trx_hash: hash,
+        trx_status: 0,
+      };
 
-      await waitForTransactionReceipt(config, { hash });
+      const response = await createProposal(backendData);
+      console.log("Backend response:", response);
 
-      toast.success("Member approved!");
+      toast.warning("Your proposal has been placed and is under review.");
+      navigate("/dashboard");
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -71,6 +76,7 @@ const NewMemberApprovalProposal = () => {
       }
       toast.error(errorMessage);
     }
+    setLoadingStatus(false);
   };
 
   return (
@@ -105,7 +111,7 @@ const NewMemberApprovalProposal = () => {
             required
           />
           <div className="flex justify-center">
-            <Button>Approve</Button>
+            <Button isLoading={loadingStatus}>Approve</Button>
           </div>
         </form>
       </div>

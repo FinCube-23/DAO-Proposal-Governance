@@ -27,16 +27,16 @@ export default function ProposalView() {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "getProposalsByPage",
           args: [0, 10],
         });
 
-        const result = response[0].find(
-          (proposal: Proposal) => proposal.proposer === id
-        );
+        const result = response[0][Number(id)];
 
         setProposal(result as Proposal);
+        console.log(result);
+        console.log(id);
       } catch (e) {
         alert("Failer to fetch proposal information");
         console.error("Failed to fetch proposal information:", e);
@@ -44,21 +44,14 @@ export default function ProposalView() {
     };
 
     getProposal();
-  }, []);
+  }, [id]);
 
   return (
     <div className="flex flex-col gap-5">
-      <ProposalCard
-        proposal={proposal}
-        proposalId={proposal.proposer}
-        showStatus={false}
-      />
+      <ProposalCard proposal={proposal} proposalId={id} />
       <div className="flex flex-col-reverse md:grid md:grid-cols-12">
         <div className="md:col-span-7">
-          <ProposalStatCard
-            proposal={proposal}
-            proposalId={proposal.proposer}
-          />
+          <ProposalStatCard proposal={proposal} proposalId={id} />
         </div>
         <div className="md:col-span-4"></div>
       </div>

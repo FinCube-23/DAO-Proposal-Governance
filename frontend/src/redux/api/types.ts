@@ -1,71 +1,71 @@
 // interfaces
 interface Response {
-    message: string;
-    status: number;
+  message: string;
+  status: number;
 }
 
 // MFS
 export type CreateMFSPayload = {
-    name: string;
-    email: string;
-    context: string;
-    type: string;
-    location: string;
-    is_approved: boolean;
-    wallet_address: string;
-    native_currency: string;
-    certificate: string;
+  name: string;
+  email: string;
+  context: string;
+  type: string;
+  location: string;
+  is_approved: boolean;
+  wallet_address: string;
+  native_currency: string;
+  certificate: string;
 };
 
 export type CreateMFSResponse = CreateMFSPayload & {
-    id: number;
+  id: number;
 };
 
 // Auth
 export type FetchMeResponse = {
-    created_at: string;
-    updated_at: string;
-    id: number;
-    name: string;
-    email: string;
-    password: string;
-    role: string;
-    mfsBusiness: null;
-    exchangeUser: null;
+  created_at: string;
+  updated_at: string;
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  mfsBusiness: null;
+  exchangeUser: null;
 };
 
 export type LoginPayload = {
-    email: string;
-    password: string;
+  email: string;
+  password: string;
 };
 
 export type LoginResponse = {
-    access_token: string;
+  access_token: string;
 };
 
 export type RegisterPayload = {
-    name: string;
-    email: string;
-    password: string;
-    role: string;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
 };
 
 export type RegisterResponse = {
-    data: {
-        message: string;
-    };
+  data: {
+    message: string;
+  };
 };
 
 // DAO
 export type CreateDAOPayload = {
-    id: number;
-    name: string;
-    token_name: string;
-    token_address: string;
-    royalty_amount: number;
-    address: string;
-    proposal_ID: [];
-    proposal_metadata: [];
+  id: number;
+  name: string;
+  token_name: string;
+  token_address: string;
+  royalty_amount: number;
+  address: string;
+  proposal_ID: [];
+  proposal_metadata: [];
 };
 
 export type CreateDAOResponse = Response;
@@ -74,12 +74,28 @@ export type GetDAOResponse = CreateDAOPayload & Response;
 
 // Proposal
 export type CreateProposalPayload = {
-    id: number;
-    proposal_address: string;
-    metadata: string;
-    trx_hash: string;
-    proposal_status: boolean;
-    external_proposal: boolean;
+  proposal_onchain_id: number;
+  proposal_type: string;
+  metadata: string;
+  proposer_address: string;
+  proposal_executed_by: string;
+  external_proposal: boolean;
+  proposal_status: string;
+  trx_hash: string;
+  trx_status: number;
+};
+
+export type GetOffchainProposalResponse = {
+  id: number;
+  proposal_onchain_id: number;
+  proposal_type: string;
+  metadata: string;
+  proposer_address: string;
+  processed_by: string;
+  proposal_status: string;
+  trx_hash: string;
+  audit_id: number;
+  trx_status: number;
 };
 
 export type CreateProposalResponse = CreateProposalPayload;
@@ -96,8 +112,8 @@ export type GetProposalCountResponse = Response;
 export type GetOngoingProposalsResponse = Response;
 
 export type RegisterMemberPayload = {
-    id: number;
-    name: string;
+  id: number;
+  name: string;
 };
 
 export type RegisterMemberResponse = Response;

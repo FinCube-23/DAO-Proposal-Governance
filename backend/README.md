@@ -107,16 +107,10 @@ The payload for the message queues is:
 
  ```json
 {
-  "id": 0,
-  "proposal_onchain_id": 0,
   "proposal_type": "membership",
-  "metadata": "Extra fields of the proposals will be formatted as json and stringify. memberURI can be considered also",
-  "proposer_address": "0x8152f498e91df80be19a28c83d8596f59fba80bd",
-  "proposal_executed_by": "string",
-  "external_proposal": false,
-  "proposal_status": "pending",
-  "trx_hash": "0x696969ce6514379f0dac14dc365955e3a56367f230173fee93e47370d178a43e7",
-  "trx_status": 0
+  "metadata": "New MFS onboarding request.....",
+  "proposer_address": "0xBb85D1852E67D6BEaa64A7eDba802189F0714F97",
+  "trx_hash": "0xTesting"
 }
 ```
 

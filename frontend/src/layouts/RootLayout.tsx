@@ -5,7 +5,11 @@ import { Toaster } from "@/components/ui/sonner";
 import "@rainbow-me/rainbowkit/styles.css";
 import { polygonAmoy } from "wagmi/chains";
 import { WagmiProvider } from "wagmi";
-import { getDefaultConfig, RainbowKitProvider } from "@rainbow-me/rainbowkit";
+import {
+  darkTheme,
+  getDefaultConfig,
+  RainbowKitProvider,
+} from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export const config = getDefaultConfig({
@@ -21,10 +25,10 @@ export default function RootLayout() {
     <>
       <div>
         {/* <AuthStateSyncer /> */}
-        <Header />
         <WagmiProvider config={config}>
           <QueryClientProvider client={queryClient}>
-            <RainbowKitProvider>
+            <RainbowKitProvider theme={darkTheme()}>
+              <Header />
               <Outlet />
               <Toaster richColors />
             </RainbowKitProvider>
