@@ -80,8 +80,21 @@ export type CreateProposalPayload = {
   proposer_address: string;
   proposal_executed_by: string;
   external_proposal: boolean;
-  proposal_status: unknown;
+  proposal_status: string;
   trx_hash: string;
+  trx_status: number;
+};
+
+export type GetOffchainProposalResponse = {
+  id: number;
+  proposal_onchain_id: number;
+  proposal_type: string;
+  metadata: string;
+  proposer_address: string;
+  processed_by: string;
+  proposal_status: string;
+  trx_hash: string;
+  audit_id: number;
   trx_status: number;
 };
 

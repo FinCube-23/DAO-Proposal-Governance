@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import WalletAuth from "@components/auth/WalletAuth";
 import { useLazyGetProposalsQuery } from "@redux/services/proposal";
 import Loader from "@components/Loader";
+import OffchainCard from "@components/dao/OffChainCard";
 
 export interface Proposal {
   executed: boolean;
@@ -479,12 +480,12 @@ export default function DaoDashboard() {
             >
               Ongoing proposals
             </Button>
-            {/* <Button
+            <Button
               onClick={() => setToggle(2)}
               className={`${toggle == 2 && "border-4 border-orange-600"}`}
             >
               Off-chain proposals
-            </Button> */}
+            </Button>
           </div>
           {loading ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
@@ -520,7 +521,11 @@ export default function DaoDashboard() {
             </p>
           ) : (
             proposalsFromBE.map((proposal, idx) => (
-              <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+              <OffchainCard
+                key={idx}
+                proposal={proposal}
+                proposalId={proposal.id}
+              />
             ))
           )}
           {/* Show loading text */}
