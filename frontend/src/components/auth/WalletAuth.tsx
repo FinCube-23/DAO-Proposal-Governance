@@ -6,7 +6,7 @@ const WalletAuth = () => {
 
   return (
     <>
-      {!isConnected && (
+      {false && (
         <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50">
           <div className="bg-background p-20 rounded-xl shadow-lg border">
             <h2 className="text-2xl font-bold mb-4 text-center">Wallet Not Connected</h2>

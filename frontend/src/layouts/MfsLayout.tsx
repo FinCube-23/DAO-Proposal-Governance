@@ -47,6 +47,7 @@ export default function MfsLayout() {
               overlayBlur: "large",
             })}
           >
+            <MFSRegistrationModal />
             <Outlet />
           </RainbowKitProvider>
         </QueryClientProvider>

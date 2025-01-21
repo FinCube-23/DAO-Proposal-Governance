@@ -11,7 +11,6 @@ export type CreateMFSPayload = {
   context: string;
   type: string;
   location: string;
-  is_approved: boolean;
   wallet_address: string;
   native_currency: string;
   certificate: string;
