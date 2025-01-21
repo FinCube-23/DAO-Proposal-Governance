@@ -59,7 +59,7 @@ export const OffchainStatCard = ({ proposal, proposalId }: any) => {
             <TabsTrigger value="info">Info</TabsTrigger>
           </TabsList>
           <TabsContent value="breakdown" className="mt-4">
-            <VotingBreakdown proposalId={proposalId} />
+            {/* <VotingBreakdown proposalId={proposalId} /> */}
           </TabsContent>
           <TabsContent value="voters" className="mt-4">
             <VoterList />

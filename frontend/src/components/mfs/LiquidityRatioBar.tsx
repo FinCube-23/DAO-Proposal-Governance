@@ -1,5 +1,5 @@
-import { TrendingUp } from "lucide-react"
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts"
+import { TrendingUp } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 import {
   Card,
@@ -8,24 +8,24 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
+} from "@/components/ui/chart";
 const chartData = [
   { currency: "USD", total: 186 },
   { currency: "BDT", total: 305 },
-]
+];
 
 const chartConfig = {
   total: {
     label: "Currency",
     color: "hsl(var(--chart-1))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function LiquidityRatioBar() {
   return (
@@ -62,5 +62,5 @@ export function LiquidityRatioBar() {
         </div>
       </CardFooter>
     </Card>
-  )
+  );
 }

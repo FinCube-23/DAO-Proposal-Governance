@@ -3,6 +3,7 @@ import DisplayCard from "@components/mfs/DisplayCard";
 import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
+import StableCoinABI from "../../contractABI/StableCoinABI.json";
 import { config } from "@layouts/RootLayout";
 import {
   Card,
@@ -33,6 +34,7 @@ export default function MfsDashboard() {
   const [proposalCount, setProposalCount] = useState("");
   const [proposalThreshold, setProposalThreshold] = useState("");
   const [isMemberApproved, setIsMemberApproved] = useState(false);
+  const [coinBalance, setCoinBalance] = useState(0);
 
   useEffect(() => {
     if (address) {
@@ -60,16 +62,23 @@ export default function MfsDashboard() {
       }
     };
 
-    // const fetchBalance = async() => {
-    //   try{
-    //     await getBalance();
-    //   }
-    //   catch(e) {
-    //     console.error(e);
-    //   }
-    // }
+    // fetchUSDCBalance
+    const getUSDCBalance = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: StableCoinABI,
+          address: "0x41E94Eb019C0762f9Bfcf9Fb1E58725BfB0e7582",
+          functionName: "balanceOf",
+          args: [address],
+        });
+        const result = response.toString();
+        console.log("USDC Balance:", result);
+        setCoinBalance(result);
+      } catch (e) {
+        console.error(e);
+      }
+    };
 
-    // getProposalThreshold
     const fetchProposalThreshold = async () => {
       try {
         const response: any = await readContract(config, {
@@ -88,8 +97,8 @@ export default function MfsDashboard() {
 
     fetchProposalCount();
     fetchProposalThreshold();
-    // fetchBalance();
-  }, [getProposalCount, getProposalThreshold, getBalance]);
+    getUSDCBalance();
+  }, [getProposalCount, getProposalThreshold, getBalance, address]);
 
   const auth = useSelector(
     (state: RootState) => state.persistedReducer.authReducer.auth
@@ -146,8 +155,8 @@ export default function MfsDashboard() {
         <div className="flex gap-8 justify-center">
           <div>
             <DisplayCard
-              title="Liquidity Ratio"
-              value="0.7m USD"
+              title="USDC Balance"
+              value={`${coinBalance} USDC`}
               dataSource="On-chain"
             />
           </div>

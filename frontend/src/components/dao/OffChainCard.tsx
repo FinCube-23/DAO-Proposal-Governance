@@ -15,7 +15,8 @@ export default function OffchainCard({ proposal, proposalId }: any) {
       onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
     >
       <CardHeader>
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-between mb-2">
+          <Badge className="border-2 border-purple-400">Off-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.proposal_status)}>
             <p className="capitalize">
               {proposal.proposal_status !== "pending" ? "Confirmed" : "Pending"}
