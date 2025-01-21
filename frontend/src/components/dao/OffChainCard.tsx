@@ -12,7 +12,7 @@ export default function OffchainCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
+      onClick={() => navigate(`/dashboard/off-chain-proposals/${proposalId}`)}
     >
       <CardHeader>
         <div className="flex justify-between mb-2">
