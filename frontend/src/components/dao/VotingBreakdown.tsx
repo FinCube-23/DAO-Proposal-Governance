@@ -39,7 +39,7 @@ export default function VotingBreakdown({ proposalId }: any) {
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "registerMember",
         args: [voteRef.current.proposalId, voteRef.current.support],
       });
@@ -73,7 +73,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "getProposalsByPage",
           args: [0, 10],
         });

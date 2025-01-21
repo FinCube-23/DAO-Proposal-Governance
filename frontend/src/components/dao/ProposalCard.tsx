@@ -14,40 +14,80 @@ const convertStatusToVariant = (status: boolean) => {
 export default function ProposalCard({ proposal, proposalId }: any) {
   const navigate = useNavigate();
   return (
-    <Card
-      className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
-    >
-      <CardHeader>
-        <div className="flex justify-end mb-2">
-          <Badge variant={convertStatusToVariant(proposal.executed)}>
-            <p className="capitalize">
-              {proposal.executed ? "Confirmed" : "Pending"}
-            </p>
-          </Badge>
-        </div>
-        <div className="font-bold text-2xl">{proposal.proposalURI}</div>
-        <a
-          target="_"
-          href={`https://amoy.polygonscan.com/address/${proposal.data}`}
-          className="text-muted-foreground hover:underline"
+    <>
+      {proposal.proposal_type === "membership" ? (
+        <Card
+          className="hover:border-green-500 cursor-pointer"
+          onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
         >
-          {proposal.data.slice(0, 42)}
-        </a>
-      </CardHeader>
+          <CardHeader>
+            <div className="flex justify-end mb-2">
+              <Badge variant={convertStatusToVariant(proposal.executed)}>
+                <p className="capitalize">
+                  {proposal.executed ? "Confirmed" : "Pending"}
+                </p>
+              </Badge>
+            </div>
+            <div className="font-bold text-2xl">{proposal.proposalURI}</div>
+            <a
+              target="_"
+              href={`https://amoy.polygonscan.com/address/${proposal.data}`}
+              className="text-muted-foreground hover:underline"
+            >
+              {proposal.data.slice(0, 42)}
+            </a>
+          </CardHeader>
 
-      <CardFooter>
-        <div className="flex gap-1 text-sm">
-          <div className="text-muted-foreground">Published by</div>
-          <a
-            target="_"
-            href={`https://amoy.polygonscan.com/address/${proposal.proposer}`}
-            className="text-green-500 hover:underline cursor-pointer"
-          >
-            <p className="overflow-tranc">{proposal.proposer}</p>
-          </a>
-        </div>
-      </CardFooter>
-    </Card>
+          <CardFooter>
+            <div className="flex gap-1 text-sm">
+              <div className="text-muted-foreground">Published by</div>
+              <a
+                target="_"
+                href={`https://amoy.polygonscan.com/address/${proposal.proposer}`}
+                className="text-green-500 hover:underline cursor-pointer"
+              >
+                <p className="overflow-tranc">{proposal.proposer}</p>
+              </a>
+            </div>
+          </CardFooter>
+        </Card>
+      ) : (
+        <Card
+          className="hover:border-green-500 cursor-pointer"
+          onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
+        >
+          <CardHeader>
+            <div className="flex justify-end mb-2">
+              <Badge variant={convertStatusToVariant(proposal.executed)}>
+                <p className="capitalize">
+                  {proposal.executed ? "Confirmed" : "Pending"}
+                </p>
+              </Badge>
+            </div>
+            <div className="font-bold text-2xl">{proposal.proposalURI}</div>
+            <a
+              target="_"
+              href={`https://amoy.polygonscan.com/address/${proposal.data}`}
+              className="text-muted-foreground hover:underline"
+            >
+              {proposal.data.slice(0, 42)}
+            </a>
+          </CardHeader>
+
+          <CardFooter>
+            <div className="flex gap-1 text-sm">
+              <div className="text-muted-foreground">Published by</div>
+              <a
+                target="_"
+                href={`https://amoy.polygonscan.com/address/${proposal.proposer}`}
+                className="text-green-500 hover:underline cursor-pointer"
+              >
+                <p className="overflow-tranc">{proposal.proposer}</p>
+              </a>
+            </div>
+          </CardFooter>
+        </Card>
+      )}
+    </>
   );
 }

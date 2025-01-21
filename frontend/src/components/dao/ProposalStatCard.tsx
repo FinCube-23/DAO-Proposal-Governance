@@ -15,11 +15,34 @@ const convertStatusToVariant = (status: boolean) => {
   return status ? "success" : "warning";
 };
 
+const convertToDate = (time: number) => {
+  const date = new Date(time * 1000);
+  const formattedDate = date.toLocaleString();
+
+  return formattedDate;
+};
+
 export const ProposalStatCard = ({ proposal, proposalId }: any) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl">Status</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-2xl">Status</CardTitle>
+          <div>
+            <p className="font-bold">
+              Vote Started At:{" "}
+              <span className="text-green-400">
+                {convertToDate(proposal.voteStart)}
+              </span>
+            </p>
+            <p className="text-left font-bold">
+              Vote Ended On:{" "}
+              <span className="text-green-400">
+                {convertToDate(proposal.voteStart)}
+              </span>
+            </p>
+          </div>
+        </div>
         <CardDescription>
           <Badge variant={convertStatusToVariant(proposal.executed)}>
             <p className="capitalize">

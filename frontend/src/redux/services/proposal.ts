@@ -9,7 +9,7 @@ import {
 export const proposalApis = api.injectEndpoints({
   endpoints: (build) => ({
     // get proposal
-    getProposal: build.query<GetProposalResponse, void>({
+    getProposals: build.query<GetProposalResponse, void>({
       query: () => {
         return {
           url: PROPOSAL_ENDPOINT.BASE,
@@ -33,5 +33,5 @@ export const proposalApis = api.injectEndpoints({
   }),
 });
 
-export const { useLazyGetProposalQuery, useCreateProposalMutation } =
+export const { useLazyGetProposalsQuery, useCreateProposalMutation } =
   proposalApis;

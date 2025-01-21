@@ -40,12 +40,8 @@ import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
 import WalletAuth from "@components/auth/WalletAuth";
-import { useLazyGetProposalQuery } from "@redux/services/proposal";
+import { useLazyGetProposalsQuery } from "@redux/services/proposal";
 import Loader from "@components/Loader";
-// import {
-//   useLazyGetOngoingProposalsQuery,
-//   useRegisterMemberMutation,
-// } from "@redux/services/proxy";
 
 export interface Proposal {
   executed: boolean;
@@ -92,22 +88,20 @@ export default function DaoDashboard() {
   });
   const [ongoingProposalCount, setOngoingProposalCount] = useState("");
   const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
-  const [toggle, setToggle] = useState(false);
+  const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
   const [pageNumber, setPageNumber] = useState(0);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
-  // const [registerMember] = useRegisterMemberMutation();
-  // const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [pageLoading, setPageLoading] = useState(false);
   const [proposalsPerPage, setProposalsPerPage] = useState(0);
-  const [getProposal] = useLazyGetProposalQuery();
+  const [getProposals] = useLazyGetProposalsQuery();
   const [isMemberApproved, setIsMemberApproved] = useState(false);
   const { isConnected, address } = useAccount();
   const [votingStatus, setVotingStatus] = useState("Voting not started");
-  const [startTime, setStartTime] = useState(0);
-  const [endTime, setEndTime] = useState(0);
   const [timeLeft, setTimeLeft] = useState("");
+  const [registerStatus, setRegisterStatus] = useState(false);
+  const [proposalsFromBE, setProposalsFromBE] = useState([]);
 
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
@@ -156,7 +150,7 @@ export default function DaoDashboard() {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "getVotingPeriod",
       });
       const result = response.toString();
@@ -172,7 +166,7 @@ export default function DaoDashboard() {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "getVotingDelay",
       });
       const result = response.toString();
@@ -188,7 +182,7 @@ export default function DaoDashboard() {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "getOngoingProposals",
       });
       console.log(response);
@@ -204,7 +198,7 @@ export default function DaoDashboard() {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "getOngoingProposalsCount",
       });
       const result = response.toString();
@@ -218,7 +212,7 @@ export default function DaoDashboard() {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "UPGRADE_INTERFACE_VERSION",
       });
       const result = response.toString();
@@ -232,10 +226,11 @@ export default function DaoDashboard() {
 
   const register = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setRegisterStatus(true);
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "registerMember",
         args: [registrationData._newMember, registrationData._memberURI],
       });
@@ -263,6 +258,7 @@ export default function DaoDashboard() {
       }
       toast.error(errorMessage);
     }
+    setRegisterStatus(false);
   };
 
   useEffect(() => {
@@ -270,7 +266,7 @@ export default function DaoDashboard() {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "daoURI",
         });
         const parsedObj = JSON.parse(response);
@@ -287,7 +283,7 @@ export default function DaoDashboard() {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "getProposalsByPage",
           args: [page, page + 3],
         });
@@ -301,8 +297,12 @@ export default function DaoDashboard() {
         setProposalsByPage(filteredProposals);
         setPageLoading(false);
 
-        // const proposalsFromBE = await getProposal();
-        // console.log(proposalsFromBE);
+        const { data } = await getProposals(page, page + 3);
+
+        setProposalsFromBE(data?.data || []);
+        console.log("====================================");
+        console.log(data.data);
+        console.log("====================================");
       } catch (e) {
         console.log(e);
       } finally {
@@ -314,7 +314,7 @@ export default function DaoDashboard() {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
-          address: "0xc72941fDf612417EeF0b8A29914744ad5f02f83F",
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "checkIsMemberApproved",
           args: [address],
         });
@@ -338,7 +338,7 @@ export default function DaoDashboard() {
     getVotingPeriod();
     checkIsMemberApproved();
     setLoading(false);
-  }, [pageNumber, getProposal, address, isConnected]);
+  }, [pageNumber, getProposals, address, isConnected]);
 
   const handleNextPage = () => {
     setPageLoading(true);
@@ -355,13 +355,26 @@ export default function DaoDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <WalletAuth></WalletAuth>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl hover:underline">
-            <a href={`${daoURI["@context"]}`} target="_">
-              {daoURI.name}
-            </a>
+          <CardTitle>
+            <div className="flex justify-between items-center">
+              <a
+                className="text-2xl hover:underline"
+                href={`${daoURI["@context"]}`}
+                target="_"
+              >
+                {daoURI.name}
+              </a>
+              <div className="flex gap-3">
+                <div className="border-2 border-blue-600 rounded-xl font-bold p-1 text-xs">
+                  Voting Period: {votingPeriod} second(s)
+                </div>
+                <div className="border-2 border-orange-600 rounded-xl font-bold p-1 text-xs">
+                  Voting Delay: {votingDelay} second(s)
+                </div>
+              </div>
+            </div>
           </CardTitle>
           <CardDescription>
             <a
@@ -393,13 +406,12 @@ export default function DaoDashboard() {
               </div>
             </div>
             <div className="flex gap-3">
-              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-2 text-xl">
+              <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold p-2 text-xl">
                 {/* Voting Period: {votingPeriod} second(s) */}
                 Voting Status: {votingStatus}
               </div>
               {votingStatus !== "Voting ended" && (
-                <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold px-2 py-2 text-xl">
-                  {/* Voting Delay: {votingDelay} second(s) */}
+                <div className="flex gap-1 border-2 border-orange-600 rounded-xl font-bold p-2 text-xl">
                   Time Left: {timeLeft}
                 </div>
               )}
@@ -454,31 +466,37 @@ export default function DaoDashboard() {
               </Dialog>
             </div>
           </Card>
-          <div className="flex">
+          <div className="flex gap-2">
             <Button
-              onClick={() => setToggle(false)}
-              className={`${!toggle && "border-4 border-orange-600"} mr-2`}
+              onClick={() => setToggle(0)}
+              className={`${toggle == 0 && "border-4 border-orange-600"}`}
             >
               All proposals
             </Button>
             <Button
-              onClick={() => setToggle(true)}
-              className={`${toggle && "border-4 border-orange-600"}`}
+              onClick={() => setToggle(1)}
+              className={`${toggle == 1 && "border-4 border-orange-600"}`}
             >
               Ongoing proposals
             </Button>
+            {/* <Button
+              onClick={() => setToggle(2)}
+              className={`${toggle == 2 && "border-4 border-orange-600"}`}
+            >
+              Off-chain proposals
+            </Button> */}
           </div>
           {loading ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
               Loading proposals
             </p>
-          ) : toggle ? (
-            ongoingProposals.length === 0 ? (
+          ) : toggle === 0 ? (
+            proposalsByPage.length === 0 ? (
               <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
-                No ongoing proposals found
+                No proposals found
               </p>
             ) : (
-              ongoingProposals.map((proposal, idx) => (
+              proposalsByPage.map((proposal, idx) => (
                 <ProposalCard
                   key={idx}
                   proposal={proposal}
@@ -486,12 +504,22 @@ export default function DaoDashboard() {
                 />
               ))
             )
-          ) : proposalsByPage.length === 0 ? (
+          ) : toggle === 1 ? (
+            ongoingProposals.length === 0 ? (
+              <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
+                No ongoing proposals found
+              </p>
+            ) : (
+              ongoingProposals.map((proposal, idx) => (
+                <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+              ))
+            )
+          ) : proposalsFromBE.length === 0 ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
-              No ongoing proposals found
+              No proposals found on the Backend
             </p>
           ) : (
-            proposalsByPage.map((proposal, idx) => (
+            proposalsFromBE.map((proposal, idx) => (
               <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
             ))
           )}
@@ -552,7 +580,9 @@ export default function DaoDashboard() {
                           />
                         </div>
                         <DialogFooter>
-                          <Button type="submit">Register</Button>
+                          <Button type="submit" isLoading={registerStatus}>
+                            Register
+                          </Button>
                         </DialogFooter>
                       </form>
                     </DialogContent>
