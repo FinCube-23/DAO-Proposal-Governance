@@ -45,10 +45,14 @@ export class TasksService {
         this.logger.log('New member proposal placed at on-chain.');
         // Updating Audit DB Transaction Status
         this.transactionService.updateStatus(txn.transactionHash, 1);
+        const eventData = this.proposalUpdateService.getProposalAddedEventByHash(txn.transactionHash)
+        .then(data => ({ data: { proposalId: data?.proposalId, proposalType: data?.proposalType } }))
+        .catch(() => ({ error: `Failed to fetch proposal data from THR GRAPH for transaction: ${txn.transactionHash}` }));
         // Emitting Transaction Status to other Services
         this.proposalUpdateService.updateProposal({
           "web3Status": 1,
-          "message": "Brain Station 23 PLC.",
+          "message": "New Member Proposal Placed Successfully.",
+          ...eventData,
           "blockNumber": txn.blockNumber,
           "transactionHash": txn.transactionHash
         });
