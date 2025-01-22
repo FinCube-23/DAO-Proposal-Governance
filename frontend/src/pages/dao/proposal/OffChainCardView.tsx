@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import OffchainCard from "./OffChainCard";
-import { OffchainStatCard } from "./OffchainStatCard";
 import { useLazyGetProposalQuery } from "@redux/services/proposal";
+import OffchainCard from "@components/dao/OffChainCard";
+import { OffchainStatCard } from "@components/dao/OffchainStatCard";
 
 export default function OffchainCardView() {
   const [proposal, setProposal] = useState({});
@@ -10,12 +10,12 @@ export default function OffchainCardView() {
   const [getProposal] = useLazyGetProposalQuery();
 
   useEffect(() => {
-    const getOnchainProposal = async () => {
+    const getOffchainProposal = async () => {
       try {
         const response = await getProposal(Number(id));
         console.log("====================================");
-        console.log(response);
-        setProposal(response);
+        console.log(response.data);
+        setProposal(response.data);
         console.log("====================================");
       } catch (e) {
         alert("Failer to fetch proposal information");
@@ -23,7 +23,7 @@ export default function OffchainCardView() {
       }
     };
 
-    getOnchainProposal();
+    getOffchainProposal();
   }, [getProposal, id]);
 
   return (

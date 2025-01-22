@@ -6,6 +6,7 @@ import { Dashboard } from "@pages/mfs/test";
 import Registration from "@pages/mfs/registration";
 import MFSPrivateLayout from "@layouts/MFSPrivateLayout";
 import Profile from "@pages/mfs/profile";
+import OffchainCardView from "@pages/dao/proposal/OffChainCardView";
 
 export const mfsRoutes: RouteObject = {
   path: "/mfs",
@@ -32,6 +33,10 @@ export const mfsRoutes: RouteObject = {
           element: <ProposalView />,
         },
         {
+          path: "off-chain-proposals/:id",
+          element: <OffchainCardView />,
+        },
+        {
           path: "tests",
           element: <Dashboard />,
         },
@@ -50,6 +55,10 @@ export const mfsRoutes: RouteObject = {
             {
               path: "proposals/:id",
               element: <ProposalView />,
+            },
+            {
+              path: "off-chain-proposals/:id",
+              element: <OffchainCardView />,
             },
           ],
         },
