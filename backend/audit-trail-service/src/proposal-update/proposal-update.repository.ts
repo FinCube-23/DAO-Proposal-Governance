@@ -20,17 +20,65 @@ export class ProposalUpdateRepository {
 
     async getProposalsAdded(transactionHash: string): Promise<any> {
         try {
-            this.logger.log('Fetching proposal added event data');
+            if (!transactionHash) {
+                this.logger.error('Invalid transaction hash: Transaction hash is empty');
+                throw new Error('INVALID_TRANSACTION_HASH');
+            }
+
+            this.logger.log(`THE GRAPH: Fetching proposal added event data for transaction: ${transactionHash}`);
 
             const result = await this.apolloClient.query({
                 query: this.proposalAddedQuery(transactionHash),
             });
-            this.logger.log('added proposals =>' + JSON.stringify(result));
 
-            return result.data;
+            this.logger.log(`Raw query response: ${JSON.stringify(result)}`);
+
+            const proposals = result.data?.proposalAddeds;
+
+            if (!proposals || proposals.length === 0) {
+                this.logger.warn(`No proposals found for transaction hash: ${transactionHash}`);
+                throw new Error(`NO_PROPOSAL_EVENT_DATA_FOUND:${transactionHash}`);
+            }
+
+            const proposal = proposals[0];
+            if (!proposal.proposalId || !proposal.blockNumber || !proposal.transactionHash) {
+                this.logger.error('Required proposal data missing', {
+                    proposalId: proposal.proposalId,
+                    blockNumber: proposal.blockNumber,
+                    transactionHash: proposal.transactionHash
+                });
+                throw new Error('INVALID_PROPOSAL_DATA');
+            }
+
+            this.logger.log('Proposal Added event found successfully', {
+                proposalId: proposal.proposalId,
+                blockNumber: proposal.blockNumber,
+                transactionHash: proposal.transactionHash
+            });
+
+            return proposal;
+
         } catch (error) {
-            this.logger.error('Error fetching added proposals on-chain event data:', error);
-            throw error;
+            if (error.networkError) {
+                this.logger.error(`Network error while fetching proposal for tx: ${transactionHash}`, error.networkError);
+                throw new Error(`NETWORK_ERROR:${transactionHash}`);
+            }
+
+            if (error.graphQLErrors?.length > 0) {
+                this.logger.error(`GraphQL errors while fetching proposal for tx: ${transactionHash}`, error.graphQLErrors);
+                throw new Error(`GRAPHQL_ERROR:${transactionHash}`);
+            }
+
+            // For our custom errors, add context and rethrow
+            if (error.message.includes('NO_PROPOSAL_FOUND') ||
+                error.message.includes('INVALID_TRANSACTION_HASH') ||
+                error.message.includes('INVALID_PROPOSAL_DATA')) {
+                throw error;
+            }
+
+            // For any unexpected errors
+            this.logger.error(`Unexpected error while fetching proposal for tx: ${transactionHash}`, error);
+            throw new Error(`UNEXPECTED_ERROR:${transactionHash}`);
         }
     }
 
