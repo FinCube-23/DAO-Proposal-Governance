@@ -15,6 +15,7 @@ import { MfsBusinessService } from './mfs_business.service';
 import { MfsBusiness } from './entities/mfs_business.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
 @Controller('mfs-business')
 export class MfsBusinessController {
   constructor(private readonly mfsBusinessService: MfsBusinessService) {}
@@ -31,7 +32,7 @@ export class MfsBusinessController {
   async create(
     @Body() mfs_business_body: MfsBusiness,
     @Request() req,
-  ): Promise<MfsBusiness> {
+  ): Promise<MfsBusinessDTO> {
 
     console.log(mfs_business_body);
     return this.mfsBusinessService.create(

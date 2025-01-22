@@ -51,8 +51,12 @@ export class MfsBusiness {
   @ApiProperty()
   certificate: string;
 
+  @Column({ type: 'varchar', nullable: true, length: 255, default: null })
+  @ApiProperty()
+  trx_hash: string;
+
   // Use lazy loading for circular reference
-  @OneToOne(() => User, (user) => user.mfsBusiness)
+  @OneToOne(() => User, (user) => user.mfsBusiness, { nullable: true })
   @ApiProperty({ type: () => User })
   user: User;
 

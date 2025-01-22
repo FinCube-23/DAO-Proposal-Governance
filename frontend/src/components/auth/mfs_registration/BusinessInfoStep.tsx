@@ -1,6 +1,7 @@
 import BusinessInfoForm from "./BusinessInfoForm";
-import { useState } from "react";
 import { Button } from "@components/ui/button";
+import { RootState } from "@redux/store";
+import { useSelector } from "react-redux";
 
 interface Props {
     incrementStep: () => void;
@@ -10,8 +11,9 @@ export default function BusinessInfoStep({
     incrementStep,
     decrementStep,
 }: Props) {
-    const [canGoNext, setCanGoNext] = useState(false);
-
+    const auth = useSelector(
+        (state: RootState) => state.persistedReducer.authReducer
+    );
     return (
         <div className="flex flex-col items-start gap-1 my-5">
             <div className="text-xl font-bold">Step 2: Enter Business Info</div>
@@ -20,12 +22,17 @@ export default function BusinessInfoStep({
             </div>
             <div className="w-full my-5">
                 <BusinessInfoForm
-                    setCanGoNext={setCanGoNext}
+                    mfsBusiness={auth.profile?.mfsBusiness ?? null}
                 />
             </div>
             <div className="flex justify-between w-full">
                 <Button onClick={decrementStep}>Prev</Button>
-                <Button disabled={!canGoNext} onClick={incrementStep}>Next</Button>
+                <Button
+                    disabled={auth.profile?.mfsBusiness == null}
+                    onClick={incrementStep}
+                >
+                    Next
+                </Button>
             </div>
         </div>
     );

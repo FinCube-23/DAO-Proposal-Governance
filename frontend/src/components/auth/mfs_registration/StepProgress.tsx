@@ -1,14 +1,18 @@
+import { useAccount } from "wagmi";
+
 interface Props {
     current: number;
 }
 
 export default function StepProgress({ current }: Props) {
+    const { isConnected } = useAccount();
+
     return (
         <div className="grid grid-cols-11 items-center justify-center gap-3 my-3">
             <div
                 className={`col-span-1 rounded-full text-center border-2 ${
-                    current === 1 && "border-white"
-                } ${current > 1 && "border-green-500"}`}
+                    isConnected && "border-green-500"
+                }`}
             >
                 1
             </div>

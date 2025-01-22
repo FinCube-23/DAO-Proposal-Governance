@@ -25,7 +25,7 @@ export default function MFSRegistrationModal() {
 
     return (
         <>
-            {!auth.profile?.mfsBusiness && (
+            {auth.profile?.mfsBusiness?.trx_hash == null && (
                 <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50">
                     <div className="bg-card p-10 rounded-xl shadow-lg border w-[425px] md:w-[600px]">
                         {current === 0 && <Prompt incrementStep={incrementStep} />}

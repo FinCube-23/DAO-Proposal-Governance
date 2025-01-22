@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MfsBusiness } from './entities/mfs_business.entity';
-import { User } from 'src/users/entities/user.entity';
+import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
 
 @Injectable()
 export class MfsBusinessService {
@@ -13,8 +13,9 @@ export class MfsBusinessService {
 
   async create(
     mfs_business: MfsBusiness,
-  ): Promise<MfsBusiness> {
-    return this.mfsBusinessRepository.save(mfs_business);
+  ): Promise<MfsBusinessDTO> {
+    const {user, ...mfsInfo} = await this.mfsBusinessRepository.save(mfs_business);
+    return mfsInfo;
   }
 
   async findAll(sub: string): Promise<MfsBusiness[]> {

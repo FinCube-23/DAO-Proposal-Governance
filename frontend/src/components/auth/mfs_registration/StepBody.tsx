@@ -1,6 +1,4 @@
-import { useAccount } from "wagmi";
 import ConnectWalletStep from "./ConnectWalletStep";
-import { useEffect } from "react";
 import BusinessInfoStep from "./BusinessInfoStep";
 import RegisterAsMemberStep from "./RegisterAsMemberStep";
 

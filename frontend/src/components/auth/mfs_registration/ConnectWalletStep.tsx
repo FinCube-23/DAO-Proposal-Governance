@@ -1,6 +1,5 @@
 import { Button } from "@components/ui/button";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useEffect } from "react";
 import { useAccount } from "wagmi";
 
 interface Props {

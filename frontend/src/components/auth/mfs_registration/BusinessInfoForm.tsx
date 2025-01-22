@@ -15,10 +15,9 @@ import { useCreateMFSMutation } from "@redux/services/mfs";
 import { toast } from "sonner";
 import { useEffect } from "react";
 import { useAccount } from "wagmi";
-
-interface Props {
-    setCanGoNext: (value: boolean) => void;
-}
+import { useDispatch } from "react-redux";
+import { setMfsBusiness } from "@redux/slices/auth";
+import { MFSBusiness } from "@redux/api/types";
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -32,17 +31,23 @@ const formSchema = z.object({
     certificate: z.string().min(1, { message: "Certificate is required" }),
 });
 
-export default function BusinessInfoForm({ setCanGoNext }: Props) {
+interface Props {
+    mfsBusiness: MFSBusiness | null;
+}
+
+export default function BusinessInfoForm({ mfsBusiness }: Props) {
+    const dispatch = useDispatch();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            name: "",
-            email: "",
-            context: "",
-            type: "",
-            location: "",
-            native_currency: "",
-            certificate: "",
+            name: mfsBusiness?.name ?? "",
+            email: mfsBusiness?.email ?? "",
+            context: mfsBusiness?.context ?? "",
+            type: mfsBusiness?.type ?? "",
+            location: mfsBusiness?.location ?? "",
+            native_currency: mfsBusiness?.native_currency ?? "",
+            certificate: mfsBusiness?.certificate ?? "",
         },
     });
 
@@ -52,9 +57,15 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
         createMFS({ ...values, wallet_address: account.address || "" });
     }
 
+    const isFieldDisabled = (fieldName: string) => {
+        if (!mfsBusiness) return false;
+        return (mfsBusiness as MFSBusiness)[fieldName as keyof MFSBusiness] !== "";
+    };
+
     const [
         createMFS,
         {
+            data: mfsData,
             isLoading: isMFSLoading,
             isSuccess: isMFSSuccess,
             isError: isMFSError,
@@ -63,7 +74,7 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
 
     useEffect(() => {
         if (isMFSSuccess) {
-            setCanGoNext(true);
+            dispatch(setMfsBusiness(mfsData));
         }
     }, [isMFSSuccess]);
 
@@ -84,7 +95,11 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                             <FormItem>
                                 <FormLabel>Org Name</FormLabel>
                                 <FormControl>
-                                    <Input type="text" {...field} />
+                                    <Input
+                                        type="text"
+                                        disabled={isFieldDisabled("name")}
+                                        {...field}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -100,6 +115,7 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                                     <Input
                                         type="email"
                                         placeholder="m@example.com"
+                                        disabled={isFieldDisabled("email")}
                                         {...field}
                                     />
                                 </FormControl>
@@ -118,6 +134,7 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                                 <FormControl>
                                     <Input
                                         placeholder="http://www.example.com"
+                                        disabled={isFieldDisabled("context")}
                                         {...field}
                                     />
                                 </FormControl>
@@ -134,6 +151,7 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                                 <FormControl>
                                     <Input
                                         placeholder="DAO | Organization"
+                                        disabled={isFieldDisabled("type")}
                                         {...field}
                                     />
                                 </FormControl>
@@ -150,7 +168,11 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                             <FormItem>
                                 <FormLabel>Location</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="BGD | USA" {...field} />
+                                    <Input
+                                        placeholder="BGD | USA"
+                                        disabled={isFieldDisabled("location")}
+                                        {...field}
+                                    />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -165,6 +187,9 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                                 <FormControl>
                                     <Input
                                         placeholder="ETH | USDT"
+                                        disabled={isFieldDisabled(
+                                            "native_currency"
+                                        )}
                                         {...field}
                                     />
                                 </FormControl>
@@ -182,6 +207,7 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                             <FormControl>
                                 <Input
                                     placeholder="Certificate URL"
+                                    disabled={isFieldDisabled("certificate")}
                                     {...field}
                                 />
                             </FormControl>
@@ -191,9 +217,17 @@ export default function BusinessInfoForm({ setCanGoNext }: Props) {
                 />
 
                 <div className="flex justify-center pt-4">
-                    <Button variant="secondary" type="submit" isLoading={isMFSLoading}>
-                        Submit
-                    </Button>
+                    {mfsBusiness ? (
+                        <div className="text-center text-green-500 font-bold">You have already registered your MFS Profile. <br/> Go to next step</div>
+                    ) : (
+                        <Button
+                            variant="secondary"
+                            type="submit"
+                            isLoading={isMFSLoading}
+                        >
+                            Submit
+                        </Button>
+                    )}
                 </div>
             </form>
         </Form>
