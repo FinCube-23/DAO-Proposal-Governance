@@ -27,18 +27,18 @@ export const ProposalStatCard = ({ proposal, proposalId }: any) => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-2xl">Status</CardTitle>
+          <CardTitle className="text-xl">Proposal Status</CardTitle>
           <div>
             <p className="font-bold">
               Vote Started At:{" "}
-              <span className="text-green-400">
+              <span className="text-blue-400">
                 {convertToDate(proposal.voteStart)}
               </span>
             </p>
             <p className="text-left font-bold">
               Vote Ended On:{" "}
-              <span className="text-green-400">
-                {convertToDate(proposal.voteStart)}
+              <span className="text-blue-400">
+                {convertToDate(proposal.voteDuration)}
               </span>
             </p>
           </div>

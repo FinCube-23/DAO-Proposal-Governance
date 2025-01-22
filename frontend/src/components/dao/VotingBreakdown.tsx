@@ -35,7 +35,7 @@ export default function VotingBreakdown({ proposalId }: any) {
   });
 
   const castVote = async (value: boolean) => {
-    voteRef.current = { proposalId, support: value };
+    voteRef.current = { proposalId: proposal.proposer, support: value };
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,

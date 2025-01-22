@@ -39,10 +39,10 @@ import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
 import { toast } from "sonner";
-import WalletAuth from "@components/auth/WalletAuth";
 import { useLazyGetProposalsQuery } from "@redux/services/proposal";
 import Loader from "@components/Loader";
 import OffchainCard from "@components/dao/OffChainCard";
+// import OffchainCard from "@components/dao/OffChainCard";
 
 export interface Proposal {
   executed: boolean;
@@ -425,19 +425,25 @@ export default function DaoDashboard() {
           <div className="flex gap-2">
             <Button
               onClick={() => setToggle(0)}
-              className={`${toggle == 0 && "border-4 border-orange-600"}`}
+              className={`${
+                toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
             >
               All proposals
             </Button>
             <Button
               onClick={() => setToggle(1)}
-              className={`${toggle == 1 && "border-4 border-orange-600"}`}
+              className={`${
+                toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
             >
               Ongoing proposals
             </Button>
             <Button
               onClick={() => setToggle(2)}
-              className={`${toggle == 2 && "border-4 border-orange-600"}`}
+              className={`${
+                toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
             >
               Off-chain proposals
             </Button>
