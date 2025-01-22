@@ -79,8 +79,8 @@ export class ProposalUpdateService {
     return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }
 
-  getUpdatedProposals() {
-    return this.update_proposals;
+  async getProposalAddedEventByHash(trx_hash: string): Promise<any> {
+    return await this.proposalUpdateRepository.getProposalsAdded(trx_hash);
   }
 
   private async mapToMessageEnvelopDto(proposal: any): Promise<ProposeEnvelopeDto> {

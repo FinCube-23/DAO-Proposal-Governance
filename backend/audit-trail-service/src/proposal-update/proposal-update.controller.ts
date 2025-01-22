@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { ProposalUpdateService } from './proposal-update.service';
 import {
@@ -15,20 +16,16 @@ import {
   MessageResponse
 } from './dto/proposal-update.dto';
 import { Logger } from '@nestjs/common';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { text } from 'stream/consumers';
 
 
 @Controller('proposal-update')
 export class ProposalUpdateController {
   private readonly logger = new Logger(ProposalUpdateController.name);
   constructor(private readonly proposalUpdateService: ProposalUpdateService) { }
-
-  @Get('get-proposals')
-  getProposals() {
-    return this.proposalUpdateService.getUpdatedProposals();
-  }
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
   @MessagePattern('queue-pending-proposal')
@@ -46,6 +43,12 @@ export class ProposalUpdateController {
   })
   async placeProposal(@Body() proposal: ResponseTransactionStatusDto) {
     return await this.proposalUpdateService.updateProposal(proposal);
+  }
+
+  @Get('temp-gql-test')
+  @ApiQuery({ name: 'trx_hash', required: true})
+  async getProposalAddedEventByHash(@Query('trx_hash') trx_hash: string) {
+    return await this.proposalUpdateService.getProposalAddedEventByHash(trx_hash);
   }
 
 }
