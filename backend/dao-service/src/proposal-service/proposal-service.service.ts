@@ -108,12 +108,12 @@ export class ProposalServiceService {
     }
   }
 
-  async updateTransactionStatus(trxHash: string, newStatus: number) {
+  async updateTransactionStatus(trxHash: string, newStatus: number, proposalOnChainId: number) {
     try {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus })
+        .set({ trx_status: newStatus,  proposal_onchain_id: proposalOnChainId})
         .where("trx_hash = :trxHash", { trxHash })
         .returning('*')
         .execute();
@@ -136,7 +136,11 @@ export class ProposalServiceService {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
-      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status);
+      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
+
+      const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
+      this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
+      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
       console.log(`Pattern: ${context.getPattern()}`);
       const originalMsg = context.getMessage();
       console.log(originalMsg);

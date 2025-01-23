@@ -7,6 +7,13 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 
+export enum TransactionConfirmationSource {
+    ALCHEMY = 'alchemy',
+    INFURA = 'infura',
+    THE_GRAPH = 'graph',
+    MANUAL = 'manual',
+}
+
 @Entity('transactions')
 export class TransactionEntity  {
     @PrimaryGeneratedColumn()
@@ -16,6 +23,14 @@ export class TransactionEntity  {
     @Column({ type: 'varchar', unique: true })
     @ApiProperty()
     trx_hash: string;
+
+    @Column({
+        type: 'enum',
+        enum: TransactionConfirmationSource,
+        default: TransactionConfirmationSource.ALCHEMY,
+        nullable: true,
+    })
+    confirmation_source: TransactionConfirmationSource;
 
     @Column({ type: 'varchar', nullable: true })
     @ApiProperty()

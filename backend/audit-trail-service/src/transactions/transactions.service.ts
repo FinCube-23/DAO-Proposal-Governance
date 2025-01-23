@@ -1,4 +1,4 @@
-import { TransactionEntity } from './entities/transaction.entity';
+import { TransactionConfirmationSource, TransactionEntity } from './entities/transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -23,7 +23,7 @@ export class TransactionsService {
         }
     }
 
-    async updateStatus(trxHash: string, newStatus: number): Promise<TransactionEntity> {
+    async updateStatus(trxHash: string, metadata: string, source: TransactionConfirmationSource, newStatus: number): Promise<TransactionEntity> {
         try {
             const transaction = await this.transactionRepository.findOne({
                 where: { trx_hash: trxHash }
@@ -33,7 +33,9 @@ export class TransactionsService {
                 throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
             }
             transaction.trx_status = newStatus;
-            this.logger.log(`Transaction status updated at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
+            transaction.trx_metadata = metadata;
+            transaction.confirmation_source = source;
+            this.logger.log(`Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source }.`);
             return await this.transactionRepository.save(transaction);
         } catch (err) {
             this.logger.error(`Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`);

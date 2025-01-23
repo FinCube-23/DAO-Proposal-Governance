@@ -20,43 +20,65 @@ export class ProposalUpdateRepository {
 
     async getProposalsAdded(transactionHash: string): Promise<any> {
         try {
-            this.logger.log('Fetching created proposals');
-
-            const result = await this.apolloClient.query({
-                query: this.proposalAddedQuery(transactionHash),
-            });
-            const resultCreated = await this.apolloClient.query({
-                query: this.proposalCreatedQuery(transactionHash),
-            });
-            this.logger.log('added proposals =>' + result.data.proposalAddeds);
-            this.logger.log('created proposals =>' + resultCreated.data.proposalCreateds);
-
-            return result.data.proposalAddeds;
-        } catch (error) {
-            this.logger.error('Error fetching created proposals:', error);
-            throw error;
-        }
-    }
-
-    async getProposalsCreateds(transactionHash: string): Promise<any> {
-        try {
-            this.logger.log('Fetching created proposals');
-
-            const result = await this.apolloClient.query({
-                query: this.proposalAddedQuery(transactionHash),
-            });
-            const resultCreated = await this.apolloClient.query({
-                query: this.proposalCreatedQuery(transactionHash),
-            });
-            this.logger.log('added proposals =>' + result.data.proposalAddeds);
-            this.logger.log('created proposals =>' + resultCreated.data.proposalCreateds);
-            if (!resultCreated.data.proposalCreateds || resultCreated.data.proposalCreateds.length === 0) {
-                return "0xEmpty";
+            if (!transactionHash) {
+                this.logger.error('Invalid transaction hash: Transaction hash is empty');
+                throw new Error('INVALID_TRANSACTION_HASH');
             }
-            return resultCreated.data.proposalCreateds;
+
+            this.logger.log(`THE GRAPH: Fetching proposal added event data for transaction: ${transactionHash}`);
+
+            const result = await this.apolloClient.query({
+                query: this.proposalAddedQuery(transactionHash),
+            });
+
+            this.logger.log(`Raw query response: ${JSON.stringify(result)}`);
+
+            const proposals = result.data?.proposalAddeds;
+
+            if (!proposals || proposals.length === 0) {
+                this.logger.warn(`No proposals found for transaction hash: ${transactionHash}`);
+                throw new Error(`NO_PROPOSAL_EVENT_DATA_FOUND:${transactionHash}`);
+            }
+
+            const proposal = proposals[0];
+            if (!proposal.proposalId || !proposal.blockNumber || !proposal.transactionHash) {
+                this.logger.error('Required proposal data missing', {
+                    proposalId: proposal.proposalId,
+                    blockNumber: proposal.blockNumber,
+                    transactionHash: proposal.transactionHash
+                });
+                throw new Error('INVALID_PROPOSAL_DATA');
+            }
+
+            this.logger.log('Proposal Added event found successfully', {
+                proposalId: proposal.proposalId,
+                blockNumber: proposal.blockNumber,
+                transactionHash: proposal.transactionHash
+            });
+
+            return proposal;
+
         } catch (error) {
-            this.logger.error('Error fetching created proposals:', error);
-            throw error;
+            if (error.networkError) {
+                this.logger.error(`Network error while fetching proposal for tx: ${transactionHash}`, error.networkError);
+                throw new Error(`NETWORK_ERROR:${transactionHash}`);
+            }
+
+            if (error.graphQLErrors?.length > 0) {
+                this.logger.error(`GraphQL errors while fetching proposal for tx: ${transactionHash}`, error.graphQLErrors);
+                throw new Error(`GRAPHQL_ERROR:${transactionHash}`);
+            }
+
+            // For our custom errors, add context and rethrow
+            if (error.message.includes('NO_PROPOSAL_FOUND') ||
+                error.message.includes('INVALID_TRANSACTION_HASH') ||
+                error.message.includes('INVALID_PROPOSAL_DATA')) {
+                throw error;
+            }
+
+            // For any unexpected errors
+            this.logger.error(`Unexpected error while fetching proposal for tx: ${transactionHash}`, error);
+            throw new Error(`UNEXPECTED_ERROR:${transactionHash}`);
         }
     }
 
@@ -75,97 +97,5 @@ export class ProposalUpdateRepository {
       `;
         return query;
     }
-
-    proposalCreatedQuery(transactionHash: string): any {
-        const query = gql`
-        query MyQuery {
-        proposalCreateds( where: {transactionHash: "${transactionHash}"}) {
-                transactionHash
-                id
-                proposalId
-                proposer
-                voteStart
-                voteEnd
-                blockNumber
-                description
-            }
-        }
-    `;
-        return query;
-    }
-
-
-    proposalExecutedQuery(transactionHash: string): any {
-        const query = gql`
-        query MyQuery {
-            proposalExecuteds(
-                where: {transactionHash_in: [
-                "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
-                "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"
-                ]}){
-                proposalId
-            }
-            memberApproveds(
-                where: {transactionHash_in: [
-                "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
-                "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"  
-                ]}){
-                member
-            }
-        }
-        `;
-        return query;
-    }
-
-    // GETTING PROPOSAL RELATED EVENTS
-
-    GET_PROPOSAL_ADDED = gql`
-    query MyQuery {
-        proposalAddeds( where: {transactionHash: "0xe8081d4c644dca8f90a5d4d1e94ba9e1f872248c4403afdf47a5ba1dd1c95553"}) {
-        id
-        proposalType
-        proposalId
-        blockNumber
-        blockTimestamp
-        transactionHash
-      }
-    }
-  `;
-
-    GET_PROPOSAL_CREATED = gql`
-    query MyQuery {
-        proposalCreateds( 
-            where: {transactionHash: "0x9bedc4ae2294b431826aae10e11fd1795e690b7a6b92cc007ae7ca8f6b185c6c"}
-        ) {
-            id
-            proposalId
-            proposer
-            blockNumber
-            voteStart
-            voteEnd
-            transactionHash
-            description
-        }
-    }
-    `;
-
-    GET_PROPOSAL_EXECUTED = gql`
-    query MyQuery {
-        proposalExecuteds(
-            where: {transactionHash_in: [
-            "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
-            "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"
-            ]}){
-            proposalId
-        }
-        memberApproveds(
-            where: {transactionHash_in: [
-            "0x2f458f83e8845f2eb5721c000c4e2794a2f272bb74e03817a52747d7d0d5345a",
-            "0xde4794a12deb8c99c7994055d6b0a4ea92d7e3eb028c17ca8754467374f4437d"  
-            ]}){
-            member
-        }
-    }
-    `;
 
 }
