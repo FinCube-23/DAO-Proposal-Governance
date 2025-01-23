@@ -7,6 +7,7 @@ interface Props {
     incrementStep: () => void;
     decrementStep: () => void;
 }
+
 export default function BusinessInfoStep({
     incrementStep,
     decrementStep,

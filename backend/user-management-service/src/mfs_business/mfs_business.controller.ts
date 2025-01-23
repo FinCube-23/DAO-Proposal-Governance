@@ -3,13 +3,13 @@ import {
   Get,
   Post,
   Body,
-  Put,
   Param,
   Delete,
   NotFoundException,
   UseGuards,
   Request,
   Req,
+  Patch,
 } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
 import { MfsBusiness } from './entities/mfs_business.entity';
@@ -33,7 +33,6 @@ export class MfsBusinessController {
     @Body() mfs_business_body: MfsBusiness,
     @Request() req,
   ): Promise<MfsBusinessDTO> {
-
     console.log(mfs_business_body);
     return this.mfsBusinessService.create(
       new MfsBusiness({ ...mfs_business_body, user: req.user }),
@@ -62,7 +61,7 @@ export class MfsBusinessController {
     }
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated.',
@@ -71,10 +70,9 @@ export class MfsBusinessController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async update(
     @Param('id') id: string,
-    @Body() mfs_business_entity: MfsBusiness,
-    @Req() req,
+    @Body() updateMfsBusinessDto: MfsBusiness,
   ): Promise<MfsBusiness> {
-    return this.mfsBusinessService.update(+id, mfs_business_entity, req.user);
+    return this.mfsBusinessService.update(+id, updateMfsBusinessDto);
   }
 
   @Delete(':id')

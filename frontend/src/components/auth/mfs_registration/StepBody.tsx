@@ -1,7 +1,6 @@
 import ConnectWalletStep from "./ConnectWalletStep";
 import BusinessInfoStep from "./BusinessInfoStep";
 import RegisterAsMemberStep from "./RegisterAsMemberStep";
-
 interface Props {
     current: number;
     incrementStep: () => void;
@@ -27,7 +26,12 @@ export default function StepBody({
                     decrementStep={decrementStep}
                 />
             )}
-            {current === 3 && <RegisterAsMemberStep />}
+            {current === 3 && (
+                <RegisterAsMemberStep
+                    incrementStep={incrementStep}
+                    decrementStep={decrementStep}
+                />
+            )}
         </>
     );
 }

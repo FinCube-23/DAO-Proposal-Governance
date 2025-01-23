@@ -22,6 +22,21 @@ export type CreateMFSResponse = CreateMFSPayload & {
   trx_hash: string | null;
 };
 
+export type UpdateMFSPayload = {
+  id: number;
+  name?: string;
+  email?: string;
+  context?: string;
+  type?: string;
+  location?: string;
+  wallet_address?: string;
+  native_currency?: string;
+  certificate?: string;
+  trx_hash?: string;
+};
+
+export type UpdateMFSResponse = UpdateMFSPayload;
+
 export type MFSBusiness = {
   id: number;
   name: string;

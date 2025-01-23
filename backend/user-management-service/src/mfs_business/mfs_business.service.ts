@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MfsBusiness } from './entities/mfs_business.entity';
@@ -11,10 +15,9 @@ export class MfsBusinessService {
     private readonly mfsBusinessRepository: Repository<MfsBusiness>,
   ) {}
 
-  async create(
-    mfs_business: MfsBusiness,
-  ): Promise<MfsBusinessDTO> {
-    const {user, ...mfsInfo} = await this.mfsBusinessRepository.save(mfs_business);
+  async create(mfs_business: MfsBusiness): Promise<MfsBusinessDTO> {
+    const { user, ...mfsInfo } =
+      await this.mfsBusinessRepository.save(mfs_business);
     return mfsInfo;
   }
 
@@ -44,15 +47,24 @@ export class MfsBusinessService {
 
   async update(
     id: number,
-    exchange_user: Partial<MfsBusiness>,
-    sub: string,
+    updateMfsBusinessDto: Partial<MfsBusiness>,
   ): Promise<MfsBusiness> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    await this.mfsBusinessRepository.update(id, exchange_user);
-    return this.mfsBusinessRepository.findOne({ where: { id } });
+    const existingBusiness = await this.mfsBusinessRepository.findOne({
+      where: { id },
+    });
+
+    if (!existingBusiness) {
+      throw new NotFoundException(`MFS Business with ID ${id} not found`);
+    }
+
+    // Merge the existing business with the update DTO
+    const updatedBusiness = this.mfsBusinessRepository.merge(
+      existingBusiness,
+      updateMfsBusinessDto,
+    );
+    updatedBusiness.updated_at = new Date();
+
+    return this.mfsBusinessRepository.save(updatedBusiness);
   }
 
   async remove(id: number, sub: string): Promise<string> {
