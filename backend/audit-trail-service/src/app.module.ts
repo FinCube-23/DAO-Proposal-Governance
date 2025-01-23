@@ -30,6 +30,6 @@ export class AppModule {
   constructor(@Inject(TasksService) private readonly tasksService: TasksService) {}
   async onModuleInit() {
     // Lifecycle Hooks: Trigger the function when the module initializes
-    this.tasksService.listenProposalTrx();
+    await this.tasksService.listenProposalTrx();
   }
 }
