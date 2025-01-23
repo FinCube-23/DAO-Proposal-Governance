@@ -40,7 +40,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "registerMember",
+        functionName: "castVote",
         args: [voteRef.current.proposalId, voteRef.current.support],
       });
       const hash = await writeContract(config, request);
@@ -64,6 +64,9 @@ export default function VotingBreakdown({ proposalId }: any) {
           errorMessage = match[1];
         }
       }
+      console.log("====================================");
+      console.log(e);
+      console.log("====================================");
       toast.error(errorMessage);
     }
   };

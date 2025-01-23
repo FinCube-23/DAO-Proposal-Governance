@@ -1,55 +1,73 @@
 import { Badge } from "@components/ui/badge";
 import { ArrowRight } from "lucide-react";
 
-export default function VotingInfo() {
-    return (
-        <>
-            <div className="flex flex-col">
-                <div className="flex flex-col gap-1">
-                    <div className="text-xl font-semibold">Rules Of Decision</div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">Options</div>
-                        <div>Approve</div>
-                    </div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">Strategy</div>
-                        <div className="flex items-center gap-1">1 Wallet <ArrowRight size={15} /> 1 Vote</div>
-                    </div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">Minimum approval</div>
-                        <div>3 of 4 Addresses</div>
-                    </div>
+export default function VotingInfo({ proposal }: any) {
+  const convertStatusToVariant = (status: boolean) => {
+    return status ? "success" : "warning";
+  };
+
+  return (
+    <>
+      <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
+          <div className="text-xl font-semibold">Off-chain Details</div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Audit ID</div>
+            <div>{proposal.audit_id}</div>
+          </div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Created At</div>
+            <div className="flex items-center gap-1">{proposal.created_at}</div>
+          </div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Updated At</div>
+            <div>{proposal.updated_at}</div>
+          </div>
+        </div>
+      </div>
+      <hr className="my-3" />
+      <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
+          <div className="text-xl font-semibold">On-chain Details</div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">On-chain ID</div>
+            <div>{proposal.proposal_onchain_id}</div>
+          </div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Proposal Type</div>
+            <div>{proposal.proposal_type}</div>
+          </div>
+        </div>
+      </div>
+      <hr className="my-3" />
+      <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
+          <div className="text-xl font-semibold">Transaction Details</div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Transaction Status</div>
+            <Badge variant={convertStatusToVariant(proposal.trx_status)}>
+              <p className="capitalize">
+                {proposal.trx_status ? "Confirmed" : "Pending"}
+              </p>
+            </Badge>
+          </div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Transaction Hash</div>
+            <a
+              target="_"
+              href={`https://amoy.polygonscan.com/address/${proposal.trx_hash}`}
+              className="text-green-600 hover:underline"
+            >
+              {proposal.trx_hash && (
+                <div>
+                  {proposal.trx_hash.slice(0, 21)}.....
+                  {proposal.trx_hash.slice(21, 42)}{" "}
                 </div>
-            </div>
-            <hr className="my-3" />
-            <div className="flex flex-col">
-                <div className="flex flex-col gap-1">
-                    <div className="text-xl font-semibold">Voting activity</div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">Current approval</div>
-                        <div>2 of 4 Addresses (50%)</div>
-                    </div>
-                    <div className="flex justify-end">
-                        <div className="flex items-center gap-2"><Badge variant="danger">Not Reached</Badge>
-                            <span className="text-muted-foreground">1 approval missing</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <hr className="my-3" />
-            <div className="flex flex-col">
-                <div className="flex flex-col gap-1">
-                    <div className="text-xl font-semibold">Duration</div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">Start</div>
-                        <div>2024/03/20 08:23 AM UTC+6</div>
-                    </div>
-                    <div className="flex justify-between">
-                        <div className="text-muted-foreground">End</div>
-                        <div>Proposal is active until approved or canceled</div>
-                    </div>
-                </div>
-            </div>
-        </>
-    )
+              )}
+            </a>
+          </div>
+        </div>
+      </div>
+    </>
+  );
 }
