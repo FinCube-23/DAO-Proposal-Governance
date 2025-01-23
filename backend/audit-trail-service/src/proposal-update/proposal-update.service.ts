@@ -83,38 +83,4 @@ export class ProposalUpdateService {
     return await this.proposalUpdateRepository.getProposalsAdded(trx_hash);
   }
 
-  private async mapToMessageEnvelopDto(proposal: any): Promise<ProposeEnvelopeDto> {
-    const dto = new ProposeEnvelopeDto();
-
-    // Initialize nested objects first
-    dto.event_data = {
-      event_name: "pattern",
-      published_at: new Date(),
-      publisher_service: 'audit-trail-service'
-    };
-
-    dto.trace_context = {
-      trace_id: "CRON-JOB-GENERATED",
-      span_id: "audit-trail-service(uuid)+dao-service(uuid)"
-    };
-
-    dto.payload = {
-      id: proposal?.id || '0xSample-Index',
-      proposalId: proposal?.proposalId || '34',
-      transaction_data: {
-        blockNumber: proposal?.blockNumber || 786,
-        web3Status: 0,
-        transactionHash: proposal?.transactionHash || '0xtrxHash',
-        message: 'Test Packet',
-      },
-      proposer_address: proposal?.proposer || '0xWallet',
-      voteStart: proposal?.voteStart || '171963',
-      voteEnd: proposal?.voteEnd || '25339',
-      description: proposal?.description || 'This is a test proposal',
-      external_proposal: false,
-    };
-
-    return dto;
-  }
-
 }

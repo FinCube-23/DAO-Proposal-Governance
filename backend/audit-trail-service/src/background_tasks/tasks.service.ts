@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
+import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
 import { TransactionsService } from 'src/transactions/transactions.service';
 
 require('dotenv').config();
@@ -72,7 +73,7 @@ export class TasksService {
           this.logger.log(`THE GRAPH: Got the response before emitting event to DAO SERVICE: ${JSON.stringify(eventData)}`);
 
           // Update the transaction status
-          await this.transactionService.updateStatus(txn.transactionHash, 1);
+          await this.transactionService.updateStatus(txn.transactionHash, JSON.stringify(eventData), TransactionConfirmationSource.ALCHEMY, 1);
 
           // Emit updated proposal event
           await this.proposalUpdateService.updateProposal({

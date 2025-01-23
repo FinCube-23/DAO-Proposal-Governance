@@ -45,11 +45,5 @@ export class ProposalUpdateController {
     return await this.proposalUpdateService.updateProposal(proposal);
   }
 
-  @Get('temp-gql-test')
-  @ApiQuery({ name: 'trx_hash', required: true})
-  async getProposalAddedEventByHash(@Query('trx_hash') trx_hash: string) {
-    return await this.proposalUpdateService.getProposalAddedEventByHash(trx_hash);
-  }
-
 }
 
