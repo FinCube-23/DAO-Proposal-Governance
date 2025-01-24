@@ -1,6 +1,7 @@
 import BusinessInfoForm from "./BusinessInfoForm";
 import { Button } from "@components/ui/button";
 import { RootState } from "@redux/store";
+import { CircleChevronLeft, CircleChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
 
 interface Props {
@@ -27,13 +28,17 @@ export default function BusinessInfoStep({
                 />
             </div>
             <div className="flex justify-between w-full">
-                <Button onClick={decrementStep}>Prev</Button>
-                <Button
-                    disabled={auth.profile?.mfsBusiness == null}
-                    onClick={incrementStep}
-                >
-                    Next
+                <Button variant={"secondary"} onClick={decrementStep}>
+                    <CircleChevronLeft /> Prev
                 </Button>
+                {auth.profile?.mfsBusiness != null && (
+                    <Button
+                        disabled={auth.profile?.mfsBusiness == null}
+                        onClick={incrementStep}
+                    >
+                        Next <CircleChevronRight />
+                    </Button>
+                )}
             </div>
         </div>
     );

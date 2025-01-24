@@ -1,13 +1,13 @@
 import { Button } from "@components/ui/button";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { CircleChevronRight } from "lucide-react";
 import { useAccount } from "wagmi";
 
 interface Props {
-    current: number;
     incrementStep: () => void;
 }
 
-export default function ConnectWalletStep({ current, incrementStep }: Props) {
+export default function ConnectWalletStep({ incrementStep }: Props) {
     const { isConnected } = useAccount();
     
     return (
@@ -20,7 +20,7 @@ export default function ConnectWalletStep({ current, incrementStep }: Props) {
             <div className=""><ConnectButton /></div>
             <div className="flex justify-end w-full">
                 <Button disabled={!isConnected} onClick={incrementStep}>
-                    Next
+                    Next <CircleChevronRight />
                 </Button>
             </div>
         </div>

@@ -18,6 +18,7 @@ import { useAccount } from "wagmi";
 import { useDispatch } from "react-redux";
 import { setMfsBusiness } from "@redux/slices/auth";
 import { MFSBusiness } from "@redux/api/types";
+import { CircleChevronUp, Send } from "lucide-react";
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
@@ -59,7 +60,9 @@ export default function BusinessInfoForm({ mfsBusiness }: Props) {
 
     const isFieldDisabled = (fieldName: string) => {
         if (!mfsBusiness) return false;
-        return (mfsBusiness as MFSBusiness)[fieldName as keyof MFSBusiness] !== "";
+        return (
+            (mfsBusiness as MFSBusiness)[fieldName as keyof MFSBusiness] !== ""
+        );
     };
 
     const [
@@ -218,14 +221,13 @@ export default function BusinessInfoForm({ mfsBusiness }: Props) {
 
                 <div className="flex justify-center pt-4">
                     {mfsBusiness ? (
-                        <div className="text-center text-green-500 font-bold">You have already registered your MFS Profile. <br/> Go to next step</div>
+                        <div className="text-center text-green-500 font-bold">
+                            You have already registered your MFS Profile. <br />{" "}
+                            Go to next step
+                        </div>
                     ) : (
-                        <Button
-                            variant="secondary"
-                            type="submit"
-                            isLoading={isMFSLoading}
-                        >
-                            Submit
+                        <Button type="submit" isLoading={isMFSLoading}>
+                            Submit <CircleChevronUp />
                         </Button>
                     )}
                 </div>

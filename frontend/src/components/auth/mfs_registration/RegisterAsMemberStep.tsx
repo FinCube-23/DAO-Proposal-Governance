@@ -1,18 +1,15 @@
 import { Button } from "@components/ui/button";
-import {
-    readContract,
-    simulateContract,
-    waitForTransactionReceipt,
-    writeContract,
-} from "@wagmi/core";
-import { FormEvent, useState } from "react";
+import { simulateContract, writeContract } from "@wagmi/core";
+import { useEffect, useState } from "react";
 import contractABI from "../../../contractABI/contractABI.json";
 import { config } from "@layouts/RootLayout";
 import { useAccount } from "wagmi";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@redux/store";
 import { toast } from "sonner";
 import { useUpdateMFSMutation } from "@redux/services/mfs";
+import { setMfsBusinessTrxHash } from "@redux/slices/auth";
+import { CircleChevronLeft, CircleChevronUp } from "lucide-react";
 
 interface Props {
     incrementStep: () => void;
@@ -23,6 +20,7 @@ export default function RegisterAsMemberStep({
     incrementStep,
     decrementStep,
 }: Props) {
+    const dispatch = useDispatch();
     const account = useAccount();
     const [isRegisterLoading, setIsRegisterLoading] = useState(false);
     const auth = useSelector(
@@ -33,14 +31,12 @@ export default function RegisterAsMemberStep({
         updateMFS,
         {
             data: updateMFSData,
-            isLoading: isUpdateMFSLoading,
             isSuccess: isUpdateMFSSuccess,
             isError: isUpdateMFSError,
         },
     ] = useUpdateMFSMutation();
 
-    const register = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+    const register = async () => {
         setIsRegisterLoading(true);
         try {
             const { request } = await simulateContract(config, {
@@ -61,9 +57,12 @@ export default function RegisterAsMemberStep({
 
             const hash = await writeContract(config, request);
 
-            updateMFS({ id: auth.profile?.mfsBusiness?.id || 0, trx_hash: hash });
-        } catch (e: any) {
-            let errorMessage = e.message;
+            updateMFS({
+                id: auth.profile?.mfsBusiness?.id || 0,
+                trx_hash: hash,
+            });
+        } catch (err: any) {
+            let errorMessage = err.message;
 
             if (errorMessage.includes("reverted with the following reason:")) {
                 const match = errorMessage.match(
@@ -73,29 +72,52 @@ export default function RegisterAsMemberStep({
                     errorMessage = match[1];
                 }
             }
+
+            if (errorMessage == "Already a member") {
+                updateMFS({
+                    id: auth.profile?.mfsBusiness?.id || 0,
+                    trx_hash: "0x00",
+                });
+            }else{
+                setIsRegisterLoading(false);
+            }
             toast.error(errorMessage);
-        } finally {
-            setIsRegisterLoading(false);
         }
     };
 
-    if (isUpdateMFSSuccess) {
-        incrementStep();
-    }
+    useEffect(() => {
+        if (isUpdateMFSSuccess) {
+            setIsRegisterLoading(false);
+            dispatch(setMfsBusinessTrxHash(updateMFSData?.trx_hash || ""));
+            incrementStep();
+        }
+    }, [isUpdateMFSSuccess]);
 
-    if (isUpdateMFSError) {
-        toast.error("Something went wrong");
-    }
+    useEffect(() => {
+        if (isUpdateMFSError) {
+            setIsRegisterLoading(false);
+            toast.error("Something went wrong");
+        }
+    }, [isUpdateMFSError]);
 
     return (
         <div className="flex flex-col items-start gap-1 my-5">
-            <div className="text-xl font-bold">Step 3: Become a Member</div>
-            <div className="text-center text-muted-foreground">
-                Apply for membership on chain.
+            <div className="text-xl font-bold">
+                Step 3: Apply for Membership
             </div>
-            <div className="w-full my-5"></div>
+            <div className="text-muted-foreground">
+                Submit your application to join our DAO. Current members will
+                vote to approve your membership.
+            </div>
+            <div className="w-full my-5 flex justify-end">
+                <Button onClick={register} isLoading={isRegisterLoading}>
+                    Apply for Membership <CircleChevronUp />
+                </Button>
+            </div>
             <div className="flex justify-between w-full">
-                <Button onClick={decrementStep}>Prev</Button>
+                <Button variant="secondary" onClick={decrementStep}>
+                    <CircleChevronLeft /> Prev
+                </Button>
             </div>
         </div>
     );

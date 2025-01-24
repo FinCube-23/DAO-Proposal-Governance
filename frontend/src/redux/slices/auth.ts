@@ -30,12 +30,25 @@ const authSlice = createSlice({
         setMfsBusiness: (state, action: PayloadAction<MFSBusiness | null>) => {
             if (state.profile) state.profile.mfsBusiness = action.payload;
         },
+        setMfsBusinessTrxHash: (
+            state,
+            action: PayloadAction<string | null>
+        ) => {
+            if (state.profile && state.profile.mfsBusiness)
+                state.profile.mfsBusiness.trx_hash = action.payload;
+        },
         clearAuthState: (state) => {
             Object.assign(state, initialState);
         },
     },
 });
 
-export const { setTokens, setProfile, setMfsBusiness, clearAuthState } = authSlice.actions;
+export const {
+    setTokens,
+    setProfile,
+    setMfsBusiness,
+    setMfsBusinessTrxHash,
+    clearAuthState,
+} = authSlice.actions;
 
 export default authSlice.reducer;

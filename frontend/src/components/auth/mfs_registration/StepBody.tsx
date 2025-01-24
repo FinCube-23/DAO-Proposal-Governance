@@ -16,7 +16,6 @@ export default function StepBody({
         <>
             {current === 1 && (
                 <ConnectWalletStep
-                    current={current}
                     incrementStep={incrementStep}
                 />
             )}
