@@ -17,7 +17,7 @@ import { useNavigate } from "react-router-dom";
 import { ChevronsLeft } from "lucide-react";
 export default function Profile() {
     const auth = useSelector(
-        (state: RootState) => state.persistedReducer.authReducer.auth
+        (state: RootState) => state.persistedReducer.authReducer
     );
     const navigate = useNavigate();
     return (

@@ -11,7 +11,6 @@ export type CreateMFSPayload = {
   context: string;
   type: string;
   location: string;
-  is_approved: boolean;
   wallet_address: string;
   native_currency: string;
   certificate: string;
@@ -19,6 +18,37 @@ export type CreateMFSPayload = {
 
 export type CreateMFSResponse = CreateMFSPayload & {
   id: number;
+  is_approved: boolean;
+  trx_hash: string | null;
+};
+
+export type UpdateMFSPayload = {
+  id: number;
+  name?: string;
+  email?: string;
+  context?: string;
+  type?: string;
+  location?: string;
+  wallet_address?: string;
+  native_currency?: string;
+  certificate?: string;
+  trx_hash?: string;
+};
+
+export type UpdateMFSResponse = UpdateMFSPayload;
+
+export type MFSBusiness = {
+  id: number;
+  name: string;
+  email: string;
+  context: string;
+  type: string;
+  location: string;
+  is_approved: boolean;
+  wallet_address: string;
+  native_currency: string;
+  certificate: string;
+  trx_hash: string | null;
 };
 
 // Auth
@@ -30,7 +60,7 @@ export type FetchMeResponse = {
   email: string;
   password: string;
   role: string;
-  mfsBusiness: null;
+  mfsBusiness: MFSBusiness | null;
   exchangeUser: null;
 };
 

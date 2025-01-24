@@ -37,6 +37,7 @@ export class User {
   // Use lazy loading here
   @OneToOne(() => MfsBusiness, (mfsBusiness) => mfsBusiness.user, {
     nullable: true,
+    onDelete: 'SET NULL',
   })
   @JoinColumn()
   @ApiProperty({ type: () => MfsBusiness }) // Use the lazy loading for Swagger
