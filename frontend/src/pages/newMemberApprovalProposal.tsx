@@ -47,15 +47,10 @@ const NewMemberApprovalProposal = () => {
 
       // backend proposal service call
       const backendData = {
-        proposal_onchain_id: 0,
         proposal_type: "membership",
         metadata: data.description,
-        proposer_address: `${address}`,
-        proposal_executed_by: `${address}`,
-        external_proposal: false,
-        proposal_status: "pending",
+        proposer_address: `0x${address}`,
         trx_hash: hash,
-        trx_status: 0,
       };
 
       const response = await createProposal(backendData);

@@ -7,7 +7,7 @@ const convertStatusToVariant = (status: boolean) => {
   return status ? "success" : "warning";
 };
 
-export default function ProposalCard({ proposal, proposalId }: any) {
+export default function OngoingProposalCard({ proposal, proposalId }: any) {
   const navigate = useNavigate();
   const [votingStatus, setVotingStatus] = useState("Voting not started");
   const [votingDelay] = useState(proposal.voteStart);
@@ -46,7 +46,7 @@ export default function ProposalCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/dashboard/proposals/${proposalId}`)}
+      onClick={() => navigate(`/dashboard/ongoing-proposals/${proposalId}`)}
     >
       <CardHeader>
         <div className="flex justify-between mb-2">

@@ -1,5 +1,4 @@
 import { Badge } from "@components/ui/badge";
-import { ArrowRight } from "lucide-react";
 
 export default function VotingInfo({ proposal }: any) {
   const convertStatusToVariant = (status: boolean) => {
@@ -13,7 +12,11 @@ export default function VotingInfo({ proposal }: any) {
           <div className="text-xl font-semibold">Off-chain Details</div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Audit ID</div>
-            <div>{proposal.audit_id}</div>
+            {proposal.audit_id ? (
+              <div>{proposal.audit_id}</div>
+            ) : (
+              <div className="text-red-600">N/A</div>
+            )}
           </div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Created At</div>
@@ -31,11 +34,23 @@ export default function VotingInfo({ proposal }: any) {
           <div className="text-xl font-semibold">On-chain Details</div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">On-chain ID</div>
-            <div>{proposal.proposal_onchain_id}</div>
+            {proposal.proposal_onchain_id ? (
+              <div>{proposal.proposal_onchain_id}</div>
+            ) : (
+              <div className="text-red-600">N/A</div>
+            )}
           </div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Proposal Type</div>
             <div>{proposal.proposal_type}</div>
+          </div>
+          <div className="flex justify-between">
+            <div className="text-muted-foreground">Processed By</div>
+            {proposal.processed_by ? (
+              <div>{proposal.processed_by}</div>
+            ) : (
+              <div className="text-red-600">N/A</div>
+            )}
           </div>
         </div>
       </div>
@@ -55,7 +70,7 @@ export default function VotingInfo({ proposal }: any) {
             <div className="text-muted-foreground">Transaction Hash</div>
             <a
               target="_"
-              href={`https://amoy.polygonscan.com/address/${proposal.trx_hash}`}
+              href={`https://amoy.polygonscan.com/tx/${proposal.trx_hash}`}
               className="text-green-600 hover:underline"
             >
               {proposal.trx_hash && (
