@@ -74,11 +74,13 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     event MemberApproved(address indexed member);
     event ProposalExecuted(uint256 indexed proposalId);
     event ProposalCanceled(uint256 indexed proposalId);
-    uint256 private memberCount;
-    uint256 private proposalCount;
+    uint256 public memberCount;
+    uint256 public proposalCount;
     string public daoURI;
     uint256 public votingDelay;
     uint256 public votingPeriod;
+
+    address[] private memberList; /*This function is only added for testing*/
 
     /** @dev Represents a member of the DAO.
      * @param memberURI The URI that identifies the member.
@@ -135,24 +137,6 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     mapping(uint256 => Proposal) private proposals;
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
-
-    /**
-     * @notice Returns the voting delay period in seconds.
-     * @dev This function is marked as `pure` because it does not read or modify the contract's state.
-     * @return The voting delay period in seconds.
-     */
-    function getVotingDelay() public view returns (uint256) {
-        return votingDelay;
-    }
-
-    /**
-     * @notice Returns the voting period duration in seconds.
-     * @dev This function is marked as `pure` because it does not read or modify the contract's state.
-     * @return The voting period duration in seconds.
-     */
-    function getVotingPeriod() public view returns (uint256) {
-        return votingPeriod;
-    }
 
     /**
      * @notice Sets the delay before voting starts
@@ -268,8 +252,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         isVotingPeriodSet
     {
         uint48 currentTime = uint48(block.timestamp);
-        uint48 start = currentTime + uint48(getVotingDelay());
-        uint48 end = start + uint48(getVotingPeriod());
+        uint48 start = currentTime + uint48(votingDelay);
+        uint48 end = start + uint48(votingPeriod);
         bytes memory _data = toBytes(_newMember);
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
@@ -315,8 +299,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         returns (uint256 proposalId)
     {
         uint48 currentTime = uint48(block.timestamp);
-        uint48 start = currentTime + uint48(getVotingDelay());
-        uint48 end = start + uint48(getVotingPeriod());
+        uint48 start = currentTime + uint48(votingDelay);
+        uint48 end = start + uint48(votingPeriod);
         proposalId = proposalCount;
         proposals[proposalCount] = Proposal({
             proposer: msg.sender,
@@ -530,6 +514,39 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
+     * @notice Retrieves proposals by their type
+     * @dev This function can only be called by an approved member
+     * @param proposalTypeFilter The type of proposals to filter (0 for NewMemberProposal, 1 for GeneralProposal)
+     * @return proposalsByType An array of Proposal structs filtered by the specified type
+     */
+
+    function getProposalsByType(
+        ProposalType proposalTypeFilter
+    )
+        public
+        view
+        onlyMember(msg.sender)
+        returns (Proposal[] memory proposalsByType)
+    {
+        uint256 count;
+
+        for (uint256 i = 0; i < proposalCount; i++) {
+            if (proposalType[i] == proposalTypeFilter) {
+                count++;
+            }
+        }
+        proposalsByType = new Proposal[](count);
+        uint256 index = 0;
+
+        for (uint256 i = 0; i < proposalCount; i++) {
+            if (proposalType[i] == proposalTypeFilter) {
+                proposalsByType[index] = proposals[i];
+                index++;
+            }
+        }
+    }
+
+    /**
      * @notice Cancels a proposal that has not been executed or canceled yet.
      * @param proposalId The ID of the proposal to be canceled.
      * @dev Only the proposer of the proposal can call this function.
@@ -598,5 +615,24 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         address _member
     ) public view onlyMember(msg.sender) returns (bool) {
         return members[_member].status;
+    }
+
+    /**
+     * @notice Delete all members except the contract owner
+     * @dev This function can only be called by the contract owner
+     * @notice This function deletes all user data except the owner
+     * @notice This function is only for testing
+     */
+    function flushMembers() public payable onlyOwner {
+        uint256 tempMemberCount = memberList.length;
+        for (uint256 i = tempMemberCount; i > 0; i--) {
+            address memberAddress = memberList[i - 1];
+            if (memberAddress != owner()) {
+                members[memberAddress].status = false;
+                delete members[memberAddress];
+                memberList.pop();
+            }
+        }
+        memberCount = 1;
     }
 }
