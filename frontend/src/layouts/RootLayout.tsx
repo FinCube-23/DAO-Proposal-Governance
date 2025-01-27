@@ -30,10 +30,8 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider theme={darkTheme()}>
               <Header />
-              <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-                <MFSSidebar />
-                <Outlet />
-              </div>
+              {/* <MFSSidebar /> */}
+              <Outlet />
               <Toaster richColors />
             </RainbowKitProvider>
           </QueryClientProvider>

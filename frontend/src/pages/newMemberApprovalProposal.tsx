@@ -17,7 +17,6 @@ const NewMemberApprovalProposal = () => {
   const [createProposal] = useCreateProposalMutation();
   const { address } = useAccount();
   const [loadingStatus, setLoadingStatus] = useState(false);
-  const [trxStatus, setTrxStatus] = useState("pending");
   const navigate = useNavigate();
 
   const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +42,6 @@ const NewMemberApprovalProposal = () => {
       });
 
       const hash = await writeContract(config, request);
-      setTrxStatus("processing");
 
       // backend proposal service call
       const backendData = {

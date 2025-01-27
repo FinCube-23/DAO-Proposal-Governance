@@ -18,9 +18,11 @@ import {
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
 import { Proposal } from "@pages/dao_dashboard";
+import { useNavigate } from "react-router-dom";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
+  const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<Proposal>({
     executed: false,
     canceled: false,
@@ -34,9 +36,11 @@ export default function VotingBreakdown({ proposalId }: any) {
     proposalURI: "",
   });
   const [id, setId] = useState("");
+  const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
     // voteRef.current = { proposalId: proposal.proposer, support: value };
+    setLoadingStatus(true);
     voteRef.current = { proposalId: id, support: value };
     try {
       const { request } = await simulateContract(config, {
@@ -71,6 +75,8 @@ export default function VotingBreakdown({ proposalId }: any) {
       console.log("====================================");
       toast.error(errorMessage);
     }
+    setLoadingStatus(false);
+    navigate("/dashboard");
   };
 
   // const executeProposal = async (value: number) => {
@@ -175,12 +181,14 @@ export default function VotingBreakdown({ proposalId }: any) {
               </div>
               <div className="flex justify-center">
                 <Button
+                  isLoading={loadingStatus}
                   className="bg-green-400 font-bold mx-4"
                   onClick={() => castVote(true)}
                 >
                   SUPPORT
                 </Button>
                 <Button
+                  isLoading={loadingStatus}
                   className="bg-red-400 font-bold mx-4"
                   onClick={() => castVote(false)}
                 >
