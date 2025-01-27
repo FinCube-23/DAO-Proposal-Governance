@@ -42,6 +42,7 @@ import { toast } from "sonner";
 import { useLazyGetProposalsQuery } from "@redux/services/proposal";
 import Loader from "@components/Loader";
 import OffchainCard from "@components/dao/OffChainCard";
+import OngoingProposalCard from "@components/dao/OngoingProposalCard";
 // import OffchainCard from "@components/dao/OffChainCard";
 
 export interface Proposal {
@@ -91,7 +92,7 @@ export default function DaoDashboard() {
   const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
   const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
-  const [pageNumber, setPageNumber] = useState(0);
+  const [onchainPageNumber, setOnchainPageNumber] = useState(0);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
   const [pageLoading, setPageLoading] = useState(false);
@@ -101,6 +102,7 @@ export default function DaoDashboard() {
   const { isConnected, address } = useAccount();
   const [registerStatus, setRegisterStatus] = useState(false);
   const [proposalsFromBE, setProposalsFromBE] = useState([]);
+  const [offchainPage, setOffchainPage] = useState(1);
 
   const handleRegistrationInput = (e: ChangeEvent<HTMLInputElement>) => {
     const form = e.target;
@@ -263,13 +265,6 @@ export default function DaoDashboard() {
         setProposalsPerPage(filteredProposals.length);
         setProposalsByPage(filteredProposals);
         setPageLoading(false);
-
-        const { data } = await getProposals(page, page + 3);
-
-        setProposalsFromBE(data?.data || []);
-        console.log("====================================");
-        console.log(data?.data);
-        console.log("====================================");
       } catch (e) {
         console.log(e);
       } finally {
@@ -292,12 +287,26 @@ export default function DaoDashboard() {
         console.error(e);
       }
     };
+
+    const getProposalsFromBE = async (page: any) => {
+      const { data } = await getProposals({
+        pageNumber: offchainPage,
+        limit: 3,
+      });
+      console.log(page + 1, page + 3);
+
+      setProposalsFromBE(data?.data || []);
+      console.log("====================================");
+      console.log(data?.data);
+      console.log("====================================");
+    };
     if (isConnected) {
       checkIsMemberApproved();
     }
 
-    getProposalsByPage(pageNumber);
+    getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
+    getProposalsFromBE(offchainPage);
     getOngoingProposalCount();
     getDAOInfo();
     getVersion();
@@ -305,18 +314,17 @@ export default function DaoDashboard() {
     getVotingPeriod();
     checkIsMemberApproved();
     setLoading(false);
-  }, [pageNumber, getProposals, address, isConnected]);
+  }, [onchainPageNumber, getProposals, address, isConnected, offchainPage]);
 
-  const handleNextPage = () => {
+  const handleOnchainNextPage = () => {
     setPageLoading(true);
-    setPageNumber((prevPage) => prevPage + 3);
-    console.log(pageNumber);
+    setOnchainPageNumber((prevPage) => prevPage + 3);
   };
 
-  const handlePrevPage = () => {
-    if (pageNumber > 0) {
+  const handleOnchainPrevPage = () => {
+    if (onchainPageNumber > 0) {
       setPageLoading(true);
-      setPageNumber((prevPage) => prevPage - 3);
+      setOnchainPageNumber((prevPage) => prevPage - 3);
     }
   };
 
@@ -476,7 +484,11 @@ export default function DaoDashboard() {
               </p>
             ) : (
               ongoingProposals.map((proposal, idx) => (
-                <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+                <OngoingProposalCard
+                  key={idx}
+                  proposal={proposal}
+                  proposalId={idx}
+                />
               ))
             )
           ) : proposalsFromBE.length === 0 ? (
@@ -493,24 +505,53 @@ export default function DaoDashboard() {
             ))
           )}
 
-          {!toggle && (
-            <div className="flex justify-center mt-5">
-              <button
-                onClick={handlePrevPage}
-                disabled={pageNumber === 0}
-                className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
-              >
-                <ArrowLeft />
-              </button>
-              <button
-                onClick={handleNextPage}
-                disabled={proposalsPerPage < 3}
-                className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
-              >
-                <ArrowRight />
-              </button>
-            </div>
-          )}
+          <div className="flex justify-center mt-5">
+            {toggle === 0 ? (
+              <>
+                <button
+                  onClick={() => {
+                    if (toggle === 0) handleOnchainPrevPage();
+                  }}
+                  disabled={onchainPageNumber === 0}
+                  className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
+                >
+                  <ArrowLeft />
+                </button>
+                <button
+                  onClick={() => {
+                    if (toggle === 0) handleOnchainNextPage();
+                  }}
+                  disabled={proposalsPerPage < 3}
+                  className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
+                >
+                  <ArrowRight />
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => {
+                    setPageLoading(true);
+                    setOffchainPage((prevPage) => prevPage - 1);
+                  }}
+                  disabled={offchainPage === 1}
+                  className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
+                >
+                  <ArrowLeft />
+                </button>
+                <button
+                  onClick={() => {
+                    setPageLoading(true);
+                    setOffchainPage((nextPage) => nextPage + 1);
+                  }}
+                  disabled={proposalsFromBE.length < 3}
+                  className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
+                >
+                  <ArrowRight />
+                </button>
+              </>
+            )}
+          </div>
         </div>
         <div className="md:col-span-5">
           <Card>

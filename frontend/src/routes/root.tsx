@@ -9,6 +9,7 @@ import Register from "@pages/register";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 import OffchainCardView from "@pages/dao/proposal/OffChainCardView";
+import OngoingProposalView from "@pages/dao/proposal/OngoingProposalView";
 
 export const rootRoutes: RouteObject = {
   path: "/",
@@ -51,6 +52,10 @@ export const rootRoutes: RouteObject = {
           element: <OffchainCardView />,
         },
         {
+          path: "ongoing-proposals/:id",
+          element: <OngoingProposalView />,
+        },
+        {
           path: "dashboard",
           element: <DaoLayout />,
           children: [
@@ -65,6 +70,10 @@ export const rootRoutes: RouteObject = {
             {
               path: "off-chain-proposals/:id",
               element: <OffchainCardView />,
+            },
+            {
+              path: "ongoing-proposals/:id",
+              element: <OngoingProposalView />,
             },
           ],
         },

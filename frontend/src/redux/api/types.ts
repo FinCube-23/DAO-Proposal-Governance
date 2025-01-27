@@ -104,15 +104,10 @@ export type GetDAOResponse = CreateDAOPayload & Response;
 
 // Proposal
 export type CreateProposalPayload = {
-  proposal_onchain_id: number;
   proposal_type: string;
   metadata: string;
   proposer_address: string;
-  proposal_executed_by: string;
-  external_proposal: boolean;
-  proposal_status: string;
   trx_hash: string;
-  trx_status: number;
 };
 
 export type GetOffchainProposalResponse = {

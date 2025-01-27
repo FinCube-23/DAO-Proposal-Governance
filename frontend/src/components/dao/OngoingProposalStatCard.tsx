@@ -21,7 +21,7 @@ const convertToDate = (time: number) => {
   return formattedDate;
 };
 
-export const ProposalStatCard = ({ proposal, proposalId }: any) => {
+export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
   return (
     <Card>
       <CardHeader>

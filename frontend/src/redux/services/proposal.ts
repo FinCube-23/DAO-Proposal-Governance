@@ -10,10 +10,13 @@ import {
 export const proposalApis = api.injectEndpoints({
   endpoints: (build) => ({
     // get proposals
-    getProposals: build.query<GetProposalResponse, void>({
-      query: () => {
+    getProposals: build.query<
+      GetProposalResponse,
+      { pageNumber: number; limit: number }
+    >({
+      query: ({ pageNumber, limit }) => {
         return {
-          url: PROPOSAL_ENDPOINT.BASE,
+          url: `${PROPOSAL_ENDPOINT.BASE}?page=${pageNumber}&limit=${limit}`,
           method: "GET",
         };
       },

@@ -11,6 +11,7 @@ import {
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import MFSSidebar from "@components/mfs/MFSSidebar";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
@@ -29,6 +30,7 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider theme={darkTheme()}>
               <Header />
+              {/* <MFSSidebar /> */}
               <Outlet />
               <Toaster richColors />
             </RainbowKitProvider>

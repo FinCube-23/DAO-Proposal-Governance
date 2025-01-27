@@ -18,9 +18,11 @@ import {
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
 import { Proposal } from "@pages/dao_dashboard";
+import { useNavigate } from "react-router-dom";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
+  const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<Proposal>({
     executed: false,
     canceled: false,
@@ -33,15 +35,19 @@ export default function VotingBreakdown({ proposalId }: any) {
     novotes: 0,
     proposalURI: "",
   });
+  const [id, setId] = useState("");
+  const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
-    voteRef.current = { proposalId: proposal.proposer, support: value };
+    // voteRef.current = { proposalId: proposal.proposer, support: value };
+    setLoadingStatus(true);
+    voteRef.current = { proposalId: id, support: value };
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "castVote",
-        args: [voteRef.current.proposalId, voteRef.current.support],
+        args: [Number(voteRef.current.proposalId), voteRef.current.support],
       });
       const hash = await writeContract(config, request);
 
@@ -69,7 +75,41 @@ export default function VotingBreakdown({ proposalId }: any) {
       console.log("====================================");
       toast.error(errorMessage);
     }
+    setLoadingStatus(false);
+    navigate("/dashboard");
   };
+
+  // const executeProposal = async (value: number) => {
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI,
+  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+  //       functionName: "executeProposal",
+  //       args: [value],
+  //     });
+  //     const hash = await writeContract(config, request);
+
+  //     await waitForTransactionReceipt(config, { hash });
+
+  //     toast.success("Proposal executed successfully");
+  //     console.log(voteRef.current);
+  //   } catch (e: any) {
+  //     let errorMessage = e.message;
+
+  //     if (errorMessage.includes("reverted with the following reason:")) {
+  //       const match = errorMessage.match(
+  //         /reverted with the following reason:\s*(.*)/
+  //       );
+  //       if (match) {
+  //         errorMessage = match[1];
+  //       }
+  //     }
+  //     console.log("====================================");
+  //     console.log(e);
+  //     console.log("====================================");
+  //     toast.error(errorMessage);
+  //   }
+  // };
 
   useEffect(() => {
     const getProposal = async () => {
@@ -102,7 +142,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <div>
             <span className="text-primary font-bold">
               {proposal.yesvotes.toString()}
-            </span>{" "}
+            </span>
             of {(proposal.yesvotes + proposal.novotes).toString()} Members
           </div>
         )}
@@ -115,6 +155,9 @@ export default function VotingBreakdown({ proposalId }: any) {
         />
       )}
       <div className="flex justify-end">
+        {/* {Date.now() / 1000 > proposal.voteDuration && (
+          <Button className="bg-red-400 font-bold">Execute</Button>
+        )} */}
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-green-400 font-bold">Vote</Button>
@@ -125,19 +168,33 @@ export default function VotingBreakdown({ proposalId }: any) {
                 Cast your vote?
               </DialogTitle>
             </DialogHeader>
-            <div className="flex justify-center mt-4">
-              <Button
-                className="bg-green-400 font-bold mx-4"
-                onClick={() => castVote(true)}
-              >
-                SUPPORT
-              </Button>
-              <Button
-                className="bg-red-400 font-bold mx-4"
-                onClick={() => castVote(false)}
-              >
-                AGAINST
-              </Button>
+            <div className="mt-4">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <p className="font-bold">Proposal ID: </p>
+                <input
+                  type="text"
+                  placeholder="Enter Proposal ID"
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  className="px-4 py-1 border bg-black rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="flex justify-center">
+                <Button
+                  isLoading={loadingStatus}
+                  className="bg-green-400 font-bold mx-4"
+                  onClick={() => castVote(true)}
+                >
+                  SUPPORT
+                </Button>
+                <Button
+                  isLoading={loadingStatus}
+                  className="bg-red-400 font-bold mx-4"
+                  onClick={() => castVote(false)}
+                >
+                  AGAINST
+                </Button>
+              </div>
             </div>
           </DialogContent>
         </Dialog>
