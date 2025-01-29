@@ -114,6 +114,7 @@ export default function DaoDashboard() {
   const { isConnected, address } = useAccount();
   const [proposalsFromBE, setProposalsFromBE] = useState([]);
   const [offchainPage, setOffchainPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const getVotingPeriod = async () => {
     try {
@@ -192,22 +193,6 @@ export default function DaoDashboard() {
     }
   };
 
-  const getProposalById = async () => {
-    try {
-      const response: any = await readContract(config, {
-        abi: contractABI,
-        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "proposals",
-        args: [2],
-      });
-
-      console.log(response);
-      setProposalById(response as Proposal);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
   useEffect(() => {
     const getDAOInfo = async () => {
       try {
@@ -274,8 +259,10 @@ export default function DaoDashboard() {
       console.log(page + 1, page + 5);
 
       setProposalsFromBE(data?.data || []);
+      setTotalPages(Math.ceil(data?.total / data?.limit));
+
       console.log("====================================");
-      console.log(data?.data);
+      console.log("Proposal 0:", data);
       console.log("====================================");
     };
     if (isConnected) {
@@ -291,7 +278,6 @@ export default function DaoDashboard() {
     getVotingDelay();
     getVotingPeriod();
     checkIsMemberApproved();
-    getProposalById();
     setLoading(false);
   }, [onchainPageNumber, getProposals, address, isConnected, offchainPage]);
 
@@ -535,30 +521,60 @@ export default function DaoDashboard() {
           {toggle === 0 ? (
             <PaginationContent>
               <PaginationItem>
-                <PaginationPrevious onClick={handleOnchainPrevPage} />
+                <PaginationPrevious
+                  onClick={handleOnchainPrevPage}
+                  className={`${
+                    onchainPageNumber === 0 && "pointer-events-none opacity-50"
+                  }`}
+                />
               </PaginationItem>
               <PaginationItem>
-                <PaginationNext onClick={handleOnchainNextPage} />
+                <PaginationNext
+                  onClick={handleOnchainNextPage}
+                  className={`${
+                    proposalsPerPage < 5 && "pointer-events-none opacity-50"
+                  }`}
+                />
               </PaginationItem>
             </PaginationContent>
           ) : toggle === 2 ? (
             <PaginationContent>
               <PaginationItem>
                 <PaginationPrevious
+                  className={`${
+                    offchainPage === 1 && "pointer-events-none opacity-50"
+                  }`}
                   onClick={() => {
                     setPageLoading(true);
-                    setOffchainPage((prevPage) => prevPage - 1);
+                    setOffchainPage((prev) => Math.max(1, prev - 1));
                   }}
                 />
               </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-              </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (pageNum) => (
+                  <PaginationItem key={pageNum}>
+                    <PaginationLink
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPageLoading(true);
+                        setOffchainPage(pageNum);
+                      }}
+                      isActive={offchainPage === pageNum}
+                    >
+                      {pageNum}
+                    </PaginationLink>
+                  </PaginationItem>
+                )
+              )}
               <PaginationItem>
                 <PaginationNext
+                  className={`${
+                    offchainPage === totalPages &&
+                    "pointer-events-none opacity-50"
+                  }`}
                   onClick={() => {
                     setPageLoading(true);
-                    setOffchainPage((nextPage) => nextPage + 1);
+                    setOffchainPage((prev) => Math.min(totalPages, prev + 1));
                   }}
                 />
               </PaginationItem>

@@ -140,14 +140,16 @@ export default function MfsDashboard() {
       </div>
       <div className="flex justify-end relative">
         <div className="absolute top-8 right-8 flex items-center gap-2">
-          {!isMemberApproved ? (
+          {address && !isMemberApproved ? (
             <div className="font-bold text-sm">
               Membership Status: <Badge variant="warning">Pending</Badge>
             </div>
-          ) : (
+          ) : address && isMemberApproved ? (
             <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
               Approved
             </p>
+          ) : (
+            <></>
           )}
           <ConnectButton />
         </div>

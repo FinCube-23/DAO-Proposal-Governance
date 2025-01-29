@@ -208,55 +208,55 @@ export default function VotingBreakdown({ proposalId }: any) {
         />
       )}
       <div className="flex justify-end">
-        {Date.now() / 1000 > proposal.voteDuration && address === owner ? (
+        {/* {Date.now() / 1000 > proposal.voteDuration && address === owner ? (
           <div className="flex gap-2">
             <Button className="bg-green-400 font-bold">Execute</Button>
             <Button className="bg-red-400 font-bold">Cancel</Button>
           </div>
-        ) : Date.now() / 1000 < proposal.voteDuration ? (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button className="bg-green-400 font-bold">Vote</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle className="text-center text-orange-400">
-                  Cast your vote?
-                </DialogTitle>
-              </DialogHeader>
-              <div className="mt-4">
-                <div className="flex justify-center items-center gap-2 mb-4">
-                  <p className="font-bold">Proposal ID: </p>
-                  <input
-                    type="text"
-                    placeholder="Enter Proposal ID"
-                    value={id}
-                    onChange={(e) => setId(e.target.value)}
-                    className="px-4 py-1 border bg-black rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div className="flex justify-center">
-                  <Button
-                    isLoading={loadingStatus}
-                    className="bg-green-400 font-bold mx-4"
-                    onClick={() => castVote(true)}
-                  >
-                    SUPPORT
-                  </Button>
-                  <Button
-                    isLoading={loadingStatus}
-                    className="bg-red-400 font-bold mx-4"
-                    onClick={() => castVote(false)}
-                  >
-                    AGAINST
-                  </Button>
-                </div>
+        ) : Date.now() / 1000 < proposal.voteDuration ? ( */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button className="bg-green-400 font-bold">Vote</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="text-center text-orange-400">
+                Cast your vote?
+              </DialogTitle>
+            </DialogHeader>
+            <div className="mt-4">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <p className="font-bold">Proposal ID: </p>
+                <input
+                  type="text"
+                  placeholder="Enter Proposal ID"
+                  value={id}
+                  onChange={(e) => setId(e.target.value)}
+                  className="px-4 py-1 border bg-black rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
               </div>
-            </DialogContent>
-          </Dialog>
-        ) : (
+              <div className="flex justify-center">
+                <Button
+                  isLoading={loadingStatus}
+                  className="bg-green-400 font-bold mx-4"
+                  onClick={() => castVote(true)}
+                >
+                  SUPPORT
+                </Button>
+                <Button
+                  isLoading={loadingStatus}
+                  className="bg-red-400 font-bold mx-4"
+                  onClick={() => castVote(false)}
+                >
+                  AGAINST
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+        {/* ) : (
           <Badge variant="outline">Wating for execution</Badge>
-        )}
+        )} */}
       </div>
     </div>
   );
