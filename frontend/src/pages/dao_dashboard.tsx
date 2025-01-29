@@ -525,7 +525,7 @@ export default function DaoDashboard() {
                   onClick={handleOnchainPrevPage}
                   className={`${
                     onchainPageNumber === 0 && "pointer-events-none opacity-50"
-                  }`}
+                  } cursor-pointer`}
                 />
               </PaginationItem>
               <PaginationItem>
@@ -533,7 +533,7 @@ export default function DaoDashboard() {
                   onClick={handleOnchainNextPage}
                   className={`${
                     proposalsPerPage < 5 && "pointer-events-none opacity-50"
-                  }`}
+                  } cursor-pointer`}
                 />
               </PaginationItem>
             </PaginationContent>
@@ -543,7 +543,7 @@ export default function DaoDashboard() {
                 <PaginationPrevious
                   className={`${
                     offchainPage === 1 && "pointer-events-none opacity-50"
-                  }`}
+                  } cursor-pointer`}
                   onClick={() => {
                     setPageLoading(true);
                     setOffchainPage((prev) => Math.max(1, prev - 1));
@@ -554,6 +554,7 @@ export default function DaoDashboard() {
                 (pageNum) => (
                   <PaginationItem key={pageNum}>
                     <PaginationLink
+                      className="cursor-pointer"
                       onClick={(e) => {
                         e.preventDefault();
                         setPageLoading(true);
@@ -571,7 +572,7 @@ export default function DaoDashboard() {
                   className={`${
                     offchainPage === totalPages &&
                     "pointer-events-none opacity-50"
-                  }`}
+                  } cursor-pointer`}
                   onClick={() => {
                     setPageLoading(true);
                     setOffchainPage((prev) => Math.min(totalPages, prev + 1));
