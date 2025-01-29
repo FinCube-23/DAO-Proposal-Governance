@@ -207,30 +207,29 @@ const GeneralProposal = () => {
             </h1>
             <div className="border-2 border-gray-600 p-5 rounded-xl shadow-2xl mt-10">
               <div className="data space-y-3">
-                <p className=" text-blue-500 font-bold italic">
+                <p className="text-blue-500 font-bold italic">
                   Targets:{" "}
                   <span className="text-white">
                     0xAbc123...0001, 0xDef456...0002 etc.
                   </span>
                 </p>
-                <p className="text-green-500 font-bold italic group relative hover:cursor-auto flex items-center">
-                  <div className="mr-1 text-white">
-                    <Info size={15}></Info>
+                <div className="text-green-500 font-bold italic flex items-center">
+                  <div className="group relative mr-1">
+                    <Info size={15} className="text-white cursor-pointer" />
+                    <span className="pointer-events-none absolute -bottom-2 left-1/2 w-[200px] -translate-x-1/2 translate-y-full text-sm text-white bg-black p-2 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      Values in wei, that should be sent with the transaction.
+                      In our case, this will be 0 as all of our voters are
+                      equal. If required, Ether can be deposited before-end or
+                      passed along when executing the transaction.
+                    </span>
                   </div>
-                  Values: <span className="text-white">0</span>
-                  <span className="tooltip-text absolute text-sm text-white bg-black p-2 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-1/2 left-0 transform translate-x-5 text-justify">
-                    Values in wei, that should be sent with the transaction. In
-                    our case, this will be 0 as all of our voters are equal. If
-                    required, Ether can be deposited before-end or passed along
-                    when executing the transaction.
-                  </span>
-                </p>
-
-                <p className=" text-yellow-500 font-mono italic">
+                  Values: <span className="text-white ml-1">0</span>
+                </div>
+                <p className="text-yellow-500 font-mono italic">
                   Calldata:{" "}
                   <span className="text-white">0xe0a8f6f5000...0001</span>
                 </p>
-                <p className="text-gray-400 italic  font-bold">
+                <p className="text-gray-400 italic font-bold">
                   <span className="text-purple-400">Description:</span>{" "}
                   Explaining the reason behind placing your proposal
                 </p>
