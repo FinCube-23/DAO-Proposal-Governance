@@ -2,7 +2,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Button } from "@components/ui/button";
 import { Dialog, DialogContent, DialogFooter } from "@components/ui/dialog";
 import { Building2, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 interface Props {
   isOpen: boolean;

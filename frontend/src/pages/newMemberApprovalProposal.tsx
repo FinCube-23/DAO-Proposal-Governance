@@ -7,7 +7,7 @@ import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -55,7 +55,7 @@ const NewMemberApprovalProposal = () => {
       console.log("Backend response:", response);
 
       toast.warning("Your proposal has been placed and is under review.");
-      navigate("/dashboard");
+      navigate("/mfs/dao/fincube");
     } catch (e: any) {
       let errorMessage = e.message;
 

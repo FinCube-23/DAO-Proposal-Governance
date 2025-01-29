@@ -8,7 +8,7 @@ import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
 import { Card } from "@components/ui/card";
 import { Info } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -92,7 +92,7 @@ const GeneralProposal = () => {
     <div className="mt-20">
       <Card className="pt-5 pb-10 mx-60 shadow-2xl">
         <Button
-          onClick={() => navigate("/dashboard")}
+          onClick={() => navigate("/mfs/dao/fincube")}
           className="mx-10 font-bold bg-green-400 hover:bg-green-600 text-white"
         >
           Go Back

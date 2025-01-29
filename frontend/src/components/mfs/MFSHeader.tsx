@@ -1,5 +1,5 @@
 import { Button } from "@components/ui/button";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import {
   Card,
   CardHeader,
@@ -32,7 +32,6 @@ import {
 import { clearAuthState } from "@redux/slices/auth";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
-import ProfileDialog from "./ProfileDialog";
 import { useDisconnect } from "wagmi";
 
 export default function MFSHeader() {

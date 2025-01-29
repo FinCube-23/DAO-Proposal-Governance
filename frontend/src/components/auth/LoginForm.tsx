@@ -14,7 +14,7 @@ import { setProfile, setTokens } from "@redux/slices/auth";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -73,7 +73,7 @@ export default function LoginForm() {
             console.log("Fetch me success", myData);
             dispatch(setProfile(myData));
             if(myData?.role === "mfs") {
-                navigate("/mfs");
+                navigate("/mfs/dashboard");
             }
         }
     }, [isFetchMeSuccess]);

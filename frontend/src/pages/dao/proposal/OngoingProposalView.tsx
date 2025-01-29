@@ -3,7 +3,7 @@ import { readContract } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import { useEffect, useState } from "react";
 import { Proposal } from "@pages/dao_dashboard";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import OngoingProposalCard from "@components/dao/OngoingProposalCard";
 import { OngoingProposalStatCard } from "@components/dao/OngoingProposalStatCard";
 

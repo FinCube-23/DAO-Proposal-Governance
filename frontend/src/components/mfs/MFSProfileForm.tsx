@@ -25,7 +25,7 @@ import { useCreateMFSMutation } from "@redux/services/mfs";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
 import { useEffect } from "react";
 import { useToast } from "@components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const FormSchema = z.object({
     name: z.string().min(1, { message: "MFS Name is required" }),

@@ -1,4 +1,4 @@
-import { RouteObject } from "react-router-dom";
+import { RouteObject } from "react-router";
 import RootLayout from "@layouts/RootLayout";
 import Welcome from "@pages/welcome";
 import DaoDashboard from "@pages/dao_dashboard";
@@ -20,7 +20,7 @@ export const rootRoutes: RouteObject = {
       element: <Welcome />,
     },
     {
-      path: "general-proposal",
+      path: "mfs/dao/fincube/general-proposal",
       element: <GeneralProposal></GeneralProposal>,
     },
     {

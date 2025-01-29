@@ -13,7 +13,7 @@ import { Label } from "@components/ui/label";
 
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import { ChevronsLeft } from "lucide-react";
 export default function Profile() {
     const auth = useSelector(
@@ -56,7 +56,7 @@ export default function Profile() {
                 </div>
             </CardContent>
             <CardFooter className="flex justify-end">
-                <Button onClick={() => navigate("/mfs")}>
+                <Button onClick={() => navigate("/mfs/dashboard")}>
                     <ChevronsLeft />
                     Back to Dashboard
                 </Button>

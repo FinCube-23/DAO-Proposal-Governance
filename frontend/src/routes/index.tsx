@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter } from "react-router";
 import { rootRoutes } from "@/routes/root";
 import { mfsRoutes } from "@routes/mfs";
 import { adminRoutes } from "@routes/admin";

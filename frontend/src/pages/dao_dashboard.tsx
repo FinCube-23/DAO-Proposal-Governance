@@ -34,7 +34,7 @@ import {
   writeContract,
 } from "@wagmi/core";
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "@layouts/RootLayout";
@@ -414,13 +414,13 @@ export default function DaoDashboard() {
                   </DialogHeader>
                   <div className="flex flex-col items-center">
                     <Button
-                      onClick={() => navigate("/general-proposal")}
+                      onClick={() => navigate("/mfs/dao/fincube/general-proposal")}
                       className="my-2 w-60 hover:bg-green-400"
                     >
                       General Proposal
                     </Button>
                     <Button
-                      onClick={() => navigate("/approval-proposal")}
+                      onClick={() => navigate("/mfs/dao/fincube/approval-proposal")}
                       className="my-2 w-60 hover:bg-orange-400"
                     >
                       New Member Approval Proposal

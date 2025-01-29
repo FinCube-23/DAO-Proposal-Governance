@@ -1,6 +1,6 @@
 import MFSHeader from "@components/mfs/MFSHeader";
 import MFSSidebar from "@components/mfs/MFSSidebar";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 
 export default function MFSPrivateLayout() {
     return (

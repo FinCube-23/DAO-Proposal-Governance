@@ -18,7 +18,7 @@ import {
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
 import { Proposal } from "@pages/dao_dashboard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
@@ -76,7 +76,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
-    navigate("/dashboard");
+    navigate("/mfs/dao/fincube");
   };
 
   // const executeProposal = async (value: number) => {

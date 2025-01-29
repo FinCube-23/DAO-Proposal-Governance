@@ -21,7 +21,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const formSchema = z.object({
     name: z.string().min(3, { message: "Name is too short" }),
