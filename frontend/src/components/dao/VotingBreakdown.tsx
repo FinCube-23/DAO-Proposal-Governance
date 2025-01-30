@@ -18,7 +18,9 @@ import {
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
 import { Proposal } from "@pages/dao_dashboard";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
+import { Badge } from "@components/ui/badge";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
@@ -37,6 +39,8 @@ export default function VotingBreakdown({ proposalId }: any) {
   });
   const [id, setId] = useState("");
   const navigate = useNavigate();
+  const [owner, setOwner] = useState("");
+  const { address } = useAccount();
 
   const castVote = async (value: boolean) => {
     // voteRef.current = { proposalId: proposal.proposer, support: value };
@@ -111,6 +115,38 @@ export default function VotingBreakdown({ proposalId }: any) {
   //   }
   // };
 
+  // const cancelProposal = async (value: number) => {
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI,
+  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+  //       functionName: "cancelProposal",
+  //       args: [value],
+  //     });
+  //     const hash = await writeContract(config, request);
+
+  //     await waitForTransactionReceipt(config, { hash });
+
+  //     toast.success("Proposal cancelled");
+  //     console.log(voteRef.current);
+  //   } catch (e: any) {
+  //     let errorMessage = e.message;
+
+  //     if (errorMessage.includes("reverted with the following reason:")) {
+  //       const match = errorMessage.match(
+  //         /reverted with the following reason:\s*(.*)/
+  //       );
+  //       if (match) {
+  //         errorMessage = match[1];
+  //       }
+  //     }
+  //     console.log("====================================");
+  //     console.log(e);
+  //     console.log("====================================");
+  //     toast.error(errorMessage);
+  //   }
+  // };
+
   useEffect(() => {
     const getProposal = async () => {
       try {
@@ -131,7 +167,24 @@ export default function VotingBreakdown({ proposalId }: any) {
       }
     };
 
+    const getOwner = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "owner",
+        });
+
+        setOwner(response as string);
+        console.log(response as string);
+      } catch (e) {
+        alert("Failer to fetch owner address");
+        console.error("Failed to fetch owner address:", e);
+      }
+    };
+
     getProposal();
+    getOwner();
   }, [proposalId]);
 
   return (
@@ -141,7 +194,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         {proposal && (
           <div>
             <span className="text-primary font-bold">
-              {proposal.yesvotes.toString()}
+              {proposal.yesvotes.toString()}{" "}
             </span>
             of {(proposal.yesvotes + proposal.novotes).toString()} Members
           </div>
@@ -155,9 +208,12 @@ export default function VotingBreakdown({ proposalId }: any) {
         />
       )}
       <div className="flex justify-end">
-        {/* {Date.now() / 1000 > proposal.voteDuration && (
-          <Button className="bg-red-400 font-bold">Execute</Button>
-        )} */}
+        {/* {Date.now() / 1000 > proposal.voteDuration && address === owner ? (
+          <div className="flex gap-2">
+            <Button className="bg-green-400 font-bold">Execute</Button>
+            <Button className="bg-red-400 font-bold">Cancel</Button>
+          </div>
+        ) : Date.now() / 1000 < proposal.voteDuration ? ( */}
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-green-400 font-bold">Vote</Button>
@@ -198,6 +254,9 @@ export default function VotingBreakdown({ proposalId }: any) {
             </div>
           </DialogContent>
         </Dialog>
+        {/* ) : (
+          <Badge variant="outline">Wating for execution</Badge>
+        )} */}
       </div>
     </div>
   );

@@ -24,6 +24,7 @@ import {
 import { readContract } from "@wagmi/core";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Badge } from "@components/ui/badge";
 
 export default function MfsDashboard() {
   const { address, isConnected } = useAccount();
@@ -138,15 +139,17 @@ export default function MfsDashboard() {
         </Card>
       </div>
       <div className="flex justify-end relative">
-        <div className="absolute top-8 right-8 flex items-center">
-          {!isMemberApproved ? (
-            <p className="mr-2 border-2 border-red-600 font-bold p-2 rounded-2xl text-xs">
-              Not approved
-            </p>
-          ) : (
+        <div className="absolute top-8 right-8 flex items-center gap-2">
+          {address && !isMemberApproved ? (
+            <div className="font-bold text-sm">
+              Membership Status: <Badge variant="warning">Pending</Badge>
+            </div>
+          ) : address && isMemberApproved ? (
             <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
               Approved
             </p>
+          ) : (
+            <></>
           )}
           <ConnectButton />
         </div>

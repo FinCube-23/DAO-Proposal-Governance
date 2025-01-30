@@ -16,9 +16,16 @@ const convertStatusToVariant = (status: boolean) => {
 
 const convertToDate = (time: number) => {
   const date = new Date(time * 1000);
-  const formattedDate = date.toLocaleString();
+  const formattedDate = date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
 
-  return formattedDate;
+  return formattedDate.replace(",", " at");
 };
 
 export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
@@ -29,7 +36,7 @@ export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
           <CardTitle className="text-xl">Proposal Status</CardTitle>
           <div>
             <p className="font-bold">
-              Vote Started At:{" "}
+              Vote Started On:
               <span className="text-blue-400">
                 {convertToDate(proposal.voteStart)}
               </span>

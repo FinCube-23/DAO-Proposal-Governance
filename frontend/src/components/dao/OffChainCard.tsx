@@ -16,7 +16,7 @@ export default function OffchainCard({ proposal, proposalId }: any) {
     >
       <CardHeader>
         <div className="flex justify-between mb-2">
-          <Badge className="border-2 border-purple-400">Off-chain</Badge>
+          <Badge variant="secondary">Off-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.proposal_status)}>
             <p className="capitalize">
               {proposal.proposal_status !== "pending" ? "Confirmed" : "Pending"}
@@ -35,7 +35,9 @@ export default function OffchainCard({ proposal, proposalId }: any) {
           <div className="text-muted-foreground">Published by</div>
           <a
             target="_"
-            href={`https://amoy.polygonscan.com/address/${proposal.proposer_address}`}
+            href={`${import.meta.env.VITE_ADDRESS_EXPLORER}${
+              proposal.proposer_address
+            }`}
             className="text-green-500 hover:underline cursor-pointer"
           >
             <p className="overflow-tranc">{proposal.proposer_address}</p>

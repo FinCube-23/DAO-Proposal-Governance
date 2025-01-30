@@ -1,5 +1,6 @@
 import { Badge } from "@components/ui/badge";
 import { Card, CardHeader, CardFooter } from "@components/ui/card";
+import { Loader } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
@@ -50,7 +51,7 @@ export default function OngoingProposalCard({ proposal, proposalId }: any) {
     >
       <CardHeader>
         <div className="flex justify-between mb-2">
-          <Badge className="border-2 border-blue-400">On-chain</Badge>
+          <Badge variant="secondary">On-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.executed)}>
             <p className="capitalize">
               {proposal.executed ? "Confirmed" : "Pending"}
@@ -58,20 +59,25 @@ export default function OngoingProposalCard({ proposal, proposalId }: any) {
           </Badge>
         </div>
         <div className="flex gap-3 justify-end">
-          <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-1 text-xs">
-            {votingStatus}
-          </div>
-
-          {votingStatus !== "Voting has ended" && (
-            <div className="flex gap-1 border-2 border-blue-600 rounded-xl font-bold px-2 py-1 text-xs">
-              Time Left: {formatTime(timeLeft)}
+          {votingStatus !== "Voting not started" ? (
+            <div className="flex gap-3 justify-end">
+              <Badge variant="outline">{votingStatus}</Badge>
+              {votingStatus !== "Voting has ended" && (
+                <>
+                  <Badge variant="outline">{formatTime(timeLeft)}</Badge>
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="flex gap-3 justify-end">
+              <Loader className="animate-spin"></Loader>
             </div>
           )}
         </div>
         <div className="font-bold text-2xl">{proposal.proposalURI}</div>
         <a
           target="_"
-          href={`https://amoy.polygonscan.com/address/${proposal.data}`}
+          href={`${import.meta.env.VITE_ADDRESS_EXPLORER}${proposal.data}`}
           className="text-muted-foreground hover:underline"
         >
           {proposal.data.slice(0, 42)}
@@ -82,7 +88,9 @@ export default function OngoingProposalCard({ proposal, proposalId }: any) {
           <div className="text-muted-foreground">Published by</div>
           <a
             target="_"
-            href={`https://amoy.polygonscan.com/address/${proposal.proposer}`}
+            href={`${import.meta.env.VITE_ADDRESS_EXPLORER}${
+              proposal.proposer
+            }`}
             className="text-green-500 hover:underline cursor-pointer"
           >
             <p className="overflow-tranc">{proposal.proposer}</p>
