@@ -20,11 +20,27 @@ export default function VotingInfo({ proposal }: any) {
           </div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Created At</div>
-            <div className="flex items-center gap-1">{proposal.created_at}</div>
+            <div className="flex items-center gap-1">
+              {new Date(proposal.created_at).toLocaleString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
           </div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Updated At</div>
-            <div>{proposal.updated_at}</div>
+            <div className="flex items-center gap-1">
+              {new Date(proposal.updated_at).toLocaleString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -70,7 +86,7 @@ export default function VotingInfo({ proposal }: any) {
             <div className="text-muted-foreground">Transaction Hash</div>
             <a
               target="_"
-              href={`https://amoy.polygonscan.com/tx/${proposal.trx_hash}`}
+              href={`${import.meta.env.VITE_TRX_EXPLORER}${proposal.trx_hash}`}
               className="text-green-600 hover:underline"
             >
               {proposal.trx_hash && (
