@@ -9,7 +9,7 @@ import {
 } from "@components/ui/card";
 import VotingInfo from "./VotingInfo";
 
-export const OffchainStatCard = ({ proposal, proposalId }: any) => {
+export const OffchainStatCard = ({ proposal }: any) => {
   const convertStatusToVariant = (status: string) => {
     return status != "pending" ? "success" : "warning";
   };

@@ -15,7 +15,7 @@ export default function OffchainCardView() {
         const response = await getProposal(Number(id));
         console.log("====================================");
         console.log(response.data);
-        setProposal(response.data);
+        setProposal(response.data as any);
         console.log("====================================");
       } catch (e) {
         alert("Failer to fetch proposal information");

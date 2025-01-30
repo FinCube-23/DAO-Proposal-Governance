@@ -18,9 +18,7 @@ import {
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
 import { Proposal } from "@pages/dao_dashboard";
-import { useNavigate } from "react-router-dom";
-import { useAccount } from "wagmi";
-import { Badge } from "@components/ui/badge";
+import { useNavigate } from "react-router";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
@@ -39,8 +37,7 @@ export default function VotingBreakdown({ proposalId }: any) {
   });
   const [id, setId] = useState("");
   const navigate = useNavigate();
-  const [owner, setOwner] = useState("");
-  const { address } = useAccount();
+  const [_, setOwner] = useState("");
 
   const castVote = async (value: boolean) => {
     // voteRef.current = { proposalId: proposal.proposer, support: value };

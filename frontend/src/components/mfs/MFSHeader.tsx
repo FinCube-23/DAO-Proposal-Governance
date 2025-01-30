@@ -31,13 +31,10 @@ import {
 } from "lucide-react";
 import { clearAuthState } from "@redux/slices/auth";
 import { useDispatch } from "react-redux";
-import { useState } from "react";
 import { useDisconnect } from "wagmi";
 
 export default function MFSHeader() {
   const dispatch = useDispatch();
-  const [isProfileDialogOpen, setIsProfileDialogOpen] =
-    useState<boolean>(false);
   const { disconnect } = useDisconnect();
 
   const handleLogout = () => {

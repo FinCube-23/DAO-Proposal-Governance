@@ -18,7 +18,7 @@ import { useAccount } from "wagmi";
 import { useDispatch } from "react-redux";
 import { setMfsBusiness } from "@redux/slices/auth";
 import { MFSBusiness } from "@redux/api/types";
-import { CircleChevronUp, Send } from "lucide-react";
+import { CircleChevronUp } from "lucide-react";
 
 const formSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),

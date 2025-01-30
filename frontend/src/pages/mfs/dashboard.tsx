@@ -102,7 +102,7 @@ export default function MfsDashboard() {
   }, [getProposalCount, getProposalThreshold, getBalance, address]);
 
   const auth = useSelector(
-    (state: RootState) => state.persistedReducer.authReducer.auth
+    (state: RootState) => state.persistedReducer.authReducer
   );
 
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function MfsDashboard() {
         <Card className="w-64 absolute -top-8 left-8">
           <CardHeader>
             <CardTitle className="text-2xl">Welcome,</CardTitle>
-            <CardDescription>{auth?.mfs?.name}</CardDescription>
+            <CardDescription>{auth?.profile?.mfsBusiness?.name}</CardDescription>
           </CardHeader>
         </Card>
       </div>

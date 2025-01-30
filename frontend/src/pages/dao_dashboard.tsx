@@ -14,8 +14,6 @@ import {
   Vote,
   WalletCards,
   History,
-  ArrowLeft,
-  ArrowRight,
   Info,
 } from "lucide-react";
 import {
@@ -39,7 +37,6 @@ import { Badge } from "@components/ui/badge";
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -71,10 +68,6 @@ interface DaoInfo {
 }
 
 export default function DaoDashboard() {
-  const [registrationData, setRegistrationData] = useState({
-    _newMember: "",
-    _memberURI: "",
-  });
   const [proposalsByPage, setProposalsByPage] = useState<Proposal[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
@@ -88,18 +81,7 @@ export default function DaoDashboard() {
     governanceURI: "",
     contractsURI: "",
   });
-  const [proposalById, setProposalById] = useState<Proposal>({
-    executed: false,
-    canceled: false,
-    proposer: "",
-    data: "",
-    target: "",
-    voteStart: 0,
-    voteDuration: 0,
-    yesvotes: 0,
-    novotes: 0,
-    proposalURI: "",
-  });
+  
   const [ongoingProposalCount, setOngoingProposalCount] = useState("");
   const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
   const [toggle, setToggle] = useState(0);
@@ -110,7 +92,7 @@ export default function DaoDashboard() {
   const [pageLoading, setPageLoading] = useState(false);
   const [proposalsPerPage, setProposalsPerPage] = useState(0);
   const [getProposals] = useLazyGetProposalsQuery();
-  const [isMemberApproved, setIsMemberApproved] = useState(false);
+  const [_, setIsMemberApproved] = useState(false);
   const { isConnected, address } = useAccount();
   const [proposalsFromBE, setProposalsFromBE] = useState([]);
   const [offchainPage, setOffchainPage] = useState(1);
@@ -255,7 +237,7 @@ export default function DaoDashboard() {
       const { data } = await getProposals({
         pageNumber: offchainPage,
         limit: 5,
-      });
+      }) as any;
       console.log(page + 1, page + 5);
 
       setProposalsFromBE(data?.data || []);
@@ -460,7 +442,7 @@ export default function DaoDashboard() {
             No proposals found on the Backend
           </p>
         ) : (
-          proposalsFromBE.map((proposal, idx) => (
+          proposalsFromBE.map((proposal: any, idx) => (
             <OffchainCard
               key={idx}
               proposal={proposal}

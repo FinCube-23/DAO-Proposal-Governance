@@ -167,7 +167,6 @@ const GeneralProposal = () => {
               <textarea
                 required
                 className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
-                type="text"
                 value={description}
                 onChange={handleDescriptionChange}
                 placeholder="Enter proposal description"

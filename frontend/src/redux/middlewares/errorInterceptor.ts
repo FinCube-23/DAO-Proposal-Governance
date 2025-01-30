@@ -6,7 +6,7 @@ import {
 } from "@reduxjs/toolkit";
 
 export const rtkQueryErrorLogger: Middleware =
-    (api: MiddlewareAPI) => (next) => (action: any) => {
+    (_: MiddlewareAPI) => (next) => (action: any) => {
         // RTK Query uses `createAsyncThunk` from redux-toolkit under the hood, so we're able to utilize these matchers!
         if (isRejectedWithValue(action)) {
             console.log("BACKEND ERROR", action?.payload);

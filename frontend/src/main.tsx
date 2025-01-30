@@ -19,7 +19,6 @@ import OngoingProposalView from "@pages/dao/proposal/OngoingProposalView";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
-import Profile from "@pages/mfs/profile";
 
 import "@rainbow-me/rainbowkit/styles.css";
 import { polygonAmoy } from "wagmi/chains";
@@ -72,10 +71,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                                         <Route
                                             path="dashboard"
                                             element={<MfsDashboard />}
-                                        />
-                                        <Route
-                                            path="profile"
-                                            element={<Profile />}
                                         />
                                         <Route path="dao">
                                             <Route path="fincube">

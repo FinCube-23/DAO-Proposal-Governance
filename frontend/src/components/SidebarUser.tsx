@@ -1,5 +1,3 @@
-"use client";
-
 import { BadgeCheck, Bell, LogOut, Sparkles } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
@@ -20,8 +18,7 @@ import {
 } from "@components/ui/sidebar";
 import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons";
 import { useDisconnect } from "wagmi";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@redux/store";
+import { useDispatch } from "react-redux";
 import { clearAuthState } from "@redux/slices/auth";
 
 interface Props {
@@ -32,9 +29,6 @@ interface Props {
 
 export default function SidebarUser({ name, email, avatar }: Props) {
     const { isMobile } = useSidebar();
-    const authStore = useSelector(
-        (state: RootState) => state.persistedReducer.authReducer
-    );
     const { disconnect } = useDisconnect();
     const dispatch = useDispatch();
 

@@ -91,7 +91,7 @@ ${colorConfig
 }
 `
         ),
-      }}
+      }as any}
     />
   )
 }
