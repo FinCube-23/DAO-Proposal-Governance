@@ -1,6 +1,6 @@
 import { Badge } from "@components/ui/badge";
 import { Card, CardHeader, CardFooter } from "@components/ui/card";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const convertStatusToVariant = (status: string) => {
   return status !== "pending" ? "success" : "warning";
@@ -12,7 +12,7 @@ export default function OffchainCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/dashboard/off-chain-proposals/${proposalId}`)}
+      onClick={() => navigate(`/mfs/dao/fincube/off-chain-proposals/${proposalId}`)}
     >
       <CardHeader>
         <div className="flex justify-between mb-2">

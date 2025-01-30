@@ -1,8 +1,8 @@
-import { useAccount } from "wagmi";
+// import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const WalletAuth = () => {
-  const { isConnected } = useAccount();
+  // const { isConnected } = useAccount();
 
   return (
     <>

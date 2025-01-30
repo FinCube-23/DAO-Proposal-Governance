@@ -1,57 +1,35 @@
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router";
 import { useEffect } from "react";
-
-import "@rainbow-me/rainbowkit/styles.css";
-import { polygonAmoy } from "wagmi/chains";
-import { WagmiProvider } from "wagmi";
-import {
-  darkTheme,
-  getDefaultConfig,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { RootState } from "@redux/store";
 import MFSRegistrationModal from "@components/auth/MFSRegistrationModal";
-
-export const config = getDefaultConfig({
-  appName: "Fincube",
-  projectId: `${import.meta.env.VITE_WALLET_CONNECT_ID}`,
-  chains: [polygonAmoy],
-});
-
-const queryClient = new QueryClient();
+import MFSSidebar from "@components/mfs/MFSSidebar";
+import { SidebarProvider, SidebarTrigger } from "@components/ui/sidebar";
 
 export default function MfsLayout() {
-  const navigate = useNavigate();
-  const authStoreState = useSelector(
-    (state: RootState) => state.persistedReducer.authReducer
-  );
+    const navigate = useNavigate();
+    const authStoreState = useSelector(
+        (state: RootState) => state.persistedReducer.authReducer
+    );
 
-  useEffect(() => {
-    if (!authStoreState.access && authStoreState.profile?.role != "mfs") {
-      navigate("/");
-    }
-  }, [authStoreState, navigate]);
+    useEffect(() => {
+        if (!authStoreState.access && authStoreState.profile?.role != "mfs") {
+            navigate("/");
+        }
+    }, [authStoreState, navigate]);
 
-  return (
-    <div>
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <RainbowKitProvider
-            theme={darkTheme({
-              accentColor: "#7b3fe4",
-              accentColorForeground: "white",
-              borderRadius: "large",
-              fontStack: "rounded",
-              overlayBlur: "large",
-            })}
-          >
-            <MFSRegistrationModal />
-            <Outlet />
-          </RainbowKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </div>
-  );
+    return (
+        <div>
+            <SidebarProvider>
+                <MFSRegistrationModal />
+                <MFSSidebar />
+                <main className="w-full">
+                    <SidebarTrigger />
+                    <div className="container mx-auto">
+                        <Outlet />
+                    </div>
+                </main>
+            </SidebarProvider>
+        </div>
+    );
 }

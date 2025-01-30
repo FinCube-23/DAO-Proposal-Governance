@@ -7,7 +7,7 @@ import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 import {
   Dialog,
   DialogContent,
@@ -58,8 +58,8 @@ const NewMemberApprovalProposal = () => {
 
       await createProposal(backendData);
 
-      toast.warning("Approval is pending");
-      setDialogOpen(true);
+      toast.warning("Your proposal has been placed and is under review.");
+      navigate("/mfs/dao/fincube");
     } catch (e: any) {
       let errorMessage = e.message;
 

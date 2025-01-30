@@ -5,7 +5,7 @@ import { readContract } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import { useEffect, useState } from "react";
 import { Proposal } from "@pages/dao_dashboard";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 
 export default function ProposalView() {
   const [proposal, setProposal] = useState<Proposal>({

@@ -1,6 +1,5 @@
 import { Button } from "@components/ui/button";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@radix-ui/react-collapsible";
-import { ChevronsUpDown } from "lucide-react";
 import { useState } from "react";
 
 export default function VoterList() {
