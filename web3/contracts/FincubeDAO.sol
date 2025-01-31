@@ -623,7 +623,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      * @notice This function deletes all user data except the owner
      * @notice This function is only for testing
      */
-    function flushMembers() public payable onlyOwner {
+    function flushMembers() external onlyOwner {
         uint256 tempMemberCount = memberList.length;
         for (uint256 i = tempMemberCount; i > 0; i--) {
             address memberAddress = memberList[i - 1];
