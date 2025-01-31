@@ -14,6 +14,8 @@ export class AuthService {
 
   async signIn(email: string, pass: string): Promise<{ access_token: string }> {
     const user = await this.usersService.findOne(email);
+    console.log(">>>>>>>fetched user: ", user);
+
     const isValid = await bcrypt.compare(pass, user.password);
     if (!isValid) {
       throw new UnauthorizedException();
