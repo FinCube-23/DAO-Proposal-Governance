@@ -106,13 +106,7 @@ const GeneralProposal = () => {
 
   return (
     <div className="mt-20">
-      <Card className="pt-5 pb-10 mx-60 shadow-2xl">
-        <Button
-          onClick={() => navigate("/mfs/dao/fincube")}
-          className="mx-10 font-bold bg-green-400 hover:bg-green-600 text-white"
-        >
-          Go Back
-        </Button>
+      <Card className="pt-5 pb-5 mx-60 shadow-2xl">
         <h1 className="text-3xl font-bold text-white mt-5 mb-12 text-center">
           General Proposal
         </h1>
@@ -167,6 +161,7 @@ const GeneralProposal = () => {
               <textarea
                 required
                 className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
+                type="text"
                 value={description}
                 onChange={handleDescriptionChange}
                 placeholder="Enter proposal description"
@@ -183,7 +178,7 @@ const GeneralProposal = () => {
             open={dialogOpen}
             onOpenChange={(open) => {
               setDialogOpen(open);
-              if (!open) navigate("/dashboard");
+              if (!open) navigate("/mfs/dao/fincube");
             }}
           >
             <DialogContent>
@@ -199,7 +194,7 @@ const GeneralProposal = () => {
               <DialogFooter>
                 <Button
                   className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-                  onClick={() => navigate("/dashboard")}
+                  onClick={() => navigate("/mfs/dao/fincube")}
                 >
                   Back to Dashboard
                 </Button>
