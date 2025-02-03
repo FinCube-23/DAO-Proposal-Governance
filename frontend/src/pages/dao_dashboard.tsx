@@ -331,7 +331,9 @@ export default function DaoDashboard() {
                 </DialogHeader>
                 <div className="flex flex-col items-center">
                   <Button
-                    onClick={() => navigate("/general-proposal")}
+                    onClick={() =>
+                      navigate("/mfs/dao/fincube/general-proposal")
+                    }
                     className="my-2 w-60 hover:bg-green-400"
                   >
                     General Proposal

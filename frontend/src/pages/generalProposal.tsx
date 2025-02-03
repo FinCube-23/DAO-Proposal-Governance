@@ -105,8 +105,8 @@ const GeneralProposal = () => {
   };
 
   return (
-    <div className="mt-20">
-      <Card className="pt-5 pb-5 mx-60 shadow-2xl">
+    <div className="mt-5">
+      <Card className="pt-5 pb-5 shadow-2xl">
         <h1 className="text-3xl font-bold text-white mt-5 mb-12 text-center">
           General Proposal
         </h1>
@@ -161,7 +161,6 @@ const GeneralProposal = () => {
               <textarea
                 required
                 className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
-                type="text"
                 value={description}
                 onChange={handleDescriptionChange}
                 placeholder="Enter proposal description"

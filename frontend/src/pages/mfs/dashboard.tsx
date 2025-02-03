@@ -5,7 +5,6 @@ import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
 import StableCoinABI from "../../contractABI/StableCoinABI.json";
 import { config } from "@layouts/RootLayout";
-import metamask from "../../../src/assets/metamask.svg";
 import {
   Card,
   CardDescription,
@@ -14,7 +13,7 @@ import {
 } from "@components/ui/card";
 import { RootState } from "@redux/store";
 import { useSelector } from "react-redux";
-import { useAccount, useConnect, useWalletClient } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
 import {
@@ -22,12 +21,10 @@ import {
   useLazyGetProposalCountQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
-import { getChainId, readContract } from "@wagmi/core";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Badge } from "@components/ui/badge";
-import { Button } from "@components/ui/button";
-import { Plus } from "lucide-react";
+import { readContract } from "@wagmi/core";
 
 // Updated token configuration
 export const tokenConfig = {
@@ -73,31 +70,31 @@ export default function MfsDashboard() {
   const [proposalThreshold, setProposalThreshold] = useState("");
   const [isMemberApproved, setIsMemberApproved] = useState(false);
   const [coinBalance, setCoinBalance] = useState(0);
-  const chainId = getChainId(config);
-  const { data: client } = useWalletClient();
+  // const chainId = getChainId(config);
+  // const { data: client } = useWalletClient();
 
-  const handleAddToken = async () => {
-    const tokenInfo =
-      tokenConfig.usdc[chainId as keyof typeof tokenConfig.usdc];
+  // const handleAddToken = async () => {
+  //   const tokenInfo =
+  //     tokenConfig.usdc[chainId as keyof typeof tokenConfig.usdc];
 
-    try {
-      const success = await client?.watchAsset({
-        type: "ERC20",
-        options: {
-          address: tokenInfo.address,
-          symbol: "USDC",
-          decimals: tokenInfo.decimals,
-          image: tokenInfo.image,
-        },
-      });
+  //   try {
+  //     const success = await client?.watchAsset({
+  //       type: "ERC20",
+  //       options: {
+  //         address: tokenInfo.address,
+  //         symbol: "USDC",
+  //         decimals: tokenInfo.decimals,
+  //         image: tokenInfo.image,
+  //       },
+  //     });
 
-      if (success) {
-        toast.success("Token added successfully");
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+  //     if (success) {
+  //       toast.success("Token added successfully");
+  //     }
+  //   } catch (e) {
+  //     console.error(e);
+  //   }
+  // };
 
   useEffect(() => {
     if (address) {
@@ -225,21 +222,21 @@ export default function MfsDashboard() {
               title="USDC Balance"
               value={`${coinBalance} USDC`}
               dataSource="On-chain"
-              actionButton={
-                <Button
-                  title="Add to Metamask"
-                  className="my-2"
-                  onClick={handleAddToken}
-                  variant="outline"
-                  disabled={
-                    !chainId ||
-                    !tokenConfig.usdc[chainId as keyof typeof tokenConfig.usdc]
-                  }
-                >
-                  <Plus size={15} color="skyblue" />
-                  <img src={metamask} alt="metamask" className="w-5" />
-                </Button>
-              }
+              // actionButton={
+              //   <Button
+              //     title="Add to Metamask"
+              //     className="my-2"
+              //     onClick={handleAddToken}
+              //     variant="outline"
+              //     disabled={
+              //       !chainId ||
+              //       !tokenConfig.usdc[chainId as keyof typeof tokenConfig.usdc]
+              //     }
+              //   >
+              //     <Plus size={15} color="skyblue" />
+              //     <img src={metamask} alt="metamask" className="w-5" />
+              //   </Button>
+              // }
             />
           </div>
           <div className="">
