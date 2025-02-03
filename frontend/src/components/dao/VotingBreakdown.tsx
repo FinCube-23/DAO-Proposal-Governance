@@ -4,6 +4,7 @@ import { Button } from "@components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -17,27 +18,16 @@ import {
 } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
-import { Proposal } from "@pages/dao_dashboard";
 import { useNavigate } from "react-router";
+import { IProposal } from "@lib/interfaces";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
-  const [proposal, setProposal] = useState<Proposal>({
-    executed: false,
-    canceled: false,
-    proposer: "",
-    data: "",
-    target: "",
-    voteStart: 0,
-    voteDuration: 0,
-    yesvotes: 0,
-    novotes: 0,
-    proposalURI: "",
-  });
+  const [proposal, setProposal] = useState<IProposal>();
   const [id, setId] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
-  const [_, setOwner] = useState("");
 
   const castVote = async (value: boolean) => {
     // voteRef.current = { proposalId: proposal.proposer, support: value };
@@ -59,7 +49,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           value ? "SUPPORT" : "AGAINST"
         } for proposal ID: ${proposalId}`
       );
-      console.log(voteRef.current);
+      setDialogOpen(true);
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -71,13 +61,10 @@ export default function VotingBreakdown({ proposalId }: any) {
           errorMessage = match[1];
         }
       }
-      console.log("====================================");
-      console.log(e);
-      console.log("====================================");
+
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
-    navigate("/mfs/dao/fincube");
   };
 
   // const executeProposal = async (value: number) => {
@@ -156,32 +143,15 @@ export default function VotingBreakdown({ proposalId }: any) {
 
         const result = response[0][proposalId];
 
-        setProposal(result as Proposal);
-        console.log(result as Proposal);
+        setProposal(result);
+        console.log(result);
       } catch (e) {
         alert("Failer to fetch proposal information");
         console.error("Failed to fetch proposal information:", e);
       }
     };
 
-    const getOwner = async () => {
-      try {
-        const response: any = await readContract(config, {
-          abi: contractABI,
-          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-          functionName: "owner",
-        });
-
-        setOwner(response as string);
-        console.log(response as string);
-      } catch (e) {
-        alert("Failer to fetch owner address");
-        console.error("Failed to fetch owner address:", e);
-      }
-    };
-
     getProposal();
-    getOwner();
   }, [proposalId]);
 
   return (
@@ -255,6 +225,30 @@ export default function VotingBreakdown({ proposalId }: any) {
           <Badge variant="outline">Wating for execution</Badge>
         )} */}
       </div>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) navigate("/mfs/dao/fincube");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+          </DialogHeader>
+          <p className="text-center text-yellow-400">
+            You have successfully casted your vote
+          </p>
+          <DialogFooter>
+            <Button
+              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+              onClick={() => navigate("/mfs/dao/fincube")}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

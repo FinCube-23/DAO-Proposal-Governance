@@ -2,18 +2,17 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import contractABI from "../contractABI/contractABI.json";
 import { simulateContract, writeContract } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
-import { useNavigate } from "react-router";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogFooter,
 } from "@components/ui/dialog";
+import { useNavigate } from "react-router";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -39,6 +38,7 @@ const NewMemberApprovalProposal = () => {
   const approveMember = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoadingStatus(true);
+
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
@@ -58,8 +58,8 @@ const NewMemberApprovalProposal = () => {
 
       await createProposal(backendData);
 
-      toast.warning("Your proposal has been placed and is under review.");
-      navigate("/mfs/dao/fincube");
+      toast.warning("Approval is pending");
+      setDialogOpen(true);
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -71,6 +71,8 @@ const NewMemberApprovalProposal = () => {
           errorMessage = match[1];
         }
       }
+      console.log(errorMessage);
+
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -78,9 +80,6 @@ const NewMemberApprovalProposal = () => {
 
   return (
     <div className="container mt-20">
-      <div className="mb-3 flex justify-end">
-        <ConnectButton />
-      </div>
       <div className="mt-10">
         <h1 className="text-3xl font-bold text-white mb-8 text-center">
           New Member Approval Proposal
@@ -108,7 +107,9 @@ const NewMemberApprovalProposal = () => {
             required
           ></textarea>
           <div className="flex justify-center">
-            <Button isLoading={loadingStatus}>Place Proposal</Button>
+            <Button type="submit" isLoading={loadingStatus}>
+              Place Proposal
+            </Button>
           </div>
         </form>
       </div>
@@ -116,7 +117,7 @@ const NewMemberApprovalProposal = () => {
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) navigate("/dashboard");
+          if (!open) navigate("/mfs/dao/fincube");
         }}
       >
         <DialogContent>
@@ -131,7 +132,7 @@ const NewMemberApprovalProposal = () => {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate("/dashboard")}
+              onClick={() => navigate("/mfs/dao/fincube")}
             >
               Back to Dashboard
             </Button>

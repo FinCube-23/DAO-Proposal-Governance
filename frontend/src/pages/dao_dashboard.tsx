@@ -8,14 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import {
-  Box,
-  Flag,
-  Vote,
-  WalletCards,
-  History,
-  Info,
-} from "lucide-react";
+import { Box, Flag, Vote, WalletCards, History, Info } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -42,48 +35,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@components/ui/pagination";
-
-export interface Proposal {
-  executed: boolean;
-  canceled: boolean;
-  proposer: string;
-  data: string;
-  target: string;
-  voteStart: number;
-  voteDuration: number;
-  yesvotes: number;
-  novotes: number;
-  proposalURI: string;
-}
-
-interface DaoInfo {
-  "@context": string;
-  name: string;
-  description: string;
-  membersURI: string;
-  proposalsURI: string;
-  activityLogURI: string;
-  governanceURI: string;
-  contractsURI: string;
-}
+import { IDaoInfo, IOffchainProposalCard, IProposal } from "@lib/interfaces";
 
 export default function DaoDashboard() {
-  const [proposalsByPage, setProposalsByPage] = useState<Proposal[]>([]);
+  const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const [daoURI, setDaoURI] = useState<DaoInfo>({
-    "@context": "",
-    name: "",
-    description: "",
-    membersURI: "",
-    proposalsURI: "",
-    activityLogURI: "",
-    governanceURI: "",
-    contractsURI: "",
-  });
-  
+  const [daoURI, setDaoURI] = useState<IDaoInfo>();
+
   const [ongoingProposalCount, setOngoingProposalCount] = useState("");
-  const [ongoingProposals, setOngoingProposals] = useState<Proposal[]>([]);
+  const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
   const [onchainPageNumber, setOnchainPageNumber] = useState(0);
@@ -92,9 +53,10 @@ export default function DaoDashboard() {
   const [pageLoading, setPageLoading] = useState(false);
   const [proposalsPerPage, setProposalsPerPage] = useState(0);
   const [getProposals] = useLazyGetProposalsQuery();
-  const [_, setIsMemberApproved] = useState(false);
+  const [, setIsMemberApproved] = useState(false);
   const { isConnected, address } = useAccount();
-  const [proposalsFromBE, setProposalsFromBE] = useState([]);
+  const [proposalsFromBE, setProposalsFromBE] =
+    useState<IOffchainProposalCard[]>();
   const [offchainPage, setOffchainPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -233,19 +195,21 @@ export default function DaoDashboard() {
       }
     };
 
-    const getProposalsFromBE = async (page: any) => {
-      const { data } = await getProposals({
+    const getProposalsFromBE = async () => {
+      const { data: response } = await getProposals({
         pageNumber: offchainPage,
         limit: 5,
-      }) as any;
-      console.log(page + 1, page + 5);
+      });
 
-      setProposalsFromBE(data?.data || []);
-      setTotalPages(Math.ceil(data?.total / data?.limit));
+      if (!response) {
+        console.error("No data found in API response", response);
+        return;
+      }
 
-      console.log("====================================");
-      console.log("Proposal 0:", data);
-      console.log("====================================");
+      setProposalsFromBE(response.data || []);
+      console.log(response);
+
+      setTotalPages(Math.ceil(response.total / response.limit));
     };
     if (isConnected) {
       checkIsMemberApproved();
@@ -253,7 +217,7 @@ export default function DaoDashboard() {
 
     getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
-    getProposalsFromBE(offchainPage);
+    getProposalsFromBE();
     getOngoingProposalCount();
     getDAOInfo();
     getVersion();
@@ -261,7 +225,14 @@ export default function DaoDashboard() {
     getVotingPeriod();
     checkIsMemberApproved();
     setLoading(false);
-  }, [onchainPageNumber, getProposals, address, isConnected, offchainPage]);
+  }, [
+    onchainPageNumber,
+    getProposals,
+    address,
+    isConnected,
+    offchainPage,
+    setIsMemberApproved,
+  ]);
 
   const handleOnchainNextPage = () => {
     setPageLoading(true);
@@ -277,16 +248,23 @@ export default function DaoDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
+        <Info />
+        <p>
+          You are not an approved member to place a new proposal or register a
+          new member
+        </p>
+      </div>
       <Card>
         <CardHeader>
           <CardTitle>
             <div className="flex justify-between items-center">
               <a
                 className="text-2xl hover:underline"
-                href={`${daoURI["@context"]}`}
+                href={`${daoURI?.["@context"]}`}
                 target="_"
               >
-                {daoURI.name}
+                {daoURI?.name}
               </a>
               <div className="flex gap-3">
                 <Badge variant="secondary">
@@ -306,7 +284,7 @@ export default function DaoDashboard() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>{daoURI.description}</p>
+          <p>{daoURI?.description}</p>
         </CardContent>
         <CardFooter>
           <div className="flex gap-10 text-sm justify-center items-center">
@@ -330,13 +308,6 @@ export default function DaoDashboard() {
           </div>
         </CardFooter>
       </Card>
-      <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
-        <Info />
-        <p>
-          You are not an approved member to place a new proposal or register a
-          new member
-        </p>
-      </div>
       <div className="md:col-span-7 flex flex-col gap-5">
         <Card>
           <div className="flex justify-between items-center p-3">
@@ -360,13 +331,17 @@ export default function DaoDashboard() {
                 </DialogHeader>
                 <div className="flex flex-col items-center">
                   <Button
-                    onClick={() => navigate("/general-proposal")}
+                    onClick={() =>
+                      navigate("/mfs/dao/fincube/general-proposal")
+                    }
                     className="my-2 w-60 hover:bg-green-400"
                   >
                     General Proposal
                   </Button>
                   <Button
-                    onClick={() => navigate("/approval-proposal")}
+                    onClick={() =>
+                      navigate("/mfs/dao/fincube/approval-proposal")
+                    }
                     className="my-2 w-60 hover:bg-orange-400"
                   >
                     New Member Approval Proposal
@@ -402,7 +377,6 @@ export default function DaoDashboard() {
             Off-chain records
           </Button>
         </div>
-        {/* Show loading text */}
         {pageLoading && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             {/* <div className="animate-spin border-4 border-t-transparent rounded-full w-10 h-10"></div> */}
@@ -414,22 +388,22 @@ export default function DaoDashboard() {
             <Loader />
           </p>
         ) : toggle === 0 ? (
-          proposalsByPage.length === 0 ? (
+          proposalsByPage?.length === 0 ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
               No proposals found
             </p>
           ) : (
-            proposalsByPage.map((proposal, idx) => (
+            proposalsByPage?.map((proposal, idx) => (
               <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
             ))
           )
         ) : toggle === 1 ? (
-          ongoingProposals.length === 0 ? (
+          ongoingProposals?.length === 0 ? (
             <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
               No ongoing proposals found
             </p>
           ) : (
-            ongoingProposals.map((proposal, idx) => (
+            ongoingProposals?.map((proposal, idx) => (
               <OngoingProposalCard
                 key={idx}
                 proposal={proposal}
@@ -437,12 +411,12 @@ export default function DaoDashboard() {
               />
             ))
           )
-        ) : proposalsFromBE.length === 0 ? (
+        ) : proposalsFromBE?.length === 0 ? (
           <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
             No proposals found on the Backend
           </p>
         ) : (
-          proposalsFromBE.map((proposal: any, idx) => (
+          proposalsFromBE?.map((proposal, idx) => (
             <OffchainCard
               key={idx}
               proposal={proposal}
@@ -450,56 +424,7 @@ export default function DaoDashboard() {
             />
           ))
         )}
-        {/* <div className="flex justify-center mt-5">
-            {toggle === 0 ? (
-              <>
-                <button
-                  onClick={() => {
-                    if (toggle === 0) handleOnchainPrevPage();
-                  }}
-                  disabled={onchainPageNumber === 0}
-                  className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
-                >
-                  <ArrowLeft />
-                </button>
-                <button
-                  onClick={() => {
-                    if (toggle === 0) handleOnchainNextPage();
-                  }}
-                  disabled={proposalsPerPage < 10}
-                  className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
-                >
-                  <ArrowRight />
-                </button>
-              </>
-            ) : toggle === 2 ? (
-              <>
-                <button
-                  onClick={() => {
-                    setPageLoading(true);
-                    setOffchainPage((prevPage) => prevPage - 1);
-                  }}
-                  disabled={offchainPage === 1}
-                  className="p-2 m-2 bg-green-500 font-bold text-white rounded-full disabled:opacity-50"
-                >
-                  <ArrowLeft />
-                </button>
-                <button
-                  onClick={() => {
-                    setPageLoading(true);
-                    setOffchainPage((nextPage) => nextPage + 1);
-                  }}
-                  disabled={proposalsFromBE.length < 10}
-                  className="p-2 m-2 bg-green-500 text-white rounded-full font-bold disabled:opacity-50"
-                >
-                  <ArrowRight />
-                </button>
-              </>
-            ) : (
-              <></>
-            )}
-          </div> */}
-        <Pagination>
+        <Pagination className="my-5">
           {toggle === 0 ? (
             <PaginationContent>
               <PaginationItem>
