@@ -18,6 +18,13 @@ export class UsersService {
     });
   }
 
+  async findByEmail(email: string): Promise<User | undefined> {
+    return this.userRepository.findOne({
+      where: { email },
+      relations: ['mfsBusiness', 'exchangeUser'],
+    });
+  }
+
   async create(user: User) {
     return this.userRepository.save(user);
   }
