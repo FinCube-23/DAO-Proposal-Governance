@@ -97,9 +97,46 @@ To get started with FinCube, follow these steps:
 3. **Configure environment variables**:
    Create a `.env` file and add the necessary environment variables as per the `.env.example` file.
 
-4. **Run the application**:
+<!-- 4. **Run the application**:
     ```bash
     docker compose up
+    ``` -->
+
+## Run the application
+In the project root a `./run.sh` can be found. This will help to run the whole application including the frontend and its micro-services.   
+
+1. **To run the whole application**:
+    ```bash
+    ./run.sh up
+    ```
+
+2. **To run the frontend only**:
+    ```bash
+    ./run.sh up-fe
+    ```
+
+3. **To run the whole backend including its all micro-service nodes**:
+    ```bash
+    ./run.sh up-be
+    ```
+
+4. **To run a single service from the backend by passing the container name as argument**:
+    ```bash
+    ./run.sh up-one <SERVICE-NAME>
+    ```
+5. **To shutdown the whole backend services**:
+    ```bash
+    ./run.sh down
+    ```
+
+6. **To shutdown a single service from the backend by passing the container name as argument**:
+    ```bash
+    ./run.sh down-one <SERVICE-NAME>
+    ```
+
+5. **To explore more with the commands**:
+    ```bash
+    ./run.sh help
     ```
 
 ## Usage
