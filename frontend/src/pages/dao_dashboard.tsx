@@ -171,6 +171,8 @@ export default function DaoDashboard() {
 
         setProposalsPerPage(filteredProposals.length);
         setProposalsByPage(filteredProposals);
+        console.log(filteredProposals);
+
         setPageLoading(false);
       } catch (e) {
         console.log(e);
