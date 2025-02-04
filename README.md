@@ -103,11 +103,14 @@ To get started with FinCube, follow these steps:
    docker compose up
    ```
 
-_Alternatively, you can run or stop the project using the provided script:_
+_Alternatively, you can automate the project runtime using the provided script:_
 
 ```bash
-./scripts/run_project.sh start
-./scripts/run_project.sh stop
+# Commands:
+#   Backend only:  ./scripts/run.sh backend
+#   Frontend only: ./scripts/run.sh frontend
+#   Both:          ./scripts/run.sh start
+#   Stop:          ./scripts/run.sh stop
 ```
 
 ## Usage

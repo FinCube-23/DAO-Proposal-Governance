@@ -1,9 +1,10 @@
 #!/bin/bash
 
-# Save as run-project.sh in your project root
-# Usage: 
-#   Start: ./run-project.sh start
-#   Stop:  ./run-project.sh stop
+# Commands:
+#   Backend only:  ./scripts/run.sh backend
+#   Frontend only: ./scripts/run.sh frontend
+#   Both:          ./scripts/run.sh start
+#   Stop:          ./scripts/run.sh stop
 
 # Configuration
 BACKEND_DIR="./backend"    # Backend directory with docker-compose
@@ -11,27 +12,30 @@ FRONTEND_DIR="./frontend"   # Frontend directory
 BACKEND_PORT=3000           # Your backend exposed port
 MAX_WAIT_TIME=30            # Max seconds to wait for backend
 
-start_project() {
+start_backend() {
     echo "Starting backend services..."
     (cd "$BACKEND_DIR" && sudo docker compose up --build -d)
     
-    echo "Waiting for backend to be ready on port $BACKEND_PORT..."
+    echo "Waiting for backend to be ready..."
     attempt=0
-
+    
     while ! nc -z localhost $BACKEND_PORT; do
         if [ $attempt -eq $MAX_WAIT_TIME ]; then
-            echo "Backend failed to start within $MAX_WAIT_TIME seconds"
+            echo " Backend failed to start!"
             stop_project
             exit 1
         fi
         attempt=$((attempt+1))
         sleep 1
+
         echo -n "."
     done
 
     echo -e "\n Backend is ready!"
+}
 
-    echo "Starting frontend development server..."
+start_frontend() {
+    echo "Starting frontend..."
     (cd "$FRONTEND_DIR" && npm run dev)
 }
 
@@ -45,12 +49,23 @@ trap stop_project SIGINT
 
 case "$1" in
     start)
-        start_project
+        start_backend
+        start_frontend
+        ;;
+    backend)
+        start_backend
+        ;;
+    frontend)
+        start_frontend
         ;;
     stop)
         stop_project
         ;;
     *)
-        echo "Usage: $0 {start|stop}"
+        echo "Usage: $0 {start|stop|backend|frontend}"
+        echo "   start    - Start both backend and frontend"
+        echo "   backend  - Start only the backend"
+        echo "   frontend - Start only the frontend"
+        echo "   stop     - Stop the backend"
         exit 1
 esac
