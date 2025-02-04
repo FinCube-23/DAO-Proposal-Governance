@@ -82,6 +82,10 @@ usage() {
     echo "  up-fe    Start frontend in a new terminal"
     echo "  up-be     Start backend in a new terminal"
     echo "  up         Start frontend and backend in separate terminals"
+    echo "  down     Stop all backend microservices"
+    echo "  up-one <service-name> Start a specific backend service"
+    echo "  down-one <service-name> Stop a specific backend service"
+    echo "  Available services: ${SERVICES[*]}"
     echo "  help           Show usage information"
 }
 
@@ -93,12 +97,27 @@ case "$1" in
     up-be)
         start_all_backends
         ;;
+    up-one)
+        if [ -z "$2" ]; then
+            echo "Please provide a service name. Available services: ${SERVICES[*]}"
+            exit 1
+        fi
+        ensure_docker_network
+        start_backend_service "$2"
+        ;;
     up)
         start_frontend
         start_all_backends
         ;;
     down)
         stop_all_backends
+        ;;
+    down-one)
+        if [ -z "$2" ]; then
+            echo "Please provide a service name. Available services: ${SERVICES[*]}"
+            exit 1
+        fi
+        stop_backend_service "$2"
         ;;
     help)
         usage
