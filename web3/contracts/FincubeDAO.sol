@@ -77,9 +77,6 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     uint256 public memberCount;
     uint256 public proposalCount;
     string public daoURI;
-    uint256 public votingDelay;
-    uint256 public votingPeriod;
-
     address[] private memberList; /*This function is only added for testing*/
 
     /** @dev Represents a member of the DAO.
@@ -122,6 +119,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
         uint256 yesvotes;
         uint256 novotes;
         string proposalURI;
+        uint256 proposalId;
     }
 
     /**
@@ -137,6 +135,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     mapping(uint256 => Proposal) private proposals;
     mapping(uint256 => ProposalVotes) private proposalVotes;
     mapping(uint256 => ProposalType) private proposalType;
+    uint256 public votingDelay;
+    uint256 public votingPeriod;
 
     /**
      * @notice Sets the delay before voting starts
@@ -170,18 +170,6 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      */
     modifier isVotingPeriodSet() {
         require(votingPeriod > 0, "Voting period is not set");
-        _;
-    }
-
-    /**
-     * @notice Modifier to ensure that the provided address is not already a member.
-     * @param _address The address to be checked.
-     */
-    modifier isNotExistingMember(address _address) {
-        require(
-            !(bytes(members[_address].memberURI).length > 0),
-            "Already a member"
-        );
         _;
     }
     /**
@@ -227,7 +215,11 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     function registerMember(
         address _newMember,
         string memory _memberURI
-    ) external isNotExistingMember(_newMember) {
+    ) external {
+        require(
+            !(bytes(members[_newMember].memberURI).length > 0),
+            "Already a member"
+        );
         Member memory member;
         member.memberURI = _memberURI;
         member.status = false;
@@ -265,7 +257,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             target: address(0xdead),
             yesvotes: 0,
             novotes: 0,
-            proposalURI: description
+            proposalURI: description,
+            proposalId: proposalCount
         });
         proposalType[proposalCount] = ProposalType.NewMemberProposal;
         emit ProposalAdded(
@@ -312,7 +305,8 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
             target: targets[0],
             yesvotes: 0,
             novotes: 0,
-            proposalURI: description
+            proposalURI: description,
+            proposalId: proposalCount
         });
         proposalType[proposalCount] = ProposalType.GeneralProposal;
         emit ProposalAdded(
@@ -417,34 +411,16 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
     }
 
     /**
-     * @notice Returns the count of ongoing proposals.
-     * @dev This function iterates through the proposals mapping and counts the proposals that have not been executed or canceled and are within the voting period.
-     * @return  ongoingCount The count of ongoing proposals.
+     * @notice Retrieves a specific proposal by its ID.
+     * @param proposalId The ID of the proposal to retrieve.
+     * @return proposal The Proposal struct corresponding to the given ID.
+     * @dev Will revert if the proposal ID is invalid.
      */
-
-    function getOngoingProposalsCount()
-        public
-        view
-        returns (uint256 ongoingCount)
-    {
-        uint256 count = proposalCount;
-        uint256 currentTimestamp = block.timestamp;
-
-        for (uint256 i; i < count; ) {
-            if (
-                !proposals[i].executed &&
-                !proposals[i].canceled &&
-                currentTimestamp > proposals[i].voteStart &&
-                currentTimestamp < proposals[i].voteDuration
-            ) {
-                unchecked {
-                    ongoingCount++;
-                }
-            }
-            unchecked {
-                ++i;
-            }
-        }
+    function getProposalsById(
+        uint256 proposalId
+    ) public view returns (Proposal memory proposal) {
+        require(proposalId < proposalCount, "Invalid proposal ID");
+        return proposals[proposalId];
     }
 
     /**
@@ -454,7 +430,7 @@ contract FinCubeDAO is UUPSUpgradeable, OwnableUpgradeable {
      */
 
     function getOngoingProposals() public view returns (Proposal[] memory) {
-        uint256 ongoingCount = getOngoingProposalsCount();
+        uint256 ongoingCount = proposalCount;
         Proposal[] memory ongoingProposals = new Proposal[](ongoingCount);
         uint256 currentTimestamp = block.timestamp; // Cache block.timestamp
         uint256 index = 0;
