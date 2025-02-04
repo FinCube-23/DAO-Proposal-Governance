@@ -160,12 +160,13 @@ Please ensure your code adheres to our coding standards and includes appropriate
 
 ## Core Contributors
 
-| Name                                                 | Role                            | Technical Contribution                     |
-| ---------------------------------------------------- | ------------------------------- | ------------------------------------------ |
-| [@FahimDev](https://www.github.com/FahimDev)         | Technical Lead and Scrum Master | Message queue                              |
-| [@SampadSikder](https://www.github.com/SampadSikder) | Backend Dev, System designer    | Smart contract dev, smart contract testing |
-| [@mashiat0808](https://www.github.com/mashiat0808)   | Backend Dev, Policy analyst     | GraphQL, smart contract testing, FDX       |
-| [@antonin686](https://www.github.com/antonin686)     | Frontend Dev                    | Front end engineer                         |
+| Name             | Role        | Technical Contribution                                                                                  |
+|----------------------|-------------------------|------------------------------------------------------------------------------------------|
+| [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Event Driven Architecture Design, Message queue, Backend Dev, The Graph integration |
+| [@antonin686](https://www.github.com/antonin686)      | Frontend Lead    | Full Stack, DevOps, Code Review, UI/UX       |
+| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev, System designer                | Smart contract dev, smart contract testing |
+| [@Raad05](https://github.com/Raad05)       | Frontend Dev                | API integration, Smart Contract Integration, RainbowKit wagmi |
+| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev, Policy analyst              | GraphQL, smart contract testing, FDX                           |
 
 ---
 
