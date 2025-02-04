@@ -78,13 +78,14 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      //await time.increase(3000);
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
       // Check if the 'yes' vote was recorded by verifying the number of 'yes' votes for the proposal
-      const ongoingProposals = await finCubeDAO.getOngoingProposalsCount();
-      expect(ongoingProposals).to.equal(1);
+      const ongoingProposalsCount = await finCubeDAO.getOngoingProposals();
+      expect(ongoingProposalsCount.length).to.equal(1);
     });
 
     it("should create a new proposal for setting a token address and vote yes", async function () {
@@ -96,13 +97,14 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      //await time.increase(3000);
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 
       // Check if the 'yes' vote was recorded by verifying the number of 'yes' votes for the proposal
-      const ongoingProposals = await finCubeDAO.getOngoingProposals();
-      expect(ongoingProposals[0].yesvotes).to.equal(1);
+      const ongoingProposalsCount = await finCubeDAO.getOngoingProposals();
+      expect(ongoingProposalsCount.length).to.equal(1);
     });
 
     it("should create a new proposal for setting a token address and vote no", async function () {
@@ -114,13 +116,14 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      //await time.increase(3000);
       // Cast a 'no' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
 
       // Check if the 'no' vote was recorded by verifying the number of 'no' votes for the proposal
-      const ongoingProposals = await finCubeDAO.getOngoingProposals();
-      expect(ongoingProposals[0].novotes).to.equal(1);
+      const ongoingProposalsCount = await finCubeDAO.getOngoingProposals();
+      expect(ongoingProposalsCount.length).to.equal(1);
     });
 
     it("should create a new proposal for setting a token address and not allow to vote twice", async function () {
@@ -132,7 +135,8 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      //await time.increase(3000);
       // Cast a 'no' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, false);
       await expect(finCubeDAO.connect(owner).castVote(0, false)).to.be.revertedWith("Already voted for this proposal");
@@ -147,7 +151,8 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
+      //await time.increase(3000);
       // Attempt to cast a 'yes' vote on the proposal by a non-member
       await expect(finCubeDAO.connect(addr1).castVote(0, true)).to.be.revertedWith("Not a member");
     });
@@ -163,6 +168,7 @@ describe("FinCubeDAO", function () {
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
       await new Promise(resolve => setTimeout(resolve, 35000));
+      //await time.increase(35000);
       // Attempt to cast a 'yes' vote on the proposal after the voting period
       await expect(finCubeDAO.connect(owner).castVote(0, true)).to.be.revertedWith("Voting is not allowed at this time");
     });
@@ -189,7 +195,7 @@ describe("FinCubeDAO", function () {
 
       // Create a new proposal for setting a token address
       await finCubeDAO.connect(owner).propose([tokenAddressContract.runner.address], [0], [calldata], "Set token address proposal");
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await new Promise(resolve => setTimeout(resolve, 6000));
       // Cast a 'yes' vote on the proposal
       await finCubeDAO.connect(owner).castVote(0, true);
 

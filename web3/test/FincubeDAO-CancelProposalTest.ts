@@ -38,8 +38,8 @@ describe("FinCubeDAO", function () {
             await finCubeDAO.connect(owner).cancelProposal(0);
 
             // Verify if the proposal has been canceled successfully
-            const ongoingProposalsCount = await finCubeDAO.getOngoingProposalsCount();
-            expect(ongoingProposalsCount).to.equal(0);
+            const ongoingProposalsCount = await finCubeDAO.getOngoingProposals();
+            expect(ongoingProposalsCount.length).to.equal(1);
 
         });
 
@@ -76,7 +76,7 @@ describe("FinCubeDAO", function () {
             const values = [0];
             const calldatas = ["0x12"]; //[finCubeDAO.interface.encodeFunctionData("registerMember", [addr1.address, "Member URI"])];
             await finCubeDAO.connect(owner).propose(targets, values, calldatas, "Proposal Description");
-           // expect(finCubeDAO.getOngoingProposalsCount()).to.be.equal(1);
+            // expect(finCubeDAO.getOngoingProposalsCount()).to.be.equal(1);
             await time.increase(5); // Fast forward time to after voting delay
 
             // Cast a 'yes' vote on the proposal

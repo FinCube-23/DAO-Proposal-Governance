@@ -15,7 +15,7 @@ if [ $? -eq 0 ]; then
         echo "All tests passed, deploying to Sepolia network..."
         
         # Deploy the contract to Sepolia network
-        #npx hardhat run scripts/01_deploy_dao_uup_v1.ts --network sepolia
+        npx hardhat run scripts/01_deploy_dao_uup_v1.ts --network sepolia
         
         # Check if the deployment was successful
         if [ $? -eq 0 ]; then
