@@ -4,6 +4,7 @@ import { Button } from "@components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -17,25 +18,15 @@ import {
 } from "@wagmi/core";
 import { config } from "@layouts/RootLayout";
 import contractABI from "../../contractABI/contractABI.json";
-import { Proposal } from "@pages/dao_dashboard";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
+import { IProposal } from "@lib/interfaces";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
-  const [proposal, setProposal] = useState<Proposal>({
-    executed: false,
-    canceled: false,
-    proposer: "",
-    data: "",
-    target: "",
-    voteStart: 0,
-    voteDuration: 0,
-    yesvotes: 0,
-    novotes: 0,
-    proposalURI: "",
-  });
+  const [proposal, setProposal] = useState<IProposal>();
   const [id, setId] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
@@ -58,7 +49,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           value ? "SUPPORT" : "AGAINST"
         } for proposal ID: ${proposalId}`
       );
-      console.log(voteRef.current);
+      setDialogOpen(true);
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -70,13 +61,10 @@ export default function VotingBreakdown({ proposalId }: any) {
           errorMessage = match[1];
         }
       }
-      console.log("====================================");
-      console.log(e);
-      console.log("====================================");
+
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
-    navigate("/dashboard");
   };
 
   // const executeProposal = async (value: number) => {
@@ -111,6 +99,38 @@ export default function VotingBreakdown({ proposalId }: any) {
   //   }
   // };
 
+  // const cancelProposal = async (value: number) => {
+  //   try {
+  //     const { request } = await simulateContract(config, {
+  //       abi: contractABI,
+  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+  //       functionName: "cancelProposal",
+  //       args: [value],
+  //     });
+  //     const hash = await writeContract(config, request);
+
+  //     await waitForTransactionReceipt(config, { hash });
+
+  //     toast.success("Proposal cancelled");
+  //     console.log(voteRef.current);
+  //   } catch (e: any) {
+  //     let errorMessage = e.message;
+
+  //     if (errorMessage.includes("reverted with the following reason:")) {
+  //       const match = errorMessage.match(
+  //         /reverted with the following reason:\s*(.*)/
+  //       );
+  //       if (match) {
+  //         errorMessage = match[1];
+  //       }
+  //     }
+  //     console.log("====================================");
+  //     console.log(e);
+  //     console.log("====================================");
+  //     toast.error(errorMessage);
+  //   }
+  // };
+
   useEffect(() => {
     const getProposal = async () => {
       try {
@@ -123,8 +143,8 @@ export default function VotingBreakdown({ proposalId }: any) {
 
         const result = response[0][proposalId];
 
-        setProposal(result as Proposal);
-        console.log(result as Proposal);
+        setProposal(result);
+        console.log(result);
       } catch (e) {
         alert("Failer to fetch proposal information");
         console.error("Failed to fetch proposal information:", e);
@@ -141,7 +161,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         {proposal && (
           <div>
             <span className="text-primary font-bold">
-              {proposal.yesvotes.toString()}
+              {proposal.yesvotes.toString()}{" "}
             </span>
             of {(proposal.yesvotes + proposal.novotes).toString()} Members
           </div>
@@ -155,9 +175,12 @@ export default function VotingBreakdown({ proposalId }: any) {
         />
       )}
       <div className="flex justify-end">
-        {/* {Date.now() / 1000 > proposal.voteDuration && (
-          <Button className="bg-red-400 font-bold">Execute</Button>
-        )} */}
+        {/* {Date.now() / 1000 > proposal.voteDuration && address === owner ? (
+          <div className="flex gap-2">
+            <Button className="bg-green-400 font-bold">Execute</Button>
+            <Button className="bg-red-400 font-bold">Cancel</Button>
+          </div>
+        ) : Date.now() / 1000 < proposal.voteDuration ? ( */}
         <Dialog>
           <DialogTrigger asChild>
             <Button className="bg-green-400 font-bold">Vote</Button>
@@ -198,7 +221,34 @@ export default function VotingBreakdown({ proposalId }: any) {
             </div>
           </DialogContent>
         </Dialog>
+        {/* ) : (
+          <Badge variant="outline">Wating for execution</Badge>
+        )} */}
       </div>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) navigate("/mfs/dao/fincube");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+          </DialogHeader>
+          <p className="text-center text-yellow-400">
+            You have successfully casted your vote
+          </p>
+          <DialogFooter>
+            <Button
+              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+              onClick={() => navigate("/mfs/dao/fincube")}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,17 +1,17 @@
+import { IOffchainProposal } from "@lib/interfaces";
 import { api } from "@redux/api/base";
 import { PROPOSAL_ENDPOINT } from "@redux/api/endpoints";
 import {
   CreateProposalPayload,
   CreateProposalResponse,
   GetOffchainProposalResponse,
-  GetProposalResponse,
 } from "@redux/api/types";
 
 export const proposalApis = api.injectEndpoints({
   endpoints: (build) => ({
     // get proposals
     getProposals: build.query<
-      GetProposalResponse,
+      GetOffchainProposalResponse,
       { pageNumber: number; limit: number }
     >({
       query: ({ pageNumber, limit }) => {
@@ -23,7 +23,7 @@ export const proposalApis = api.injectEndpoints({
       providesTags: ["proposal"],
     }),
     // create proposal
-    getProposal: build.query<GetOffchainProposalResponse, number>({
+    getProposal: build.query<IOffchainProposal, number>({
       query: (id) => ({
         url: `${PROPOSAL_ENDPOINT.BASE}/${id}`,
         method: "GET",

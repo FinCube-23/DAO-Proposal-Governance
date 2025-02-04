@@ -8,7 +8,13 @@ import { useCreateProposalMutation } from "@redux/services/proposal";
 import { useAccount } from "wagmi";
 import { Card } from "@components/ui/card";
 import { Info } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@components/ui/dialog";
+import { useNavigate } from "react-router";
 
 const GeneralProposal = () => {
   const [targets, setTargets] = useState("");
@@ -18,25 +24,34 @@ const GeneralProposal = () => {
   const { address } = useAccount();
   const [createProposal] = useCreateProposalMutation();
   const [loadingStatus, setLoadingStatus] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  const handleTargetsChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleTargetsChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setTargets(e.target.value);
   };
 
-  const handleValuesChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleValuesChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setValues(e.target.value);
   };
 
-  const handleCalldatasChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleCalldatasChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setCalldatas(e.target.value);
   };
 
-  const handleDescriptionChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setDescription(e.target.value);
   };
 
-  const propose = async (e: FormEvent<HTMLFormElement>) => {
+  const propose = async (
+    e: FormEvent<HTMLFormElement | HTMLTextAreaElement>
+  ) => {
     e.preventDefault();
     setLoadingStatus(true);
     const data = {
@@ -71,7 +86,8 @@ const GeneralProposal = () => {
 
       const response = await createProposal(backendData);
       console.log("Backend response:", response);
-      toast.success("General proposal placed successfully!");
+      setDialogOpen(true);
+      toast.warning("Proposal is pending");
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -89,14 +105,8 @@ const GeneralProposal = () => {
   };
 
   return (
-    <div className="mt-20">
-      <Card className="pt-5 pb-10 mx-60 shadow-2xl">
-        <Button
-          onClick={() => navigate("/dashboard")}
-          className="mx-10 font-bold bg-green-400 hover:bg-green-600 text-white"
-        >
-          Go Back
-        </Button>
+    <div className="mt-5">
+      <Card className="pt-5 pb-5 shadow-2xl">
         <h1 className="text-3xl font-bold text-white mt-5 mb-12 text-center">
           General Proposal
         </h1>
@@ -148,51 +158,77 @@ const GeneralProposal = () => {
               <label className="block text-sm font-medium text-white">
                 Description:
               </label>
-              <input
+              <textarea
                 required
                 className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded focus:outline-none focus:ring-2 focus:ring-blue-600"
-                type="text"
                 value={description}
                 onChange={handleDescriptionChange}
                 placeholder="Enter proposal description"
+                rows={5} // Adjust rows for the
               />
             </div>
             <div className="text-center">
               <Button type="submit" isLoading={loadingStatus}>
-                Propose
+                Place Proposal
               </Button>
             </div>
           </form>
-          <div className="sample-data bg-slate-900 border rounded-xl p-20 w-1/2 font-sans shadow-[0_0_15px_4px_rgba(104,0,255,0.8)]">
-            <h1 className="text-2xl text-white font-semibold italic mb-10">
+          <Dialog
+            open={dialogOpen}
+            onOpenChange={(open) => {
+              setDialogOpen(open);
+              if (!open) navigate("/mfs/dao/fincube");
+            }}
+          >
+            <DialogContent>
+              <DialogHeader>
+                <h2 className="text-lg font-bold text-green-400">
+                  Proposal Submitted
+                </h2>
+              </DialogHeader>
+              <p className="text-center text-yellow-400">
+                Your proposal has been successfully submitted and is under
+                review.
+              </p>
+              <DialogFooter>
+                <Button
+                  className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+                  onClick={() => navigate("/mfs/dao/fincube")}
+                >
+                  Back to Dashboard
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <div className="sample-data bg-slate-900 border rounded-xl p-20 w-1/2 font-sans shadow-[0_0_15px_4px_rgba(104,0,255,0.8)] h-full mt-20">
+            <h1 className="text-2xl text-white font-semibold italic">
               Example Data:
             </h1>
-            <div className="border-2 border-gray-600 p-5 rounded-xl shadow-2xl mt-16">
+            <div className="border-2 border-gray-600 p-5 rounded-xl shadow-2xl mt-10">
               <div className="data space-y-3">
-                <p className=" text-blue-500 font-bold italic">
+                <p className="text-blue-500 font-bold italic">
                   Targets:{" "}
                   <span className="text-white">
                     0xAbc123...0001, 0xDef456...0002 etc.
                   </span>
                 </p>
-                <p className="text-green-500 font-bold italic group relative hover:cursor-auto flex items-center">
-                  <div className="mr-1 text-white">
-                    <Info size={15}></Info>
+                <div className="text-green-500 font-bold italic flex items-center">
+                  <div className="group relative mr-1">
+                    <Info size={15} className="text-white cursor-pointer" />
+                    <span className="pointer-events-none absolute -bottom-2 left-1/2 w-[200px] -translate-x-1/2 translate-y-full text-sm text-white bg-black p-2 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      Values in wei, that should be sent with the transaction.
+                      In our case, this will be 0 as all of our voters are
+                      equal. If required, Ether can be deposited before-end or
+                      passed along when executing the transaction.
+                    </span>
                   </div>
-                  Values: <span className="text-white">0</span>
-                  <span className="tooltip-text absolute text-sm text-white bg-black p-2 rounded-xl shadow-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-2 w-1/2 left-0 transform translate-x-5 text-justify">
-                    Values in wei, that should be sent with the transaction. In
-                    our case, this will be 0 as all of our voters are equal. If
-                    required, Ether can be deposited before-end or passed along
-                    when executing the transaction.
-                  </span>
-                </p>
-
-                <p className=" text-yellow-500 font-mono italic">
+                  Values: <span className="text-white ml-1">0</span>
+                </div>
+                <p className="text-yellow-500 font-mono italic">
                   Calldata:{" "}
                   <span className="text-white">0xe0a8f6f5000...0001</span>
                 </p>
-                <p className="text-gray-400 italic  font-bold">
+                <p className="text-gray-400 italic font-bold">
                   <span className="text-purple-400">Description:</span>{" "}
                   Explaining the reason behind placing your proposal
                 </p>

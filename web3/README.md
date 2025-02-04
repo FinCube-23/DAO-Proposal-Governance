@@ -51,4 +51,6 @@ During adding newMembers follow:
         }
     ]
 }
-```
+
+# The Graph Subgraph Deployment on a Proxy Contract
+In FinCube, the smart contract follows UUPSUpgradeable standard. So, the subgraph needs to be deployed with some additional options. The full guide to deploying the Subgraph on a Proxy Contract can be found here: [Proxy Contract Subgraph Implementation](https://docs.google.com/presentation/d/1P009AD8E6FmC2yHQ2OeAx0qoMl3bp3beUlV3UcwpLqs/edit?usp=sharing)

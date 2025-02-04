@@ -1,6 +1,6 @@
 // import AuthStateSyncer from "@components/AuthStateSyncer";
 import Header from "@components/Header";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import { Toaster } from "@/components/ui/sonner";
 import "@rainbow-me/rainbowkit/styles.css";
 import { polygonAmoy } from "wagmi/chains";
@@ -11,7 +11,6 @@ import {
   RainbowKitProvider,
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import MFSSidebar from "@components/mfs/MFSSidebar";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
@@ -30,7 +29,6 @@ export default function RootLayout() {
           <QueryClientProvider client={queryClient}>
             <RainbowKitProvider theme={darkTheme()}>
               <Header />
-              {/* <MFSSidebar /> */}
               <Outlet />
               <Toaster richColors />
             </RainbowKitProvider>

@@ -6,7 +6,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import RegisterForm from "@components/auth/RegisterForm";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 
 export default function Register() {
     return (

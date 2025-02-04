@@ -1,3 +1,5 @@
+import { IOffchainProposalCard } from "@lib/interfaces";
+
 // interfaces
 interface Response {
   message: string;
@@ -111,16 +113,10 @@ export type CreateProposalPayload = {
 };
 
 export type GetOffchainProposalResponse = {
-  id: number;
-  proposal_onchain_id: number;
-  proposal_type: string;
-  metadata: string;
-  proposer_address: string;
-  processed_by: string;
-  proposal_status: string;
-  trx_hash: string;
-  audit_id: number;
-  trx_status: number;
+  data: IOffchainProposalCard[];
+  limit: number;
+  page: number;
+  total: number;
 };
 
 export type CreateProposalResponse = CreateProposalPayload;

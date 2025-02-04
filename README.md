@@ -1,4 +1,3 @@
-
 # FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services
 
 ![Layer 1: Ethereum](https://img.shields.io/badge/Layer%201-Ethereum-blue)
@@ -23,8 +22,6 @@ Welcome to FinCube's GitHub repository! FinCube is a revolutionary platform leve
 11. [License](#license)
 12. [Authors/Devs](#authors/devs)
 
-
-
 ## Introduction
 
 FinCube addresses the inefficiencies of the current financial system, which heavily relies on centralized authorities like Central Banks and systems like SWIFT. By utilizing blockchain technology and decentralized governance through a Decentralized Autonomous Organization (DAO), FinCube enables near-instantaneous transactions, reduced costs, and enhanced security.
@@ -40,17 +37,17 @@ FinCube addresses the inefficiencies of the current financial system, which heav
 - **Inclusive Governance**: Democratic decision-making process through the DAO.
 - **Economic Inclusivity**: Enhances financial inclusivity in underdeveloped and developing countries.
 
-
 ## Technical Features
-| Features             | Technology Used         | Remarks                                                                                  |
-|----------------------|-------------------------|------------------------------------------------------------------------------------------|
-| Containerization     | Docker                  | Docker is used to containerize services [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)                                                 |
-| Message Queue        | RabbitMQ                | There are multiple services which need to communicate with each other at the same time. Some of them may not be active at the same time. So for interservice communication, Message Queue is used |
-| Blockchain Indexer   | The Graph               | Used to listen and query events from the blockchain                                      |
-| Proxy Contract       | UUPSUpgradeableProxy    | The smart contract is made UUPS upgradeable to incorporate changes on the go             |
-| Pagination           | Solidity                | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used |
-| API Gateway           |   ExpressJS            | Redirecting client request to appropriate backend container  [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)    |
-| Automated Contract Deployment          |   Shell script            | Ensure the contract compiles and runs all tests before deployment, deploys, creates and moves artifacts to backend web3-proxy container, increasing customization for deployment |
+
+| Features                      | Technology Used      | Remarks                                                                                                                                                                                           |
+| ----------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Containerization              | Docker               | Docker is used to containerize services [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)                                  |
+| Message Queue                 | RabbitMQ             | There are multiple services which need to communicate with each other at the same time. Some of them may not be active at the same time. So for interservice communication, Message Queue is used |
+| Blockchain Indexer            | The Graph            | Used to listen and query events from the blockchain                                                                                                                                               |
+| Proxy Contract                | UUPSUpgradeableProxy | The smart contract is made UUPS upgradeable to incorporate changes on the go                                                                                                                      |
+| Pagination                    | Solidity             | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used                                       |
+| API Gateway                   | ExpressJS            | Redirecting client request to appropriate backend container [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)              |
+| Automated Contract Deployment | Shell script         | Ensure the contract compiles and runs all tests before deployment, deploys, creates and moves artifacts to backend web3-proxy container, increasing customization for deployment                  |
 
 ## Architecture
 
@@ -62,13 +59,14 @@ FinCube leverages a combination of blockchain technology, smart contracts, and d
 - **Web3 Integration**: For seamless on-ramping and off-ramping of digital assets.
 
 ### Backend Services
-| Services             | Technology Used         |                                                                             
-|----------------------|-------------------------|
-| Audit-trail-service     |        NestJS, RabbitMQ           |   
-| DAO-service        |     NestJS, PostgreSQL            |  
-| API-gateway   |           NestJS   |  
-| User-management-service      | NestJS, PostgreSQL, Auth0    |              
-| Web3-proxy-service          |       NestJS, Alchemy, Web3JS          | 
+
+| Services                | Technology Used           |
+| ----------------------- | ------------------------- |
+| Audit-trail-service     | NestJS, RabbitMQ          |
+| DAO-service             | NestJS, PostgreSQL        |
+| API-gateway             | NestJS                    |
+| User-management-service | NestJS, PostgreSQL, Auth0 |
+| Web3-proxy-service      | NestJS, Alchemy, Web3JS   |
 
 Backend folder contains more details regarding each of the services and the APIs.
 
@@ -77,6 +75,7 @@ Backend folder contains more details regarding each of the services and the APIs
 <! -- we can add the screenshots from our project to this -->
 
 ### Web3 services
+
 Web3 services contain the smart contracts, smart contract testcases, deployment, UUPS proxy deployment functionalities.
 
 ## Installation
@@ -84,23 +83,35 @@ Web3 services contain the smart contracts, smart contract testcases, deployment,
 To get started with FinCube, follow these steps:
 
 1. **Clone the repository**:
-    ```bash
-    git clone https://github.com/FinCube-23/DAO-Proposal-Governance.git
-    cd DAO-Proposal-Governance
-    ```
+
+   ```bash
+   git clone https://github.com/FinCube-23/DAO-Proposal-Governance.git
+   cd DAO-Proposal-Governance
+   ```
 
 2. **Install dependencies**:
-    ```bash
-    docker compose build
-    ```
+
+   ```bash
+   docker compose build
+   ```
 
 3. **Configure environment variables**:
    Create a `.env` file and add the necessary environment variables as per the `.env.example` file.
 
 4. **Run the application**:
-    ```bash
-    docker compose up
-    ```
+   ```bash
+   docker compose up
+   ```
+
+_Alternatively, you can automate the project runtime using the provided script:_
+
+```bash
+# Commands:
+#   Backend only:  ./scripts/run.sh backend
+#   Frontend only: ./scripts/run.sh frontend
+#   Both:          ./scripts/run.sh start
+#   Stop:          ./scripts/run.sh stop
+```
 
 ## Usage
 
@@ -129,6 +140,7 @@ FinCube's revenue streams include:
 5. Ensure cross-currency bill and service payments.
 
 ### Sprint planning
+
 Sprint plans of the project is [here](https://docs.google.com/spreadsheets/d/1H1C_8erMfxNjflPygsy6K6sB8qtqSrySQkH1MoQ7cOQ/edit?usp=sharing).
 
 ## Contributing
@@ -156,8 +168,6 @@ Please ensure your code adheres to our coding standards and includes appropriate
 | [@Raad05](https://github.com/Raad05)       | Frontend Dev                | API integration, Smart Contract Integration, RainbowKit wagmi |
 | [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev, Policy analyst              | GraphQL, smart contract testing, FDX                           |
 
-
 ---
 
 Thank you for your interest in FinCube! We look forward to your contributions and feedback. For any questions or support, please reach out to our team at daogovernance127@gmail.com.
-

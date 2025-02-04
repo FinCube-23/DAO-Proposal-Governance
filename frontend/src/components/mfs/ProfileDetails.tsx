@@ -1,10 +1,10 @@
-import { Button } from '@components/ui/button'
-import { DialogFooter } from '@components/ui/dialog'
+// import { Button } from '@components/ui/button'
+// import { DialogFooter } from '@components/ui/dialog'
 
 export default function ProfileDetails() {
   return (
     <>
-    {/* <div className="flex flex-col gap-5">
+      {/* <div className="flex flex-col gap-5">
                     <div className="flex flex-col gap-2">
                         <Label>MFS Name</Label>
                         <Input disabled={true} value={auth?.profile?.mfsBusiness?} />
@@ -38,5 +38,5 @@ export default function ProfileDetails() {
                     </Button>
                 </DialogFooter> */}
     </>
-  )
+  );
 }

@@ -10,6 +10,8 @@ export class UsersService {
   ) {}
 
   async findOne(email: string): Promise<User | undefined> {
+    console.log(">>>>>>>email: ", email);
+
     return this.userRepository.findOne({
       where: { email },
       relations: ['mfsBusiness', 'exchangeUser'],

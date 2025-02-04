@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router";
 import { Button } from "./ui/button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@redux/reducer";
