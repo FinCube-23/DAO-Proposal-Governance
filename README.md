@@ -9,18 +9,25 @@ Welcome to FinCube's GitHub repository! FinCube is a revolutionary platform leve
 
 ## Table of Contents
 
-1. [Introduction](#introduction)
-2. [Features](#features)
-3. [Technical Features](#technical-features)
-4. [Architecture](#architecture)
-5. [Installation](#installation)
-6. [Usage](#usage)
-7. [Advantages](#advantages)
-8. [Business Model](#business-model)
-9. [Roadmap](#roadmap)
-10. [Contributing](#contributing)
-11. [License](#license)
-12. [Authors/Devs](#authors/devs)
+- [FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services](#fincube---a-blockchain-based-solution-for-interplanetary-decentralized-mobile-financial-services)
+  - [Table of Contents](#table-of-contents)
+  - [Introduction](#introduction)
+  - [Features](#features)
+  - [Technical Features](#technical-features)
+  - [Architecture](#architecture)
+    - [Backend Services](#backend-services)
+    - [Frontend Services](#frontend-services)
+    - [Web3 services](#web3-services)
+  - [Installation](#installation)
+  - [Run the application](#run-the-application)
+  - [Usage](#usage)
+  - [Advantages](#advantages)
+  - [Business Model](#business-model)
+  - [Roadmap](#roadmap)
+    - [Sprint planning](#sprint-planning)
+  - [Contributing](#contributing)
+  - [License](#license)
+  - [Core Contributors](#core-contributors)
 
 ## Introduction
 
@@ -98,20 +105,47 @@ To get started with FinCube, follow these steps:
 3. **Configure environment variables**:
    Create a `.env` file and add the necessary environment variables as per the `.env.example` file.
 
-4. **Run the application**:
-   ```bash
-   docker compose up
-   ```
+<!-- 4. **Run the application**:
+    ```bash
+    docker compose up
+    ``` -->
 
-_Alternatively, you can automate the project runtime using the provided script:_
+## Run the application
+In the project root a `./run.sh` can be found. This will help to run the whole application including the frontend and its micro-services.   
 
-```bash
-# Commands:
-#   Backend only:  ./scripts/run.sh backend
-#   Frontend only: ./scripts/run.sh frontend
-#   Both:          ./scripts/run.sh start
-#   Stop:          ./scripts/run.sh stop
-```
+1. **To run the whole application**:
+    ```bash
+    ./run.sh up
+    ```
+
+2. **To run the frontend only**:
+    ```bash
+    ./run.sh up-fe
+    ```
+
+3. **To run the whole backend including its all micro-service nodes**:
+    ```bash
+    ./run.sh up-be
+    ```
+
+4. **To run a single service from the backend by passing the container name as argument**:
+    ```bash
+    ./run.sh up-one <SERVICE-NAME>
+    ```
+5. **To shutdown the whole backend services**:
+    ```bash
+    ./run.sh down
+    ```
+
+6. **To shutdown a single service from the backend by passing the container name as argument**:
+    ```bash
+    ./run.sh down-one <SERVICE-NAME>
+    ```
+
+5. **To explore more with the commands**:
+    ```bash
+    ./run.sh help
+    ```
 
 ## Usage
 
