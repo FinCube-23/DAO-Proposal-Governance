@@ -15,5 +15,5 @@ services:
       - fincube23_network
 
 networks:
-  message_q_network:
+  fincube23_network:
     external: true
