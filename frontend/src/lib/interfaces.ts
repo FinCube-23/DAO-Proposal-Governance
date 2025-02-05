@@ -29,6 +29,7 @@ export interface IProposal {
   yesvotes: number;
   novotes: number;
   proposalURI: string;
+  proposalId: number;
 }
 
 export interface IDaoInfo {

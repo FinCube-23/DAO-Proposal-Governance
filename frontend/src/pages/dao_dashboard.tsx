@@ -65,7 +65,7 @@ export default function DaoDashboard() {
       const response: any = await readContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "getVotingPeriod",
+        functionName: "votingPeriod",
       });
       const result = response.toString();
 
@@ -81,7 +81,7 @@ export default function DaoDashboard() {
       const response: any = await readContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "getVotingDelay",
+        functionName: "votingDelay",
       });
       const result = response.toString();
 
@@ -396,7 +396,11 @@ export default function DaoDashboard() {
             </p>
           ) : (
             proposalsByPage?.map((proposal, idx) => (
-              <ProposalCard key={idx} proposal={proposal} proposalId={idx} />
+              <ProposalCard
+                key={idx}
+                proposal={proposal}
+                proposalId={proposal.proposalId}
+              />
             ))
           )
         ) : toggle === 1 ? (
@@ -409,7 +413,7 @@ export default function DaoDashboard() {
               <OngoingProposalCard
                 key={idx}
                 proposal={proposal}
-                proposalId={idx}
+                proposalId={proposal.proposalId}
               />
             ))
           )

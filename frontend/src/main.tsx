@@ -20,8 +20,7 @@ import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { polygonAmoy } from "wagmi/chains";
-import { WagmiProvider } from "wagmi";
+import { http, WagmiProvider } from "wagmi";
 import {
   darkTheme,
   getDefaultConfig,
@@ -29,11 +28,17 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
+import { sepolia } from "viem/chains";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
   projectId: `${import.meta.env.VITE_WALLET_CONNECT_ID}`,
-  chains: [polygonAmoy],
+  chains: [sepolia],
+  transports: {
+    [sepolia.id]: http(
+      "https://eth-sepolia.g.alchemy.com/v2/mNVDS9BNNIgmXc5u1oBGNoB9_L2NOo_g"
+    ),
+  },
 });
 
 const queryClient = new QueryClient();
