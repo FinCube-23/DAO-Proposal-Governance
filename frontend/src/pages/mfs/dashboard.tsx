@@ -29,10 +29,8 @@ import { getChainId, readContract } from "@wagmi/core";
 import { Button } from "@components/ui/button";
 import { Plus } from "lucide-react";
 
-// Updated token configuration
 export const tokenConfig = {
   usdc: {
-    // Mainnets
     1: {
       // Ethereum
       address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
@@ -51,15 +49,18 @@ export const tokenConfig = {
       decimals: 6,
       image: "https://optimistic.etherscan.io/token/images/centre-usdc_28.png",
     },
-
-    // Testnets
     80002: {
-      // Polygon Amoy (testnet)
-      address: "0x2a0dD4b621e65B093EaA794C1a7F259eE0dA9456", // Replace with actual test token address
+      // Polygon Amoy
+      address: "0x2a0dD4b621e65B093EaA794C1a7F259eE0dA9456",
       decimals: 6,
       image: "https://amoy.polygonscan.com/token/images/centre-usdc_28.png",
     },
-    // Add other testnets as needed
+    11155111: {
+      // Ethereum Sepolia
+      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Sepolia USDC test token
+      decimals: 6,
+      image: "https://etherscan.io/token/images/centre-usdc_28.png",
+    },
   },
 };
 
