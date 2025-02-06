@@ -30,38 +30,38 @@ import { Button } from "@components/ui/button";
 import { Plus } from "lucide-react";
 
 export const tokenConfig = {
-  usdc: {
-    1: {
-      // Ethereum
-      address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
-      decimals: 6,
-      image: "https://etherscan.io/token/images/centre-usdc_28.png",
+    usdc: {
+        1: {
+            // Ethereum
+            address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+            decimals: 6,
+            image: "https://etherscan.io/token/images/centre-usdc_28.png",
+        },
+        137: {
+            // Polygon POS
+            address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
+            decimals: 6,
+            image: "https://polygonscan.com/token/images/centre-usdc_28.png",
+        },
+        10: {
+            // Optimism
+            address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
+            decimals: 6,
+            image: "https://optimistic.etherscan.io/token/images/centre-usdc_28.png",
+        },
+        80002: {
+            // Polygon Amoy
+            address: "0x2a0dD4b621e65B093EaA794C1a7F259eE0dA9456",
+            decimals: 6,
+            image: "https://amoy.polygonscan.com/token/images/centre-usdc_28.png",
+        },
+        11155111: {
+            // Ethereum Sepolia
+            address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Sepolia USDC test token
+            decimals: 6,
+            image: "https://etherscan.io/token/images/centre-usdc_28.png",
+        },
     },
-    137: {
-      // Polygon POS
-      address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174",
-      decimals: 6,
-      image: "https://polygonscan.com/token/images/centre-usdc_28.png",
-    },
-    10: {
-      // Optimism
-      address: "0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85",
-      decimals: 6,
-      image: "https://optimistic.etherscan.io/token/images/centre-usdc_28.png",
-    },
-    80002: {
-      // Polygon Amoy
-      address: "0x2a0dD4b621e65B093EaA794C1a7F259eE0dA9456",
-      decimals: 6,
-      image: "https://amoy.polygonscan.com/token/images/centre-usdc_28.png",
-    },
-    11155111: {
-      // Ethereum Sepolia
-      address: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // Sepolia USDC test token
-      decimals: 6,
-      image: "https://etherscan.io/token/images/centre-usdc_28.png",
-    },
-  },
 };
 
 export default function MfsDashboard() {
@@ -218,7 +218,12 @@ export default function MfsDashboard() {
                         ) : (
                             <></>
                         )}
-                        <ConnectButton />
+                        <div className="relative w-fit">
+                            {!isConnected && (
+                                <div className="absolute size-4 bg-red-500 animate-ping -top-1.5 -right-1.5 z-20 rounded-full"></div>
+                            )}
+                            <ConnectButton />
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-col gap-8 pt-28 px-8">

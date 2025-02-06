@@ -70,6 +70,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="" element={<Navigate to="/mfs/dashboard" />} />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
+                      <Route path="" element={<Navigate to="/mfs/dao/fincube" />} />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
                         <Route
