@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { store } from "@redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "@redux/store";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Welcome from "@pages/welcome";
 import RootLayout from "@layouts/RootLayout";
 import Login from "@pages/login";
@@ -67,8 +67,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="register" element={<Register />} />
                   </Route>
                   <Route path="mfs" element={<MfsLayout />}>
+                    <Route path="" element={<Navigate to="/mfs/dashboard" />} />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
+                      <Route path="" element={<Navigate to="/mfs/dao/fincube" />} />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
                         <Route
