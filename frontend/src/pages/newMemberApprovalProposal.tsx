@@ -23,6 +23,7 @@ const NewMemberApprovalProposal = () => {
   const { address } = useAccount();
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [trxHash, setTrxHash] = useState("");
   const navigate = useNavigate();
 
   const handleInput = (
@@ -57,6 +58,7 @@ const NewMemberApprovalProposal = () => {
       };
 
       await createProposal(backendData);
+      setTrxHash(hash);
 
       toast.warning("Approval is pending");
       setDialogOpen(true);
@@ -126,8 +128,16 @@ const NewMemberApprovalProposal = () => {
               Proposal Submitted
             </h2>
           </DialogHeader>
-          <p className="text-center text-yellow-400">
+          <p className="text-yellow-400">
             Your proposal has been successfully submitted and is under review.
+            To check the transaction status,{" "}
+            <a
+              target="_"
+              href={`${import.meta.env.VITE_TRX_EXPLORER}${trxHash}`}
+              className="text-blue-400 underline"
+            >
+              click here
+            </a>
           </p>
           <DialogFooter>
             <Button

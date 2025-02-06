@@ -99,9 +99,13 @@ export default function DaoDashboard() {
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
         functionName: "getOngoingProposals",
       });
-      console.log(response);
 
-      setOngoingProposals(response);
+      const filteredProposals = response.filter(
+        (proposal: any) =>
+          proposal.proposer !== "0x0000000000000000000000000000000000000000"
+      );
+
+      setOngoingProposals(filteredProposals);
     } catch (e) {
       console.error(e);
     }

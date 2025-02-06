@@ -14,24 +14,25 @@ export default function OngoingProposalView() {
   const { id } = useParams();
 
   useEffect(() => {
-    const getOngoingProposal = async () => {
+    const getProposalsById = async () => {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
           address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-          functionName: "getOngoingProposals",
+          functionName: "getProposalsById",
+          args: [id],
         });
 
-        const result = response[Number(id)];
-        setProposal(result);
+        setProposal(response);
+        console.log(id);
       } catch (e) {
         toast.error("Failer to fetch proposal information");
         console.error("Failed to fetch proposal information:", e);
       }
     };
 
-    getOngoingProposal();
-  }, [id, proposal]);
+    getProposalsById();
+  }, [id]);
 
   return (
     <div className="flex flex-col gap-5">
