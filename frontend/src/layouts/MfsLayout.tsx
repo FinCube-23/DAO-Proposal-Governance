@@ -25,9 +25,9 @@ export default function MfsLayout() {
             <SidebarProvider className="z-50">
                 <MFSRegistrationModal />
                 <MFSSidebar />
-                <main className="w-full">
+                <main className="w-full h-screen">
                     <MFSHeader />
-                    <div className="container mx-auto mt-10">
+                    <div className="container mx-auto mt-24 h-full">
                         <Outlet />
                     </div>
                 </main>

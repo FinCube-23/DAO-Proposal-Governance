@@ -7,7 +7,7 @@ export default function MFSHeader() {
     const location = useLocation();
     const pathnames = location.pathname.split("/").filter((x) => x);
     return (
-        <div className="flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6">
+        <div className="fixed flex h-14 items-center gap-4 border-b bg-background px-4 lg:h-[60px] lg:px-6 w-full">
             <SidebarTrigger />
             <div
                 data-orientation="vertical"
@@ -24,7 +24,7 @@ export default function MFSHeader() {
                     return isLast ? (
                         <span
                             key={name}
-                            className="text-muted-foreground hover:underline"
+                            className="text-muted-foreground"
                         >
                             {name}
                         </span> // Last segment is not a link
