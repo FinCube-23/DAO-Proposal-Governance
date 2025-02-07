@@ -208,7 +208,7 @@ export default function VotingBreakdown({ proposalId }: any) {
             </DialogContent>
           </Dialog>
         )}
-        {Number(proposal?.yesvotes) >= 1 && (
+        {Number(proposal?.yesvotes) >= 1 && !proposal?.executed && (
           <Button
             onClick={executeProposal}
             className="bg-blue-400 font-bold mt-2 mx-2 text-white"
@@ -216,14 +216,16 @@ export default function VotingBreakdown({ proposalId }: any) {
             Execute
           </Button>
         )}
-        {address === proposal?.proposer && !proposal?.canceled && (
-          <Button
-            onClick={cancelProposal}
-            className="bg-red-400 font-bold mt-2 mx-2 text-white"
-          >
-            Cancel
-          </Button>
-        )}
+        {address === proposal?.proposer &&
+          !proposal?.canceled &&
+          !proposal?.executed && (
+            <Button
+              onClick={cancelProposal}
+              className="bg-red-400 font-bold mt-2 mx-2 text-white"
+            >
+              Cancel
+            </Button>
+          )}
       </div>
       <Dialog
         open={dialogOpen}
