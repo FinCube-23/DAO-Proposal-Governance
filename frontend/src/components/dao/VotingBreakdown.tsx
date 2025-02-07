@@ -71,37 +71,34 @@ export default function VotingBreakdown({ proposalId }: any) {
     setLoadingStatus(false);
   };
 
-  // const executeProposal = async (value: number) => {
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI,
-  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-  //       functionName: "executeProposal",
-  //       args: [value],
-  //     });
-  //     const hash = await writeContract(config, request);
+  const executeProposal = async () => {
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "executeProposal",
+        args: [proposalId],
+      });
+      const hash = await writeContract(config, request);
 
-  //     await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
-  //     toast.success("Proposal executed successfully");
-  //     console.log(voteRef.current);
-  //   } catch (e: any) {
-  //     let errorMessage = e.message;
+      toast.success("Proposal executed successfully");
+    } catch (e: any) {
+      let errorMessage = e.message;
 
-  //     if (errorMessage.includes("reverted with the following reason:")) {
-  //       const match = errorMessage.match(
-  //         /reverted with the following reason:\s*(.*)/
-  //       );
-  //       if (match) {
-  //         errorMessage = match[1];
-  //       }
-  //     }
-  //     console.log("====================================");
-  //     console.log(e);
-  //     console.log("====================================");
-  //     toast.error(errorMessage);
-  //   }
-  // };
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      console.log(e);
+      toast.error(errorMessage);
+    }
+  };
 
   const cancelProposal = async () => {
     try {
@@ -212,7 +209,10 @@ export default function VotingBreakdown({ proposalId }: any) {
           </Dialog>
         )}
         {Number(proposal?.yesvotes) >= 1 && (
-          <Button className="bg-blue-400 font-bold mt-2 mx-2 text-white">
+          <Button
+            onClick={executeProposal}
+            className="bg-blue-400 font-bold mt-2 mx-2 text-white"
+          >
             Execute
           </Button>
         )}
