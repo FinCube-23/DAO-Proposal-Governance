@@ -8,7 +8,7 @@ import {
   CardContent,
   CardFooter,
 } from "@components/ui/card";
-import { Box, Flag, Vote, WalletCards, History, Info } from "lucide-react";
+import { Box, Flag, Vote, WalletCards, History } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -185,22 +185,6 @@ export default function DaoDashboard() {
       }
     };
 
-    const checkIsMemberApproved = async () => {
-      try {
-        const response: any = await readContract(config, {
-          abi: contractABI,
-          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-          functionName: "checkIsMemberApproved",
-          args: [address],
-        });
-
-        console.log(response);
-        setIsMemberApproved(true);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-
     const getProposalsFromBE = async () => {
       const { data: response } = await getProposals({
         pageNumber: offchainPage,
@@ -217,9 +201,6 @@ export default function DaoDashboard() {
 
       setTotalPages(Math.ceil(response.total / response.limit));
     };
-    if (isConnected) {
-      checkIsMemberApproved();
-    }
 
     getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
@@ -229,7 +210,6 @@ export default function DaoDashboard() {
     getVersion();
     getVotingDelay();
     getVotingPeriod();
-    checkIsMemberApproved();
     setLoading(false);
   }, [
     onchainPageNumber,
@@ -254,13 +234,13 @@ export default function DaoDashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
+      {/* <div className="flex items-center gap-2 border border-red-500 text-white font-bold text-sm text-center p-2 rounded-xl">
         <Info />
         <p>
           You are not an approved member to place a new proposal or register a
           new member
         </p>
-      </div>
+      </div> */}
       <Card>
         <CardHeader>
           <CardTitle>

@@ -24,7 +24,6 @@ import {
 } from "@redux/services/proxy";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Badge } from "@components/ui/badge";
 import { getChainId, readContract } from "@wagmi/core";
 import { Button } from "@components/ui/button";
 import { Plus } from "lucide-react";
@@ -65,17 +64,16 @@ export const tokenConfig = {
 };
 
 export default function MfsDashboard() {
-    const { address, isConnected } = useAccount();
-    const { connectors } = useConnect();
-    const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
-    const [getProposalCount] = useLazyGetProposalCountQuery();
-    const [getBalance] = useLazyGetBalanceQuery();
-    const [proposalCount, setProposalCount] = useState("");
-    const [proposalThreshold, setProposalThreshold] = useState("");
-    const [isMemberApproved, setIsMemberApproved] = useState(false);
-    const [coinBalance, setCoinBalance] = useState(0);
-    const chainId = getChainId(config);
-    const { data: client } = useWalletClient();
+  const { address } = useAccount();
+  const { connectors } = useConnect();
+  const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
+  const [getProposalCount] = useLazyGetProposalCountQuery();
+  const [getBalance] = useLazyGetBalanceQuery();
+  const [proposalCount, setProposalCount] = useState("");
+  const [proposalThreshold, setProposalThreshold] = useState("");
+  const [coinBalance, setCoinBalance] = useState(0);
+  const chainId = getChainId(config);
+  const { data: client } = useWalletClient();
 
     const handleAddToken = async () => {
         const tokenInfo =
@@ -164,30 +162,9 @@ export default function MfsDashboard() {
         getUSDCBalance();
     }, [getProposalCount, getProposalThreshold, getBalance, address]);
 
-    const auth = useSelector(
-        (state: RootState) => state.persistedReducer.authReducer
-    );
-
-    useEffect(() => {
-        const checkIsMemberApproved = async () => {
-            try {
-                const response: any = await readContract(config, {
-                    abi: contractABI,
-                    address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-                    functionName: "checkIsMemberApproved",
-                    args: [address],
-                });
-
-                console.log(response);
-                setIsMemberApproved(true);
-            } catch (e) {
-                console.error(e);
-            }
-        };
-        if (isConnected) {
-            checkIsMemberApproved();
-        }
-    }, [address, isConnected]);
+  const auth = useSelector(
+    (state: RootState) => state.persistedReducer.authReducer
+  );
 
     return (
         <div className="h-full flex flex-col justify-center -mt-24">
@@ -206,24 +183,7 @@ export default function MfsDashboard() {
                 </div>
                 <div className="flex justify-end relative">
                     <div className="absolute top-8 right-8 flex items-center gap-2">
-                        {address && !isMemberApproved ? (
-                            <div className="font-bold text-sm">
-                                Membership Status:{" "}
-                                <Badge variant="warning">Pending</Badge>
-                            </div>
-                        ) : address && isMemberApproved ? (
-                            <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
-                                Approved
-                            </p>
-                        ) : (
-                            <></>
-                        )}
-                        <div className="relative w-fit">
-                            {!isConnected && (
-                                <div className="absolute size-4 bg-red-500 animate-ping -top-1.5 -right-1.5 z-20 rounded-full"></div>
-                            )}
-                            <ConnectButton />
-                        </div>
+                        <ConnectButton />
                     </div>
                 </div>
                 <div className="flex flex-col gap-8 pt-28 px-8">

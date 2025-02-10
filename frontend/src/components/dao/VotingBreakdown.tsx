@@ -32,7 +32,6 @@ export default function VotingBreakdown({ proposalId }: any) {
   const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
-    // voteRef.current = { proposalId: proposal.proposer, support: value };
     setLoadingStatus(true);
     voteRef.current = { proposalId: proposalId, support: value };
     try {
@@ -72,6 +71,7 @@ export default function VotingBreakdown({ proposalId }: any) {
   };
 
   const executeProposal = async () => {
+    setLoadingStatus(true);
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
@@ -98,9 +98,11 @@ export default function VotingBreakdown({ proposalId }: any) {
       console.log(e);
       toast.error(errorMessage);
     }
+    setLoadingStatus(false);
   };
 
   const cancelProposal = async () => {
+    setLoadingStatus(true);
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
@@ -126,6 +128,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       }
       toast.error(errorMessage);
     }
+    setLoadingStatus(false);
   };
 
   useEffect(() => {
@@ -210,6 +213,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         )}
         {Number(proposal?.yesvotes) >= 1 && !proposal?.executed && (
           <Button
+            isLoading={loadingStatus}
             onClick={executeProposal}
             className="bg-blue-400 font-bold mt-2 mx-2 text-white"
           >
@@ -220,6 +224,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           !proposal?.canceled &&
           !proposal?.executed && (
             <Button
+              isLoading={loadingStatus}
               onClick={cancelProposal}
               className="bg-red-400 font-bold mt-2 mx-2 text-white"
             >
