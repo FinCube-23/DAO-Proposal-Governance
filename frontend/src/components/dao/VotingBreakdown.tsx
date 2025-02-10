@@ -211,15 +211,17 @@ export default function VotingBreakdown({ proposalId }: any) {
             </DialogContent>
           </Dialog>
         )}
-        {Number(proposal?.yesvotes) >= 1 && !proposal?.executed && (
-          <Button
-            isLoading={loadingStatus}
-            onClick={executeProposal}
-            className="bg-blue-400 font-bold mt-2 mx-2 text-white"
-          >
-            Execute
-          </Button>
-        )}
+        {!voteStatus &&
+          Number(proposal?.yesvotes) >= 1 &&
+          !proposal?.executed && (
+            <Button
+              isLoading={loadingStatus}
+              onClick={executeProposal}
+              className="bg-blue-400 font-bold mt-2 mx-2 text-white"
+            >
+              Execute
+            </Button>
+          )}
         {address === proposal?.proposer &&
           !proposal?.canceled &&
           !proposal?.executed && (
