@@ -7,6 +7,7 @@ COPY package*.json ./
 
 RUN npm install
 
+# --chown=app:app, ensures your security best practices and avoids file permission issues
 COPY --chown=app:app . .
 
 # Expose the port your app runs on

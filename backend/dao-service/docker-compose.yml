@@ -5,7 +5,6 @@ services:
       context: ./
       args:
         - APP_ENV
-    # command: npm run start:dev
     ports:
       - 3002:3000
     volumes:
