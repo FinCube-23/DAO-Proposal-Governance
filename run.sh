@@ -4,7 +4,7 @@
 set -e
 
 # List of backend microservices
-SERVICES=("audit-trail-service" "dao-service" "user-management-service" "web3-proxy-service" "rabbitmq" "service-discovery")
+SERVICES=("audit-trail-service" "user-management-service" "web3-proxy-service" "rabbitmq" "service-discovery" "dao-service")
 
 # Required Docker Network
 NETWORK_NAME="fincube23_network"
@@ -47,7 +47,8 @@ start_backend_service() {
     local service=$1
     echo "Starting $service..."
     cd "backend/$service"
-    docker-compose up --build -d 
+    docker compose up --build -d
+
     cd - >/dev/null
 }
 
@@ -56,7 +57,7 @@ stop_backend_service() {
     local service=$1
     echo "Stopping $service..."
     cd "backend/$service"
-    docker-compose down
+    docker compose down
     cd - >/dev/null
 }
 
