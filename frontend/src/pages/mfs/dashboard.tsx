@@ -64,16 +64,16 @@ export const tokenConfig = {
 };
 
 export default function MfsDashboard() {
-  const { address } = useAccount();
-  const { connectors } = useConnect();
-  const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
-  const [getProposalCount] = useLazyGetProposalCountQuery();
-  const [getBalance] = useLazyGetBalanceQuery();
-  const [proposalCount, setProposalCount] = useState("");
-  const [proposalThreshold, setProposalThreshold] = useState("");
-  const [coinBalance, setCoinBalance] = useState(0);
-  const chainId = getChainId(config);
-  const { data: client } = useWalletClient();
+    const { address, isConnected } = useAccount();
+    const { connectors } = useConnect();
+    const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
+    const [getProposalCount] = useLazyGetProposalCountQuery();
+    const [getBalance] = useLazyGetBalanceQuery();
+    const [proposalCount, setProposalCount] = useState("");
+    const [proposalThreshold, setProposalThreshold] = useState("");
+    const [coinBalance, setCoinBalance] = useState(0);
+    const chainId = getChainId(config);
+    const { data: client } = useWalletClient();
 
     const handleAddToken = async () => {
         const tokenInfo =
@@ -162,9 +162,9 @@ export default function MfsDashboard() {
         getUSDCBalance();
     }, [getProposalCount, getProposalThreshold, getBalance, address]);
 
-  const auth = useSelector(
-    (state: RootState) => state.persistedReducer.authReducer
-  );
+    const auth = useSelector(
+        (state: RootState) => state.persistedReducer.authReducer
+    );
 
     return (
         <div className="h-full flex flex-col justify-center -mt-24">
@@ -183,7 +183,12 @@ export default function MfsDashboard() {
                 </div>
                 <div className="flex justify-end relative">
                     <div className="absolute top-8 right-8 flex items-center gap-2">
-                        <ConnectButton />
+                        <div className="relative w-fit">
+                            {!isConnected && (
+                                <div className="absolute size-4 bg-red-500 animate-ping -top-1.5 -right-1.5 z-20 rounded-full"></div>
+                            )}
+                            <ConnectButton />
+                        </div>
                     </div>
                 </div>
                 <div className="flex flex-col gap-8 pt-28 px-8">
