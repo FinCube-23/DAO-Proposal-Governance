@@ -9,6 +9,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import VotingBreakdown from "./VotingBreakdown";
 import VoterList from "./VoterList";
+import { labels } from "./Labels";
 
 const convertStatusToVariant = (status: boolean) => {
   return status ? "success" : "warning";
@@ -27,21 +28,6 @@ const convertToDate = (time: number) => {
 
   return formattedDate.replace(",", " at");
 };
-
-const labels = [
-  {
-    label: "Yes",
-    color: "green",
-  },
-  {
-    label: "No",
-    color: "red",
-  },
-  {
-    label: "None",
-    color: "gray",
-  },
-];
 
 export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
   return (
