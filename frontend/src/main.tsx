@@ -5,7 +5,7 @@ import { Provider } from "react-redux";
 import { store } from "@redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistor } from "@redux/store";
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 import Welcome from "@pages/welcome";
 import RootLayout from "@layouts/RootLayout";
 import Login from "@pages/login";
@@ -20,8 +20,7 @@ import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { polygonAmoy } from "wagmi/chains";
-import { WagmiProvider } from "wagmi";
+import { http, WagmiProvider } from "wagmi";
 import {
   darkTheme,
   getDefaultConfig,
@@ -29,11 +28,17 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
+import { sepolia } from "viem/chains";
 
 export const config = getDefaultConfig({
   appName: "Fincube",
   projectId: `${import.meta.env.VITE_WALLET_CONNECT_ID}`,
-  chains: [polygonAmoy],
+  chains: [sepolia],
+  transports: {
+    [sepolia.id]: http(
+      "https://eth-sepolia.g.alchemy.com/v2/mNVDS9BNNIgmXc5u1oBGNoB9_L2NOo_g"
+    ),
+  },
 });
 
 const queryClient = new QueryClient();
@@ -62,8 +67,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="register" element={<Register />} />
                   </Route>
                   <Route path="mfs" element={<MfsLayout />}>
+                    <Route path="" element={<Navigate to="/mfs/dashboard" />} />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
+                      <Route path="" element={<Navigate to="/mfs/dao/fincube" />} />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
                         <Route

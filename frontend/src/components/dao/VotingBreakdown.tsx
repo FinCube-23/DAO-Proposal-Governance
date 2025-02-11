@@ -25,14 +25,13 @@ export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<IProposal>();
-  const [id, setId] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
     // voteRef.current = { proposalId: proposal.proposer, support: value };
     setLoadingStatus(true);
-    voteRef.current = { proposalId: id, support: value };
+    voteRef.current = { proposalId: proposalId, support: value };
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
@@ -49,6 +48,8 @@ export default function VotingBreakdown({ proposalId }: any) {
           value ? "SUPPORT" : "AGAINST"
         } for proposal ID: ${proposalId}`
       );
+      console.log("Proposal ID:", proposalId);
+
       setDialogOpen(true);
     } catch (e: any) {
       let errorMessage = e.message;
@@ -192,16 +193,6 @@ export default function VotingBreakdown({ proposalId }: any) {
               </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <div className="flex justify-center items-center gap-2 mb-4">
-                <p className="font-bold">Proposal ID: </p>
-                <input
-                  type="text"
-                  placeholder="Enter Proposal ID"
-                  value={id}
-                  onChange={(e) => setId(e.target.value)}
-                  className="px-4 py-1 border bg-black rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
               <div className="flex justify-center">
                 <Button
                   isLoading={loadingStatus}

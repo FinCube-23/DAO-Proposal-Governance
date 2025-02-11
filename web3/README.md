@@ -1,6 +1,6 @@
 # Fincube Smart contract
 
-This contract demonstrates a basic Hardhat use case. It comes with the smart contract for DAO proposal governance, testcases for that contract, smart contract deploy script with UUPS proxy and a Hardhat Ignition module that deploys that contract.
+This contract is a hybrid of [EIP-4824](https://eips.ethereum.org/EIPS/eip-4824) which is considered as Common Interfaces for DAOs and [OpenZeppelin's](https://docs.openzeppelin.com/contracts/4.x/api/governance) Governance. Though the OpenZeppelin's contract was not inherited to keep the implementation simple for DAO fundamentals. This contract demonstrates a basic Hardhat use case. It comes with the smart contract for DAO proposal governance, testcases for that contract, smart contract deploy script with UUPS proxy and a Hardhat Ignition module that deploys that contract.
 
  ## Features
 
@@ -38,11 +38,12 @@ During adding newMembers follow:
 ![Approve member flow](member-proposal.jpg)
 
 # Members JSON-LD schema:
+```json
 {
     "@context": "<http://www.daostar.org/schemas>",
     "type": "DAO",
     "name": "<name of the DAO>",
-    "location: "BGD",
+    "location": "BGD",
     "members": [
         {
             "type": "EthereumAddress",
@@ -50,3 +51,6 @@ During adding newMembers follow:
         }
     ]
 }
+
+# The Graph Subgraph Deployment on a Proxy Contract
+In FinCube, the smart contract follows UUPSUpgradeable standard. So, the subgraph needs to be deployed with some additional options. The full guide to deploying the Subgraph on a Proxy Contract can be found here: [Proxy Contract Subgraph Implementation](https://docs.google.com/presentation/d/1P009AD8E6FmC2yHQ2OeAx0qoMl3bp3beUlV3UcwpLqs/edit?usp=sharing)

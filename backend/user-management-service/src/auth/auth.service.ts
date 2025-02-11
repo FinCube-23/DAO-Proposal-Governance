@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
@@ -13,12 +18,13 @@ export class AuthService {
   ) {}
 
   async signIn(email: string, pass: string): Promise<{ access_token: string }> {
-    const user = await this.usersService.findOne(email);
-    console.log(">>>>>>>fetched user: ", user);
-
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('User does not exists');
+    }
     const isValid = await bcrypt.compare(pass, user.password);
     if (!isValid) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid Crentials');
     }
     const payload = { sub: user.id, email: user.email };
     return {
@@ -29,8 +35,19 @@ export class AuthService {
   async signUp(
     createUserDto: CreateUserDto,
   ): Promise<{ data: { message: string } }> {
+    // Check if user already exists
+    const existingUser = await this.usersService.findByEmail(
+      createUserDto.email,
+    );
+    
+    if (existingUser) {
+      throw new ConflictException('User already exists');
+    }
+
     const hash = await bcrypt.hash(createUserDto.password, 10);
-    await this.usersService.create(new User({ ...createUserDto, password: hash }));
+    await this.usersService.create(
+      new User({ ...createUserDto, password: hash }),
+    );
 
     return {
       data: {
