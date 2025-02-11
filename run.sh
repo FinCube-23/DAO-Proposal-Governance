@@ -4,7 +4,7 @@
 set -e
 
 # List of backend microservices
-SERVICES=("audit-trail-service" "dao-service" "user-management-service" "web3-proxy-service" "rabbitmq")
+SERVICES=("audit-trail-service" "dao-service" "user-management-service" "web3-proxy-service" "rabbitmq" "service-discovery")
 
 # Required Docker Network
 NETWORK_NAME="fincube23_network"
