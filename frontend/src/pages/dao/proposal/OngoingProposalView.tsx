@@ -1,6 +1,6 @@
 import contractABI from "../../../contractABI/contractABI.json";
 import { readContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../../main";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import OngoingProposalCard from "@components/dao/OngoingProposalCard";

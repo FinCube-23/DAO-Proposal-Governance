@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import contractABI from "../contractABI/contractABI.json";
 import { simulateContract, writeContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../main";
 import { toast } from "sonner";
 import { Button } from "@components/ui/button";
 import { useCreateProposalMutation } from "@redux/services/proposal";

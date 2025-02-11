@@ -20,20 +20,17 @@ import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
 
 import "@rainbow-me/rainbowkit/styles.css";
-import { http, WagmiProvider } from "wagmi";
-import {
-  darkTheme,
-  getDefaultConfig,
-  RainbowKitProvider,
-} from "@rainbow-me/rainbowkit";
+import { createConfig, http, WagmiProvider } from "wagmi";
+import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
 import { sepolia } from "viem/chains";
+import { injected } from "@wagmi/core";
 
-export const config = getDefaultConfig({
-  appName: "Fincube",
-  projectId: `${import.meta.env.VITE_WALLET_CONNECT_ID}`,
+export const config = createConfig({
   chains: [sepolia],
+  connectors: [injected()],
+  ssr: true,
   transports: {
     [sepolia.id]: http(
       "https://eth-sepolia.g.alchemy.com/v2/mNVDS9BNNIgmXc5u1oBGNoB9_L2NOo_g"

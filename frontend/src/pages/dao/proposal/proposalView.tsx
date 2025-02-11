@@ -2,7 +2,7 @@ import ProposalCard from "@components/dao/ProposalCard";
 import { ProposalStatCard } from "@components/dao/ProposalStatCard";
 import contractABI from "../../../contractABI/contractABI.json";
 import { readContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../../main";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { IProposal } from "@lib/interfaces";

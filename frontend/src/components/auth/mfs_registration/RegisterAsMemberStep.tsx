@@ -2,7 +2,7 @@ import { Button } from "@components/ui/button";
 import { simulateContract, writeContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import contractABI from "../../../contractABI/contractABI.json";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../../main";
 import { useAccount } from "wagmi";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@redux/store";

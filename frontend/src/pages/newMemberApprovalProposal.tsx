@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import contractABI from "../contractABI/contractABI.json";
 import { simulateContract, writeContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+// import { config } from "../../main";
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@components/ui/dialog";
 import { useNavigate } from "react-router";
+import { config } from "../main";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({

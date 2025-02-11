@@ -4,7 +4,7 @@ import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
 import StableCoinABI from "../../contractABI/StableCoinABI.json";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../main";
 import metamask from "../../assets/metamask.svg";
 import {
     Card,

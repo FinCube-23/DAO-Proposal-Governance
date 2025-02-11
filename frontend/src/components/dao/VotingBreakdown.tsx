@@ -16,7 +16,7 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../main";
 import contractABI from "../../contractABI/contractABI.json";
 import { useNavigate } from "react-router";
 import { IProposal } from "@lib/interfaces";

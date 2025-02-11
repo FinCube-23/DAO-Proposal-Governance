@@ -21,7 +21,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
-import { config } from "@layouts/RootLayout";
+import { config } from "../main";
 import { useLazyGetProposalsQuery } from "@redux/services/proposal";
 import Loader from "@components/Loader";
 import OffchainCard from "@components/dao/OffChainCard";
