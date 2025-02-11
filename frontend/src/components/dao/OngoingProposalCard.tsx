@@ -47,14 +47,16 @@ export default function OngoingProposalCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/mfs/dao/fincube/ongoing-proposals/${proposalId}`)}
+      onClick={() =>
+        navigate(`/mfs/dao/fincube/ongoing-proposals/${proposalId}`)
+      }
     >
       <CardHeader>
         <div className="flex justify-between mb-2">
           <Badge variant="secondary">On-chain</Badge>
-          <Badge variant={convertStatusToVariant(proposal.executed)}>
+          <Badge variant={convertStatusToVariant(proposal.canceled)}>
             <p className="capitalize">
-              {proposal.executed ? "Confirmed" : "Pending"}
+              {proposal.canceled ? "Canceled" : "Pending"}
             </p>
           </Badge>
         </div>

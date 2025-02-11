@@ -54,7 +54,7 @@ export default function ProposalCard({ proposal, proposalId }: any) {
           <Badge variant="secondary">On-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.canceled)}>
             <p className="capitalize">
-              {proposal.canceled ? "Cancelled" : "Pending"}
+              {proposal.canceled ? "Canceled" : "Pending"}
             </p>
           </Badge>
         </div>

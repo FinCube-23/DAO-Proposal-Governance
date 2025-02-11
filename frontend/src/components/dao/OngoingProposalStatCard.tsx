@@ -8,7 +8,7 @@ import {
 } from "@components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import VotingBreakdown from "./VotingBreakdown";
-import VoterList from "./VoterList";
+// import VoterList from "./VoterList";
 import { labels } from "./Labels";
 
 const convertStatusToVariant = (status: boolean) => {
@@ -52,9 +52,9 @@ export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
             </div>
           </div>
           <CardDescription>
-            <Badge variant={convertStatusToVariant(proposal.executed)}>
+            <Badge variant={convertStatusToVariant(proposal.canceled)}>
               <p className="capitalize">
-                {proposal.executed ? "Confirmed" : "Pending"}
+                {proposal.canceled ? "Canceled" : "Pending"}
               </p>
             </Badge>
           </CardDescription>
@@ -63,14 +63,14 @@ export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
           <Tabs defaultValue="breakdown">
             <TabsList>
               <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-              <TabsTrigger value="voters">Voters</TabsTrigger>
+              {/* <TabsTrigger value="voters">Voters</TabsTrigger> */}
             </TabsList>
             <TabsContent value="breakdown" className="mt-4">
               <VotingBreakdown proposalId={proposalId} />
             </TabsContent>
-            <TabsContent value="voters" className="mt-4">
+            {/* <TabsContent value="voters" className="mt-4">
               <VoterList />
-            </TabsContent>
+            </TabsContent> */}
           </Tabs>
         </CardContent>
       </Card>

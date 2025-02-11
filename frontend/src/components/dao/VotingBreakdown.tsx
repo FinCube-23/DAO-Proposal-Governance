@@ -213,11 +213,12 @@ export default function VotingBreakdown({ proposalId }: any) {
         )}
         {!voteStatus &&
           Number(proposal?.yesvotes) >= 1 &&
-          !proposal?.executed && (
+          !proposal?.executed &&
+          !proposal?.canceled && (
             <Button
               isLoading={loadingStatus}
               onClick={executeProposal}
-              className="bg-blue-400 font-bold mt-2 mx-2 text-white"
+              className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 mx-2 text-white"
             >
               Execute
             </Button>
@@ -228,7 +229,7 @@ export default function VotingBreakdown({ proposalId }: any) {
             <Button
               isLoading={loadingStatus}
               onClick={cancelProposal}
-              className="bg-red-400 font-bold mt-2 mx-2 text-white"
+              className="bg-red-400 hover:bg-red-500 font-bold mt-2 mx-2 text-white"
             >
               Cancel
             </Button>
