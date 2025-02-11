@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
 const convertStatusToVariant = (status: boolean) => {
-  return status ? "success" : "warning";
+  return status ? "danger" : "warning";
 };
 
 export default function ProposalCard({ proposal, proposalId }: any) {
@@ -52,9 +52,9 @@ export default function ProposalCard({ proposal, proposalId }: any) {
       <CardHeader>
         <div className="flex justify-between mb-2">
           <Badge variant="secondary">On-chain</Badge>
-          <Badge variant={convertStatusToVariant(proposal.executed)}>
+          <Badge variant={convertStatusToVariant(proposal.canceled)}>
             <p className="capitalize">
-              {proposal.executed ? "Confirmed" : "Pending"}
+              {proposal.canceled ? "Canceled" : "Pending"}
             </p>
           </Badge>
         </div>

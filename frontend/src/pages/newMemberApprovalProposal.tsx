@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import contractABI from "../contractABI/contractABI.json";
 import { simulateContract, writeContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+// import { config } from "../../main";
 import { Button } from "@components/ui/button";
 import { toast } from "sonner";
 import { useCreateProposalMutation } from "@redux/services/proposal";
@@ -13,6 +13,7 @@ import {
   DialogFooter,
 } from "@components/ui/dialog";
 import { useNavigate } from "react-router";
+import { config } from "../main";
 
 const NewMemberApprovalProposal = () => {
   const [data, setData] = useState({
@@ -23,6 +24,7 @@ const NewMemberApprovalProposal = () => {
   const { address } = useAccount();
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [trxHash, setTrxHash] = useState("");
   const navigate = useNavigate();
 
   const handleInput = (
@@ -57,6 +59,7 @@ const NewMemberApprovalProposal = () => {
       };
 
       await createProposal(backendData);
+      setTrxHash(hash);
 
       toast.warning("Approval is pending");
       setDialogOpen(true);
@@ -126,8 +129,16 @@ const NewMemberApprovalProposal = () => {
               Proposal Submitted
             </h2>
           </DialogHeader>
-          <p className="text-center text-yellow-400">
+          <p className="text-yellow-400">
             Your proposal has been successfully submitted and is under review.
+            To check the transaction status,{" "}
+            <a
+              target="_"
+              href={`${import.meta.env.VITE_TRX_EXPLORER}${trxHash}`}
+              className="text-blue-400 underline"
+            >
+              click here
+            </a>
           </p>
           <DialogFooter>
             <Button

@@ -2,7 +2,7 @@ import ProposalCard from "@components/dao/ProposalCard";
 import { ProposalStatCard } from "@components/dao/ProposalStatCard";
 import contractABI from "../../../contractABI/contractABI.json";
 import { readContract } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../../main";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { IProposal } from "@lib/interfaces";
@@ -14,19 +14,16 @@ export default function ProposalView() {
   const { id } = useParams();
 
   useEffect(() => {
-    const getProposalsByPage = async () => {
+    const getProposalsById = async () => {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
           address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-          functionName: "getProposalsByPage",
-          args: [0, 10],
+          functionName: "getProposalsById",
+          args: [id],
         });
 
-        const result = response[0][Number(id)];
-
-        setProposal(result);
-        console.log(result);
+        setProposal(response);
         console.log(id);
       } catch (e) {
         toast.error("Failer to fetch proposal information");
@@ -34,7 +31,7 @@ export default function ProposalView() {
       }
     };
 
-    getProposalsByPage();
+    getProposalsById();
   }, [id]);
 
   return (

@@ -16,20 +16,22 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from "@wagmi/core";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../main";
 import contractABI from "../../contractABI/contractABI.json";
 import { useNavigate } from "react-router";
 import { IProposal } from "@lib/interfaces";
+import { useAccount } from "wagmi";
 
 export default function VotingBreakdown({ proposalId }: any) {
+  const { address } = useAccount();
   const voteRef = useRef({ proposalId: "", support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<IProposal>();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [voteStatus, setVoteStatus] = useState(true);
   const navigate = useNavigate();
 
   const castVote = async (value: boolean) => {
-    // voteRef.current = { proposalId: proposal.proposer, support: value };
     setLoadingStatus(true);
     voteRef.current = { proposalId: proposalId, support: value };
     try {
@@ -68,92 +70,93 @@ export default function VotingBreakdown({ proposalId }: any) {
     setLoadingStatus(false);
   };
 
-  // const executeProposal = async (value: number) => {
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI,
-  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-  //       functionName: "executeProposal",
-  //       args: [value],
-  //     });
-  //     const hash = await writeContract(config, request);
+  const executeProposal = async () => {
+    setLoadingStatus(true);
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "executeProposal",
+        args: [proposalId],
+      });
+      const hash = await writeContract(config, request);
 
-  //     await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
-  //     toast.success("Proposal executed successfully");
-  //     console.log(voteRef.current);
-  //   } catch (e: any) {
-  //     let errorMessage = e.message;
+      toast.success("Proposal executed successfully");
+    } catch (e: any) {
+      let errorMessage = e.message;
 
-  //     if (errorMessage.includes("reverted with the following reason:")) {
-  //       const match = errorMessage.match(
-  //         /reverted with the following reason:\s*(.*)/
-  //       );
-  //       if (match) {
-  //         errorMessage = match[1];
-  //       }
-  //     }
-  //     console.log("====================================");
-  //     console.log(e);
-  //     console.log("====================================");
-  //     toast.error(errorMessage);
-  //   }
-  // };
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      console.log(e);
+      toast.error(errorMessage);
+    }
+    setLoadingStatus(false);
+  };
 
-  // const cancelProposal = async (value: number) => {
-  //   try {
-  //     const { request } = await simulateContract(config, {
-  //       abi: contractABI,
-  //       address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-  //       functionName: "cancelProposal",
-  //       args: [value],
-  //     });
-  //     const hash = await writeContract(config, request);
+  const cancelProposal = async () => {
+    setLoadingStatus(true);
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "cancelProposal",
+        args: [proposalId],
+      });
+      const hash = await writeContract(config, request);
 
-  //     await waitForTransactionReceipt(config, { hash });
+      await waitForTransactionReceipt(config, { hash });
 
-  //     toast.success("Proposal cancelled");
-  //     console.log(voteRef.current);
-  //   } catch (e: any) {
-  //     let errorMessage = e.message;
+      toast.success("Proposal cancelled");
+    } catch (e: any) {
+      let errorMessage = e.message;
 
-  //     if (errorMessage.includes("reverted with the following reason:")) {
-  //       const match = errorMessage.match(
-  //         /reverted with the following reason:\s*(.*)/
-  //       );
-  //       if (match) {
-  //         errorMessage = match[1];
-  //       }
-  //     }
-  //     console.log("====================================");
-  //     console.log(e);
-  //     console.log("====================================");
-  //     toast.error(errorMessage);
-  //   }
-  // };
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
+    }
+    setLoadingStatus(false);
+  };
 
   useEffect(() => {
-    const getProposal = async () => {
+    const getProposalsById = async () => {
       try {
         const response: any = await readContract(config, {
           abi: contractABI,
           address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-          functionName: "getProposalsByPage",
-          args: [0, 10],
+          functionName: "getProposalsById",
+          args: [proposalId],
         });
 
-        const result = response[0][proposalId];
-
-        setProposal(result);
-        console.log(result);
+        setProposal(response);
       } catch (e) {
         alert("Failer to fetch proposal information");
         console.error("Failed to fetch proposal information:", e);
       }
     };
 
-    getProposal();
+    getProposalsById();
   }, [proposalId]);
+
+  useEffect(() => {
+    const currentTime = Date.now() / 1000;
+    if (currentTime > Number(proposal?.voteDuration)) {
+      setVoteStatus(false);
+    }
+  }, [proposal]);
 
   return (
     <div>
@@ -176,45 +179,61 @@ export default function VotingBreakdown({ proposalId }: any) {
         />
       )}
       <div className="flex justify-end">
-        {/* {Date.now() / 1000 > proposal.voteDuration && address === owner ? (
-          <div className="flex gap-2">
-            <Button className="bg-green-400 font-bold">Execute</Button>
-            <Button className="bg-red-400 font-bold">Cancel</Button>
-          </div>
-        ) : Date.now() / 1000 < proposal.voteDuration ? ( */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button className="bg-green-400 font-bold">Vote</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="text-center text-orange-400">
-                Cast your vote?
-              </DialogTitle>
-            </DialogHeader>
-            <div className="mt-4">
-              <div className="flex justify-center">
-                <Button
-                  isLoading={loadingStatus}
-                  className="bg-green-400 font-bold mx-4"
-                  onClick={() => castVote(true)}
-                >
-                  SUPPORT
-                </Button>
-                <Button
-                  isLoading={loadingStatus}
-                  className="bg-red-400 font-bold mx-4"
-                  onClick={() => castVote(false)}
-                >
-                  AGAINST
-                </Button>
+        {voteStatus && !proposal?.canceled && (
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button className="bg-green-400 font-bold mt-2">Vote</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="text-center text-orange-400">
+                  Cast your vote?
+                </DialogTitle>
+              </DialogHeader>
+              <div className="mt-4">
+                <div className="flex justify-center">
+                  <Button
+                    isLoading={loadingStatus}
+                    className="bg-green-400 font-bold mx-4"
+                    onClick={() => castVote(true)}
+                  >
+                    SUPPORT
+                  </Button>
+                  <Button
+                    isLoading={loadingStatus}
+                    className="bg-red-400 font-bold mx-4"
+                    onClick={() => castVote(false)}
+                  >
+                    AGAINST
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-        {/* ) : (
-          <Badge variant="outline">Wating for execution</Badge>
-        )} */}
+            </DialogContent>
+          </Dialog>
+        )}
+        {!voteStatus &&
+          Number(proposal?.yesvotes) >= 1 &&
+          !proposal?.executed &&
+          !proposal?.canceled && (
+            <Button
+              isLoading={loadingStatus}
+              onClick={executeProposal}
+              className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 mx-2 text-white"
+            >
+              Execute
+            </Button>
+          )}
+        {address === proposal?.proposer &&
+          !proposal?.canceled &&
+          !proposal?.executed && (
+            <Button
+              isLoading={loadingStatus}
+              onClick={cancelProposal}
+              className="bg-red-400 hover:bg-red-500 font-bold mt-2 mx-2 text-white"
+            >
+              Cancel
+            </Button>
+          )}
       </div>
       <Dialog
         open={dialogOpen}

@@ -4,7 +4,7 @@ import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
 import StableCoinABI from "../../contractABI/StableCoinABI.json";
-import { config } from "@layouts/RootLayout";
+import { config } from "../../main";
 import metamask from "../../assets/metamask.svg";
 import {
     Card,
@@ -24,7 +24,6 @@ import {
 } from "@redux/services/proxy";
 import WalletAuth from "@components/auth/WalletAuth";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { Badge } from "@components/ui/badge";
 import { getChainId, readContract } from "@wagmi/core";
 import { Button } from "@components/ui/button";
 import { Plus } from "lucide-react";
@@ -72,7 +71,6 @@ export default function MfsDashboard() {
     const [getBalance] = useLazyGetBalanceQuery();
     const [proposalCount, setProposalCount] = useState("");
     const [proposalThreshold, setProposalThreshold] = useState("");
-    const [isMemberApproved, setIsMemberApproved] = useState(false);
     const [coinBalance, setCoinBalance] = useState(0);
     const chainId = getChainId(config);
     const { data: client } = useWalletClient();
@@ -168,27 +166,6 @@ export default function MfsDashboard() {
         (state: RootState) => state.persistedReducer.authReducer
     );
 
-    useEffect(() => {
-        const checkIsMemberApproved = async () => {
-            try {
-                const response: any = await readContract(config, {
-                    abi: contractABI,
-                    address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-                    functionName: "checkIsMemberApproved",
-                    args: [address],
-                });
-
-                console.log(response);
-                setIsMemberApproved(true);
-            } catch (e) {
-                console.error(e);
-            }
-        };
-        if (isConnected) {
-            checkIsMemberApproved();
-        }
-    }, [address, isConnected]);
-
     return (
         <div className="h-full flex flex-col justify-center -mt-24">
             <div className="border bg-background min-h-96 rounded-xl mt-10 pb-10">
@@ -206,18 +183,6 @@ export default function MfsDashboard() {
                 </div>
                 <div className="flex justify-end relative">
                     <div className="absolute top-8 right-8 flex items-center gap-2">
-                        {address && !isMemberApproved ? (
-                            <div className="font-bold text-sm">
-                                Membership Status:{" "}
-                                <Badge variant="warning">Pending</Badge>
-                            </div>
-                        ) : address && isMemberApproved ? (
-                            <p className="mr-2 border-2 border-green-600 font-bold p-2 rounded-2xl text-xs">
-                                Approved
-                            </p>
-                        ) : (
-                            <></>
-                        )}
                         <div className="relative w-fit">
                             {!isConnected && (
                                 <div className="absolute size-4 bg-red-500 animate-ping -top-1.5 -right-1.5 z-20 rounded-full"></div>
