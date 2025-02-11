@@ -14,5 +14,3 @@ services:
 networks:
   fincube23_network:
     external: true
-  fincube23_network:
-    external: true
