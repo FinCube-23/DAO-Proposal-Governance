@@ -37,13 +37,13 @@ export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">Proposal Status</CardTitle>
             <div>
-              <p className="font-bold">
-                Vote Started On:
+              <p className="font-bold text-xs text-right">
+                Vote Started On:{" "}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteStart)}
                 </span>
               </p>
-              <p className="text-left font-bold">
+              <p className="font-bold text-xs text-right">
                 Vote Ended On:{" "}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteDuration)}

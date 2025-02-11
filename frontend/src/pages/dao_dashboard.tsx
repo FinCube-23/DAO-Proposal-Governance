@@ -302,7 +302,7 @@ export default function DaoDashboard() {
               <p>
                 {loading
                   ? "Loading proposals..."
-                  : `Ongoing proposals: ${ongoingProposalCount}`}
+                  : `Ongoing proposals: ${Number(ongoingProposalCount)}`}
               </p>
             </div>
             <Dialog>

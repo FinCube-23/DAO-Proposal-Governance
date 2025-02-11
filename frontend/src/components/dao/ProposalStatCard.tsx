@@ -32,18 +32,18 @@ const convertToDate = (time: number) => {
 export const ProposalStatCard = ({ proposal, proposalId }: any) => {
   return (
     <div className="flex items-center gap-5">
-      <Card className="flex-grow">
+      <Card className="flex-grow w-full">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl">Proposal Status</CardTitle>
             <div>
-              <p className="font-bold">
+              <p className="font-bold text-xs text-right">
                 Vote Started On:{" "}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteStart)}
                 </span>
               </p>
-              <p className="text-left font-bold">
+              <p className="font-bold text-xs text-right">
                 Vote Ended On:{" "}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteDuration)}
@@ -75,7 +75,7 @@ export const ProposalStatCard = ({ proposal, proposalId }: any) => {
         </CardContent>
       </Card>
       <div>
-        <p className="text-xl font-bold py-2">Vote Labels:</p>
+        <p className="text-lg font-bold py-2">Vote Labels:</p>
         {labels.map((label, idx) => (
           <div key={idx} className="flex items-center gap-2">
             <div className={`h-4 w-4 bg-${label.color}-400`}></div>
