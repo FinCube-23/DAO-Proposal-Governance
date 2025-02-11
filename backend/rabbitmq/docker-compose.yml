@@ -5,9 +5,6 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: user # Default username
-      RABBITMQ_DEFAULT_PASS: password # Default password
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq/
@@ -16,4 +13,6 @@ services:
 
 networks:
   message_q_network:
+    external: true
+  fincube23_network:
     external: true
