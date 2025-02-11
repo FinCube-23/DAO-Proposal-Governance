@@ -2,18 +2,19 @@ services:
   user-management-service:
     container_name: user_management_api
     build:
-      context: .
+      context: ./
       args:
         - APP_ENV
-    command: npm run start
     ports:
       - 3001:3000
     volumes:
-      - .:/usr/src/app
+      - ./:/app
+      - /app/node_modules
     env_file:
       - .env.local
     networks:
       - fincube23_network
+      
   user-management-pgsqldb:
     container_name: user-management-pgsqldb
     image: postgres

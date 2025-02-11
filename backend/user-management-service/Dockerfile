@@ -7,7 +7,8 @@ COPY package*.json ./
 
 RUN npm install
 
-COPY . .
+# --chown=app:app, ensures your security best practices and avoids file permission issues
+COPY --chown=app:app . .
 
 EXPOSE 3000
 
