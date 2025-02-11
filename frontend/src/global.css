@@ -1,6 +1,13 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body {
+  @apply font-sans;
+}
 
 @layer base {
   :root {
@@ -99,7 +106,7 @@
   display: block;
   height: 5px;
   width: 75px;
-  top:10;
+  top: 10;
   margin-bottom: 10px;
 }
 .styled-title:after {
