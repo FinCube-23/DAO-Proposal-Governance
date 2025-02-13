@@ -1,4 +1,4 @@
-import React from "react";
+ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./global.css";
 import { Provider } from "react-redux";
@@ -18,28 +18,27 @@ import OngoingProposalView from "@pages/dao/proposal/OngoingProposalView";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
-
+ 
 import "@rainbow-me/rainbowkit/styles.css";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
-import { sepolia } from "viem/chains";
+import { polygonAmoy, sepolia } from "viem/chains";
 import { injected } from "@wagmi/core";
-
+ 
 export const config = createConfig({
-  chains: [sepolia],
+  chains: [sepolia, polygonAmoy],
   connectors: [injected()],
   ssr: true,
   transports: {
-    [sepolia.id]: http(
-      "https://eth-sepolia.g.alchemy.com/v2/mNVDS9BNNIgmXc5u1oBGNoB9_L2NOo_g"
-    ),
+    [sepolia.id]: http(`${import.meta.env.VITE_SEPOLIA_RPC}`),
+    [polygonAmoy.id]: http(),
   },
 });
-
+ 
 const queryClient = new QueryClient();
-
+ 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WagmiProvider config={config}>
@@ -67,7 +66,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="" element={<Navigate to="/mfs/dashboard" />} />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
-                      <Route path="" element={<Navigate to="/mfs/dao/fincube" />} />
+                      <Route
+                        path=""
+                        element={<Navigate to="/mfs/dao/fincube" />}
+                      />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
                         <Route
@@ -102,3 +104,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </WagmiProvider>
   </React.StrictMode>
 );
+ 
