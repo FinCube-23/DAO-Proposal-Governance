@@ -47,7 +47,7 @@ start_backend_service() {
     local service=$1
     echo "Starting $service..."
     cd "backend/$service"
-    docker-compose up --build -d 
+    docker compose up --build -d 
     cd - >/dev/null
 }
 
@@ -56,7 +56,7 @@ stop_backend_service() {
     local service=$1
     echo "Stopping $service..."
     cd "backend/$service"
-    docker-compose down
+    docker compose down
     cd - >/dev/null
 }
 
