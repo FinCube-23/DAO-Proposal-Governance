@@ -8,16 +8,18 @@ import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse } from './dto/proposal.dto';
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
-  private readonly logger = new Logger(ProposalServiceService.name);
   constructor(
     @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
-    @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy
+    @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy,
+    private readonly logger: WinstonLogger
   ) {
+    this.logger.setContext(ProposalServiceService.name);
     this.update_proposals = [];
   }
 

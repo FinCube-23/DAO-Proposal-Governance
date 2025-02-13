@@ -5,7 +5,8 @@ import { ProposalServiceModule } from './proposal-service/proposal-service.modul
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { WinstonLogger } from './shared/common/logger/winston-logger'
+
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     AuthzModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, WinstonLogger],
+  exports: [WinstonLogger],
 })
 export class AppModule { }

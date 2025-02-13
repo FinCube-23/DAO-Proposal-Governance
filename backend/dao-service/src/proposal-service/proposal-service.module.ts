@@ -3,8 +3,8 @@ import { ProposalServiceService } from './proposal-service.service';
 import { ProposalServiceController } from './proposal-service.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
-
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 @Module({
   imports: [
@@ -21,6 +21,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     ]),
   ],
   controllers: [ProposalServiceController],
-  providers: [ProposalServiceService],
+  providers: [ProposalServiceService, WinstonLogger],
 })
 export class ProposalServiceModule { }
