@@ -5,11 +5,11 @@ services:
       context: ./
       args:
         - APP_ENV
-    command: npm run start
     ports:
       - 3002:3000
     volumes:
-      - ./:/usr/src/app
+      - ./:/app
+      - /app/node_modules
     env_file:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
