@@ -6,8 +6,9 @@ import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservice
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose']
+    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
   });
+
   const microservice = await app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
@@ -26,6 +27,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
+
   app.startAllMicroservices();
   await app.listen(3000);
 }

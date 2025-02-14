@@ -1,5 +1,6 @@
 import { LoggerService, Injectable } from '@nestjs/common';
 import * as winston from 'winston';
+import * as morgan from 'morgan';
 import { maskJSON2, JsonMask2Configs, UuidMaskOptions } from 'maskdata';
 
 @Injectable()
