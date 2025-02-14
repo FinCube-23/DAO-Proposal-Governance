@@ -48,7 +48,10 @@ export class ProposalServiceService {
       const new_proposal = this.proposalRepository.create(proposal);
 
       const saved_proposal = await this.proposalRepository.save(new_proposal);
-      this.logger.log(`New proposal created with ID: ${saved_proposal.id}`);
+      this.logger.log({
+        message: `New proposal created with ID: ${saved_proposal.id}`,
+        wallet: proposal.proposer_address,
+      });
 
       return saved_proposal;
 
@@ -97,7 +100,10 @@ export class ProposalServiceService {
 
   // 💬 Publishing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log("Triggering queue-pending-proposal for Transaction: " + proposal.trx_hash);
+    this.logger.log({
+      message: "Triggering queue-pending-proposal for a new transaction",
+      trxHash: proposal.trx_hash,
+    });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
       this.rabbitClient.send('queue-pending-proposal', proposal)
