@@ -58,7 +58,8 @@ const NewMemberApprovalProposal = () => {
         trx_hash: hash,
       };
 
-      await createProposal(backendData);
+      const res = await createProposal(backendData);
+      console.log("Backend Response: ", res);
       setTrxHash(hash);
 
       toast.warning("Approval is pending");

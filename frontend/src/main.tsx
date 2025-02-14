@@ -1,4 +1,4 @@
- import React from "react";
+import React from "react";
 import ReactDOM from "react-dom/client";
 import "./global.css";
 import { Provider } from "react-redux";
@@ -18,7 +18,7 @@ import OngoingProposalView from "@pages/dao/proposal/OngoingProposalView";
 import ProposalView from "@pages/dao/proposal/proposalView";
 import GeneralProposal from "@pages/generalProposal";
 import NewMemberApprovalProposal from "@pages/newMemberApprovalProposal";
- 
+
 import "@rainbow-me/rainbowkit/styles.css";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
@@ -26,19 +26,19 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
 import { polygonAmoy, sepolia } from "viem/chains";
 import { injected } from "@wagmi/core";
- 
+
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
   connectors: [injected()],
   ssr: true,
   transports: {
     [sepolia.id]: http(`${import.meta.env.VITE_SEPOLIA_RPC}`),
-    [polygonAmoy.id]: http(),
+    [polygonAmoy.id]: http(`${import.meta.env.VITE_AMOY_RPC}`),
   },
 });
- 
+
 const queryClient = new QueryClient();
- 
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <WagmiProvider config={config}>
@@ -104,4 +104,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </WagmiProvider>
   </React.StrictMode>
 );
- 
