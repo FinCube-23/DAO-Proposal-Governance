@@ -1,0 +1,20 @@
+filebeat.inputs:
+  - type: log
+    enabled: true
+    paths:
+      - "/logs/dao-service/app.log"
+    fields:
+      - service: dao-app
+
+output.elasticsearch:
+  hosts: ["http://localhost:9200"]
+  index: "nestjs-logs-%{+yyyy.MM.dd}"
+
+logging:
+  level: info
+  to_files: true
+  files:
+    path: /var/log/filebeat
+    name: filebeat
+    keepfiles: 7
+    permissions: 0644
