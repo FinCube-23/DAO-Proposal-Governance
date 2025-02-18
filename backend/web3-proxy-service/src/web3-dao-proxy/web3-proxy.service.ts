@@ -64,4 +64,12 @@ export class Web3ProxyService {
 
     return formattedProposals;
   }
+
+  async getProposalById(proposalId: number): Promise<any> {
+    const proposal = await this.contract.getProposalsById(proposalId);
+
+    const formattedProposal = this.parseBigInt(proposal);
+
+    return formattedProposal;
+  }
 }

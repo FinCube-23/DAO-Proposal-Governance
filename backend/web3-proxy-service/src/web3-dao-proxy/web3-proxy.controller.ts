@@ -29,6 +29,11 @@ export class Web3ProxyController {
     return this.web3ProxyService.getOngoingProposals(req.user);
   }
 
+  @Get('proposal-by-id/:proposalId')
+  async getProposalById(@Param('proposalId') proposalId: number) {
+    return this.web3ProxyService.getProposalById(proposalId);
+  }
+
   @Post('proposals-by-page')
   async getProposalsByPage(@Req() req, @Body('cursor') cursor: number, @Body('howMany') howMany: number): Promise<any> {
     return this.web3ProxyService.getProposalsByPage(cursor, howMany, req.user);
@@ -51,5 +56,7 @@ export class Web3ProxyController {
   async checkIsMemberApproved(@Req() req, @Body('address') memberAddress: string): Promise<any> {
     return this.web3ProxyService.checkIsMemberApproved(memberAddress, req.user);
   }
+
+
 
 }
