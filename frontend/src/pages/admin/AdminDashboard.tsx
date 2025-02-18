@@ -10,8 +10,65 @@ import {
   CardTitle,
 } from "@components/ui/card";
 import { Tabs, TabsContent } from "@components/ui/tabs";
+import { IProposal } from "@lib/interfaces";
+import {
+  useLazyGetBalanceQuery,
+  useLazyGetOngoingProposalsQuery,
+  useLazyGetProposalCountQuery,
+  useLazyGetProposalThresholdQuery,
+} from "@redux/services/proxy";
+import { useState } from "react";
 
 export default function AdminDashboard() {
+  const [balance, setBalance] = useState<string>();
+  const [threshold, setThreshold] = useState<string>();
+  const [proposalCount, setProposalCount] = useState<string>();
+  const [totalOngoingProposals, setTotalOngoingProposals] =
+    useState<IProposal[]>();
+
+  // RTK Query
+  const [getBalance] = useLazyGetBalanceQuery();
+  const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
+  const [getProposalCount] = useLazyGetProposalCountQuery();
+  const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
+
+  const walletBalance = async () => {
+    try {
+      const response: any = await getBalance();
+      setBalance(response);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const totalProposals = async () => {
+    try {
+      const response: any = await getProposalCount();
+      setProposalCount(response);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const proposalThreshold = async () => {
+    try {
+      const response: any = await getProposalThreshold();
+      setThreshold(response);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const getTotalOngoingProposals = async () => {
+    try {
+      const response: any = await getOngoingProposals();
+      const activeProposals = response.length;
+      setTotalOngoingProposals(activeProposals);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <>
       <div className="md:hidden">
