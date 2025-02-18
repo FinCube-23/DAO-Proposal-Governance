@@ -26,6 +26,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@components/ui/sonner";
 import { polygonAmoy, sepolia } from "viem/chains";
 import { injected } from "@wagmi/core";
+import AdminLayout from "@layouts/AdminLayout";
+import AdminDashboard from "@pages/admin/AdminDashboard";
 
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
@@ -94,6 +96,13 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                         />
                       </Route>
                     </Route>
+                  </Route>
+                  <Route path="admin" element={<AdminLayout />}>
+                    <Route
+                      path=""
+                      element={<Navigate to="/admin/dashboard" />}
+                    />
+                    <Route path="dashboard" element={<AdminDashboard />} />
                   </Route>
                 </Routes>
               </BrowserRouter>
