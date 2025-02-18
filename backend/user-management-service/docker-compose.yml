@@ -36,6 +36,8 @@ services:
       - '5050:80'
     depends_on:
       - user-management-pgsqldb
+    networks:
+      - fincube23_network
 
 volumes:
   postgres_data:
