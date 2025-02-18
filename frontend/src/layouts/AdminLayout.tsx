@@ -23,7 +23,7 @@ export default function AdminLayout() {
       <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
       <SidebarProvider className="z-50">
         <MFSSidebar />
-        <main className="w-full h-screen">
+        <main className="w-full overflow-hidden">
           <MFSHeader />
           <div className="container mx-auto mt-24 h-full">
             <Outlet />
