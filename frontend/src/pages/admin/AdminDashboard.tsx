@@ -2,6 +2,7 @@ import { MainNav } from "@components/admin/main-nav";
 import { Overview } from "@components/admin/overview";
 import { RecentTransactions } from "@components/admin/recent-transactions";
 import { UserNav } from "@components/admin/user-nav";
+import { Badge } from "@components/ui/badge";
 import {
   Card,
   CardContent,
@@ -12,6 +13,7 @@ import {
 import { Tabs, TabsContent } from "@components/ui/tabs";
 import { IProposal } from "@lib/interfaces";
 import {
+  useLazyCheckIsMemberApprovedQuery,
   useLazyGetBalanceQuery,
   useLazyGetOngoingProposalsQuery,
   useLazyGetProposalThresholdQuery,
@@ -25,12 +27,14 @@ export default function AdminDashboard() {
   const [threshold, setThreshold] = useState<string>();
   const [totalOngoingProposals, setTotalOngoingProposals] =
     useState<IProposal[]>();
+  const [approvalStatus, setApprovalStatus] = useState<boolean>();
   const { address } = useAccount();
 
   // RTK Query
   const [getBalance] = useLazyGetBalanceQuery();
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
+  const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
 
   const getTotalOngoingProposals = async () => {
     try {
@@ -43,6 +47,20 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => {
+    const checkIsMember = async () => {
+      const data = { address: `${address}` };
+
+      if (address) {
+        try {
+          const response: any = await checkIsMemberApproved(data);
+          console.log(response.data);
+          setApprovalStatus(response.data);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     const walletBalance = async () => {
       const data = { address: `${address}` };
 
@@ -70,9 +88,10 @@ export default function AdminDashboard() {
       }
     };
 
+    checkIsMember();
     walletBalance();
     proposalThreshold();
-  }, [getBalance, getProposalThreshold, address]);
+  }, [getBalance, getProposalThreshold, checkIsMemberApproved, address]);
 
   return (
     <>
@@ -91,6 +110,7 @@ export default function AdminDashboard() {
           alt="Dashboard"
           className="hidden dark:block"
         />
+        h-5 h-5
       </div>
       <div className="hidden flex-col md:flex">
         <div className="border-b">
@@ -136,27 +156,20 @@ export default function AdminDashboard() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">
-                      Total Proposals
+                      Membership Status
                     </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="h-4 w-4 text-muted-foreground"
-                    >
-                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                      <circle cx="9" cy="7" r="4" />
-                      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
-                    </svg>
+                    {approvalStatus ? (
+                      <Badge variant="success" className="h-5" />
+                    ) : (
+                      <Badge variant="warning" className="h-5" />
+                    )}
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">10</div>
+                    <div className="text-2xl font-bold">
+                      {approvalStatus ? <p>Approved</p> : <p>Pending</p>}
+                    </div>
                     <p className="text-xs text-muted-foreground">
-                      Including ongoing proposals
+                      Your membership approval status
                     </p>
                   </CardContent>
                 </Card>
