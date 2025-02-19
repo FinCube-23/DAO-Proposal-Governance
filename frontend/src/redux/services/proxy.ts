@@ -12,11 +12,12 @@ import {
 export const proxyApis = api.injectEndpoints({
   endpoints: (build) => ({
     // get balance
-    getBalance: build.query<GetBalanceResponse, void>({
-      query: () => {
+    getBalance: build.query<GetBalanceResponse, { address: string }>({
+      query: (payload) => {
         return {
           url: `${PROXY_ENDPOINT.BASE}/balance`,
-          method: "GET",
+          method: "POST",
+          body: payload,
         };
       },
     }),
