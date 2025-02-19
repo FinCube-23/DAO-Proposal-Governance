@@ -41,7 +41,8 @@
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.20",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "winston-loki": "^6.1.3"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
