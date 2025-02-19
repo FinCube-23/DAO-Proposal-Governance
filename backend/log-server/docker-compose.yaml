@@ -11,31 +11,40 @@ services:
     volumes:
       - ./config/loki-config.yaml:/etc/loki/local-config.yaml  # Mount the custom Loki config
 
-  promtail:
-    image: grafana/promtail:latest
-    container_name: promtail
-    networks:
-      - fincube23_network
-    volumes:
-      - /tmp:/tmp  # Mount temporary directory for positions file
-      - ./config/promtail-config.yaml:/etc/promtail/config.yaml  # Mount Promtail config
-      - ../dao-service/logs:/app/dao-service/logs
-    depends_on:
-      - loki  # Ensure Loki is up before starting Promtail
-
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
     networks:
       - fincube23_network
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: "admin"  # Set admin password for Grafana
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     ports:
       - "3200:3000"  # Expose Grafana's UI port
     depends_on:
       - loki  # Ensure Loki is up before starting Grafana
     volumes:
       - grafana-data:/var/lib/grafana  # Persistent storage for Grafana dashboards and settings
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
 
 networks:
   fincube23_network:
