@@ -180,7 +180,7 @@ export default function AdminDashboard() {
                     </svg>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">10</div>
+                    <div className="text-2xl font-bold">{threshold}</div>
                     <p className="text-xs text-muted-foreground">
                       Minimum number of votes needed to execute
                     </p>
