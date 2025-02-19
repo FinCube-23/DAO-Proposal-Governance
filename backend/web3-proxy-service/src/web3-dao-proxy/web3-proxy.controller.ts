@@ -35,12 +35,6 @@ export class Web3ProxyController {
     return this.web3ProxyService.getProposalThreshold(req.user);
   }
 
-  @Get('proposal-count')
-  @ApiOperation({ summary: "Get the total number of ongoing proposals" })
-  async getOngoingProposalCount(@Req() req): Promise<number> {
-    return this.web3ProxyService.getOngoingProposalCount(req.user);
-  }
-
   @Get('ongoing-proposals')
   @ApiOperation({ summary: "Get the ongoing proposals" })
   async getOngoingProposals(@Req() req): Promise<any> {

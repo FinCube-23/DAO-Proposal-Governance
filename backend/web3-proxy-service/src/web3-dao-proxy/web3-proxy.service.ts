@@ -28,12 +28,12 @@ export class Web3ProxyService {
     return await this.contract.proposalThreshold();
   }
 
-  async getOngoingProposalCount(sub: string): Promise<number> {
-    return await this.contract.getOngoingProposalsCount();
-  }
-
   async getOngoingProposals(sub: string): Promise<any> {
-    return await this.contract.getOngoingProposals();
+    const proposals = await this.contract.getOngoingProposals();
+
+    const formattedProposals = this.parseBigInt(proposals);
+
+    return formattedProposals;
   }
 
   async registerMember(address: string, _memberURI: string, sub: string): Promise<any> {
