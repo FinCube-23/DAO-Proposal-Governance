@@ -2,6 +2,7 @@ import { LoggerService, Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 import { maskJSON2, JsonMask2Configs, UuidMaskOptions } from 'maskdata';
 const LokiTransport = require('winston-loki');
+require('dotenv').config();
 
 @Injectable()
 export class WinstonLogger implements LoggerService {
@@ -37,7 +38,7 @@ export class WinstonLogger implements LoggerService {
                 new winston.transports.Console(),
                 new winston.transports.File({ filename: 'logs/app.log' }),
                 new LokiTransport({
-                    host: "http://loki:3100"
+                    host: process.env.LOG_SERVER
                   })
             ]
         });
