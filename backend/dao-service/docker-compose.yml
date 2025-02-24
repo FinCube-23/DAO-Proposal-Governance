@@ -10,6 +10,7 @@ services:
     volumes:
       - ./:/app
       - /app/node_modules
+      - ./libs/validate-auth:/usr/src/app/libs/validate-auth
     env_file:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
