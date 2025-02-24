@@ -37,6 +37,8 @@ services:
       - '5070:80'
     depends_on:
       - audit-trail-pgsqldb
+    networks:
+      - fincube23_network
 
 volumes:
   postgres-data:
