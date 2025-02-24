@@ -1,0 +1,55 @@
+version: '3'
+
+services:
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    networks:
+      - fincube23_network
+    ports:
+      - "3100:3100"  # Expose Loki's port for queries
+    volumes:
+      - ./config/loki-config.yaml:/etc/loki/local-config.yaml  # Mount the custom Loki config
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - fincube23_network
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - "3200:3000"  # Expose Grafana's UI port
+    depends_on:
+      - loki  # Ensure Loki is up before starting Grafana
+    volumes:
+      - grafana-data:/var/lib/grafana  # Persistent storage for Grafana dashboards and settings
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+
+networks:
+  fincube23_network:
+    external: true  # Use the external Docker network 'fincube23_network'
+
+volumes:
+  grafana-data:
+    driver: local  # Persistent volume for Grafana
