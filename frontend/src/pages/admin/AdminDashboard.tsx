@@ -28,8 +28,7 @@ import contractABI from "../../contractABI/contractABI.json";
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
   const [threshold, setThreshold] = useState<string>();
-  const [totalOngoingProposals, setTotalOngoingProposals] =
-    useState<IProposal[]>();
+  const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [approvalStatus, setApprovalStatus] = useState<boolean>();
   const { address } = useAccount();
 
@@ -39,16 +38,6 @@ export default function AdminDashboard() {
   const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
   const [proposalCount, setProposalCount] = useState<string>();
-
-  const getTotalOngoingProposals = async () => {
-    try {
-      const response: any = await getOngoingProposals();
-      const activeProposals = response.data.length;
-      setTotalOngoingProposals(activeProposals);
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -108,11 +97,28 @@ export default function AdminDashboard() {
       }
     };
 
+    const getTotalOngoingProposals = async () => {
+      try {
+        const response: any = await getOngoingProposals();
+        const activeProposals = response.data.length;
+        setOngoingProposals(activeProposals);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getTotalOngoingProposals();
     getProposalCount();
     checkIsMember();
     walletBalance();
     proposalThreshold();
-  }, [getBalance, getProposalThreshold, checkIsMemberApproved, address]);
+  }, [
+    getBalance,
+    getProposalThreshold,
+    checkIsMemberApproved,
+    getOngoingProposals,
+    address,
+  ]);
 
   return (
     <>
@@ -154,18 +160,7 @@ export default function AdminDashboard() {
                     <CardTitle className="text-sm font-medium">
                       Balance
                     </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="h-4 w-4 text-muted-foreground"
-                    >
-                      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                    </svg>
+                    <Badge variant="secondary">On-chain</Badge>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{balance} ETH</div>
@@ -179,6 +174,7 @@ export default function AdminDashboard() {
                     <CardTitle className="text-sm font-medium">
                       Membership Status
                     </CardTitle>
+                    <Badge variant="secondary">On-chain</Badge>
                     {approvalStatus ? (
                       <Badge variant="success" className="h-5" />
                     ) : (
@@ -199,19 +195,7 @@ export default function AdminDashboard() {
                     <CardTitle className="text-sm font-medium">
                       Proposal Threshold
                     </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="h-4 w-4 text-muted-foreground"
-                    >
-                      <rect width="20" height="14" x="2" y="5" rx="2" />
-                      <path d="M2 10h20" />
-                    </svg>
+                    <Badge variant="secondary">On-chain</Badge>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">{threshold}</div>
@@ -225,21 +209,12 @@ export default function AdminDashboard() {
                     <CardTitle className="text-sm font-medium">
                       Total Ongoing Proposals
                     </CardTitle>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      className="h-4 w-4 text-muted-foreground"
-                    >
-                      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-                    </svg>
+                    <Badge variant="secondary">On-chain</Badge>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold">10</div>
+                    <div className="text-2xl font-bold">
+                      {ongoingProposals?.length || 0}
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       Proposals currently active for casting vote
                     </p>
@@ -257,7 +232,10 @@ export default function AdminDashboard() {
                 </Card>
                 <Card className="col-span-3">
                   <CardHeader>
-                    <CardTitle>Recent Proposals</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle>Recent Proposals</CardTitle>
+                      <Badge variant="secondary">On-chain</Badge>
+                    </div>
                     <CardDescription>
                       Total number of proposals: {proposalCount}
                     </CardDescription>
