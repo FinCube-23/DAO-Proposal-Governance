@@ -12,15 +12,18 @@ import {
 } from "@components/ui/card";
 import { Tabs, TabsContent } from "@components/ui/tabs";
 import { IProposal } from "@lib/interfaces";
+import { config } from "../../main";
 import {
   useLazyCheckIsMemberApprovedQuery,
   useLazyGetBalanceQuery,
   useLazyGetOngoingProposalsQuery,
   useLazyGetProposalThresholdQuery,
 } from "@redux/services/proxy";
+import { readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
+import contractABI from "../../contractABI/contractABI.json";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -35,11 +38,12 @@ export default function AdminDashboard() {
   const [getProposalThreshold] = useLazyGetProposalThresholdQuery();
   const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
+  const [proposalCount, setProposalCount] = useState<string>();
 
   const getTotalOngoingProposals = async () => {
     try {
       const response: any = await getOngoingProposals();
-      const activeProposals = response.length;
+      const activeProposals = response.data.length;
       setTotalOngoingProposals(activeProposals);
     } catch (e) {
       console.error(e);
@@ -88,6 +92,23 @@ export default function AdminDashboard() {
       }
     };
 
+    const getProposalCount = async () => {
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "proposalCount",
+        });
+        const result = response.toString();
+
+        console.log("Proposal Count:", result);
+        setProposalCount(result);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getProposalCount();
     checkIsMember();
     walletBalance();
     proposalThreshold();
@@ -236,13 +257,13 @@ export default function AdminDashboard() {
                 </Card>
                 <Card className="col-span-3">
                   <CardHeader>
-                    <CardTitle>Recent Transactions</CardTitle>
+                    <CardTitle>Recent Proposals</CardTitle>
                     <CardDescription>
-                      Total number of transactions: 10
+                      Total number of proposals: {proposalCount}
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RecentTransactions />
+                    <RecentTransactions proposalCount={proposalCount} />
                   </CardContent>
                 </Card>
               </div>
