@@ -8,7 +8,7 @@ const { Network, Alchemy } = require("alchemy-sdk");
 
 const settings = {
   apiKey: process.env.ALCHEMY_API_KEY,
-  network: Network.ETH_SEPOLIA,
+  network: Network[process.env.ALCHEMY_NETWORK] || Network.ETH_SEPOLIA,
 };
 // Ref: https://github.com/alchemyplatform/alchemy-sdk-js/blob/master/docs-md/enums/Network.md
 
