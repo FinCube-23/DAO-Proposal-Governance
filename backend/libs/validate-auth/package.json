@@ -1,0 +1,29 @@
+{
+  "name": "@custom/validate-auth",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@nestjs/microservices": "^11.0.10",
+    "consola": "^3.4.0",
+    "fast-safe-stringify": "^2.1.1",
+    "iterare": "^1.2.1",
+    "path-to-regexp": "^8.2.0",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1",
+    "tslib": "^2.8.1",
+    "uid": "^2.0.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.13.4",
+    "typescript": "^5.7.3"
+  }
+}
