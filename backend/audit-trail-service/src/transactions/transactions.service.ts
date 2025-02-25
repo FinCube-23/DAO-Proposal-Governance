@@ -35,11 +35,19 @@ export class TransactionsService {
             transaction.trx_status = newStatus;
             transaction.trx_metadata = metadata;
             transaction.confirmation_source = source;
-            this.logger.log(`Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source }.`);
+            this.logger.log(`Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`);
             return await this.transactionRepository.save(transaction);
         } catch (err) {
             this.logger.error(`Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`);
             throw new Error("Transaction status couldn't get updated.");
+        }
+    }
+
+    async getTransactions(): Promise<TransactionEntity[]> {
+        try {
+            return await this.transactionRepository.find();
+        } catch {
+            this.logger.error("Could not find any transactions");
         }
     }
 }

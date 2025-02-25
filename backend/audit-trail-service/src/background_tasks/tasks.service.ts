@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
 import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
 import { TransactionsService } from 'src/transactions/transactions.service';
+import { Cron } from '@nestjs/schedule';
 
 require('dotenv').config();
 const { Network, Alchemy } = require("alchemy-sdk");
@@ -22,6 +23,13 @@ export class TasksService {
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
   ) { }
+
+  @Cron('30 * * * * *')
+  async handleCron() {
+    this.logger.debug('Called when the current second is 30');
+    const transactions = await this.transactionService.getTransactions();
+    this.logger.log(`Current transactions in DB ${transactions}`);
+  }
 
   async listenProposalTrx() {
     const proposalTopic = process.env.PROPOSAL_TOPIC;
