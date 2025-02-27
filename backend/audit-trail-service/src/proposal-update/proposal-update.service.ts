@@ -32,6 +32,7 @@ export class ProposalUpdateService {
       const new_dao_audit = {
         "trx_hash": data_packet.trx_hash,
         "trx_sender": data_packet.proposer_address,
+        "trx_status": 0
       };
       const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
       const originalMsg = context.getMessage();
@@ -81,6 +82,10 @@ export class ProposalUpdateService {
 
   async getProposalAddedEventByHash(trx_hash: string): Promise<any> {
     return await this.proposalUpdateRepository.getProposalsAdded(trx_hash);
+  }
+
+  async getTransactionUpdates(trx_hashes: string[]): Promise<any> {
+    return await this.proposalUpdateRepository.transactionUpdateQuery(trx_hashes);
   }
 
 }

@@ -98,4 +98,70 @@ export class ProposalUpdateRepository {
         return query;
     }
 
+    //To get transaction updates, this will be updated in the following CARD #242 after cron job completes.
+    transactionUpdateQuery(transactionHashes: string[]): any {
+        const query = gql`
+          query GetTransactionsByHashes($transactionHashes: [String!]!) {
+            proposalExecuteds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalCreateds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            ownershipTransferreds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            memberRegistereds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            memberApproveds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalType
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+          }
+        `;
+        return query;
+    }
+
+
 }

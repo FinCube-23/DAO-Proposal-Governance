@@ -26,9 +26,23 @@ export class TasksService {
 
   @Cron('30 * * * * *')
   async handleCron() {
-    this.logger.debug('Called when the current second is 30');
-    const transactions = await this.transactionService.getTransactions();
-    this.logger.log(`Current transactions in DB ${transactions}`);
+    this.logger.log("Cron job started to look for pending transactions");
+    //Get pending proposals from DB
+    this.logger.log("Quering transactions from Transaction DB");
+
+    const pendingTransactionHash = await this.transactionService.getPendingTransactionHash();
+
+    this.logger.log(`This are the pending transaction hashes: ${pendingTransactionHash}`);
+
+    //Query pending transactions (if any) from GraphQL
+    this.logger.log(`Quering pending transactions from The Graph`);
+
+    const pendingTransactions = await this.proposalUpdateService.getTransactionUpdates(pendingTransactionHash);
+
+    this.logger.log(`Found pending transactions: ${pendingTransactions}`);
+
+    //Update if there is any change in status first transaction service, then DAO service
+
   }
 
   async listenProposalTrx() {

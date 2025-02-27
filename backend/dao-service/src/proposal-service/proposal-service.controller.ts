@@ -19,7 +19,7 @@ export class ProposalServiceController {
   // 💬 MessagePattern expects a response | This is a publisher
   @Post()
   @ApiTags("Proposal Off-chain")
-  @ApiOperation({summary: "Inserts new proposal data at off-chain DB and emit message to Audit Trail Service",})
+  @ApiOperation({ summary: "Inserts new proposal data at off-chain DB and emit message to Audit Trail Service", })
   @ApiOkResponse({ status: 200, description: 'The record has been successfully created.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Req() req, @Body() proposal_entity: ProposalDto): Promise<ProposalEntity> {
@@ -32,7 +32,7 @@ export class ProposalServiceController {
   @ApiResponse({ status: 200, type: ProposalEntity })
   @ApiResponse({ status: 404, description: 'Proposal not found' })
   async findOne(@Param('id') id: number): Promise<ProposalEntity> {
-      return this.proposalService.findById(id);
+    return this.proposalService.findById(id);
   }
 
   @Get()
@@ -42,10 +42,10 @@ export class ProposalServiceController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async findAll(
-      @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-      @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number
   ): Promise<PaginatedProposalResponse> {
-      return this.proposalService.findAll(page, limit);
+    return this.proposalService.findAll(page, limit);
   }
 
   // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer

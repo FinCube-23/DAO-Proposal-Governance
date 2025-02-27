@@ -1,4 +1,4 @@
-import { TransactionConfirmationSource, TransactionEntity } from './entities/transaction.entity';
+import { TransactionConfirmationSource, TransactionEntity, TransactionStatus } from './entities/transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
@@ -32,7 +32,8 @@ export class TransactionsService {
             if (!transaction) {
                 throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
             }
-            transaction.trx_status = newStatus;
+
+            transaction.trx_status = newStatus as TransactionStatus;
             transaction.trx_metadata = metadata;
             transaction.confirmation_source = source;
             this.logger.log(`Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`);
@@ -43,11 +44,17 @@ export class TransactionsService {
         }
     }
 
-    async getTransactions(): Promise<TransactionEntity[]> {
+    async getPendingTransactionHash(): Promise<string[]> {
         try {
-            return await this.transactionRepository.find();
+            const transactions = await this.transactionRepository.find({
+                where: {
+                    trx_status: TransactionStatus.PENDING
+                }
+            });
+            return transactions.map(transaction => transaction.trx_hash);
         } catch {
-            this.logger.error("Could not find any transactions");
+            this.logger.error("Could not find any pending transactions");
+            return [];
         }
     }
 }
