@@ -49,7 +49,12 @@ export class ProposalEntity {
     proposal_type: ProposalType;
 
     @Column({ type: 'varchar', nullable: true })
-    @ApiProperty()
+    @ApiProperty({
+        description: "Description of the proposal",
+        example: "Proposal to add bKash to DAO 🚀",
+        required: false
+    }
+    )
     metadata: string;
 
     @Column({ type: 'varchar' })

@@ -33,7 +33,7 @@ export class ProposalServiceService {
 
       const pendingTrx = {
         trx_hash: proposal.trx_hash,
-        proposer_address: proposal.proposer_address
+        proposer_address: proposal.proposer_address,
       };
 
       // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
@@ -121,7 +121,7 @@ export class ProposalServiceService {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus,  proposal_onchain_id: proposalOnChainId})
+        .set({ trx_status: newStatus, proposal_onchain_id: proposalOnChainId })
         .where("trx_hash = :trxHash", { trxHash })
         .returning('*')
         .execute();
