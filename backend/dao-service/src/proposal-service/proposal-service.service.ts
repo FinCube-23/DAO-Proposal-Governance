@@ -2,11 +2,9 @@ import { Injectable, Inject, NotFoundException, UnauthorizedException, Logger } 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
-import axios from 'axios';
-
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse } from './dto/proposal.dto';
-import { firstValueFrom, timeout } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
