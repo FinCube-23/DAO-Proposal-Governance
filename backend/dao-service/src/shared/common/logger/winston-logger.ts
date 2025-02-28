@@ -25,23 +25,29 @@ export class WinstonLogger implements LoggerService {
 
     constructor() {
         this.logger = winston.createLogger({
-            format: winston.format.combine(
-                winston.format.json(),
-                winston.format.timestamp(),
-                winston.format.colorize(),
-                winston.format.printf(({ level, message, timestamp, context }) => {
-                    const maskedMessage = this.maskSensitiveData(message);
-                    return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
-                })
-            ),
-            transports: [
-                new winston.transports.Console(),
-                new winston.transports.File({ filename: 'logs/app.log' }),
-                new LokiTransport({
-                    host: process.env.LOG_SERVER
-                  })
-            ]
-        });
+        format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.json()
+        ),
+        transports: [
+            new winston.transports.Console({
+                format: winston.format.combine(
+                    winston.format.colorize(),
+                    winston.format.printf(({ level, message, timestamp, context }) => {
+                        const maskedMessage = this.maskSensitiveData(message);
+                        return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
+                    })
+                )
+            }),
+            new winston.transports.File({ filename: 'logs/app.log' }),
+            new LokiTransport({
+                host: process.env.LOG_SERVER,
+                labels: { service: "proposal-service" },
+                json: true
+            })
+        ]
+    });
+
     }
 
     setContext(context: string) {
@@ -82,19 +88,19 @@ export class WinstonLogger implements LoggerService {
         this.logger.info({ message, context: this.context });
     }
 
-    error(message: string, trace?: string) {
+    error(message: any, trace?: string) {
         this.logger.error({ message, trace, context: this.context });
     }
 
-    warn(message: string) {
+    warn(message: any) {
         this.logger.warn({ message, context: this.context });
     }
 
-    debug(message: string) {
+    debug(message: any) {
         this.logger.debug({ message, context: this.context });
     }
 
-    verbose(message: string) {
+    verbose(message: any) {
         this.logger.verbose({ message, context: this.context });
     }
 }

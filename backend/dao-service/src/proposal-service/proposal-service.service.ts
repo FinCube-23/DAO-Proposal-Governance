@@ -48,16 +48,26 @@ export class ProposalServiceService {
       const new_proposal = this.proposalRepository.create(proposal);
 
       const saved_proposal = await this.proposalRepository.save(new_proposal);
-      this.logger.log({
+      this.logger.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
         message: `New proposal created with ID: ${saved_proposal.id}`,
         wallet: proposal.proposer_address,
-      });
+        proposalId: saved_proposal.id
+      }));
 
       return saved_proposal;
 
     } catch (err) {
-      this.logger.error(`Failed to create proposal: ${err.message}`);
-      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      this.logger.error(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: `Failed to create proposal: ${err.message}`,
+        error: err.stack
+      }));
+      this.logger.debug(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: `Error details`,
+        errorDetails: JSON.stringify(err)
+      }));
       throw new Error(`Failed to create proposal`);
     }
   }
@@ -68,6 +78,7 @@ export class ProposalServiceService {
     });
 
     if (!proposal) {
+      this.logger.warn(`Proposal with ID ${id} not found`);
       throw new NotFoundException(`Proposal with ID ${id} not found`);
     }
 
@@ -90,6 +101,8 @@ export class ProposalServiceService {
       .take(limit)
       .getManyAndCount();
 
+    this.logger.debug(`Found ${proposals.length} proposals out of ${total}`);
+
     return {
       data: proposals,
       total,
@@ -100,18 +113,31 @@ export class ProposalServiceService {
 
   // 💬 Publishing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log({
-      message: "Triggering queue-pending-proposal for a new transaction",
+    this.logger.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      message: "Triggering queue-pnding-proposal for new transaction",
       trxHash: proposal.trx_hash,
-    });
+      service: "AUDIT-TRAIL-SERVICE"
+    }));
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
       this.rabbitClient.send('queue-pending-proposal', proposal)
     );
     if (messageResponse.status == 'SUCCESS') {
-      this.logger.log("New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : " + messageResponse.data.db_record_id);
+      this.logger.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Transaction hash stored in AUDIT-TRAIL-SERVICE",
+        dbRecordId: messageResponse.data.db_record_id,
+        trxHash: proposal.trx_hash
+      }));
       return messageResponse;
     } else {
+      this.logger.error(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Proposal processing failed",
+        error: messageResponse.error?.message,
+        trxHash: proposal.trx_hash
+      }));
       throw new Error(messageResponse.error?.message || 'Proposal processing failed');
     }
   }
@@ -127,13 +153,26 @@ export class ProposalServiceService {
         .execute();
 
       if (result.affected === 0) {
+        this.logger.warn(`Transaction with hash ${trxHash} not found`);
         throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
       }
 
-      this.logger.log(`Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`);
+      this.logger.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Transaction status updated",
+        trxHash: trxHash,
+        newStatus: newStatus,
+        proposalOnChainId: proposalOnChainId
+      }));
       return result.raw[0];
     } catch (err) {
-      this.logger.error(`Failed to update transaction status for hash: ${trxHash}. Error: ${err}`);
+      this.logger.error(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Failed to update transaction status",
+        trxHash: trxHash,
+        error: err.message,
+        stack: err.stack
+      }));
       throw new Error(`Failed to update transaction status.`);
     }
   }
@@ -141,19 +180,35 @@ export class ProposalServiceService {
   // 📡 Listening Event from Publisher
   handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
     try {
-      this.logger.log(
-        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
-      );
-      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
+      const pattern = context.getPattern();
+      const originalMsg = context.getMessage();
+
+      this.logger.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Received proposal transaction update",
+        transactionHash: proposal.transactionHash,
+        pattern: pattern,
+        rawMessage: JSON.parse(originalMsg.content.toString())
+      }));
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
-      this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
+      
+      this.logger.debug({
+        timestamp: new Date().toISOString(),
+        message: "Proposal ID status from The Graph",
+        proposalId: proposalId,
+        web3Status: proposal.web3Status
+      });
+
       this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
-      console.log(`Pattern: ${context.getPattern()}`);
-      const originalMsg = context.getMessage();
-      console.log(originalMsg);
+
     } catch (error) {
-      this.logger.error('Invalid proposal object received:', error);
+      this.logger.error(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        message: "Invalid proposal object received",
+        error: error.message,
+        stack: error.stack
+      }));
     }
   }
 
