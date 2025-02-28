@@ -47,7 +47,10 @@ export class TasksService {
     this.logger.log(`Found pending transactions: ${pendingTransactions}`);
 
 
-    //These will be filtered at the later card
+    //These will be filtered at the later card #242
+
+
+
     //Update if there is any change in status first transaction service, then DAO service
 
     const eventDataArray: any[] = [];

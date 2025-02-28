@@ -86,8 +86,8 @@ export class ProposalUpdateRepository {
     async getTransactionsUpdated(transactionHashes: string[]): Promise<any> {
         try {
             if (!transactionHashes || transactionHashes.length === 0) {
-                this.logger.error('Invalid transaction hashes: Transaction hash list is empty');
-                throw new Error('INVALID_TRANSACTION_HASHES');
+                this.logger.log('Transaction hash list is empty');
+                return;
             }
 
             transactionHashes = transactionHashes.filter(hash => /^0x[a-fA-F0-9]{64}$/.test(hash));
