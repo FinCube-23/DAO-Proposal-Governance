@@ -85,7 +85,7 @@ export class ProposalUpdateService {
   }
 
   async getTransactionUpdates(trx_hashes: string[]): Promise<any> {
-    return await this.proposalUpdateRepository.transactionUpdateQuery(trx_hashes);
+    return await this.proposalUpdateRepository.getTransactionsUpdated(trx_hashes);
   }
 
 }
