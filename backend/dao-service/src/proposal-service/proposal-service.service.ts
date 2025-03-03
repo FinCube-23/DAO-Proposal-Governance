@@ -1,11 +1,11 @@
 import { Injectable, Inject, NotFoundException, UnauthorizedException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProposalEntity } from './entities/proposal.entity';
+import { ProposalEntity, ProposalStatus, ProposalType } from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
-import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse } from './dto/proposal.dto';
+import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse, UpdateProposalDto } from './dto/proposal.dto';
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
@@ -62,6 +62,42 @@ export class ProposalServiceService {
     }
   }
 
+  async executeProposal(executedProposalDto: UpdateProposalDto): Promise<any> {
+    try {
+      if (!executedProposalDto.proposalId || !executedProposalDto.transactionHash) {
+        throw new Error('Proposal ID and Transaction Hash is required');
+      }
+      const proposal = await this.proposalRepository.findOne({
+        where: {
+          proposal_onchain_id: executedProposalDto.proposalId
+        }
+      });
+
+      this.logger.log(`Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`);
+
+      const executedTrx = {
+        trx_hash: executedProposalDto.transactionHash,
+        proposer_address: proposal.proposer_address,
+      };
+      //Handle executedProposal using audit trail service
+      const audit_record = await this.handleExecutedProposal(executedTrx);
+      //Updating proposal with latest audit ID
+      proposal.audit_id = audit_record.data.db_record_id;
+      proposal.proposal_status = ProposalStatus.EXECUTED;
+
+      const updatedProposal = await this.proposalRepository.save(proposal);
+
+      this.logger.log(`Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`);
+
+      return updatedProposal;
+
+    } catch (err) {
+      this.logger.error(`Error executing proposal: ${err.message}`);
+      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      throw new Error(`Failed to execute proposal`);
+    }
+  }
+
   async findById(id: number): Promise<ProposalEntity> {
     const proposal = await this.proposalRepository.findOne({
       where: { id }
@@ -115,6 +151,26 @@ export class ProposalServiceService {
       throw new Error(messageResponse.error?.message || 'Proposal processing failed');
     }
   }
+
+  async handleExecutedProposal(proposal: PendingTransactionDto): Promise<any> {
+    this.logger.log({
+      message: "Triggering queue-executed-proposal for a executed transaction",
+      trxHash: proposal.trx_hash,
+    });
+    // Convert Observable to Promise and await the response
+    const messageResponse = await firstValueFrom(
+      this.rabbitClient.send('transaction-updated-proposal', proposal)
+    );
+
+    if (messageResponse.status == 'SUCCESS') {
+      this.logger.log("Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : " + messageResponse.data.db_record_id);
+      return messageResponse;
+    } else {
+      throw new Error(messageResponse.error?.message || 'Proposal processing failed');
+    }
+
+  }
+
 
   async updateTransactionStatus(trxHash: string, newStatus: number, proposalOnChainId: number) {
     try {

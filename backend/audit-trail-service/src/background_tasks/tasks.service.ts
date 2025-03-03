@@ -47,14 +47,9 @@ export class TasksService {
     this.logger.log(`Found pending transactions: ${pendingTransactions}`);
 
 
-    //These will be filtered at the later card #242
-
-
-
-    //Update if there is any change in status first transaction service, then DAO service
-
     const eventDataArray: any[] = [];
 
+    //make this a seperate function. Only look for proposal related events
     const transactionTypes = [
       "proposalExecuteds",
       "proposalCreateds",

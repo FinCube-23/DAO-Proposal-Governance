@@ -96,4 +96,9 @@ export class PendingTransactionDto {
   proposer_address: string;
 }
 
+export class UpdateProposalDto {
+  proposalId: number;
+  transactionHash: string;
+}
+
 

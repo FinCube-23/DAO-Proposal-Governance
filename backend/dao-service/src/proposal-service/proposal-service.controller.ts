@@ -3,7 +3,7 @@ import { ProposalServiceService } from './proposal-service.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiProperty, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProposalEntity } from './entities/proposal.entity';
-import { PaginatedProposalResponse, ProposalDto } from './dto/proposal.dto';
+import { PaginatedProposalResponse, ProposalDto, ProposalListDto, UpdateProposalDto } from './dto/proposal.dto';
 import {
   Ctx,
   EventPattern,
@@ -24,6 +24,16 @@ export class ProposalServiceController {
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async create(@Req() req, @Body() proposal_entity: ProposalDto): Promise<ProposalEntity> {
     return this.proposalService.create(proposal_entity, req.user);
+  }
+
+  // 💬 MessagePattern expects a response | This is a publisher
+  @Patch()
+  @ApiTags("Proposal Update")
+  @ApiOperation({ summary: 'Update executed proposal using ID at off-chain DB and emit message to Audit Trail Service' })
+  @ApiOkResponse({ status: 200, description: 'The record has been successfully updated.', type: ProposalEntity })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async executeProposal(@Req() req, @Body() executeProposalDto: UpdateProposalDto): Promise<ProposalEntity> {
+    return this.proposalService.executeProposal(executeProposalDto);
   }
 
   @Get(':id')

@@ -28,9 +28,15 @@ export class ProposalUpdateController {
   constructor(private readonly proposalUpdateService: ProposalUpdateService) { }
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
+  // In next sprint, this names should be edited. This has to be TransactionUpdateService. At the moment, creating a new endpoint for this.
   @MessagePattern('queue-pending-proposal')
   async getProposal(@Payload() data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
     return await this.proposalUpdateService.handlePendingProposal(data_packet, context);
+  }
+
+  @MessagePattern('transaction-updated-proposal')
+  async getTransactionUpdate(@Payload() data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
+    return await this.proposalUpdateService.handleUpdatedTransaction(data_packet, context);
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
