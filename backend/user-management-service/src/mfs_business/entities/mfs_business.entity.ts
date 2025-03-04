@@ -9,6 +9,13 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/users/entities/user.entity';
 
+export enum OnChainProposalStatus {
+  REGISTERED = 'register',
+  PENDING = 'pending',
+  APPROVED = 'approved',
+  CANCELLED = 'cancelled',
+}
+
 @Entity('mfs_businesses')
 export class MfsBusiness {
   @PrimaryGeneratedColumn()
@@ -51,9 +58,22 @@ export class MfsBusiness {
   @ApiProperty()
   certificate: string;
 
-  @Column({ type: 'varchar', nullable: true, length: 255, default: null })
-  @ApiProperty()
-  trx_hash: string;
+  @Column({ type: 'int', nullable: true, default: null })
+  @ApiProperty({
+    description:
+      'This field will get updated by AUDIT TRAIL SERVICE after on-chain transaction is successfully completed.',
+    example: 0,
+    required: false,
+  })
+  proposal_onchain_id: number;
+
+  @Column({
+    type: 'enum',
+    enum: OnChainProposalStatus,
+    default: OnChainProposalStatus.REGISTERED,
+    nullable: true,
+  })
+  membership_onchain_status: OnChainProposalStatus;
 
   // Use lazy loading for circular reference
   @OneToOne(() => User, (user) => user.mfsBusiness, { nullable: true })
