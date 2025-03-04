@@ -2,7 +2,6 @@ import { Injectable, Inject, NotFoundException, UnauthorizedException, Logger } 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProposalEntity } from './entities/proposal.entity';
-import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
 import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse } from './dto/proposal.dto';
@@ -48,26 +47,26 @@ export class ProposalServiceService {
       const new_proposal = this.proposalRepository.create(proposal);
 
       const saved_proposal = await this.proposalRepository.save(new_proposal);
-      this.logger.log(JSON.stringify({
+      this.logger.log({
         timestamp: new Date().toISOString(),
         message: `New proposal created with ID: ${saved_proposal.id}`,
         wallet: proposal.proposer_address,
         proposalId: saved_proposal.id
-      }));
+      });
 
       return saved_proposal;
 
     } catch (err) {
-      this.logger.error(JSON.stringify({
+      this.logger.error({
         timestamp: new Date().toISOString(),
         message: `Failed to create proposal: ${err.message}`,
         error: err.stack
-      }));
-      this.logger.debug(JSON.stringify({
+      });
+      this.logger.debug({
         timestamp: new Date().toISOString(),
         message: `Error details`,
         errorDetails: JSON.stringify(err)
-      }));
+      });
       throw new Error(`Failed to create proposal`);
     }
   }
@@ -113,31 +112,31 @@ export class ProposalServiceService {
 
   // 💬 Publishing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log(JSON.stringify({
+    this.logger.log({
       timestamp: new Date().toISOString(),
       message: "Triggering queue-pnding-proposal for new transaction",
       trxHash: proposal.trx_hash,
       service: "AUDIT-TRAIL-SERVICE"
-    }));
+    });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
       this.rabbitClient.send('queue-pending-proposal', proposal)
     );
     if (messageResponse.status == 'SUCCESS') {
-      this.logger.log(JSON.stringify({
+      this.logger.log({
         timestamp: new Date().toISOString(),
         message: "Transaction hash stored in AUDIT-TRAIL-SERVICE",
         dbRecordId: messageResponse.data.db_record_id,
         trxHash: proposal.trx_hash
-      }));
+      });
       return messageResponse;
     } else {
-      this.logger.error(JSON.stringify({
+      this.logger.error({
         timestamp: new Date().toISOString(),
         message: "Proposal processing failed",
         error: messageResponse.error?.message,
         trxHash: proposal.trx_hash
-      }));
+      });
       throw new Error(messageResponse.error?.message || 'Proposal processing failed');
     }
   }
@@ -157,22 +156,22 @@ export class ProposalServiceService {
         throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
       }
 
-      this.logger.log(JSON.stringify({
+      this.logger.log({
         timestamp: new Date().toISOString(),
         message: "Transaction status updated",
         trxHash: trxHash,
         newStatus: newStatus,
         proposalOnChainId: proposalOnChainId
-      }));
+      });
       return result.raw[0];
     } catch (err) {
-      this.logger.error(JSON.stringify({
+      this.logger.error({
         timestamp: new Date().toISOString(),
         message: "Failed to update transaction status",
         trxHash: trxHash,
         error: err.message,
         stack: err.stack
-      }));
+      });
       throw new Error(`Failed to update transaction status.`);
     }
   }
@@ -183,13 +182,13 @@ export class ProposalServiceService {
       const pattern = context.getPattern();
       const originalMsg = context.getMessage();
 
-      this.logger.log(JSON.stringify({
+      this.logger.log({
         timestamp: new Date().toISOString(),
         message: "Received proposal transaction update",
         transactionHash: proposal.transactionHash,
         pattern: pattern,
         rawMessage: JSON.parse(originalMsg.content.toString())
-      }));
+      });
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       
@@ -203,12 +202,12 @@ export class ProposalServiceService {
       this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
 
     } catch (error) {
-      this.logger.error(JSON.stringify({
+      this.logger.error({
         timestamp: new Date().toISOString(),
         message: "Invalid proposal object received",
         error: error.message,
         stack: error.stack
-      }));
+      });
     }
   }
 
