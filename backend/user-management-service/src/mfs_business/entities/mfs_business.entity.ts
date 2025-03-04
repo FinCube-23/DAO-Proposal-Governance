@@ -58,6 +58,10 @@ export class MfsBusiness {
   @ApiProperty()
   certificate: string;
 
+  @Column({ type: 'varchar', nullable: true, length: 255, default: null })
+  @ApiProperty()
+  trx_hash: string;
+
   @Column({ type: 'int', nullable: true, default: null })
   @ApiProperty({
     description:
