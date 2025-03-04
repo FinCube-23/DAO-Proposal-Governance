@@ -27,13 +27,23 @@ export class ProposalServiceController {
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
-  @Patch()
+  @Patch('execute-proposal')
   @ApiTags("Proposal Update")
-  @ApiOperation({ summary: 'Update executed proposal using ID at off-chain DB and emit message to Audit Trail Service' })
+  @ApiOperation({ summary: 'Update executed proposal using ID at off-chain DB and emit message to Audit Trail Service', })
   @ApiOkResponse({ status: 200, description: 'The record has been successfully updated.', type: ProposalEntity })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async executeProposal(@Req() req, @Body() executeProposalDto: UpdateProposalDto): Promise<ProposalEntity> {
     return this.proposalService.executeProposal(executeProposalDto);
+  }
+
+  // 💬 MessagePattern expects a response | This is a publisher
+  @Patch('cancel-proposal')
+  @ApiTags("Proposal Update")
+  @ApiOperation({ summary: 'Update executed proposal using ID at off-chain DB and emit message to Audit Trail Service', })
+  @ApiOkResponse({ status: 200, description: 'The record has been successfully updated.', type: ProposalEntity })
+  @ApiResponse({ status: 401, description: 'Unauthorized.' })
+  async cancelProposal(@Req() req, @Body() cancelProposalDto: UpdateProposalDto): Promise<ProposalEntity> {
+    return this.proposalService.cancelProposal(cancelProposalDto);
   }
 
   @Get(':id')
@@ -62,6 +72,12 @@ export class ProposalServiceController {
   @EventPattern('create-proposal-placed')
   handleCreatedProposalPlaced(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
     this.proposalService.handleCreatedProposalPlacedEvent(proposal, context);
+  }
+
+  // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
+  @EventPattern('update-transaction-event')
+  handleProposalUpdated(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+    this.proposalService.handleProposalUpdatedEvent(proposal, context);
   }
 
 }

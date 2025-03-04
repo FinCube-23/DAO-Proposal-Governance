@@ -49,7 +49,6 @@ export class TasksService {
 
     const eventDataArray: any[] = [];
 
-    //make this a seperate function. Only look for proposal related events
     const transactionTypes = [
       "proposalExecuteds",
       "proposalCreateds",
@@ -70,11 +69,13 @@ export class TasksService {
       }
     }
 
+
     // Remove duplicates based on `transactionHash`
     const uniqueTransactions = Array.from(
       new Map(eventDataArray.map((tx) => [tx.transactionHash, tx])).values()
     );
 
+    //update each transactions
     for (const transaction of uniqueTransactions) {
       try {
         await this.transactionService.updateStatus(
@@ -83,6 +84,14 @@ export class TasksService {
           TransactionConfirmationSource.THE_GRAPH,
           1
         );
+        await this.proposalUpdateService.updatedTransaction({
+          web3Status: 1,
+          message: "Transaction updated successfully.",
+          ...eventDataArray,
+          blockNumber: transaction.blockNumber,
+          transactionHash: transaction.transactionHash,
+        });
+
         this.logger.log(`Transaction ${transaction.transactionHash} successfully updated.`);
       } catch (updateError) {
         this.logger.error(`Failed to update transaction ${transaction.transactionHash}: ${updateError.message}`);
@@ -161,6 +170,30 @@ export class TasksService {
         this.logger.error(`Error handling ProposalAddedEvents: ${err.message}`, err.stack);
       }
     });
+  }
+
+  async updateTransaction() {
+    const proposalExecutedTopic = process.env.PROPOSAL_EXECUTED_TOPIC;
+    const proposalCancelledTopic = process.env.PROPOSAL_CANCELLED_TOPIC;
+    const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
+    const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
+
+    // Utility function to pause execution for a given number of milliseconds
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    const proposalUpdatedEvents = {
+      address: daoContractAddress,
+      topics: [proposalCancelledTopic, proposalEndTopic],
+    };
+
+    alchemy.ws.on(proposalUpdatedEvents, async (txn) => {
+      try {
+        this.logger.log(`Found new executed/cancelled event!`);
+      } catch (err) {
+        this.logger.error(`An error has occured`);
+      }
+
+    })
   }
 
 }

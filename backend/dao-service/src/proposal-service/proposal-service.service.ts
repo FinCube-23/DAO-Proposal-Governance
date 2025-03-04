@@ -80,8 +80,9 @@ export class ProposalServiceService {
         proposer_address: proposal.proposer_address,
       };
       //Handle executedProposal using audit trail service
-      const audit_record = await this.handleExecutedProposal(executedTrx);
-      //Updating proposal with latest audit ID
+      const audit_record = await this.handleUpdatedProposal(executedTrx);
+      //Updating proposal with latest audit ID and trx_hash
+      proposal.trx_hash = executedTrx.trx_hash;
       proposal.audit_id = audit_record.data.db_record_id;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
@@ -95,6 +96,44 @@ export class ProposalServiceService {
       this.logger.error(`Error executing proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
       throw new Error(`Failed to execute proposal`);
+    }
+  }
+
+
+  async cancelProposal(cancelProposalDto: UpdateProposalDto): Promise<any> {
+    try {
+      if (!cancelProposalDto.proposalId || !cancelProposalDto.transactionHash) {
+        throw new Error('Proposal ID and Transaction Hash is required');
+      }
+      const proposal = await this.proposalRepository.findOne({
+        where: {
+          proposal_onchain_id: cancelProposalDto.proposalId
+        }
+      });
+
+      this.logger.log(`Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`);
+
+      const executedTrx = {
+        trx_hash: cancelProposalDto.transactionHash,
+        proposer_address: proposal.proposer_address,
+      };
+      //Handle executedProposal using audit trail service
+      const audit_record = await this.handleUpdatedProposal(executedTrx);
+      //Updating proposal with latest audit ID and trx_hash
+      proposal.trx_hash = executedTrx.trx_hash;
+      proposal.audit_id = audit_record.data.db_record_id;
+      proposal.proposal_status = ProposalStatus.CANCEL;
+
+      const updatedProposal = await this.proposalRepository.save(proposal);
+
+      this.logger.log(`Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`);
+
+      return updatedProposal;
+
+    } catch (err) {
+      this.logger.error(`Error cancelling proposal: ${err.message}`);
+      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      throw new Error(`Failed to cancel proposal`);
     }
   }
 
@@ -152,9 +191,9 @@ export class ProposalServiceService {
     }
   }
 
-  async handleExecutedProposal(proposal: PendingTransactionDto): Promise<any> {
+  async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
-      message: "Triggering queue-executed-proposal for a executed transaction",
+      message: "Triggering transaction update for a updated transaction",
       trxHash: proposal.trx_hash,
     });
     // Convert Observable to Promise and await the response
@@ -196,6 +235,25 @@ export class ProposalServiceService {
 
   // 📡 Listening Event from Publisher
   handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+    try {
+      this.logger.log(
+        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
+      );
+      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
+
+      const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
+      this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
+      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
+      console.log(`Pattern: ${context.getPattern()}`);
+      const originalMsg = context.getMessage();
+      console.log(originalMsg);
+    } catch (error) {
+      this.logger.error('Invalid proposal object received:', error);
+    }
+  }
+
+  // 📡 Listening Event from Publisher
+  handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
