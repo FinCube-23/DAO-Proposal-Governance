@@ -22,7 +22,7 @@ export const proposalApis = api.injectEndpoints({
       },
       providesTags: ["proposal"],
     }),
-    // create proposal
+    // get proposal
     getProposal: build.query<IOffchainProposal, number>({
       query: (id) => ({
         url: `${PROPOSAL_ENDPOINT.BASE}/${id}`,
@@ -30,6 +30,7 @@ export const proposalApis = api.injectEndpoints({
       }),
       providesTags: ["proposal"],
     }),
+    // create proposal
     createProposal: build.mutation<
       CreateProposalResponse,
       CreateProposalPayload
@@ -41,6 +42,30 @@ export const proposalApis = api.injectEndpoints({
       }),
       invalidatesTags: ["proposal"],
     }),
+    // execute proposals
+    executeProposal: build.mutation<
+      CreateProposalResponse,
+      { proposalId: number; transactionHash: string }
+    >({
+      query: (payload) => ({
+        url: `${PROPOSAL_ENDPOINT.BASE}/execute-proposal`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["proposal"],
+    }),
+    // cancel proposal
+    cancelProposal: build.mutation<
+      CreateProposalResponse,
+      { proposalId: number; transactionHash: string }
+    >({
+      query: (payload) => ({
+        url: `${PROPOSAL_ENDPOINT.BASE}/cancel-proposal`,
+        method: "PATCH",
+        body: payload,
+      }),
+      invalidatesTags: ["proposal"],
+    }),
   }),
 });
 
@@ -48,4 +73,6 @@ export const {
   useLazyGetProposalsQuery,
   useCreateProposalMutation,
   useLazyGetProposalQuery,
+  useExecuteProposalMutation,
+  useCancelProposalMutation,
 } = proposalApis;
