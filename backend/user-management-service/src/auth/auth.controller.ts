@@ -11,7 +11,12 @@ import {
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
-import { Ctx, MessagePattern, Payload, RmqContext } from '@nestjs/microservices';
+import {
+  Ctx,
+  MessagePattern,
+  Payload,
+  RmqContext,
+} from '@nestjs/microservices';
 import {
   ValidateAuthorizationDto,
   MessageResponse,
@@ -27,12 +32,16 @@ export class AuthController {
     return this.authService.signIn(signInDto.email, signInDto.password);
   }
 
+  //Event Listen 📡 Consumer
   @MessagePattern('validate-authorization')
   async getProposal(
     @Payload() data_packet: ValidateAuthorizationDto,
     @Ctx() context: RmqContext,
   ): Promise<MessageResponse> {
-    return await this.authService.handleValidateAuthorization(data_packet, context);
+    return await this.authService.handleValidateAuthorization(
+      data_packet,
+      context,
+    );
   }
 
   @HttpCode(HttpStatus.OK)

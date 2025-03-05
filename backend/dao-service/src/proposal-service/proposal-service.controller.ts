@@ -21,7 +21,7 @@ import { ProposalEntity } from './entities/proposal.entity';
 import { PaginatedProposalResponse, ProposalDto } from './dto/proposal.dto';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { ValidateAuth } from '@custom/validate-auth';
+// import { ValidateAuth } from '@custom/validate-auth';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
@@ -44,7 +44,7 @@ export class ProposalServiceController {
     @Req() req,
     @Body() proposal_entity: ProposalDto,
   ): Promise<ProposalEntity> {
-    return this.proposalService.create(proposal_entity, req.user);
+    return this.proposalService.create(proposal_entity);
   }
 
   @Get('test')
@@ -56,9 +56,9 @@ export class ProposalServiceController {
     status: 200,
     description: 'Dummy description',
   })
-  @ValidateAuth()
+  // @ValidateAuth()
   async testDecorator(): Promise<boolean> {
-    return true;
+    return await this.proposalService.test();
   }
 
   @Get(':id')

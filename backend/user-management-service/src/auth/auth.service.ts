@@ -52,10 +52,9 @@ export class AuthService {
       });
       return {
         status: 'FAILED',
-        message_id: data_packet?.access_token || 'unknown',
         timestamp: new Date().toISOString(),
         data: {
-          db_record_id: 0,
+          user_id: 0,
           current_status: 'UNKNOWN',
         },
         error: {
@@ -81,10 +80,9 @@ export class AuthService {
 
       return {
         status: 'SUCCESS',
-        message_id: data_packet.access_token,
         timestamp: new Date().toISOString(),
         data: {
-          db_record_id: user.id,
+          user_id: user.id,
           current_status: 'VALIDATED',
         },
       };
@@ -96,10 +94,9 @@ export class AuthService {
       });
       return {
         status: 'FAILED',
-        message_id: data_packet?.access_token || 'unknown',
         timestamp: new Date().toISOString(),
         data: {
-          db_record_id: 0,
+          user_id: 0,
           current_status: 'UNKNOWN',
         },
         error: {
