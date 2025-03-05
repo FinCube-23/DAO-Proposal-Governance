@@ -173,6 +173,10 @@ export class ProposalServiceService {
     };
   }
 
+  async findByStatus(status: ProposalStatus): Promise<ProposalEntity[]> {
+    return this.proposalRepository.find({ where: { proposal_status: status } });
+  }
+
   // 💬 Publishing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
