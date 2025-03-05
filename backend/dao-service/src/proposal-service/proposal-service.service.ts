@@ -179,15 +179,14 @@ export class ProposalServiceService {
   // 📡 Listening Event from Publisher
   handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
     try {
-      const pattern = context.getPattern();
       const originalMsg = context.getMessage();
 
       this.logger.log({
         timestamp: new Date().toISOString(),
         message: "Received proposal transaction update",
-        transactionHash: proposal.transactionHash,
-        pattern: pattern,
-        rawMessage: JSON.parse(originalMsg.content.toString())
+        trxHash: proposal.transactionHash,
+        event_patter: context.getPattern(),
+        // event_info: JSON.parse(originalMsg.content.toString())
       });
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
