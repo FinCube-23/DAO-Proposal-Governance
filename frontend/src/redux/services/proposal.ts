@@ -44,7 +44,7 @@ export const proposalApis = api.injectEndpoints({
     }),
     // execute proposals
     executeProposal: build.mutation<
-      CreateProposalResponse,
+      Response,
       { proposalId: number; transactionHash: string }
     >({
       query: (payload) => ({
@@ -56,7 +56,7 @@ export const proposalApis = api.injectEndpoints({
     }),
     // cancel proposal
     cancelProposal: build.mutation<
-      CreateProposalResponse,
+      Response,
       { proposalId: number; transactionHash: string }
     >({
       query: (payload) => ({
