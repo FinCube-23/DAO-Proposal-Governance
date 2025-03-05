@@ -47,7 +47,7 @@ export class ProposalServiceController {
     return this.proposalService.create(proposal_entity);
   }
 
-  @Get('test')
+  @Post('test')
   @ApiTags('Dummy API')
   @ApiOperation({
     summary: 'Dummy Api for testing decorator',

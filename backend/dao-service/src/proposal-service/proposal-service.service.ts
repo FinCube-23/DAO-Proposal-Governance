@@ -63,15 +63,16 @@ export class ProposalServiceService {
     }
   }
 
-  async test(): Promise<any> {
+  async test(): Promise<boolean> {
+    console.log('Auth Message Call Test')
     const messageResponse = firstValueFrom(
       this.rabbitClient.send(
         'validate-authorization',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW50b25pbi5pc2xhbUBicmFpbnN0YXRpb24tMjMuY29tIiwiaWF0IjoxNzQxMTY4MDUyLCJleHAiOjE3NDEyNTQ0NTJ9.SNFTZSlfifDHOdV-qg-qPtTMyENPuF9WDG3nSUHtzCU',
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW50b25pbi5pc2xhbUBicmFpbnN0YXRpb24tMjMuY29tIiwiaWF0IjoxNzQxMTY4MDUyLCJleHAiOjE3NDEyNTQ0NTJ9.SNFTZSlfifDHOdV-qg-qPtTMyENPuF9WDG3nSUHtzCU",
       ),
     );
-
-    return messageResponse;
+    console.log(messageResponse)
+    return true;
   }
 
   async findById(id: number): Promise<ProposalEntity> {
