@@ -36,6 +36,13 @@ import {
   PaginationPrevious,
 } from "@components/ui/pagination";
 import { IDaoInfo, IOffchainProposalCard, IProposal } from "@lib/interfaces";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DaoDashboard() {
   const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
@@ -337,31 +344,44 @@ export default function DaoDashboard() {
             </Dialog>
           </div>
         </Card>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setToggle(0)}
-            className={`${
-              toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            All proposals
-          </Button>
-          <Button
-            onClick={() => setToggle(1)}
-            className={`${
-              toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            Ongoing proposals
-          </Button>
-          <Button
-            onClick={() => setToggle(2)}
-            className={`${
-              toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            Off-chain records
-          </Button>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setToggle(0)}
+              className={`${
+                toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              All proposals
+            </Button>
+            <Button
+              onClick={() => setToggle(1)}
+              className={`${
+                toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Ongoing proposals
+            </Button>
+            <Button
+              onClick={() => setToggle(2)}
+              className={`${
+                toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Off-chain records
+            </Button>
+          </div>
+          <Select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filters" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="cancel">Canceled</SelectItem>
+              <SelectItem value="executed">Executed</SelectItem>
+              <SelectItem value="approved">Approved</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         {pageLoading && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
