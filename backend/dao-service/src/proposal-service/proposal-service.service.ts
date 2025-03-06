@@ -11,6 +11,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
 
 @Injectable()
 export class ProposalServiceService {
@@ -63,12 +64,13 @@ export class ProposalServiceService {
     }
   }
 
-  async test(): Promise<boolean> {
+  async test(packet: ValidateAuthorizationDto): Promise<boolean> {
     console.log('Auth Message Call Test')
-    const messageResponse = firstValueFrom(
+    const messageResponse = await firstValueFrom(
       this.rabbitClient.send(
         'validate-authorization',
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW50b25pbi5pc2xhbUBicmFpbnN0YXRpb24tMjMuY29tIiwiaWF0IjoxNzQxMTY4MDUyLCJleHAiOjE3NDEyNTQ0NTJ9.SNFTZSlfifDHOdV-qg-qPtTMyENPuF9WDG3nSUHtzCU",
+        packet
+        //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW50b25pbi5pc2xhbUBicmFpbnN0YXRpb24tMjMuY29tIiwiaWF0IjoxNzQxMTY4MDUyLCJleHAiOjE3NDEyNTQ0NTJ9.SNFTZSlfifDHOdV-qg-qPtTMyENPuF9WDG3nSUHtzCU",
       ),
     );
     console.log(messageResponse)

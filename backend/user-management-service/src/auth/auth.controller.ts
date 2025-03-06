@@ -35,10 +35,12 @@ export class AuthController {
   //Event Listen 📡 Consumer
   @MessagePattern('validate-authorization')
   async test(@Payload() data_packet: String, @Ctx() context: RmqContext) {
-    console.log(data_packet)
+    console.log(data_packet);
     return true;
   }
 
+  // //Event Listen 📡 Consumer
+  // @MessagePattern('validate-authorization')
   async getProposal(
     @Payload() data_packet: ValidateAuthorizationDto,
     @Ctx() context: RmqContext,
