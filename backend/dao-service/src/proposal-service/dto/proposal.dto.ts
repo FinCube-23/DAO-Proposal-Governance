@@ -34,6 +34,9 @@ export class ProposalListDto {
     required: false
   })
   proposal_status: ProposalStatus;
+
+  @ApiProperty()
+  metadata: string;
 }
 
 export class PaginatedProposalResponse {
