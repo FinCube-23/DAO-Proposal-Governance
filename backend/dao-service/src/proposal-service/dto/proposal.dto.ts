@@ -35,6 +35,13 @@ export class ProposalListDto {
   })
   proposal_status: ProposalStatus;
 
+  @ApiProperty({
+    description: "This field will get updated by AUDIT TRAIL SERVICE after on-chain transaction is successfully completed.",
+    example: 0,
+    required: false
+  })
+  proposal_onchain_id: number;
+
   @ApiProperty()
   metadata: string;
 }
