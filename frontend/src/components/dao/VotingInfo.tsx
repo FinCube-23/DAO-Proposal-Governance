@@ -12,7 +12,7 @@ export default function VotingInfo({ proposal }: any) {
           <div className="text-xl font-semibold">Off-chain Details</div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">Audit ID</div>
-            {proposal.audit_id ? (
+            {proposal.audit_id !== null ? (
               <div className="font-bold">{proposal.audit_id}</div>
             ) : (
               <div className="text-red-600">N/A</div>
@@ -50,7 +50,7 @@ export default function VotingInfo({ proposal }: any) {
           <div className="text-xl font-semibold">On-chain Details</div>
           <div className="flex justify-between">
             <div className="text-muted-foreground">On-chain ID</div>
-            {proposal.proposal_onchain_id ? (
+            {proposal.proposal_onchain_id !== null ? (
               <div className="font-bold">{proposal.proposal_onchain_id}</div>
             ) : (
               <div className="text-red-600 font-bold">N/A</div>

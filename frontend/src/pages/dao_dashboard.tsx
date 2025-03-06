@@ -69,7 +69,7 @@ export default function DaoDashboard() {
     useState<IOffchainProposalCard[]>();
   const [offchainPage, setOffchainPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [filterStatus, setFilterStatus] = useState<string>();
+  const [filterStatus, setFilterStatus] = useState<string>("pending");
   const [filterProposals] = useLazyFilterProposalsQuery();
   const [filtered, setFiltered] = useState([]);
   const [filterToggle, setFilterToggle] = useState<boolean>(false);
@@ -211,7 +211,7 @@ export default function DaoDashboard() {
       }
 
       setProposalsFromBE(response.data || []);
-      console.log(response);
+      console.log("Backend data:", response);
 
       setTotalPages(Math.ceil(response.total / response.limit));
     };

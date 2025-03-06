@@ -157,7 +157,9 @@ export class ProposalServiceService {
         'proposal.id',
         'proposal.proposal_type',
         'proposal.proposer_address',
-        'proposal.proposal_status'
+        'proposal.proposal_status',
+        'proposal.proposal_onchain_id',
+        'proposal.metadata'
       ])
       .skip(skip)
       .take(limit)
