@@ -66,10 +66,21 @@ export const proposalApis = api.injectEndpoints({
       }),
       invalidatesTags: ["proposal"],
     }),
+    // filter proposals
+    filterProposals: build.query<GetOffchainProposalResponse, string>({
+      query: (payload) => {
+        return {
+          url: `${PROPOSAL_ENDPOINT.BASE}/filter/${payload}`,
+          method: "GET",
+        };
+      },
+      providesTags: ["proposal"],
+    }),
   }),
 });
 
 export const {
+  useLazyFilterProposalsQuery,
   useLazyGetProposalsQuery,
   useCreateProposalMutation,
   useLazyGetProposalQuery,
