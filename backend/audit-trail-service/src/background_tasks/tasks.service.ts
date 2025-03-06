@@ -87,7 +87,7 @@ export class TasksService {
         await this.proposalUpdateService.updatedTransaction({
           web3Status: 1,
           message: "Transaction updated successfully.",
-          ...eventDataArray,
+          data: { ...transaction },
           blockNumber: transaction.blockNumber,
           transactionHash: transaction.transactionHash,
         });
@@ -172,28 +172,6 @@ export class TasksService {
     });
   }
 
-  async updateTransaction() {
-    const proposalExecutedTopic = process.env.PROPOSAL_EXECUTED_TOPIC;
-    const proposalCancelledTopic = process.env.PROPOSAL_CANCELLED_TOPIC;
-    const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
-    const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
 
-    // Utility function to pause execution for a given number of milliseconds
-    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-    const proposalUpdatedEvents = {
-      address: daoContractAddress,
-      topics: [proposalCancelledTopic, proposalEndTopic],
-    };
-
-    alchemy.ws.on(proposalUpdatedEvents, async (txn) => {
-      try {
-        this.logger.log(`Found new executed/cancelled event!`);
-      } catch (err) {
-        this.logger.error(`An error has occured`);
-      }
-
-    })
-  }
 
 }

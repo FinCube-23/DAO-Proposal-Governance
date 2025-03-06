@@ -131,7 +131,7 @@ export class ProposalUpdateService {
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updatedTransaction(proposal: ResponseTransactionStatusDto) {
-    await this.rabbitClient.emit('update-transaction-event', proposal);
+    await this.rabbitClient.emit('membership-proposal-update', proposal);
     return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }
 

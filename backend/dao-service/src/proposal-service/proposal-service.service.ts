@@ -82,7 +82,6 @@ export class ProposalServiceService {
       //Handle executedProposal using audit trail service
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
-      proposal.trx_hash = executedTrx.trx_hash;
       proposal.audit_id = audit_record.data.db_record_id;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
@@ -120,7 +119,6 @@ export class ProposalServiceService {
       //Handle executedProposal using audit trail service
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
-      proposal.trx_hash = executedTrx.trx_hash;
       proposal.audit_id = audit_record.data.db_record_id;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
@@ -177,7 +175,7 @@ export class ProposalServiceService {
     return this.proposalRepository.find({ where: { proposal_status: status } });
   }
 
-  // 💬 Publishing Message in the queue
+  // 💬 Producing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
       message: "Triggering queue-pending-proposal for a new transaction",
@@ -195,6 +193,7 @@ export class ProposalServiceService {
     }
   }
 
+  // 💬 Producing Message in the queue
   async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
       message: "Triggering transaction update for a updated transaction",
@@ -202,7 +201,7 @@ export class ProposalServiceService {
     });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('transaction-updated-proposal', proposal)
+      this.rabbitClient.send('membership-proposal-status-update', proposal)
     );
 
     if (messageResponse.status == 'SUCCESS') {
@@ -215,7 +214,7 @@ export class ProposalServiceService {
   }
 
 
-  async updateTransactionStatus(trxHash: string, newStatus: number, proposalOnChainId: number) {
+  async updateProposalCreated(trxHash: string, newStatus: number, proposalOnChainId: number) {
     try {
       const result = await this.proposalRepository
         .createQueryBuilder()
@@ -236,6 +235,27 @@ export class ProposalServiceService {
       throw new Error(`Failed to update transaction status.`);
     }
   }
+  async updateProposalStatus(newStatus: number, proposalOnChainId: number) {
+    try {
+      const result = await this.proposalRepository
+        .createQueryBuilder()
+        .update()
+        .set({ trx_status: newStatus }) // Updating web3_status
+        .where("proposal_onchain_id = :proposalOnChainId", { proposalOnChainId }) // Using proposal_onchain_id as the condition
+        .returning('*')
+        .execute();
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`Proposal with on-chain ID ${proposalOnChainId} not found`);
+      }
+
+      this.logger.log(`Proposal status successfully updated for on-chain ID: ${proposalOnChainId} to status: ${newStatus} | Result: ${result.raw[0]}`);
+      return result.raw[0];
+    } catch (err) {
+      this.logger.error(`Failed to update proposal status for on-chain ID: ${proposalOnChainId}. Error: ${err}`);
+      throw new Error(`Failed to update proposal status.`);
+    }
+  }
 
   // 📡 Listening Event from Publisher
   handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
@@ -247,7 +267,7 @@ export class ProposalServiceService {
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
-      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
+      this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
       console.log(`Pattern: ${context.getPattern()}`);
       const originalMsg = context.getMessage();
       console.log(originalMsg);
@@ -257,7 +277,7 @@ export class ProposalServiceService {
   }
 
   // 📡 Listening Event from Publisher
-  handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+  async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
@@ -266,7 +286,15 @@ export class ProposalServiceService {
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
-      this.updateTransactionStatus(proposal.transactionHash, proposal.web3Status, proposalId);
+
+      //Check if proposal ID is present
+      const validEntry = await this.proposalRepository.findOne({ where: { proposal_onchain_id: proposalId } });
+
+      if (!validEntry) {
+        this.logger.error(`Proposal with ID: ${proposalId} not found in the database`);
+        this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
+      }
+      this.updateProposalStatus(proposal.web3Status, proposalId);
       console.log(`Pattern: ${context.getPattern()}`);
       const originalMsg = context.getMessage();
       console.log(originalMsg);

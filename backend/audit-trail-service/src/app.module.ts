@@ -31,6 +31,5 @@ export class AppModule {
   async onModuleInit() {
     // Lifecycle Hooks: Trigger the function when the module initializes
     await this.tasksService.listenProposalTrx();
-    await this.tasksService.updateTransaction();
   }
 }
