@@ -20,6 +20,7 @@ export class ProposalServiceService {
     @InjectRepository(ProposalEntity)
     private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy,
+    @Inject('USER_MANAGEMENT_SERVICE') private umsRabbitClient: ClientProxy,
     private readonly logger: WinstonLogger,
   ) {
     this.logger.setContext(ProposalServiceService.name);
@@ -65,15 +66,10 @@ export class ProposalServiceService {
   }
 
   async test(packet: ValidateAuthorizationDto): Promise<boolean> {
-    console.log('Auth Message Call Test')
+    console.log('Auth Message Call Test');
     const messageResponse = await firstValueFrom(
-      this.rabbitClient.send(
-        'validate-authorization',
-        packet
-        //"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW50b25pbi5pc2xhbUBicmFpbnN0YXRpb24tMjMuY29tIiwiaWF0IjoxNzQxMTY4MDUyLCJleHAiOjE3NDEyNTQ0NTJ9.SNFTZSlfifDHOdV-qg-qPtTMyENPuF9WDG3nSUHtzCU",
-      ),
+      this.umsRabbitClient.send('validate-authorization', packet),
     );
-    console.log(messageResponse)
     return true;
   }
 

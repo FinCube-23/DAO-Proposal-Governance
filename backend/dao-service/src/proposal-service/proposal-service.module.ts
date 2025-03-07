@@ -18,6 +18,14 @@ import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
           queue: 'proposal-queue', // Routing Key
         },
       },
+      {
+        name: 'USER_MANAGEMENT_SERVICE', // Injectable
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://rabbitmq:5672'],
+          queue: 'authorization', // Routing Key
+        },
+      },
     ]),
   ],
   controllers: [ProposalServiceController],
