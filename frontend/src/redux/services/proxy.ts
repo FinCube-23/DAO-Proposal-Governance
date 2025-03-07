@@ -11,12 +11,24 @@ import {
 
 export const proxyApis = api.injectEndpoints({
   endpoints: (build) => ({
+    // check is member approved
+    checkIsMemberApproved: build.query<boolean, { address: string }>({
+      query: (payload) => {
+        return {
+          url: `${PROXY_ENDPOINT.BASE}/is-member-approved`,
+          method: "POST",
+          body: payload,
+        };
+      },
+      providesTags: ["proxy"],
+    }),
     // get balance
-    getBalance: build.query<GetBalanceResponse, void>({
-      query: () => {
+    getBalance: build.query<GetBalanceResponse, { address: string }>({
+      query: (payload) => {
         return {
           url: `${PROXY_ENDPOINT.BASE}/balance`,
-          method: "GET",
+          method: "POST",
+          body: payload,
         };
       },
     }),
@@ -72,6 +84,7 @@ export const proxyApis = api.injectEndpoints({
 });
 
 export const {
+  useLazyCheckIsMemberApprovedQuery,
   useLazyGetBalanceQuery,
   useLazyGetProposalThresholdQuery,
   useLazyGetProposalCountQuery,

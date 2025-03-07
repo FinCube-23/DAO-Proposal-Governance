@@ -11,7 +11,7 @@ import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
     TypeOrmModule.forFeature([ProposalEntity]),
     ClientsModule.register([
       {
-        name: 'PROPOSAL_SERVICE', // Injectable 
+        name: 'PROPOSAL_SERVICE', // Injectable
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://rabbitmq:5672'],
@@ -23,4 +23,4 @@ import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
   controllers: [ProposalServiceController],
   providers: [ProposalServiceService, WinstonLogger],
 })
-export class ProposalServiceModule { }
+export class ProposalServiceModule {}

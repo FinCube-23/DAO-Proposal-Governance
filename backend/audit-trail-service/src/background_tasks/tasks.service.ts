@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
 import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
 import { TransactionsService } from 'src/transactions/transactions.service';
+import { Cron } from '@nestjs/schedule';
 
 require('dotenv').config();
 const { Network, Alchemy } = require("alchemy-sdk");
@@ -22,6 +23,79 @@ export class TasksService {
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
   ) { }
+
+  @Cron('30 * * * * *')
+  async handleCron() {
+    this.logger.log("Cron job started to look for pending transactions");
+    //Get pending proposals from DB
+    this.logger.log("Quering transactions from Transaction DB");
+
+    const pendingTransactionHash = await this.transactionService.getPendingTransactionHash();
+
+    this.logger.log(`This are the pending transaction hashes: ${pendingTransactionHash}`);
+
+    //Query pending transactions (if any) from GraphQL
+    this.logger.log(`Quering pending transactions from The Graph`);
+
+    const pendingTransactions = await this.proposalUpdateService.getTransactionUpdates(pendingTransactionHash);
+
+    if (!pendingTransactions || pendingTransactions.length === 0) {
+      this.logger.log(`No pending transactions!`);
+      return;
+    }
+
+    this.logger.log(`Found pending transactions: ${pendingTransactions}`);
+
+
+    //These will be filtered at the later card #242
+
+
+
+    //Update if there is any change in status first transaction service, then DAO service
+
+    const eventDataArray: any[] = [];
+
+    const transactionTypes = [
+      "proposalExecuteds",
+      "proposalCreateds",
+      "proposalCanceleds",
+      "proposalAddeds",
+      "ownershipTransferreds",
+      "memberRegistereds",
+      "memberApproveds"
+    ];
+
+
+    for (const type of transactionTypes) {
+      if (pendingTransactions[type]) {
+        eventDataArray.push(...pendingTransactions[type].map((tx: any) => ({
+          ...tx,
+          eventType: type // Store which event type it belongs to
+        })));
+      }
+    }
+
+    // Remove duplicates based on `transactionHash`
+    const uniqueTransactions = Array.from(
+      new Map(eventDataArray.map((tx) => [tx.transactionHash, tx])).values()
+    );
+
+    for (const transaction of uniqueTransactions) {
+      try {
+        await this.transactionService.updateStatus(
+          transaction.transactionHash,
+          transaction,
+          TransactionConfirmationSource.THE_GRAPH,
+          1
+        );
+        this.logger.log(`Transaction ${transaction.transactionHash} successfully updated.`);
+      } catch (updateError) {
+        this.logger.error(`Failed to update transaction ${transaction.transactionHash}: ${updateError.message}`);
+      }
+    }
+
+
+  }
 
   async listenProposalTrx() {
     const proposalTopic = process.env.PROPOSAL_TOPIC;
