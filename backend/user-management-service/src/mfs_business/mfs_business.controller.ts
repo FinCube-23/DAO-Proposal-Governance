@@ -16,6 +16,14 @@ import { MfsBusiness } from './entities/mfs_business.entity';
 import { ApiBody, ApiResponse } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
+import {
+  Ctx,
+  RmqContext,
+  MessagePattern,
+  Payload,
+  EventPattern,
+} from '@nestjs/microservices';
+
 @Controller('mfs-business')
 export class MfsBusinessController {
   constructor(private readonly mfsBusinessService: MfsBusinessService) {}
@@ -37,6 +45,16 @@ export class MfsBusinessController {
     return this.mfsBusinessService.create(
       new MfsBusiness({ ...mfs_business_body, user: req.user }),
     );
+  }
+
+  // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
+  @EventPattern('create-proposal-placed')
+  handleCreatedProposalPlaced(
+    @Payload() proposal: any,
+    @Ctx() context: RmqContext,
+  ) {
+    console.log('Testing');
+    console.log(JSON.stringify(proposal));
   }
 
   @Get()

@@ -15,7 +15,7 @@ import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://rabbitmq:5672'],
-          queue: 'proposal-queue', // Routing Key
+          queue: 'pending-proposal-queue', // Routing Key
         },
       },
     ]),
