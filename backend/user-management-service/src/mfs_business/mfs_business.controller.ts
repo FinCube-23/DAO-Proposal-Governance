@@ -19,7 +19,6 @@ import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
 import {
   Ctx,
   RmqContext,
-  MessagePattern,
   Payload,
   EventPattern,
 } from '@nestjs/microservices';
