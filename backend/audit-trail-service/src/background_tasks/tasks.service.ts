@@ -2,7 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
 import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
 import { TransactionsService } from 'src/transactions/transactions.service';
-import { Cron } from '@nestjs/schedule';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+
 
 require('dotenv').config();
 const { Network, Alchemy } = require("alchemy-sdk");
@@ -18,13 +19,14 @@ const alchemy = new Alchemy(settings);
 @Injectable()
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
-
+  private cronJobName = 'check-pending-transactions';
   constructor(
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
+    private schedulerRegistry: SchedulerRegistry
   ) { }
 
-  @Cron('30 * * * * *')
+  @Cron('30 * * * * *', { name: 'check-pending-transactions' })
   async handleCron() {
     this.logger.log("Cron job started to look for pending transactions");
     //Get pending proposals from DB
@@ -101,6 +103,29 @@ export class TasksService {
 
   }
 
+
+  private stopCronJob() {
+    try {
+      const job = this.schedulerRegistry.getCronJob(this.cronJobName);
+      job.stop();
+      this.logger.log(`Cron job ${this.cronJobName} has been stopped`);
+    } catch (error) {
+      this.logger.error(`Failed to stop cron job: ${error.message}`);
+    }
+  }
+
+  // Method to start the cron job
+  private startCronJob() {
+    try {
+      const job = this.schedulerRegistry.getCronJob(this.cronJobName);
+      job.start();
+      this.logger.log(`Cron job ${this.cronJobName} has been started`);
+    } catch (error) {
+      this.logger.error(`Failed to start cron job: ${error.message}`);
+    }
+  }
+
+
   async listenProposalTrx() {
     const proposalTopic = process.env.PROPOSAL_TOPIC;
     const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
@@ -117,8 +142,10 @@ export class TasksService {
     // Open the websocket and listen for events!
     alchemy.ws.on(ProposalAddedEvents, async (txn) => {
       try {
+        this.stopCronJob();
         this.logger.log(`New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`);
         this.logger.log(`proposalEndTopic Value: ${txn.topics[1]}`);
+        this.logger.log("Resetting Cron");
         console.log(JSON.stringify(txn, null, 2));
         console.dir(txn, { depth: null });
 
@@ -128,8 +155,8 @@ export class TasksService {
           this.logger.log('proposalEndTopic is zero for ProposalCreated event.');
           this.logger.log('New member proposal transaction placed on-chain.');
 
-          // Introduce a 30-second delay before fetching the data
-          const delay = 30000; // 30 seconds
+          // Introduce a 10-second delay before fetching the data
+          const delay = 10000; // 10 seconds
           this.logger.log(`Waiting for ${delay / 1000} seconds to allow the indexer to update before our GraphQL query.`);
           await sleep(delay);
 
@@ -166,8 +193,10 @@ export class TasksService {
         } else {
           this.logger.warn('proposalEndTopic is non-zero for ProposalCreated event.');
         }
+        this.startCronJob();
       } catch (err) {
         this.logger.error(`Error handling ProposalAddedEvents: ${err.message}`, err.stack);
+        this.startCronJob();
       }
     });
   }
