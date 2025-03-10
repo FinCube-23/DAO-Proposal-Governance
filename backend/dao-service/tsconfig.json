@@ -17,5 +17,9 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-  }
+    "paths": {
+      "@custom/validate-auth": ["node_modules/@custom/validate-auth"]
+    }
+  },
+  "include": ["src/**/*.ts"]
 }

@@ -1,67 +1,86 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
+import { IProposal } from "@lib/interfaces";
+import { config } from "../../main";
+import contractABI from "../../contractABI/contractABI.json";
+import { readContract } from "@wagmi/core";
+import { useEffect, useState } from "react";
+import { Badge } from "@components/ui/badge";
+import { Loader } from "lucide-react";
 
-export function RecentTransactions() {
+export function RecentTransactions({ proposalCount }: any) {
+  const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
+  const [loading, setLoading] = useState<boolean>();
+
+  useEffect(() => {
+    const getProposalsByPage = async (page: any) => {
+      setLoading(true);
+      try {
+        const response: any = await readContract(config, {
+          abi: contractABI,
+          address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+          functionName: "getProposalsByPage",
+          args: [page, 5],
+        });
+
+        const filteredProposals = response[0].filter(
+          (proposal: any) =>
+            proposal.proposer !== "0x0000000000000000000000000000000000000000"
+        );
+
+        setProposalsByPage(filteredProposals);
+        console.log(filteredProposals);
+      } catch (e) {
+        console.log(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getProposalsByPage(0);
+  }, []);
+
   return (
     <div className="space-y-8">
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/avatars/01.png" alt="Avatar" />
-          <AvatarFallback>OM</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Olivia Martin</p>
-          <p className="text-sm text-muted-foreground">
-            olivia.martin@email.com
-          </p>
+      {loading ? (
+        <div className="flex justify-center mt-28">
+          <Loader className="animate-spin" />
         </div>
-        <div className="ml-auto font-medium">+$1,999.00</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="flex h-9 w-9 items-center justify-center space-y-0 border">
-          <AvatarImage src="/avatars/02.png" alt="Avatar" />
-          <AvatarFallback>JL</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Jackson Lee</p>
-          <p className="text-sm text-muted-foreground">jackson.lee@email.com</p>
-        </div>
-        <div className="ml-auto font-medium">+$39.00</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/avatars/03.png" alt="Avatar" />
-          <AvatarFallback>IN</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Isabella Nguyen</p>
-          <p className="text-sm text-muted-foreground">
-            isabella.nguyen@email.com
-          </p>
-        </div>
-        <div className="ml-auto font-medium">+$299.00</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/avatars/04.png" alt="Avatar" />
-          <AvatarFallback>WK</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">William Kim</p>
-          <p className="text-sm text-muted-foreground">will@email.com</p>
-        </div>
-        <div className="ml-auto font-medium">+$99.00</div>
-      </div>
-      <div className="flex items-center">
-        <Avatar className="h-9 w-9">
-          <AvatarImage src="/avatars/05.png" alt="Avatar" />
-          <AvatarFallback>SD</AvatarFallback>
-        </Avatar>
-        <div className="ml-4 space-y-1">
-          <p className="text-sm font-medium leading-none">Sofia Davis</p>
-          <p className="text-sm text-muted-foreground">sofia.davis@email.com</p>
-        </div>
-        <div className="ml-auto font-medium">+$39.00</div>
-      </div>
+      ) : (
+        <>
+          {proposalsByPage?.map((proposal, idx) => (
+            <div key={idx} className="flex items-center">
+              <Avatar className="h-9 w-9">
+                <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                <AvatarFallback>{proposal.proposalURI[0]}</AvatarFallback>
+              </Avatar>
+              <div className="ml-4 space-y-1">
+                <p className="text-sm font-medium leading-none">
+                  {proposal.proposalURI}
+                </p>
+                <a
+                  target="_"
+                  href={`${import.meta.env.VITE_ADDRESS_EXPLORER}${
+                    proposal.proposer
+                  }`}
+                  className="text-sm text-muted-foreground hover:underline"
+                >
+                  {proposal.proposer}
+                </a>
+              </div>
+              <div className="ml-auto font-medium">
+                {proposal.canceled && !proposal.executed ? (
+                  <Badge variant="danger">Canceled</Badge>
+                ) : !proposal.canceled && proposal.executed ? (
+                  <Badge variant="success">Confirmed</Badge>
+                ) : (
+                  !proposal.canceled &&
+                  !proposal.executed && <Badge variant="warning">Pending</Badge>
+                )}
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

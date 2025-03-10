@@ -25,30 +25,41 @@ export class WinstonLogger implements LoggerService {
 
     constructor() {
         this.logger = winston.createLogger({
-            format: winston.format.combine(
-                winston.format.json(),
-                winston.format.timestamp(),
-                winston.format.colorize(),
-                winston.format.printf(({ level, message, timestamp, context }) => {
-                    const maskedMessage = this.maskSensitiveData(message);
-                    return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
-                })
-            ),
-            transports: [
-                new winston.transports.Console(),
-                new winston.transports.File({ filename: 'logs/app.log' }),
-                new LokiTransport({
-                    host: process.env.LOG_SERVER
-                  })
-            ]
-        });
+        format: winston.format.combine(
+            winston.format.timestamp(),
+            winston.format.printf(({ level, message, timestamp, context }) => {
+                const maskedMessage = this.maskSensitiveData(message);
+                // Ensure the message is stringified
+                return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
+            })
+        ),
+        transports: [
+            new winston.transports.Console({
+                format: winston.format.combine(
+                    winston.format.colorize(),
+                    winston.format.printf(({ level, message, timestamp, context }) => {
+                        const maskedMessage = this.maskSensitiveData(message);
+                        return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
+                        //return JSON.stringify(`[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`);
+                    })
+                )
+            }),
+            new winston.transports.File({ filename: 'logs/app.log' }),
+            new LokiTransport({
+                host: process.env.LOG_SERVER,
+                labels: { service: "dao-service" },
+                json: true
+            })
+        ]
+    });
+
     }
 
     setContext(context: string) {
         this.context = context; // Set module name dynamically
     }
 
-    generateMaskConfig(data: Record<string, any>): JsonMask2Configs {
+    private generateMaskConfig(data: Record<string, any>): JsonMask2Configs {
         const config: JsonMask2Configs = {};
 
         for (const [configKey, fields] of Object.entries(this.MASK_CONFIG)) {
@@ -70,7 +81,7 @@ export class WinstonLogger implements LoggerService {
           return config;
     }
 
-    maskSensitiveData(data: any) {
+    private maskSensitiveData(data: any) {
         if (typeof data !== 'object' || data === null) return data; // Ignore non-objects
 
         const maskConfig = this.generateMaskConfig(data);
@@ -78,23 +89,34 @@ export class WinstonLogger implements LoggerService {
         return maskJSON2(data, maskConfig);
     }
 
-    log(message: any) {
-        this.logger.info({ message, context: this.context });
+    private stringifyMessage(message: any): string {
+        if (typeof message === 'object' && message !== null) {
+            // Recursively stringify the object
+            return JSON.stringify(message, (key, value) =>
+                typeof value === 'object' && value !== null ? JSON.stringify(value) : value
+            );
+        }
+        return message.toString();
     }
 
-    error(message: string, trace?: string) {
+    log(message: any) {
+        const maskedMessage = JSON.stringify(this.maskSensitiveData(message));
+        this.logger.info(this.stringifyMessage(maskedMessage), { context: this.context });
+    }
+
+    error(message: any, trace?: string) {
         this.logger.error({ message, trace, context: this.context });
     }
 
-    warn(message: string) {
+    warn(message: any) {
         this.logger.warn({ message, context: this.context });
     }
 
-    debug(message: string) {
+    debug(message: any) {
         this.logger.debug({ message, context: this.context });
     }
 
-    verbose(message: string) {
+    verbose(message: any) {
         this.logger.verbose({ message, context: this.context });
     }
 }
