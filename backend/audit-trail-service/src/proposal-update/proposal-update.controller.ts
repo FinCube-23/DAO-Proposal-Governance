@@ -32,6 +32,11 @@ export class ProposalUpdateController {
   async getProposal(@Payload() data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
     return await this.proposalUpdateService.handlePendingProposal(data_packet, context);
   }
+  // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
+  @MessagePattern('membership-proposal-status-update')
+  async getTransactionUpdate(@Payload() data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
+    return await this.proposalUpdateService.handleUpdatedTransaction(data_packet, context);
+  }
 
   // 💬 Pushing Event in the Message Queue in EventPattern (No response expected) | This is Publisher
   @Post('create-proposal')

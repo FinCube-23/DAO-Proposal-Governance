@@ -22,7 +22,10 @@ import { useNavigate } from "react-router";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "../main";
-import { useLazyGetProposalsQuery } from "@redux/services/proposal";
+import {
+  useLazyFilterProposalsQuery,
+  useLazyGetProposalsQuery,
+} from "@redux/services/proposal";
 import Loader from "@components/Loader";
 import OffchainCard from "@components/dao/OffChainCard";
 import OngoingProposalCard from "@components/dao/OngoingProposalCard";
@@ -36,6 +39,13 @@ import {
   PaginationPrevious,
 } from "@components/ui/pagination";
 import { IDaoInfo, IOffchainProposalCard, IProposal } from "@lib/interfaces";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function DaoDashboard() {
   const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
@@ -59,6 +69,10 @@ export default function DaoDashboard() {
     useState<IOffchainProposalCard[]>();
   const [offchainPage, setOffchainPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [filterStatus, setFilterStatus] = useState<string>("pending");
+  const [filterProposals] = useLazyFilterProposalsQuery();
+  const [filtered, setFiltered] = useState([]);
+  const [filterToggle, setFilterToggle] = useState<boolean>(false);
 
   const getVotingPeriod = async () => {
     try {
@@ -197,7 +211,7 @@ export default function DaoDashboard() {
       }
 
       setProposalsFromBE(response.data || []);
-      console.log(response);
+      console.log("Backend data:", response);
 
       setTotalPages(Math.ceil(response.total / response.limit));
     };
@@ -231,6 +245,26 @@ export default function DaoDashboard() {
       setOnchainPageNumber((prevPage) => prevPage - 5);
     }
   };
+
+  const handleFilterChange = (value: string) => {
+    setFilterToggle(true);
+    setFilterStatus(value);
+  };
+
+  useEffect(() => {
+    const filter = async (status: string) => {
+      try {
+        const response = await filterProposals(status);
+
+        console.log(response.data);
+        setFiltered(response.data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    filter(filterStatus);
+  }, [filterProposals, filterStatus]);
 
   return (
     <div className="flex flex-col gap-5">
@@ -337,31 +371,55 @@ export default function DaoDashboard() {
             </Dialog>
           </div>
         </Card>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setToggle(0)}
-            className={`${
-              toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            All proposals
-          </Button>
-          <Button
-            onClick={() => setToggle(1)}
-            className={`${
-              toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            Ongoing proposals
-          </Button>
-          <Button
-            onClick={() => setToggle(2)}
-            className={`${
-              toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
-            }`}
-          >
-            Off-chain records
-          </Button>
+        <div className="flex justify-between items-center">
+          <div className="flex gap-2">
+            <Button
+              onClick={() => {
+                setToggle(0);
+                setFilterToggle(false);
+              }}
+              className={`${
+                toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              All proposals
+            </Button>
+            <Button
+              onClick={() => {
+                setToggle(1);
+                setFilterToggle(false);
+              }}
+              className={`${
+                toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Ongoing proposals
+            </Button>
+            <Button
+              onClick={() => {
+                setToggle(2);
+                setFilterToggle(false);
+              }}
+              className={`${
+                toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
+              }`}
+            >
+              Off-chain records
+            </Button>
+          </div>
+          {toggle === 2 && (
+            <Select value={filterStatus} onValueChange={handleFilterChange}>
+              <SelectTrigger className="w-[120px]">
+                <SelectValue placeholder="Filters" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="cancel">Canceled</SelectItem>
+                <SelectItem value="executed">Executed</SelectItem>
+                <SelectItem value="approved">Approved</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
         {pageLoading && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
@@ -405,7 +463,7 @@ export default function DaoDashboard() {
           <p className="text-3xl text-center font-bold border border-white py-10 m-10 rounded-xl">
             No proposals found on the Backend
           </p>
-        ) : (
+        ) : !filterToggle ? (
           proposalsFromBE?.map((proposal, idx) => (
             <OffchainCard
               key={idx}
@@ -413,74 +471,88 @@ export default function DaoDashboard() {
               proposalId={proposal.id}
             />
           ))
+        ) : (
+          filterToggle &&
+          filtered?.map((proposal, idx) => (
+            <OffchainCard
+              key={idx}
+              proposal={proposal}
+              proposalId={proposal.id}
+            />
+          ))
         )}
-        <Pagination className="my-5">
-          {toggle === 0 ? (
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={handleOnchainPrevPage}
-                  className={`${
-                    onchainPageNumber === 0 && "pointer-events-none opacity-50"
-                  } cursor-pointer`}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  onClick={handleOnchainNextPage}
-                  className={`${
-                    proposalsPerPage < 5 && "pointer-events-none opacity-50"
-                  } cursor-pointer`}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          ) : toggle === 2 ? (
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  className={`${
-                    offchainPage === 1 && "pointer-events-none opacity-50"
-                  } cursor-pointer`}
-                  onClick={() => {
-                    setPageLoading(true);
-                    setOffchainPage((prev) => Math.max(1, prev - 1));
-                  }}
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                (pageNum) => (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      className="cursor-pointer"
-                      onClick={(e) => {
-                        e.preventDefault();
+        {!filterToggle && (
+          <Pagination className="my-5">
+            {toggle === 0 ? (
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={handleOnchainPrevPage}
+                    className={`${
+                      onchainPageNumber === 0 &&
+                      "pointer-events-none opacity-50"
+                    } cursor-pointer`}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={handleOnchainNextPage}
+                    className={`${
+                      proposalsPerPage < 5 && "pointer-events-none opacity-50"
+                    } cursor-pointer`}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            ) : (
+              toggle === 2 && (
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      className={`${
+                        offchainPage === 1 && "pointer-events-none opacity-50"
+                      } cursor-pointer`}
+                      onClick={() => {
                         setPageLoading(true);
-                        setOffchainPage(pageNum);
+                        setOffchainPage((prev) => Math.max(1, prev - 1));
                       }}
-                      isActive={offchainPage === pageNum}
-                    >
-                      {pageNum}
-                    </PaginationLink>
+                    />
                   </PaginationItem>
-                )
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  className={`${
-                    offchainPage === totalPages &&
-                    "pointer-events-none opacity-50"
-                  } cursor-pointer`}
-                  onClick={() => {
-                    setPageLoading(true);
-                    setOffchainPage((prev) => Math.min(totalPages, prev + 1));
-                  }}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          ) : (
-            <></>
-          )}
-        </Pagination>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (pageNum) => (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          className="cursor-pointer"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPageLoading(true);
+                            setOffchainPage(pageNum);
+                          }}
+                          isActive={offchainPage === pageNum}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+                  <PaginationItem>
+                    <PaginationNext
+                      className={`${
+                        offchainPage === totalPages &&
+                        "pointer-events-none opacity-50"
+                      } cursor-pointer`}
+                      onClick={() => {
+                        setPageLoading(true);
+                        setOffchainPage((prev) =>
+                          Math.min(totalPages, prev + 1)
+                        );
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              )
+            )}
+          </Pagination>
+        )}
       </div>
     </div>
   );

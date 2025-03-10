@@ -21,6 +21,10 @@ import contractABI from "../../contractABI/contractABI.json";
 import { useNavigate } from "react-router";
 import { IProposal } from "@lib/interfaces";
 import { useAccount } from "wagmi";
+import {
+  useCancelProposalMutation,
+  useExecuteProposalMutation,
+} from "@redux/services/proposal";
 
 export default function VotingBreakdown({ proposalId }: any) {
   const { address } = useAccount();
@@ -30,6 +34,8 @@ export default function VotingBreakdown({ proposalId }: any) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [voteStatus, setVoteStatus] = useState(true);
   const navigate = useNavigate();
+  const [executeProposal] = useExecuteProposalMutation();
+  const [cancelProposal] = useCancelProposalMutation();
 
   const castVote = async (value: boolean) => {
     setLoadingStatus(true);
@@ -70,7 +76,7 @@ export default function VotingBreakdown({ proposalId }: any) {
     setLoadingStatus(false);
   };
 
-  const executeProposal = async () => {
+  const execute = async () => {
     setLoadingStatus(true);
     try {
       const { request } = await simulateContract(config, {
@@ -80,6 +86,11 @@ export default function VotingBreakdown({ proposalId }: any) {
         args: [proposalId],
       });
       const hash = await writeContract(config, request);
+
+      await executeProposal({
+        proposalId: Number(proposalId),
+        transactionHash: hash,
+      });
 
       await waitForTransactionReceipt(config, { hash });
 
@@ -101,7 +112,7 @@ export default function VotingBreakdown({ proposalId }: any) {
     setLoadingStatus(false);
   };
 
-  const cancelProposal = async () => {
+  const cancel = async () => {
     setLoadingStatus(true);
     try {
       const { request } = await simulateContract(config, {
@@ -111,6 +122,8 @@ export default function VotingBreakdown({ proposalId }: any) {
         args: [proposalId],
       });
       const hash = await writeContract(config, request);
+
+      await cancelProposal({ proposalId: proposalId, transactionHash: hash });
 
       await waitForTransactionReceipt(config, { hash });
 
@@ -217,7 +230,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           !proposal?.canceled && (
             <Button
               isLoading={loadingStatus}
-              onClick={executeProposal}
+              onClick={execute}
               className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 mx-2 text-white"
             >
               Execute
@@ -228,7 +241,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           !proposal?.executed && (
             <Button
               isLoading={loadingStatus}
-              onClick={cancelProposal}
+              onClick={cancel}
               className="bg-red-400 hover:bg-red-500 font-bold mt-2 mx-2 text-white"
             >
               Cancel

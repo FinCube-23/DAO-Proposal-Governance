@@ -6,11 +6,11 @@ WORKDIR /app
 # Copy only package.json and package-lock.json first for better caching
 COPY package*.json ./
 
-# Copy the external libs into /app/libs
-COPY ../libs /app/libs
+# # Copy the external libs into /app/libs
+# COPY ../libs /app/libs
 
-# Update package.json paths to use /app/libs inside Docker
-RUN sed -i 's|"file:../libs/validate-auth"|"file:libs/validate-auth"|g' package.json
+# # Update package.json paths to use /app/libs inside Docker
+# RUN sed -i 's|"file:../libs/validate-auth"|"file:libs/validate-auth"|g' package.json
 
 # Install dependencies
 RUN npm install
