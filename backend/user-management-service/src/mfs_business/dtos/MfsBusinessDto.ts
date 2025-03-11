@@ -9,5 +9,6 @@ export class MfsBusinessDTO {
   wallet_address: string;
   native_currency: string;
   certificate: string;
-  trx_hash: string;
+  proposal_onchain_id: number;
+  membership_onchain_status: string;
 }

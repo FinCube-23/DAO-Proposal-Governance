@@ -67,37 +67,63 @@ The Web3 Proxy Service performs smart contract invocations and is configured wit
 
 ## Services
 
-### DAO Service
-
-- **Purpose:** Manage DAO creation, proposal submission, and voting.
-- **API Endpoints:** `/dao-service`, `/dao-service/proposal-service`
-- **Technology:** NestJS, PostgreSQL
-
 ### User Management Service
 
 - **Purpose:** Handle user registration, authentication, and profile management.
-- **API Endpoints:** `/user-management-service/mfs-business`, `/user-management-service/exchange-user`
-- **Technology:** NestJS, PostgreSQL, Auth0
+- **API Route:** `/user-management-service`
+- **Technology:** NestJS, PostgreSQL, RabbitMQ (Consumer)
+
+### DAO Service
+
+- **Purpose:** Manage DAO creation, proposal submission, and voting.
+- **API Route:** `/dao-service`
+- **Technology:** NestJS, PostgreSQL, RabbitMQ (Producer)
 
 ### Web3 Proxy Service
 
-- **Purpose:** Interact with blockchain via smart contracts for DAO operations.
-- **API Endpoints:** `/web3-proxy-service/web3-dao-proxy`
-- **Technology:** NestJS, Alchemy, Web3JS
+- **Purpose:** Interact with blockchain via smart contracts for DAO operations signed by organization's custodial wallet.
+- **API Endpoints:** `/web3-proxy-service`
+- **Technology:** NestJS, Alchemy, Web3JS, RabbitMQ (Producer)
 
 ### Audit Trail Service
 
 - **Purpose:** Record and track all DAO-related activities and proposals.
-- **API Endpoints:** N/A (Message Queue integration)
-- **Technology:** NestJS, RabbitMQ
+- **API Route:** `/audit-trail-service`
+- **Technology:** NestJS, RabbitMQ (Publisher)
 
 ### API Gateway
 
 - **Purpose:** Client requests from frontend are rerouted using this API gateway.
 - **API Endpoints:** N/A
-- **Technology:** NestJS
+- **Technology:** nginx
 
-## Message Broker Payloads
+## Event Driven Architecture (EDA)
+As our proposed solution involves multiple data sources and the fusion of different types of on-chain and off-chain networks, **EDA** is a suitable candidate for this project.
+
+In the Web2 layer, where almost all user actions can be processed in real-time, `synchronous` messaging is sufficient to keep the databases of different services in sync. However, the modules that coordinate between Web2 and Web3 must rely on `asynchronous` events as on-chain transaction may require some time to process. Since EVM-based smart contracts have built-in on-chain event functionality, we can leverage this to design our dApp using Event-Driven Architecture.
+
+### Authorization Check in Micro-Service (Synchronous) 
+
+These distributed service endpoints are secured by an auth guard. This auth guard is a decorator that functions as a `Producer`. When a REST API of a service is called, that service collects the `JWT Token` from the request cookie and sends it through a message queue to the User Management Service, which then responds with an acknowledgment.
+
+![Architecture Design of Message Drive Auth Guard](EDA_Auth_Architecture.message-pattern.drawio.png)
+
+### Sync Web2 and Web3 Data Sources per Service (Asynchronous)  
+
+As our system is a hybrid ecosystem of blockchain and conventional enterprise microservices, the data storage system is also hybrid. To keep all the different data synced between the Web2 and Web3 layers, this Event Driven architecture is proposed. For example, when a new DAO member proposal is created at the smart contract level, the Web3 event syncs the on-chain `proposal id` to the Audit Trail service, which listens for on-chain events as background tasks. This single Web2 service publishes a Web2 event to the event bus, where other required subscriber services, like the DAO service and User Management Service, sync their off-chain proposal database and KYC profile database with that `proposal id`, ensuring that this information can be tracked and audited according to enterprise best practices.
+
+![Architecture Design of Event Driven Architecture](EDA_Architecture.event-pattern.drawio.png)
+
+
+### Sequence Diagram of DB sync process of transaction history
+There are two pattern used between **Audit-trail** service and **DAO service** for inter-service communication. 
+From DAO Service to Audit Trail Service the queue is in `Message Pattern` where a transaction hash is collected from the frontend when a proposal was placed. As this is a `Message Pattern` Queue the DAO Service will also receive a response from Audit Trail Service which is a `Primary key` of that transaction at the Audit-trail DB. 
+
+On the other side the Audit-trail service is running background tasks to track the pending on-chain transaction's update by their transaction hashes provided by the DAO service. If the transaction is successful the on-chain events will notify the Audit-trail and Audit-trail will notify the DAO service through rabbitMQ `Event Pattern`.
+
+![Sequence Diagram for Inter-Service Communication with Message-Broker](DAO-Audit-Message-Broker.fincube.png)
+
+<!-- ## Message Broker Payloads
 There are two message queues communicating between Audit-trail service and DAO service. 
  - From DAO Service to Audit Trail Service the queue is in `Message Pattern`. Here DAO Service is the publisher and Audit Trail Service is the consumer. As this is a `Message Pattern` Queue the DAO Service will also receive a response from Audit Trail Service.     
 
@@ -126,9 +152,7 @@ The payload for the message queues is:
     "blockNumber": 123321,
     "transactionHash": "0xTesting"
 }
-```
-
-![Sequence Diagram for Inter-Service Communication with Message-Broker](DAO-Audit-Message-Broker.fincube.png)
+``` -->
 
 ## Installation
 
@@ -143,35 +167,10 @@ To install and run the backend services, follow these steps:
 2. **Install dependencies:**
     Ensure you have Docker installed. Build the containers using:
     ```bash
-    docker compose build
-    ```
-
-3. **Setup Docker:**
-    Ensure you have Docker installed. Start the containers using:
-    ```bash
-    docker-compose up 
+    ./run.sh up-be
     ```
 
 ## Configuration
 
-Each service has its own configuration file located in its respective directory. Make sure to set the necessary environment variables for database connections, Auth0, and blockchain API keys.
+Each service has its own configuration file located in its respective directory. Make sure to set the necessary environment variables for database connections, and blockchain API keys.
 
-### Example `.env` file for DAO Service:
-```plaintext
-APP_ENV=
-APP_PORT=
-DB_HOST=
-DB_PORT=
-POSTGRES_DB=
-POSTGRES_USER=
-POSTGRES_PASSWORD=
-PGADMIN_DEFAULT_EMAIL=
-PGADMIN_DEFAULT_PASSWORD=
-AUTH0_ISSUER_URL= 
-AUTH0_AUDIENCE= 
-SEPOLIA_API_KEY=
-PROPOSAL_TOPIC=
-PROPOSAL_END_TOPIC=
-DAO_CONTRACT_ADDRESS= 
-
- ```

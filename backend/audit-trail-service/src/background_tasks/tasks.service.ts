@@ -167,7 +167,8 @@ export class TasksService {
             eventData = {
               data: {
                 proposalId: data?.proposalId,
-                proposalType: data?.proposalType
+                proposalType: data?.proposalType,
+                proposedWallet: data?.data
               }
             };
           } catch (error) {

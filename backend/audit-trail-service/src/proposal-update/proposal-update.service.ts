@@ -37,6 +37,10 @@ export class ProposalUpdateService {
       const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
       const originalMsg = context.getMessage();
       const replyTo = originalMsg.properties.replyTo;
+      // const channel = context.getChannelRef();
+      // this.logger.log('Channel: ' + JSON.stringify(channel));
+      // Manual Acknowledgement
+      // channel.ack(originalMsg); This will kill the operation here.
       this.logger.log('Replying To Producer Service: ' + replyTo);
       // Return properly structured response with dummy values
       return {
