@@ -2,8 +2,8 @@ services:
   dao-app:
     container_name: dao_service_api
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: dao-service/Dockerfile
       args:
         - APP_ENV
     ports:

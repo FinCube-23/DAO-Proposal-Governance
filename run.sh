@@ -46,18 +46,18 @@ ensure_docker_network() {
 start_backend_service() {
     local service=$1
     echo "Starting $service..."
-    cd "backend/$service"
+    pushd  "backend/$service"
     docker compose up --build -d 
-    cd - >/dev/null
+    popd
 }
 
 # Function to stop a specific backend service
 stop_backend_service() {
     local service=$1
     echo "Stopping $service..."
-    cd "backend/$service"
+    pushd "backend/$service"
     docker compose down
-    cd - >/dev/null
+    popd
 }
 
 start_all_backends() {
