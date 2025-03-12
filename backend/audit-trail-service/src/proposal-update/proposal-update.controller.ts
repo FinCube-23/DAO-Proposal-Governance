@@ -20,12 +20,13 @@ import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { text } from 'stream/consumers';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 
 @Controller('proposal-update')
 export class ProposalUpdateController {
   private readonly logger = new Logger(ProposalUpdateController.name);
-  constructor(private readonly proposalUpdateService: ProposalUpdateService) { }
+  constructor(private readonly proposalUpdateService: ProposalUpdateService, private readonly amqpConnection: AmqpConnection) { }
 
   // 📡 MessagePattern expects a response, Not like Fire and Forget model | This is a Consumer
   @MessagePattern('queue-pending-proposal')
@@ -48,6 +49,13 @@ export class ProposalUpdateController {
   })
   async placeProposal(@Body() proposal: ResponseTransactionStatusDto) {
     return await this.proposalUpdateService.updateProposal(proposal);
+  }
+
+  // Add this to a temporary endpoint for testing
+  @Get('test-rmq')
+  async testRabbitMQ() {
+    await this.amqpConnection.publish('proposal-update-exchange', '', { test: 'message' });
+    return 'Test message sent!';
   }
 
 }

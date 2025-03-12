@@ -5,7 +5,7 @@ WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # --chown=app:app, ensures your security best practices and avoids file permission issues
 COPY --chown=app:app . .
