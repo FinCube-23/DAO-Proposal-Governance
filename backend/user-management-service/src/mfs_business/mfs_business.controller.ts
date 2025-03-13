@@ -48,16 +48,6 @@ export class MfsBusinessController {
     );
   }
 
-  // // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
-  // @EventPattern('create-proposal-placed')
-  // handleCreatedProposalPlaced(
-  //   @Payload() proposal: any,
-  //   @Ctx() context: RmqContext,
-  // ) {
-  //   console.log('Testing');
-  //   console.log(JSON.stringify(proposal));
-  // // }
-
   @Get()
   @ApiResponse({ status: 200, type: [MfsBusiness] })
   @ApiResponse({ status: 404, description: 'Not Found.' })
