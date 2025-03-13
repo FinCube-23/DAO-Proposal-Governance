@@ -81,7 +81,7 @@ export class MfsBusinessService {
     return `Removed #${id} MFS Business`;
   }
 
-  async updateOcChainProposalId(walletAddress: string, proposalId: number) {
+  async updateOnChainProposalId(walletAddress: string, proposalId: number) {
     const normalizedWalletAddress = walletAddress.toLowerCase();
 
     const business = await this.mfsBusinessRepository.findOne({
@@ -130,7 +130,7 @@ export class MfsBusinessService {
       console.log(
         `On-Chain Proposal ID: ${proposalId} | Member's Proposed Wallet: ${proposedWallet}`,
       );
-      this.updateOcChainProposalId(proposedWallet, proposalId);
+      this.updateOnChainProposalId(proposedWallet, proposalId);
     } catch (error) {
       console.error('Invalid proposal object received:', error);
     }
