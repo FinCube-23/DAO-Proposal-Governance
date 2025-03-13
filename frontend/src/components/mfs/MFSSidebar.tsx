@@ -69,6 +69,9 @@ export default function MFSSidebar({
         <SidebarUser
           name={auth.profile?.name || "N/A"}
           email={auth.profile?.email || "N/A"}
+          role={auth.profile?.role || "N/A"}
+          created_at={auth.profile?.created_at || "N/A"}
+          mfsBusiness={auth.profile?.organization || null}
         />
       </SidebarFooter>
       <SidebarRail />
