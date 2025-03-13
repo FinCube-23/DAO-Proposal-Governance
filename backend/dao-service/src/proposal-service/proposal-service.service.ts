@@ -268,14 +268,8 @@ export class ProposalServiceService {
       durable: true,
     },
   })
-  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, context: any) {
+  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
-      this.logger.log(`Received proposal update from 
-        Publisher: ${context?.exchange || 'Unknown Publisher'}
-        Exchange: ${context?.exchange || 'Unknown Exchange'} 
-        Routing Key: ${context?.routingKey || 'Unknown Routing Key'}
-        Queue: ${context?.queue || 'Unknown Queue'}
-        `);
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
@@ -288,8 +282,6 @@ export class ProposalServiceService {
       this.logger.error('Invalid proposal object received:', error);
     }
   }
-
-
 
   // 📡 Listening Event from Publisher
   async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
