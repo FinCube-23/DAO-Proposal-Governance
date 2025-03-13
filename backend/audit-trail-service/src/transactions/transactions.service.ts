@@ -25,29 +25,28 @@ export class TransactionsService {
 
     async updateStatus(trxHash: string, metadata: string, source: TransactionConfirmationSource, newStatus: number): Promise<TransactionEntity> {
         try {
-            const transactions = await this.transactionRepository.find({
+            const transaction = await this.transactionRepository.findOne({
                 where: { trx_hash: trxHash }
             });
 
-            if (transactions.length === 0) {
-                this.logger.warn(`Transaction ${trxHash} not found in DB. Skipping update.`);
+            if (!transaction) {
+                this.logger.warn("Transaction is an off-system transaction, not found in DB");
                 return null;
             }
+            this.logger.log(`Transaction status found! Getting updated at Audit Trail DB at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
 
-            const transaction = transactions[0];
-
-            this.logger.log(`Transaction found! Updating at Audit Trail DB at PK: ${transaction.id}`);
 
             transaction.trx_status = newStatus as TransactionStatus;
             transaction.trx_metadata = metadata;
             transaction.confirmation_source = source;
-
+            this.logger.log(`Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`);
             return await this.transactionRepository.save(transaction);
         } catch (err) {
             this.logger.error(`Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`);
             throw new Error("Transaction status couldn't get updated.");
         }
     }
+
     async getPendingTransactionHash(): Promise<string[]> {
         try {
             const transactions = await this.transactionRepository.find({

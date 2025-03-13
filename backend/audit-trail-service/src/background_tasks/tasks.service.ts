@@ -195,9 +195,10 @@ export class TasksService {
               blockNumber: txn.blockNumber,
               transactionHash: txn.transactionHash,
             });
+            this.logger.log('WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!');
+
           }
 
-          this.logger.log('WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!');
         } else {
           this.logger.warn('WEBSOCKET: proposalEndTopic is non-zero for ProposalCreated event.');
         }
