@@ -14,8 +14,13 @@ export enum TransactionConfirmationSource {
     MANUAL = 'manual',
 }
 
+export enum TransactionStatus {
+    PENDING = 0,
+    CONFIRMED = 1
+}
+
 @Entity('transactions')
-export class TransactionEntity  {
+export class TransactionEntity {
     @PrimaryGeneratedColumn()
     @ApiProperty()
     id: number;
@@ -36,9 +41,18 @@ export class TransactionEntity  {
     @ApiProperty()
     trx_metadata: string;
 
-    @Column({ type: 'integer', nullable: true })
-    @ApiProperty()
-    trx_status: number;
+    @Column({
+        type: 'enum',
+        enum: TransactionStatus,
+        default: TransactionStatus.PENDING,
+    })
+    @ApiProperty({
+        description: "This field will be automatically updated based on the proposal transaction status and after approval or cancellation and execution of the proposal on-chain",
+        enum: TransactionStatus,
+        example: TransactionStatus.PENDING,
+        required: false
+    })
+    trx_status: TransactionStatus;
 
     @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
 

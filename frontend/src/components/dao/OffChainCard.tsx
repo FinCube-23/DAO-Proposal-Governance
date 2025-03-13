@@ -3,7 +3,13 @@ import { Card, CardHeader, CardFooter } from "@components/ui/card";
 import { useNavigate } from "react-router";
 
 const convertStatusToVariant = (status: string) => {
-  return status !== "pending" ? "success" : "warning";
+  return status === "pending"
+    ? "warning"
+    : status === "cancel"
+    ? "danger"
+    : status === "executed"
+    ? "success"
+    : "success";
 };
 
 export default function OffchainCard({ proposal, proposalId }: any) {
@@ -12,21 +18,20 @@ export default function OffchainCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/mfs/dao/fincube/off-chain-proposals/${proposalId}`)}
+      onClick={() =>
+        navigate(`/mfs/dao/fincube/off-chain-proposals/${proposalId}`)
+      }
     >
       <CardHeader>
         <div className="flex justify-between mb-2">
           <Badge variant="secondary">Off-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.proposal_status)}>
-            <p className="capitalize">
-              {proposal.proposal_status !== "pending" ? "Confirmed" : "Pending"}
-            </p>
+            <p className="capitalize">{proposal.proposal_status}</p>
           </Badge>
         </div>
         <div className="font-bold text-2xl">Proposal ID: {proposal.id}</div>
         <div className="font-bold text-lg">
-          Proposal Type:{" "}
-          <span className="italic">{proposal.proposal_type}</span>
+          Description: <span className="italic">{proposal.metadata}</span>
         </div>
       </CardHeader>
 

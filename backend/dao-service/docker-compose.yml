@@ -2,17 +2,18 @@ services:
   dao-app:
     container_name: dao_service_api
     build:
-      context: ./
+      context: .
+      dockerfile: Dockerfile
       args:
         - APP_ENV
     ports:
-      - 3002:3000
+      - '3002:3000'
     volumes:
-      - ./:/app
+      - .:/app # Mount dao-service code
       - /app/node_modules
+      - ../libs:/app/libs:ro # Mount libs directory as read-only
     env_file:
-      # Add this line to specify the environment file
-      - .env.local # Specify the path to your .env file
+      - .env.local
     networks:
       - fincube23_network
 

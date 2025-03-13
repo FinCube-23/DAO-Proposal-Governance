@@ -4,8 +4,9 @@ import { ProposalUpdateController } from './proposal-update.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { ProposalUpdateRepository } from './proposal-update.repository';
-import { TransactionsService } from 'src/transactions/transactions.service';
 import { TransactionsModule } from 'src/transactions/transactions.module';
+import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+
 require('dotenv').config();
 
 @Module({
@@ -35,7 +36,20 @@ require('dotenv').config();
           queue: 'proposal-update-queue', // Routing Key
         },
       },
-    ])],
+    ]),
+    RabbitMQModule.forRoot({
+      uri: 'amqp://rabbitmq:5672',
+      exchanges: [
+        {
+          name: 'proposal-update-exchange',
+          type: 'fanout',
+        },
+      ],
+      connectionInitOptions: {
+        wait: true,
+        timeout: 30000, // Increase RabbitMQ connection timeout to 30 seconds
+      },
+    })],
   exports: ['APOLLO_CLIENT1', ProposalUpdateService],
 })
 export class ProposalUpdateModule { }

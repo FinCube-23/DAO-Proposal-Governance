@@ -22,10 +22,12 @@ import {
   Payload,
   EventPattern,
 } from '@nestjs/microservices';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+
 
 @Controller('mfs-business')
 export class MfsBusinessController {
-  constructor(private readonly mfsBusinessService: MfsBusinessService) {}
+  constructor(private readonly mfsBusinessService: MfsBusinessService) { }
 
   @Post()
   @ApiBody({ type: MfsBusiness })
@@ -46,15 +48,15 @@ export class MfsBusinessController {
     );
   }
 
-  // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
-  @EventPattern('create-proposal-placed')
-  handleCreatedProposalPlaced(
-    @Payload() proposal: any,
-    @Ctx() context: RmqContext,
-  ) {
-    console.log('Testing');
-    console.log(JSON.stringify(proposal));
-  }
+  // // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
+  // @EventPattern('create-proposal-placed')
+  // handleCreatedProposalPlaced(
+  //   @Payload() proposal: any,
+  //   @Ctx() context: RmqContext,
+  // ) {
+  //   console.log('Testing');
+  //   console.log(JSON.stringify(proposal));
+  // // }
 
   @Get()
   @ApiResponse({ status: 200, type: [MfsBusiness] })

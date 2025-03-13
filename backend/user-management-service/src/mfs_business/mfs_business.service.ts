@@ -7,13 +7,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { MfsBusiness } from './entities/mfs_business.entity';
 import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
 export class MfsBusinessService {
   constructor(
     @InjectRepository(MfsBusiness)
     private readonly mfsBusinessRepository: Repository<MfsBusiness>,
-  ) {}
+  ) { }
 
   async create(mfs_business: MfsBusiness): Promise<MfsBusinessDTO> {
     const { user, ...mfsInfo } =
@@ -74,5 +75,17 @@ export class MfsBusinessService {
     // }
     await this.mfsBusinessRepository.delete(id);
     return `Removed #${id} MFS Business`;
+  }
+
+  @RabbitSubscribe({
+    exchange: 'proposal-update-exchange',
+    routingKey: '',
+    queue: 'user-management-service-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  handleNewMemberProposalPlaced(proposal: any) {
+    console.log("Recieved from audit trail!");
   }
 }

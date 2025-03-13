@@ -82,6 +82,80 @@ export class ProposalUpdateRepository {
         }
     }
 
+
+    async getTransactionsUpdated(transactionHashes: string[]): Promise<any> {
+        try {
+            if (!transactionHashes || transactionHashes.length === 0) {
+                this.logger.log('Transaction hash list is empty');
+                return;
+            }
+
+            transactionHashes = transactionHashes.filter(hash => /^0x[a-fA-F0-9]{64}$/.test(hash));
+            if (transactionHashes.length === 0) {
+                this.logger.warn('No valid transaction hashes found after filtering.');
+                throw new Error('NO_VALID_TRANSACTION_HASHES');
+            }
+
+            this.logger.log(`Fetching event data for transactions: ${transactionHashes.join(', ')}`);
+
+            const result = await this.apolloClient.query({
+                query: this.transactionUpdateQuery(transactionHashes),
+                variables: { transactionHashes },
+            });
+
+            this.logger.log(`Raw query response: ${JSON.stringify(result)}`);
+
+            const {
+                proposalExecuteds,
+                proposalAddeds,
+                proposalCreateds,
+                proposalCanceleds,
+                ownershipTransferreds,
+                memberRegistereds,
+                memberApproveds,
+            } = result.data || {};
+
+            if (!proposalExecuteds && !proposalAddeds && !proposalCreateds && !proposalCanceleds &&
+                !ownershipTransferreds && !memberRegistereds && !memberApproveds) {
+                this.logger.warn(`No relevant events found for transaction hashes: ${transactionHashes.join(', ')}`);
+                throw new Error(`NO_EVENT_DATA_FOUND`);
+            }
+
+            const transactionsData = {
+                proposalExecuteds: proposalExecuteds || [],
+                proposalAddeds: proposalAddeds || [],
+                proposalCreateds: proposalCreateds || [],
+                proposalCanceleds: proposalCanceleds || [],
+                ownershipTransferreds: ownershipTransferreds || [],
+                memberRegistereds: memberRegistereds || [],
+                memberApproveds: memberApproveds || [],
+            };
+
+            this.logger.log('Fetched transaction event data successfully', transactionsData);
+
+            return transactionsData;
+        } catch (error) {
+            if (error.networkError) {
+                this.logger.error(`Network error while fetching transactions`, error.networkError);
+                throw new Error(`NETWORK_ERROR`);
+            }
+
+            if (error.graphQLErrors?.length > 0) {
+                this.logger.error(`GraphQL errors while fetching transactions`, error.graphQLErrors);
+                throw new Error(`GRAPHQL_ERROR`);
+            }
+
+            if (error.message.includes('NO_EVENT_DATA_FOUND') ||
+                error.message.includes('INVALID_TRANSACTION_HASHES')) {
+                throw error;
+            }
+
+            this.logger.error(`Unexpected error while fetching transactions`, error);
+            throw new Error(`UNEXPECTED_ERROR`);
+        }
+    }
+
+
     proposalAddedQuery(transactionHash: string): any {
         const query = gql`
         query MyQuery {
@@ -98,5 +172,68 @@ export class ProposalUpdateRepository {
       `;
         return query;
     }
+
+    //To get transaction updates, this will be updated in the following CARD #242 after cron job completes.
+    transactionUpdateQuery(transactionHashes: string[]): any {
+        const query = gql`
+          query GetTransactionsByHashes($transactionHashes: [String!]!) {
+            proposalExecuteds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalId
+              proposalType
+              blockNumber
+              blockTimestamp
+            }
+            proposalCreateds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              proposalId
+              blockNumber
+              blockTimestamp
+            }
+            proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              blockNumber
+              blockTimestamp
+            }
+            ownershipTransferreds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              blockNumber
+              blockTimestamp
+            }
+            memberRegistereds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              blockNumber
+              blockTimestamp
+            }
+            memberApproveds(where: { transactionHash_in: $transactionHashes }) {
+              transactionHash
+              id
+              blockNumber
+              blockTimestamp
+            }
+          }
+        `;
+        return query;
+    }
+
 
 }

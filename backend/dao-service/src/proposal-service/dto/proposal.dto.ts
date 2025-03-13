@@ -34,6 +34,16 @@ export class ProposalListDto {
     required: false
   })
   proposal_status: ProposalStatus;
+
+  @ApiProperty({
+    description: "This field will get updated by AUDIT TRAIL SERVICE after on-chain transaction is successfully completed.",
+    example: 0,
+    required: false
+  })
+  proposal_onchain_id: number;
+
+  @ApiProperty()
+  metadata: string;
 }
 
 export class PaginatedProposalResponse {
@@ -94,6 +104,11 @@ export class ProposalDto {
 export class PendingTransactionDto {
   trx_hash: string;
   proposer_address: string;
+}
+
+export class UpdateProposalDto {
+  proposalId: number;
+  transactionHash: string;
 }
 
 
