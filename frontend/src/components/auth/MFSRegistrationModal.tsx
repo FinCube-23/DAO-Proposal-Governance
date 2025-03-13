@@ -30,10 +30,10 @@ export default function MFSRegistrationModal() {
     };
 
     useEffect(() => {
-        if (auth.profile?.mfsBusiness?.trx_hash == null) {
+        if (auth.profile?.organization?.trx_hash == null) {
             setShowModal(true);
         }
-    }, [auth.profile?.mfsBusiness?.trx_hash]);
+    }, [auth.profile?.organization?.trx_hash]);
 
     return (
         <>

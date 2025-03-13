@@ -176,7 +176,7 @@ export default function MfsDashboard() {
             <CardHeader>
               <CardTitle className="text-2xl">Welcome,</CardTitle>
               <CardDescription>
-                {auth?.profile?.mfsBusiness?.name}
+                {auth?.profile?.organization?.name}
               </CardDescription>
             </CardHeader>
           </Card>

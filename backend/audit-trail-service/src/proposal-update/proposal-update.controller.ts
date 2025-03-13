@@ -19,7 +19,6 @@ import { Logger } from '@nestjs/common';
 import { ApiBody, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { Ctx, RmqContext, MessagePattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { text } from 'stream/consumers';
 
 
 @Controller('proposal-update')

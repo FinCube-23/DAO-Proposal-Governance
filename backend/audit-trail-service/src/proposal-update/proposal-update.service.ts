@@ -10,6 +10,7 @@ import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
 
 
 @Injectable()
@@ -21,6 +22,7 @@ export class ProposalUpdateService {
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
     private transactionService: TransactionsService,
     private readonly proposalUpdateRepository: ProposalUpdateRepository,
+    private readonly amqpConnection: AmqpConnection
   ) {
     this.update_proposals = [];
   }
@@ -125,14 +127,16 @@ export class ProposalUpdateService {
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updateProposal(proposal: ResponseTransactionStatusDto) {
-    await this.rabbitClient.emit('create-proposal-placed', proposal);
-    return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
+    await this.amqpConnection.publish('proposal-update-exchange', '', proposal);
+    this.logger.log("WEBSOCKET: Proposal on-chain status update notified!")
+    return { message: 'Proposal on-chain status update notified!' };
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updatedTransaction(proposal: ResponseTransactionStatusDto) {
-    await this.rabbitClient.emit('membership-proposal-update', proposal);
-    return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
+    await this.amqpConnection.publish('proposal-update-exchange', '', proposal);
+    this.logger.log("CRON: Proposal on-chain status update notified!")
+    return { message: 'Proposal on-chain status update notified!' };
   }
 
   async getProposalAddedEventByHash(trx_hash: string): Promise<any> {

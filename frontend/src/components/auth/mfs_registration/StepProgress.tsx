@@ -34,7 +34,7 @@ export default function StepProgress({ current }: Props) {
             <div className="col-span-1 relative">
                 <div
                     className={`rounded-full text-center border-4 ${
-                        auth.profile?.mfsBusiness != null && "border-green-500"
+                        auth.profile?.organization != null && "border-green-500"
                     } `}
                 >
                     2
@@ -49,7 +49,7 @@ export default function StepProgress({ current }: Props) {
             <div className="col-span-1 relative">
                 <div
                     className={`col-span-1 rounded-full text-center border-4 ${
-                        auth.profile?.mfsBusiness?.trx_hash != null &&
+                        auth.profile?.organization?.trx_hash != null &&
                         "border-white"
                     }`}
                 >

@@ -142,10 +142,10 @@ export class TasksService {
     // Open the websocket and listen for events!
     alchemy.ws.on(ProposalAddedEvents, async (txn) => {
       try {
+        this.logger.log("WEBSOCKET: Stopping Cron");
         this.stopCronJob();
         this.logger.log(`WEBSOCKET: New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`);
         this.logger.log(`WEBSOCKET: proposalEndTopic Value: ${txn.topics[1]}`);
-        this.logger.log("WEBSOCKET: Resetting Cron");
         console.log(JSON.stringify(txn, null, 2));
         console.dir(txn, { depth: null });
 
@@ -167,7 +167,8 @@ export class TasksService {
             eventData = {
               data: {
                 proposalId: data?.proposalId,
-                proposalType: data?.proposalType
+                proposalType: data?.proposalType,
+                proposedWallet: data?.data
               }
             };
           } catch (error) {
@@ -193,6 +194,7 @@ export class TasksService {
         } else {
           this.logger.warn('WEBSOCKET: proposalEndTopic is non-zero for ProposalCreated event.');
         }
+        this.logger.log("WEBSOCKET: Starting Cron");
         this.startCronJob();
       } catch (err) {
         this.logger.error(`WEBSOCKET: Error handling ProposalAddedEvents: ${err.message}`, err.stack);

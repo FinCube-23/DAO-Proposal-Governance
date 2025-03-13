@@ -39,7 +39,7 @@ export type UpdateMFSPayload = {
 
 export type UpdateMFSResponse = UpdateMFSPayload;
 
-export type MFSBusiness = {
+export type Organization = {
   id: number;
   name: string;
   email: string;
@@ -51,6 +51,7 @@ export type MFSBusiness = {
   native_currency: string;
   certificate: string;
   trx_hash: string | null;
+  membership_onchain_status: string;
 };
 
 // Auth
@@ -62,7 +63,19 @@ export type FetchMeResponse = {
   email: string;
   password: string;
   role: string;
-  mfsBusiness: MFSBusiness | null;
+  organization: Organization | null;
+  exchangeUser: null;
+};
+
+export type GetMFSBusinessResponse = {
+  created_at: string;
+  updated_at: string;
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  role: string;
+  mfsBusiness: Organization | null;
   exchangeUser: null;
 };
 

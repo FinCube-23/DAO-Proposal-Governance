@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useDispatch } from "react-redux";
 import { setMfsBusiness } from "@redux/slices/auth";
-import { MFSBusiness } from "@redux/api/types";
+import { Organization } from "@redux/api/types";
 import { CircleChevronUp } from "lucide-react";
 
 const formSchema = z.object({
@@ -33,7 +33,7 @@ const formSchema = z.object({
 });
 
 interface Props {
-  mfsBusiness: MFSBusiness | null;
+  mfsBusiness: Organization | null;
 }
 
 export default function BusinessInfoForm({ mfsBusiness }: Props) {
@@ -55,12 +55,17 @@ export default function BusinessInfoForm({ mfsBusiness }: Props) {
   const account = useAccount();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createMFS({ ...values, wallet_address: account.address || "" });
+    createMFS({
+      ...values,
+      wallet_address: account.address?.toLowerCase() || "",
+    });
   }
 
   const isFieldDisabled = (fieldName: string) => {
     if (!mfsBusiness) return false;
-    return (mfsBusiness as MFSBusiness)[fieldName as keyof MFSBusiness] !== "";
+    return (
+      (mfsBusiness as Organization)[fieldName as keyof Organization] !== ""
+    );
   };
 
   const [

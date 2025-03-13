@@ -9,6 +9,7 @@ import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse, UpdatePr
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 
 @Injectable()
@@ -97,7 +98,6 @@ export class ProposalServiceService {
       throw new Error(`Failed to execute proposal`);
     }
   }
-
 
   async cancelProposal(cancelProposalDto: UpdateProposalDto): Promise<any> {
     try {
@@ -198,7 +198,7 @@ export class ProposalServiceService {
   // 💬 Producing Message in the queue
   async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
-      message: "Triggering transaction update for a updated transaction",
+      message: "Triggering transaction reference for an updated proposal (Execute/Cancel)",
       trxHash: proposal.trx_hash,
     });
     // Convert Observable to Promise and await the response
@@ -214,7 +214,6 @@ export class ProposalServiceService {
     }
 
   }
-
 
   async updateProposalCreated(trxHash: string, newStatus: number, proposalOnChainId: number) {
     try {
@@ -237,6 +236,7 @@ export class ProposalServiceService {
       throw new Error(`Failed to update transaction status.`);
     }
   }
+
   async updateProposalStatus(newStatus: number, proposalOnChainId: number) {
     try {
       const result = await this.proposalRepository
@@ -260,7 +260,15 @@ export class ProposalServiceService {
   }
 
   // 📡 Listening Event from Publisher
-  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+  @RabbitSubscribe({
+    exchange: 'proposal-update-exchange',
+    routingKey: '',
+    queue: 'dao-service-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
@@ -270,9 +278,6 @@ export class ProposalServiceService {
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
       this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
-      console.log(`Pattern: ${context.getPattern()}`);
-      const originalMsg = context.getMessage();
-      console.log(originalMsg);
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
