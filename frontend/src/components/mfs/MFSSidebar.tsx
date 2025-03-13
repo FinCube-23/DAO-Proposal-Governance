@@ -55,7 +55,7 @@ export default function MFSSidebar({
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <BrandCard
-          name={auth.profile?.mfsBusiness?.name || "N/A"}
+          name={auth.profile?.organization?.name || "N/A"}
           logo={GalleryVerticalEnd}
           type="MFS"
         />

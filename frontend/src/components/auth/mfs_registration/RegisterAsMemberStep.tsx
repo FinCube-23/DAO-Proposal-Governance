@@ -46,10 +46,10 @@ export default function RegisterAsMemberStep({
         args: [
           account.address,
           JSON.stringify({
-            "@context": auth.profile?.mfsBusiness?.context,
-            name: auth.profile?.mfsBusiness?.name,
-            type: auth.profile?.mfsBusiness?.type,
-            location: auth.profile?.mfsBusiness?.location,
+            "@context": auth.profile?.organization?.context,
+            name: auth.profile?.organization?.name,
+            type: auth.profile?.organization?.type,
+            location: auth.profile?.organization?.location,
             members: [],
           }),
         ],
@@ -58,7 +58,7 @@ export default function RegisterAsMemberStep({
       const hash = await writeContract(config, request);
 
       updateMFS({
-        id: auth.profile?.mfsBusiness?.id || 0,
+        id: auth.profile?.organization?.id || 0,
         trx_hash: hash,
       });
     } catch (err: any) {
@@ -75,7 +75,7 @@ export default function RegisterAsMemberStep({
 
       if (errorMessage == "Already a member") {
         updateMFS({
-          id: auth.profile?.mfsBusiness?.id || 0,
+          id: auth.profile?.organization?.id || 0,
           trx_hash: "0x00",
         });
       } else {

@@ -1,4 +1,4 @@
-import { FetchMeResponse, MFSBusiness } from "@redux/api/types";
+import { FetchMeResponse, Organization } from "@redux/api/types";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 type TokenPayload = {
@@ -27,15 +27,15 @@ const authSlice = createSlice({
         setProfile: (state, action: PayloadAction<ProfilePayload | null>) => {
             state.profile = action.payload;
         },
-        setMfsBusiness: (state, action: PayloadAction<MFSBusiness | null>) => {
-            if (state.profile) state.profile.mfsBusiness = action.payload;
+        setMfsBusiness: (state, action: PayloadAction<Organization | null>) => {
+            if (state.profile) state.profile.organization = action.payload;
         },
         setMfsBusinessTrxHash: (
             state,
             action: PayloadAction<string | null>
         ) => {
-            if (state.profile && state.profile.mfsBusiness)
-                state.profile.mfsBusiness.trx_hash = action.payload;
+            if (state.profile && state.profile.organization)
+                state.profile.organization.trx_hash = action.payload;
         },
         clearAuthState: (state) => {
             Object.assign(state, initialState);

@@ -39,7 +39,7 @@ export type UpdateMFSPayload = {
 
 export type UpdateMFSResponse = UpdateMFSPayload;
 
-export type MFSBusiness = {
+export type Organization = {
   id: number;
   name: string;
   email: string;
@@ -62,7 +62,7 @@ export type FetchMeResponse = {
   email: string;
   password: string;
   role: string;
-  mfsBusiness: MFSBusiness | null;
+  organization: Organization | null;
   exchangeUser: null;
 };
 

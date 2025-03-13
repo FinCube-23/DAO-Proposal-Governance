@@ -24,16 +24,16 @@ export default function BusinessInfoStep({
             </div>
             <div className="w-full my-5">
                 <BusinessInfoForm
-                    mfsBusiness={auth.profile?.mfsBusiness ?? null}
+                    mfsBusiness={auth.profile?.organization ?? null}
                 />
             </div>
             <div className="flex justify-between w-full">
                 <Button variant={"secondary"} onClick={decrementStep}>
                     <CircleChevronLeft /> Prev
                 </Button>
-                {auth.profile?.mfsBusiness != null && (
+                {auth.profile?.organization != null && (
                     <Button
-                        disabled={auth.profile?.mfsBusiness == null}
+                        disabled={auth.profile?.organization == null}
                         onClick={incrementStep}
                     >
                         Next <CircleChevronRight />
