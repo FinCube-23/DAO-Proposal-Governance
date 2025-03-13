@@ -55,7 +55,10 @@ export default function BusinessInfoForm({ mfsBusiness }: Props) {
   const account = useAccount();
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    createMFS({ ...values, wallet_address: account.address || "" });
+    createMFS({
+      ...values,
+      wallet_address: account.address?.toLowerCase() || "",
+    });
   }
 
   const isFieldDisabled = (fieldName: string) => {
