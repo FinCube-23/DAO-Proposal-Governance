@@ -99,7 +99,6 @@ export class ProposalServiceService {
     }
   }
 
-
   async cancelProposal(cancelProposalDto: UpdateProposalDto): Promise<any> {
     try {
       if (!cancelProposalDto.proposalId || !cancelProposalDto.transactionHash) {
@@ -199,7 +198,7 @@ export class ProposalServiceService {
   // 💬 Producing Message in the queue
   async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
-      message: "Triggering transaction update for a updated transaction",
+      message: "Triggering transaction reference for an updated proposal (Execute/Cancel)",
       trxHash: proposal.trx_hash,
     });
     // Convert Observable to Promise and await the response
@@ -215,7 +214,6 @@ export class ProposalServiceService {
     }
 
   }
-
 
   async updateProposalCreated(trxHash: string, newStatus: number, proposalOnChainId: number) {
     try {
@@ -238,6 +236,7 @@ export class ProposalServiceService {
       throw new Error(`Failed to update transaction status.`);
     }
   }
+
   async updateProposalStatus(newStatus: number, proposalOnChainId: number) {
     try {
       const result = await this.proposalRepository
@@ -261,8 +260,22 @@ export class ProposalServiceService {
   }
 
   // 📡 Listening Event from Publisher
-  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
+  @RabbitSubscribe({
+    exchange: 'proposal-update-exchange',
+    routingKey: '',
+    queue: 'dao-service-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto, context: any) {
     try {
+      this.logger.log(`Received proposal update from 
+        Publisher: ${context?.exchange || 'Unknown Publisher'}
+        Exchange: ${context?.exchange || 'Unknown Exchange'} 
+        Routing Key: ${context?.routingKey || 'Unknown Routing Key'}
+        Queue: ${context?.queue || 'Unknown Queue'}
+        `);
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
@@ -271,9 +284,6 @@ export class ProposalServiceService {
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
       this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
-      // console.log(`Pattern: ${context.getPattern()}`);
-      // const originalMsg = context.getMessage();
-      // console.log(originalMsg);
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
@@ -306,18 +316,6 @@ export class ProposalServiceService {
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
-  }
-
-  @RabbitSubscribe({
-    exchange: 'proposal-update-exchange',
-    routingKey: '',
-    queue: 'dao-service-queue',
-    queueOptions: {
-      durable: true,
-    },
-  })
-  handleCreatedProposalPlaced(proposal: any) {
-    this.handleCreatedProposalPlacedEvent(proposal);
   }
 
 }
