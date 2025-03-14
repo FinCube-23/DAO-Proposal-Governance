@@ -25,6 +25,7 @@ import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
 
 @Injectable()
 export class ProposalServiceService {
@@ -34,6 +35,7 @@ export class ProposalServiceService {
     @InjectRepository(ProposalEntity)
     private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy,
+    @Inject('USER_MANAGEMENT_SERVICE') private umsRabbitClient: ClientProxy,
     private readonly logger: WinstonLogger,
   ) {
     this.logger.setContext(ProposalServiceService.name);
@@ -410,5 +412,13 @@ export class ProposalServiceService {
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
+  }
+
+  async test(packet: ValidateAuthorizationDto): Promise<boolean> {
+    console.log('Auth Message Call Test');
+    const messageResponse = await firstValueFrom(
+      this.umsRabbitClient.send('validate-authorization', packet),
+    );
+    return true;
   }
 }

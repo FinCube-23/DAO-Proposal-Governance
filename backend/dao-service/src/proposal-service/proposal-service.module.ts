@@ -19,6 +19,14 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           queue: 'pending-proposal-queue', // Routing Key
         },
       },
+      {
+        name: 'USER_MANAGEMENT_SERVICE',
+        transport: Transport.RMQ,
+        options: {
+          urls: ['amqp://rabbitmq:5672'],
+          queue: 'authorization',
+        },
+      },
     ]),
     RabbitMQModule.forRoot({
       uri: 'amqp://rabbitmq:5672',
@@ -35,16 +43,15 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
           routingKey: '', // Empty for fanout exchanges
           createQueueIfNotExists: true,
           options: {
-            durable: true
-          }
+            durable: true,
+          },
         },
       ],
       connectionInitOptions: {
         wait: true,
         timeout: 30000, // Increase RabbitMQ connection timeout to 30 seconds
       },
-
-    })
+    }),
   ],
   controllers: [ProposalServiceController],
   providers: [ProposalServiceService, WinstonLogger],
