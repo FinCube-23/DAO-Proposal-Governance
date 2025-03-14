@@ -28,10 +28,13 @@ export class TransactionsService {
             const transaction = await this.transactionRepository.findOne({
                 where: { trx_hash: trxHash }
             });
-            this.logger.log(`Transaction status found! Getting updated at Audit Trail DB at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
+
             if (!transaction) {
-                throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
+                this.logger.warn("Transaction is an off-system transaction, not found in DB");
+                return null;
             }
+            this.logger.log(`Transaction status found! Getting updated at Audit Trail DB at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`);
+
 
             transaction.trx_status = newStatus as TransactionStatus;
             transaction.trx_metadata = metadata;
