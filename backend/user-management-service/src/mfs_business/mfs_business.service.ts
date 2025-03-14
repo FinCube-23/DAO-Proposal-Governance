@@ -123,17 +123,16 @@ export class MfsBusinessService {
     }
   }
 
-  async updateOnChainProposalStatus(walletAddress: string, status: OnChainProposalStatus) {
+  async updateOnChainProposalStatus(proposalId: number, status: OnChainProposalStatus) {
     try {
-      const normalizedWalletAddress = walletAddress.toLowerCase();
 
       const business = await this.mfsBusinessRepository.findOne({
-        where: { wallet_address: normalizedWalletAddress },
+        where: { proposal_onchain_id: proposalId },
       });
 
       if (!business) {
         console.error(
-          `No business found with wallet address: ${normalizedWalletAddress}`,
+          `No organization found at on-chain proposal ID: ${proposalId}`,
         );
         return;
       }
@@ -142,11 +141,11 @@ export class MfsBusinessService {
       await this.mfsBusinessRepository.save(business);
 
       console.log(
-        `Successfully updated proposal status into ${status} of proposal id ${business.proposal_onchain_id} (on-chain) for wallet address: ${normalizedWalletAddress}`,
+        `Successfully updated proposal status into ${status} of proposal id ${business.proposal_onchain_id} (on-chain)`,
       );
     } catch (error) {
       console.error(
-        'Proposal Wallet address issue found | Error:',
+        'Proposal on-chain ID issue found | Error:',
         error,
       );
     }
@@ -204,12 +203,15 @@ export class MfsBusinessService {
     proposal: ResponseTransactionStatusDto,
   ) {
     const typename = proposal?.data?.__typename ?? null;
-    const proposedWallet =
-    'error' in proposal ? null : proposal.data?.proposedWallet ?? null;
+    const proposalId =
+        'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
+    console.log(`Processed on-chain proposal ID: ${proposalId}`)
     if (typename == 'ProposalExecuted') {
-      await this.updateOnChainProposalStatus(proposedWallet, OnChainProposalStatus.APPROVED);
+      console.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
+      await this.updateOnChainProposalStatus(proposalId, OnChainProposalStatus.APPROVED);
     }else {
-      await this.updateOnChainProposalStatus(proposedWallet, OnChainProposalStatus.CANCELLED);
+      console.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
+      await this.updateOnChainProposalStatus(proposalId, OnChainProposalStatus.CANCELLED);
     }
   }
 }
