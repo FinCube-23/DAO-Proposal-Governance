@@ -167,6 +167,7 @@ export class ProposalUpdateRepository {
             blockTimestamp
             transactionHash
             data
+            __typename
           }
         }
       `;
