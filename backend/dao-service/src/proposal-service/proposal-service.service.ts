@@ -29,7 +29,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
-  private eventDrivenFunctionCall: any;
+  private eventDrivenFunctionCall: Record<string, (proposal: ResponseTransactionStatusDto) => void>;
   constructor(
     @InjectRepository(ProposalEntity)
     private proposalRepository: Repository<ProposalEntity>,
@@ -40,9 +40,9 @@ export class ProposalServiceService {
     this.update_proposals = [];
     // Open for Extension Close for Modification
     this.eventDrivenFunctionCall = {
-      'ProposalCanceled': this.handleProposalUpdatedEvent,
-      'ProposalExecuted': this.handleProposalUpdatedEvent,
-      'ProposalAdded': this.handleCreatedProposalPlacedEvent,
+      'ProposalCanceled': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalExecuted': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalAdded': this.handleCreatedProposalPlacedEvent.bind(this),
       // Add more strings and corresponding functions as needed
     };
   }
