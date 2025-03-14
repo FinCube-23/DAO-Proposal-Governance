@@ -53,11 +53,11 @@ export default function DaoDashboard() {
   const navigate = useNavigate();
   const [daoURI, setDaoURI] = useState<IDaoInfo>();
 
-  const [ongoingProposalCount, setOngoingProposalCount] = useState("");
+  const [ongoingProposalCount, setProposalCount] = useState(0);
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
-  const [onchainPageNumber, setOnchainPageNumber] = useState(0);
+  const [onchainPageNumber, setOnchainPageNumber] = useState(188);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
   const [pageLoading, setPageLoading] = useState(false);
@@ -125,15 +125,15 @@ export default function DaoDashboard() {
     }
   };
 
-  const getOngoingProposalCount = async () => {
+  const getProposalCount = async () => {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "getOngoingProposalsCount",
+        functionName: "proposalCount",
       });
-      const result = response.toString();
-      setOngoingProposalCount(result);
+      const result = Number(response);
+      setProposalCount(result);
     } catch (e) {
       console.error(e);
     }
@@ -179,7 +179,7 @@ export default function DaoDashboard() {
           abi: contractABI,
           address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "getProposalsByPage",
-          args: [page, page + 5],
+          args: [page - 5, page],
         });
 
         const filteredProposals = response[0].filter(
@@ -219,7 +219,7 @@ export default function DaoDashboard() {
     getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
     getProposalsFromBE();
-    getOngoingProposalCount();
+    getProposalCount();
     getDAOInfo();
     getVersion();
     getVotingDelay();
@@ -236,13 +236,13 @@ export default function DaoDashboard() {
 
   const handleOnchainNextPage = () => {
     setPageLoading(true);
-    setOnchainPageNumber((prevPage) => prevPage + 5);
+    setOnchainPageNumber((prevPage) => prevPage - 5);
   };
 
   const handleOnchainPrevPage = () => {
     if (onchainPageNumber > 0) {
       setPageLoading(true);
-      setOnchainPageNumber((prevPage) => prevPage - 5);
+      setOnchainPageNumber((prevPage) => prevPage + 5);
     }
   };
 
@@ -489,7 +489,7 @@ export default function DaoDashboard() {
                   <PaginationPrevious
                     onClick={handleOnchainPrevPage}
                     className={`${
-                      onchainPageNumber === 0 &&
+                      onchainPageNumber === 188 &&
                       "pointer-events-none opacity-50"
                     } cursor-pointer`}
                   />
