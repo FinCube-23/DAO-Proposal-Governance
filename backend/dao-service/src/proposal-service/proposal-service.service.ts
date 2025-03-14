@@ -114,12 +114,13 @@ export class ProposalServiceService {
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       proposal.audit_id = audit_record.data.db_record_id;
+      proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -153,12 +154,13 @@ export class ProposalServiceService {
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       proposal.audit_id = audit_record.data.db_record_id;
+      proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -227,7 +229,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -252,7 +254,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -333,7 +335,7 @@ export class ProposalServiceService {
       durable: true,
     },
   })
-  handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
+  async handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
     this.logger.log(
       `THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`,
     );
@@ -344,14 +346,13 @@ export class ProposalServiceService {
       this.logger.log(
         `Calling function for on-chain event: ${this.eventDrivenFunctionCall[typename]?.name ?? 'Unknown function'}`,
       );
-      //this.handleCreatedProposalPlacedEvent(proposal);
-      this.eventDrivenFunctionCall[typename](proposal);
+      await this.eventDrivenFunctionCall[typename](proposal);
     } else {
       this.logger.warn(`On-chain event type "${typename}" is not recognized.`);
     }
   }
 
-  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
+  async handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
@@ -363,7 +364,7 @@ export class ProposalServiceService {
         `Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`,
       );
       if (proposalId) {
-        this.updateProposalCreated(
+        await this.updateProposalCreated(
           proposal.transactionHash,
           proposal.web3Status,
           proposalId,
@@ -380,8 +381,7 @@ export class ProposalServiceService {
 
   // 📡 Listening Event from Publisher
   async handleProposalUpdatedEvent(
-    proposal: ResponseTransactionStatusDto,
-    @Ctx() context: RmqContext,
+    proposal: ResponseTransactionStatusDto
   ) {
     try {
       this.logger.log(
@@ -403,16 +403,10 @@ export class ProposalServiceService {
         this.logger.error(
           `Proposal with ID: ${proposalId} not found in the database`,
         );
-        this.updateProposalCreated(
-          proposal.transactionHash,
-          proposal.web3Status,
-          proposalId,
-        );
+        return;
       }
-      this.updateProposalStatus(proposal.web3Status, proposalId);
-      console.log(`Pattern: ${context.getPattern()}`);
-      const originalMsg = context.getMessage();
-      console.log(originalMsg);
+      await this.updateProposalStatus(proposal.web3Status, proposalId);
+
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
