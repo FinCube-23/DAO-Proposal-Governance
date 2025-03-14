@@ -15,10 +15,22 @@ import { ResponseTransactionStatusDto } from './dtos/response-transaction-status
 
 @Injectable()
 export class MfsBusinessService {
+
+  private eventDrivenFunctionCall: Record<string, (proposal: ResponseTransactionStatusDto) => void>;
+  
   constructor(
     @InjectRepository(MfsBusiness)
     private readonly mfsBusinessRepository: Repository<MfsBusiness>,
-  ) {}
+  ) {
+
+    // Open for Extension Close for Modification
+    this.eventDrivenFunctionCall = {
+      'ProposalCanceled': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalExecuted': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalAdded': this.handleCreatedProposalPlacedEvent.bind(this),
+      // Add more strings and corresponding functions as needed
+    };
+  }
 
   async create(mfs_business: MfsBusiness): Promise<MfsBusinessDTO> {
     const { user, ...mfsInfo } =
@@ -111,6 +123,35 @@ export class MfsBusinessService {
     }
   }
 
+  async updateOnChainProposalStatus(walletAddress: string, status: OnChainProposalStatus) {
+    try {
+      const normalizedWalletAddress = walletAddress.toLowerCase();
+
+      const business = await this.mfsBusinessRepository.findOne({
+        where: { wallet_address: normalizedWalletAddress },
+      });
+
+      if (!business) {
+        console.error(
+          `No business found with wallet address: ${normalizedWalletAddress}`,
+        );
+        return;
+      }
+
+      business.membership_onchain_status = status;
+      await this.mfsBusinessRepository.save(business);
+
+      console.log(
+        `Successfully updated proposal status into ${status} of proposal id ${business.proposal_onchain_id} (on-chain) for wallet address: ${normalizedWalletAddress}`,
+      );
+    } catch (error) {
+      console.error(
+        'Proposal Wallet address issue found | Error:',
+        error,
+      );
+    }
+  }
+
   // 📡 Listening Event from Publisher
   @RabbitSubscribe({
     exchange: 'proposal-update-exchange',
@@ -120,15 +161,29 @@ export class MfsBusinessService {
       durable: true,
     },
   })
+  async handleMembershipEventAction(proposal: ResponseTransactionStatusDto) {
+    console.log(
+      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`,
+    );
+    const typename = proposal?.data?.__typename ?? null;
+    console.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
+    if (this.eventDrivenFunctionCall[typename]) {
+      // Call the corresponding function from the dictionary
+      console.log(
+        `Calling function for on-chain event: ${this.eventDrivenFunctionCall[typename]?.name ?? 'Unknown function'}`,
+      );
+      await this.eventDrivenFunctionCall[typename](proposal);
+    } else {
+      console.warn(`On-chain event type "${typename}" is not recognized.`);
+    }
+  }
+
   async handleCreatedProposalPlacedEvent(
     proposal: ResponseTransactionStatusDto,
   ) {
     try {
       console.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
-      );
-      console.log(
-        `THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`,
       );
 
       const proposalId =
@@ -142,6 +197,19 @@ export class MfsBusinessService {
       await this.updateOnChainProposalId(proposedWallet, proposalId);
     } catch (error) {
       console.error('Invalid proposal object received:', error);
+    }
+  }
+
+  async handleProposalUpdatedEvent(
+    proposal: ResponseTransactionStatusDto,
+  ) {
+    const typename = proposal?.data?.__typename ?? null;
+    const proposedWallet =
+    'error' in proposal ? null : proposal.data?.proposedWallet ?? null;
+    if (typename == 'ProposalExecuted') {
+      await this.updateOnChainProposalStatus(proposedWallet, OnChainProposalStatus.APPROVED);
+    }else {
+      await this.updateOnChainProposalStatus(proposedWallet, OnChainProposalStatus.CANCELLED);
     }
   }
 }
