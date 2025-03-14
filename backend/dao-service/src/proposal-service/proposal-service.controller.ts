@@ -95,11 +95,6 @@ export class ProposalServiceController {
     return this.proposalService.findByStatus(status);
   }
 
-  // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
-  @EventPattern('membership-proposal-update')
-  handleProposalUpdated(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
-    this.proposalService.handleProposalUpdatedEvent(proposal, context);
-  }
 
 }
 

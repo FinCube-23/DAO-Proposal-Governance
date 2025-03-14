@@ -1,31 +1,57 @@
-import { Injectable, Inject, NotFoundException, UnauthorizedException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  UnauthorizedException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ProposalEntity, ProposalStatus, ProposalType } from './entities/proposal.entity';
+import {
+  ProposalEntity,
+  ProposalStatus,
+  ProposalType,
+} from './entities/proposal.entity';
 import axios from 'axios';
 
 import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
-import { ProposalDto, PendingTransactionDto, PaginatedProposalResponse, UpdateProposalDto } from './dto/proposal.dto';
+import {
+  ProposalDto,
+  PendingTransactionDto,
+  PaginatedProposalResponse,
+  UpdateProposalDto,
+} from './dto/proposal.dto';
 import { firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
-
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
+  private eventDrivenFunctionCall: Record<string, (proposal: ResponseTransactionStatusDto) => void>;
   constructor(
-    @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
+    @InjectRepository(ProposalEntity)
+    private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy,
-    private readonly logger: WinstonLogger
+    private readonly logger: WinstonLogger,
   ) {
     this.logger.setContext(ProposalServiceService.name);
     this.update_proposals = [];
+    // Open for Extension Close for Modification
+    this.eventDrivenFunctionCall = {
+      'ProposalCanceled': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalExecuted': this.handleProposalUpdatedEvent.bind(this),
+      'ProposalAdded': this.handleCreatedProposalPlacedEvent.bind(this),
+      // Add more strings and corresponding functions as needed
+    };
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
-  async create(proposal: Partial<ProposalEntity>, sub: string): Promise<ProposalEntity> {
+  async create(
+    proposal: Partial<ProposalEntity>,
+    sub: string,
+  ): Promise<ProposalEntity> {
     try {
       // First verify we have the required fields
       if (!proposal.trx_hash || !proposal.proposer_address) {
@@ -55,7 +81,6 @@ export class ProposalServiceService {
       });
 
       return saved_proposal;
-
     } catch (err) {
       this.logger.error(`Failed to create proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
@@ -65,16 +90,21 @@ export class ProposalServiceService {
 
   async executeProposal(executedProposalDto: UpdateProposalDto): Promise<any> {
     try {
-      if (!executedProposalDto.proposalId || !executedProposalDto.transactionHash) {
+      if (
+        !executedProposalDto.proposalId ||
+        !executedProposalDto.transactionHash
+      ) {
         throw new Error('Proposal ID and Transaction Hash is required');
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: executedProposalDto.proposalId
-        }
+          proposal_onchain_id: executedProposalDto.proposalId,
+        },
       });
 
-      this.logger.log(`Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`);
+      this.logger.log(
+        `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+      );
 
       const executedTrx = {
         trx_hash: executedProposalDto.transactionHash,
@@ -84,14 +114,16 @@ export class ProposalServiceService {
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       proposal.audit_id = audit_record.data.db_record_id;
+      proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
-      this.logger.log(`Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`);
+      this.logger.log(
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+      );
 
       return updatedProposal;
-
     } catch (err) {
       this.logger.error(`Error executing proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
@@ -106,11 +138,13 @@ export class ProposalServiceService {
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: cancelProposalDto.proposalId
-        }
+          proposal_onchain_id: cancelProposalDto.proposalId,
+        },
       });
 
-      this.logger.log(`Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`);
+      this.logger.log(
+        `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+      );
 
       const executedTrx = {
         trx_hash: cancelProposalDto.transactionHash,
@@ -120,14 +154,16 @@ export class ProposalServiceService {
       const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       proposal.audit_id = audit_record.data.db_record_id;
+      proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
-      this.logger.log(`Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status}`);
+      this.logger.log(
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+      );
 
       return updatedProposal;
-
     } catch (err) {
       this.logger.error(`Error cancelling proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
@@ -137,7 +173,7 @@ export class ProposalServiceService {
 
   async findById(id: number): Promise<ProposalEntity> {
     const proposal = await this.proposalRepository.findOne({
-      where: { id }
+      where: { id },
     });
 
     if (!proposal) {
@@ -147,7 +183,10 @@ export class ProposalServiceService {
     return proposal;
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<PaginatedProposalResponse> {
+  async findAll(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<PaginatedProposalResponse> {
     // Calculate records to skip: e.g., page 3 with limit 10 = skip 20 records (returns records 21-30)
     const skip = (page - 1) * limit;
 
@@ -159,7 +198,7 @@ export class ProposalServiceService {
         'proposal.proposer_address',
         'proposal.proposal_status',
         'proposal.proposal_onchain_id',
-        'proposal.metadata'
+        'proposal.metadata',
       ])
       .skip(skip)
       .take(limit)
@@ -169,7 +208,7 @@ export class ProposalServiceService {
       data: proposals,
       total,
       page,
-      limit
+      limit,
     };
   }
 
@@ -180,59 +219,79 @@ export class ProposalServiceService {
   // 💬 Producing Message in the queue
   async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
-      message: "Triggering queue-pending-proposal for a new transaction",
+      message: 'Triggering queue-pending-proposal for a new transaction',
       trxHash: proposal.trx_hash,
     });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('queue-pending-proposal', proposal)
+      this.rabbitClient.send('queue-pending-proposal', proposal),
     );
     if (messageResponse.status == 'SUCCESS') {
-      this.logger.log("New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : " + messageResponse.data.db_record_id);
+      this.logger.log(
+        'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
+        messageResponse.data.db_record_id,
+      );
       return messageResponse;
     } else {
-      throw new Error(messageResponse.error?.message || 'Proposal processing failed');
+      throw new Error(
+        messageResponse.error?.message || 'Proposal processing failed',
+      );
     }
   }
 
   // 💬 Producing Message in the queue
   async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
     this.logger.log({
-      message: "Triggering transaction reference for an updated proposal (Execute/Cancel)",
+      message:
+        'Triggering transaction reference for an updated proposal (Execute/Cancel)',
       trxHash: proposal.trx_hash,
     });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('membership-proposal-status-update', proposal)
+      this.rabbitClient.send('membership-proposal-status-update', proposal),
     );
 
     if (messageResponse.status == 'SUCCESS') {
-      this.logger.log("Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : " + messageResponse.data.db_record_id);
+      this.logger.log(
+        'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
+        messageResponse.data.db_record_id,
+      );
       return messageResponse;
     } else {
-      throw new Error(messageResponse.error?.message || 'Proposal processing failed');
+      throw new Error(
+        messageResponse.error?.message || 'Proposal processing failed',
+      );
     }
-
   }
 
-  async updateProposalCreated(trxHash: string, newStatus: number, proposalOnChainId: number) {
+  async updateProposalCreated(
+    trxHash: string,
+    newStatus: number,
+    proposalOnChainId: number,
+  ) {
     try {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
         .set({ trx_status: newStatus, proposal_onchain_id: proposalOnChainId })
-        .where("trx_hash = :trxHash", { trxHash })
+        .where('trx_hash = :trxHash', { trxHash })
         .returning('*')
         .execute();
 
       if (result.affected === 0) {
-        throw new NotFoundException(`Transaction with hash ${trxHash} not found`);
+        throw new NotFoundException(
+          `Transaction with hash ${trxHash} not found`,
+        );
       }
 
-      this.logger.log(`Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`);
+      this.logger.log(
+        `Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
+      );
       return result.raw[0];
     } catch (err) {
-      this.logger.error(`Failed to update transaction status for hash: ${trxHash}. Error: ${err}`);
+      this.logger.error(
+        `Failed to update transaction status for hash: ${trxHash}. Error: ${err}`,
+      );
       throw new Error(`Failed to update transaction status.`);
     }
   }
@@ -243,18 +302,26 @@ export class ProposalServiceService {
         .createQueryBuilder()
         .update()
         .set({ trx_status: newStatus }) // Updating web3_status
-        .where("proposal_onchain_id = :proposalOnChainId", { proposalOnChainId }) // Using proposal_onchain_id as the condition
+        .where('proposal_onchain_id = :proposalOnChainId', {
+          proposalOnChainId,
+        }) // Using proposal_onchain_id as the condition
         .returning('*')
         .execute();
 
       if (result.affected === 0) {
-        throw new NotFoundException(`Proposal with on-chain ID ${proposalOnChainId} not found`);
+        throw new NotFoundException(
+          `Proposal with on-chain ID ${proposalOnChainId} not found`,
+        );
       }
 
-      this.logger.log(`Proposal status successfully updated for on-chain ID: ${proposalOnChainId} to status: ${newStatus} | Result: ${result.raw[0]}`);
+      this.logger.log(
+        `Proposal status successfully updated for on-chain ID: ${proposalOnChainId} to status: ${newStatus} | Result: ${result.raw[0]}`,
+      );
       return result.raw[0];
     } catch (err) {
-      this.logger.error(`Failed to update proposal status for on-chain ID: ${proposalOnChainId}. Error: ${err}`);
+      this.logger.error(
+        `Failed to update proposal status for on-chain ID: ${proposalOnChainId}. Error: ${err}`,
+      );
       throw new Error(`Failed to update proposal status.`);
     }
   }
@@ -268,46 +335,80 @@ export class ProposalServiceService {
       durable: true,
     },
   })
-  handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
+  async handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
+    this.logger.log(
+      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`,
+    );
+    const typename = proposal?.data?.__typename ?? null;
+    this.logger.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
+    if (this.eventDrivenFunctionCall[typename]) {
+      // Call the corresponding function from the dictionary
+      this.logger.log(
+        `Calling function for on-chain event: ${this.eventDrivenFunctionCall[typename]?.name ?? 'Unknown function'}`,
+      );
+      await this.eventDrivenFunctionCall[typename](proposal);
+    } else {
+      this.logger.warn(`On-chain event type "${typename}" is not recognized.`);
+    }
+  }
+
+  async handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
-      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
 
-      const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
-      this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
-      this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
+      const proposalId =
+        'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
+      this.logger.log(
+        `Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`,
+      );
+      if (proposalId) {
+        await this.updateProposalCreated(
+          proposal.transactionHash,
+          proposal.web3Status,
+          proposalId,
+        );
+      } else {
+        this.logger.warn(
+          'Something went wrong! Proposal ID is null | Off-chain DB status is not updated.',
+        );
+      }
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
   }
 
   // 📡 Listening Event from Publisher
-  async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+  async handleProposalUpdatedEvent(
+    proposal: ResponseTransactionStatusDto
+  ) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
-      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
 
-      const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
-      this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
+      const proposalId =
+        'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
+      this.logger.log(
+        `Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`,
+      );
 
       //Check if proposal ID is present
-      const validEntry = await this.proposalRepository.findOne({ where: { proposal_onchain_id: proposalId } });
+      const validEntry = await this.proposalRepository.findOne({
+        where: { proposal_onchain_id: proposalId },
+      });
 
       if (!validEntry) {
-        this.logger.error(`Proposal with ID: ${proposalId} not found in the database`);
-        this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
+        this.logger.error(
+          `Proposal with ID: ${proposalId} not found in the database`,
+        );
+        return;
       }
-      this.updateProposalStatus(proposal.web3Status, proposalId);
-      console.log(`Pattern: ${context.getPattern()}`);
-      const originalMsg = context.getMessage();
-      console.log(originalMsg);
+      await this.updateProposalStatus(proposal.web3Status, proposalId);
+
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
   }
-
 }
