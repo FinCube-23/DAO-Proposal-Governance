@@ -13,11 +13,13 @@ import contractABI from "../../contractABI/contractABI.json";
 import { config } from "../../main";
 import { toast } from "sonner";
 import { Button } from "@components/ui/button";
+import { useNavigate } from "react-router";
 
 export default function VotingInfo({ proposal }: any) {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [executeProposal] = useExecuteProposalMutation();
   const [cancelProposal] = useCancelProposalMutation();
+  const navigate = useNavigate();
   const convertStatusToVariant = (status: boolean) => {
     return status ? "success" : "warning";
   };
@@ -139,7 +141,16 @@ export default function VotingInfo({ proposal }: any) {
           <div className="flex justify-between">
             <div className="text-muted-foreground">On-chain ID</div>
             {proposal.proposal_onchain_id !== null ? (
-              <div className="font-bold">{proposal.proposal_onchain_id}</div>
+              <div
+                onClick={() =>
+                  navigate(
+                    `/mfs/dao/fincube/proposals/${proposal.proposal_onchain_id}`
+                  )
+                }
+                className="font-bold underline cursor-pointer text-blue-400"
+              >
+                {proposal.proposal_onchain_id}
+              </div>
             ) : (
               <div className="text-red-600 font-bold">N/A</div>
             )}
@@ -186,8 +197,8 @@ export default function VotingInfo({ proposal }: any) {
             </a>
           </div>
           {proposal.proposal_onchain_id !== null && (
-            <div className="flex justify-between items-center">
-              <div className="text-muted-foreground">Action</div>
+            <div className="flex justify-between items-center mt-10">
+              <div className="text-xl">Action:</div>
               <div>
                 <Button
                   isLoading={loadingStatus}
