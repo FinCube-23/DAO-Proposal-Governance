@@ -53,11 +53,11 @@ export default function DaoDashboard() {
   const navigate = useNavigate();
   const [daoURI, setDaoURI] = useState<IDaoInfo>();
 
-  const [ongoingProposalCount, setProposalCount] = useState(0);
+  const [proposalCount, setProposalCount] = useState(0);
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
-  const [onchainPageNumber, setOnchainPageNumber] = useState(188);
+  const [onchainPageNumber, setOnchainPageNumber] = useState(0);
   const [votingPeriod, setVotingPeriod] = useState("");
   const [votingDelay, setVotingDelay] = useState("");
   const [pageLoading, setPageLoading] = useState(false);
@@ -134,6 +134,7 @@ export default function DaoDashboard() {
       });
       const result = Number(response);
       setProposalCount(result);
+      setOnchainPageNumber(result);
     } catch (e) {
       console.error(e);
     }
@@ -182,10 +183,12 @@ export default function DaoDashboard() {
           args: [page - 5, page],
         });
 
-        const filteredProposals = response[0].filter(
-          (proposal: any) =>
-            proposal.proposer !== "0x0000000000000000000000000000000000000000"
-        );
+        const filteredProposals = response[0]
+          .filter(
+            (proposal: any) =>
+              proposal.proposer !== "0x0000000000000000000000000000000000000000"
+          )
+          .reverse();
 
         setProposalsPerPage(filteredProposals.length);
         setProposalsByPage(filteredProposals);
@@ -219,7 +222,6 @@ export default function DaoDashboard() {
     getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
     getProposalsFromBE();
-    getProposalCount();
     getDAOInfo();
     getVersion();
     getVotingDelay();
@@ -264,6 +266,7 @@ export default function DaoDashboard() {
     };
 
     filter(filterStatus);
+    getProposalCount();
   }, [filterProposals, filterStatus]);
 
   return (
@@ -336,7 +339,7 @@ export default function DaoDashboard() {
               <p>
                 {loading
                   ? "Loading proposals..."
-                  : `Ongoing proposals: ${Number(ongoingProposalCount)}`}
+                  : `Total proposals: ${proposalCount}`}
               </p>
             </div>
             <Dialog>
@@ -489,7 +492,7 @@ export default function DaoDashboard() {
                   <PaginationPrevious
                     onClick={handleOnchainPrevPage}
                     className={`${
-                      onchainPageNumber === 188 &&
+                      onchainPageNumber === proposalCount &&
                       "pointer-events-none opacity-50"
                     } cursor-pointer`}
                   />
