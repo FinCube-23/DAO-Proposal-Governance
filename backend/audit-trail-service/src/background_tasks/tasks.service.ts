@@ -179,18 +179,26 @@ export class TasksService {
           this.logger.log(`THE GRAPH: Got the response before emitting event to DAO SERVICE: ${JSON.stringify(eventData)}`);
 
           // Update the transaction status
-          await this.transactionService.updateStatus(txn.transactionHash, JSON.stringify(eventData), TransactionConfirmationSource.ALCHEMY, 1);
+          const updatedTransaction = await this.transactionService.updateStatus(
+            txn.transactionHash,
+            JSON.stringify(eventData),
+            TransactionConfirmationSource.ALCHEMY,
+            1
+          );
 
           // Emit updated proposal event
-          await this.proposalUpdateService.updateProposal({
-            web3Status: 1,
-            message: "New Member Proposal Placed Successfully.",
-            ...eventData,
-            blockNumber: txn.blockNumber,
-            transactionHash: txn.transactionHash,
-          });
+          if (updatedTransaction) {
+            await this.proposalUpdateService.updateProposal({
+              web3Status: 1,
+              message: "New Member Proposal Placed Successfully.",
+              ...eventData,
+              blockNumber: txn.blockNumber,
+              transactionHash: txn.transactionHash,
+            });
+            this.logger.log('WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!');
 
-          this.logger.log('WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!');
+          }
+
         } else {
           this.logger.warn('WEBSOCKET: proposalEndTopic is non-zero for ProposalCreated event.');
         }
