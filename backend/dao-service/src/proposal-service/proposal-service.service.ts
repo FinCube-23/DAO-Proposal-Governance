@@ -15,6 +15,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
+  private eventDrivenFunctionCall: any;
   constructor(
     @InjectRepository(ProposalEntity) private proposalRepository: Repository<ProposalEntity>,
     @Inject('PROPOSAL_SERVICE') private rabbitClient: ClientProxy,
@@ -22,6 +23,14 @@ export class ProposalServiceService {
   ) {
     this.logger.setContext(ProposalServiceService.name);
     this.update_proposals = [];
+    // Open for Extension Close for Modification
+    this.eventDrivenFunctionCall = {
+      'proposalCanceleds': this.handleProposalUpdatedEvent,
+      'proposalExecuteds': this.handleProposalUpdatedEvent,
+      'proposalAddeds': this.handleCreatedProposalPlacedEvent,
+      'ProposalAdded': this.handleCreatedProposalPlacedEvent
+      // Add more strings and corresponding functions as needed
+    };
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
@@ -267,17 +276,33 @@ export class ProposalServiceService {
     queueOptions: {
       durable: true,
     },
-  })
+  }) handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
+    this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
+    const typename = proposal?.data?.__typename ?? null;
+    this.logger.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
+    if (this.eventDrivenFunctionCall[typename]) {
+      // Call the corresponding function from the dictionary
+      this.eventDrivenFunctionCall[typename](proposal);
+    } else {
+      console.log(`On-chain event type "${typename}" is not recognized.`);
+    }
+  }
+
+
   handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
-      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);
-      this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
+      if (proposalId) {
+        this.updateProposalCreated(proposal.transactionHash, proposal.web3Status, proposalId);
+      } 
+      else {
+        this.logger.warn('Something went wrong! Proposal ID is null | Off-chain DB status is not updated.');
+      }
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
@@ -289,7 +314,6 @@ export class ProposalServiceService {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
       );
-      this.logger.log(`THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`);
 
       const proposalId = 'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
       this.logger.log(`Proposal ID Status from AUDIT TRAIL's The Graph: ${proposalId}`);

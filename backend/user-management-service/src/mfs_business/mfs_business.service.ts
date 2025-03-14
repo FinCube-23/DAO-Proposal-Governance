@@ -82,24 +82,33 @@ export class MfsBusinessService {
   }
 
   async updateOnChainProposalId(walletAddress: string, proposalId: number) {
-    const normalizedWalletAddress = walletAddress.toLowerCase();
+    try {
+      const normalizedWalletAddress = walletAddress.toLowerCase();
 
-    const business = await this.mfsBusinessRepository.findOne({
-      where: { wallet_address: normalizedWalletAddress },
-    });
+      const business = await this.mfsBusinessRepository.findOne({
+        where: { wallet_address: normalizedWalletAddress },
+      });
 
-    if (!business) {
-      console.error(`No business found with wallet address: ${normalizedWalletAddress}`);
-      return;
+      if (!business) {
+        console.error(
+          `No business found with wallet address: ${normalizedWalletAddress}`,
+        );
+        return;
+      }
+
+      business.proposal_onchain_id = proposalId;
+      business.membership_onchain_status = OnChainProposalStatus.PENDING;
+      await this.mfsBusinessRepository.save(business);
+
+      console.log(
+        `Successfully updated proposal_onchain_id to ${proposalId} for wallet address: ${normalizedWalletAddress}`,
+      );
+    } catch (error) {
+      console.error(
+        'Proposal on-chain ID or Wallet address issue found | Error:',
+        error,
+      );
     }
-
-    business.proposal_onchain_id = proposalId;
-    business.membership_onchain_status = OnChainProposalStatus.PENDING;
-    await this.mfsBusinessRepository.save(business);
-
-    console.log(
-      `Successfully updated proposal_onchain_id to ${proposalId} for wallet address: ${normalizedWalletAddress}`,
-    );
   }
 
   // 📡 Listening Event from Publisher
@@ -130,7 +139,7 @@ export class MfsBusinessService {
       console.log(
         `On-Chain Proposal ID: ${proposalId} | Member's Proposed Wallet: ${proposedWallet}`,
       );
-      this.updateOnChainProposalId(proposedWallet, proposalId);
+      await this.updateOnChainProposalId(proposedWallet, proposalId);
     } catch (error) {
       console.error('Invalid proposal object received:', error);
     }
