@@ -193,13 +193,6 @@ export class ProposalUpdateRepository {
               blockNumber
               blockTimestamp
             }
-            proposalCreateds(where: { transactionHash_in: $transactionHashes }) {
-              transactionHash
-              id
-              proposalId
-              blockNumber
-              blockTimestamp
-            }
             proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
