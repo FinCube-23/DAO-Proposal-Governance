@@ -17,17 +17,6 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
 
-  const eventBus = await app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.RMQ,
-    options: {
-      urls: ['amqp://rabbitmq:5672'],
-      queue: 'proposal-update-queue', // Routing Key from where this service listens 
-      queueOptions: {
-        durable: true, // Make the queue durable (survive restarts)
-      },
-    },
-  });
-
   app.enableCors();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
