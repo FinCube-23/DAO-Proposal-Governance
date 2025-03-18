@@ -83,7 +83,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVotingPeriod(result);
     } catch (e) {
       console.error(e);
@@ -99,7 +98,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVotingDelay(result);
     } catch (e) {
       console.error(e);
@@ -149,7 +147,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVersion(result);
     } catch (e) {
       console.error(e);
@@ -167,7 +164,6 @@ export default function DaoDashboard() {
         const parsedObj = JSON.parse(response);
 
         setDaoURI(parsedObj);
-        console.log("DaoURI", parsedObj.name);
       } catch (e) {
         console.error(e);
       }
@@ -192,11 +188,10 @@ export default function DaoDashboard() {
 
         setProposalsPerPage(filteredProposals.length);
         setProposalsByPage(filteredProposals);
-        console.log(filteredProposals);
 
         setPageLoading(false);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -214,7 +209,6 @@ export default function DaoDashboard() {
       }
 
       setProposalsFromBE(response.data || []);
-      console.log("Backend data:", response);
 
       setTotalPages(Math.ceil(response.total / response.limit));
     };
