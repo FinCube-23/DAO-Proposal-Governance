@@ -20,11 +20,90 @@ const alchemy = new Alchemy(settings);
 export class TasksService {
   private readonly logger = new Logger(TasksService.name);
   private cronJobName = 'check-pending-transactions';
+  private typeDrivenFunctionCall: Record<string, (transaction: any) => void>;
+
   constructor(
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
     private schedulerRegistry: SchedulerRegistry
-  ) { }
+  ) {
+    this.typeDrivenFunctionCall = {
+      '0': this.handleMembershipApprovalProposalCreated.bind(this),
+      '1': this.handleGeneralProposalCreated.bind(this),
+      // Add more strings and corresponding functions as needed
+    };
+  }
+
+  async handleGeneralProposalCreated(transaction: any) {
+    this.logger.log(`CRON: General Proposal Being Sent To DAO-Service!`);
+
+    await this.transactionService.updateStatus(
+      transaction.transactionHash,
+      transaction,
+      TransactionConfirmationSource.THE_GRAPH,
+      1
+    );
+
+    await this.proposalUpdateService.updatedGeneralProposal({
+      web3Status: 1,
+      message: "Transaction updated successfully.",
+      data: { ...transaction },
+      blockNumber: transaction.blockNumber,
+      transactionHash: transaction.transactionHash,
+    });
+
+  }
+
+  async handleMembershipApprovalProposalCreated(transaction: any) {
+    this.logger.log(`CRON: Membership Approval Proposal being emitted to event bus`);
+
+    await this.transactionService.updateStatus(
+      transaction.transactionHash,
+      transaction,
+      TransactionConfirmationSource.THE_GRAPH,
+      1
+    );
+    await this.proposalUpdateService.updatedTransaction({
+      web3Status: 1,
+      message: "Transaction updated successfully.",
+      data: { ...transaction },
+      blockNumber: transaction.blockNumber,
+      transactionHash: transaction.transactionHash,
+    });
+
+  }
+
+  async handleProposalStatusUpdate(transaction: any) {
+    this.logger.log(`CRON: Proposal Executed or Cancelled being emitted to event bus`);
+
+    await this.transactionService.updateStatus(
+      transaction.transactionHash,
+      transaction,
+      TransactionConfirmationSource.THE_GRAPH,
+      1
+    );
+    await this.proposalUpdateService.updatedTransaction({
+      web3Status: 1,
+      message: "Transaction updated successfully.",
+      data: { ...transaction },
+      blockNumber: transaction.blockNumber,
+      transactionHash: transaction.transactionHash,
+    });
+  }
+
+  async handleEventEmissionBasedOnProposalType(transaction: any) {
+    const proposalType = transaction.proposalType;
+
+    if (this.typeDrivenFunctionCall[proposalType]) {
+      // Call the corresponding function from the dictionary
+      this.logger.log(
+        `Calling function for on-chain event: ${this.typeDrivenFunctionCall[proposalType]?.name ?? 'Unknown function'}`,
+      );
+      await this.typeDrivenFunctionCall[proposalType](transaction);
+    } else {
+      this.logger.warn(`Proposal type ${proposalType} is not recognized.`);
+    }
+  }
 
   @Cron('30 * * * * *', { name: 'check-pending-transactions' })
   async handleCron() {
@@ -80,19 +159,11 @@ export class TasksService {
     //update each transactions
     for (const transaction of uniqueTransactions) {
       try {
-        await this.transactionService.updateStatus(
-          transaction.transactionHash,
-          transaction,
-          TransactionConfirmationSource.THE_GRAPH,
-          1
-        );
-        await this.proposalUpdateService.updatedTransaction({
-          web3Status: 1,
-          message: "Transaction updated successfully.",
-          data: { ...transaction },
-          blockNumber: transaction.blockNumber,
-          transactionHash: transaction.transactionHash,
-        });
+        if (transaction.__typename == "ProposalAdded") {
+          await this.handleEventEmissionBasedOnProposalType(transaction);
+        } else {
+          await this.handleProposalStatusUpdate(transaction);
+        }
 
         this.logger.log(`CRON: Transaction ${transaction.transactionHash} successfully updated.`);
       } catch (updateError) {
@@ -189,7 +260,7 @@ export class TasksService {
 
           // Emit updated proposal event
           if (updatedTransaction) {
-            await this.proposalUpdateService.updateProposal({
+            await this.proposalUpdateService.updatedTransaction({
               web3Status: 1,
               message: "New Member Proposal Placed Successfully.",
               ...eventData,

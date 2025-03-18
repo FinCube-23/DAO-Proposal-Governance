@@ -126,10 +126,9 @@ export class ProposalUpdateService {
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
-  async updateProposal(proposal: ResponseTransactionStatusDto) {
-    await this.amqpConnection.publish('proposal-update-exchange', '', proposal);
-    this.logger.log("WEBSOCKET: Proposal on-chain status update notified!")
-    return { message: 'Proposal on-chain status update notified!' };
+  async updatedGeneralProposal(proposal: ResponseTransactionStatusDto) {
+    await this.rabbitClient.emit('general-proposal-placed', proposal);
+    return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern

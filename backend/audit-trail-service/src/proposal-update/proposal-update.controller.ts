@@ -46,7 +46,7 @@ export class ProposalUpdateController {
     type: ResponseTransactionStatusDto,
   })
   async placeProposal(@Body() proposal: ResponseTransactionStatusDto) {
-    return await this.proposalUpdateService.updateProposal(proposal);
+    return await this.proposalUpdateService.updatedTransaction(proposal);
   }
 
 }

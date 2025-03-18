@@ -73,7 +73,7 @@ const GeneralProposal = () => {
       const hash = await writeContract(config, request);
 
       const backendData = {
-        proposal_type: "membership",
+        proposal_type: "general",
         metadata: data.description,
         proposer_address: `0x${address}`,
         trx_hash: hash,
