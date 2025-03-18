@@ -34,11 +34,10 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
-// import { ValidateAuth } from '@custom/validate-auth';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
-  constructor(private readonly proposalService: ProposalServiceService) { }
+  constructor(private readonly proposalService: ProposalServiceService) {}
 
   // 💬 MessagePattern expects a response | This is a publisher
   @Post()
@@ -177,11 +176,10 @@ export class ProposalServiceController {
     status: 200,
     description: 'Dummy description',
   })
-  // @ValidateAuth()
   async testDecorator(
     @Req() req,
     @Body() packet: ValidateAuthorizationDto,
   ): Promise<boolean> {
-    return await this.proposalService.test(packet);
+    return await this.proposalService.test(req, packet);
   }
 }

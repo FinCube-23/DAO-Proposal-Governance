@@ -4,6 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,6 +27,7 @@ import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-tra
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
+import { validateAuth } from '@fincube/validate-auth';
 
 @Injectable()
 export class ProposalServiceService {
@@ -231,7 +233,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -256,7 +258,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -414,11 +416,15 @@ export class ProposalServiceService {
     }
   }
 
-  async test(packet: ValidateAuthorizationDto): Promise<boolean> {
+  async test(req: any, packet: ValidateAuthorizationDto): Promise<boolean> {
     console.log('Auth Message Call Test');
-    const messageResponse = await firstValueFrom(
-      this.umsRabbitClient.send('validate-authorization', packet),
+    const res = await validateAuth(
+      req,
+      this.umsRabbitClient as any,
+      packet.options,
     );
+
+    console.log('res', res);
     return true;
   }
 }
