@@ -43,7 +43,7 @@ require('dotenv').config();
         {
           name: 'proposal-update-exchange',
           type: 'fanout',
-        },
+        }
       ],
       connectionInitOptions: {
         wait: true,

@@ -167,13 +167,6 @@ export class MfsBusinessService {
     const typename = proposal?.data?.__typename ?? null;
     console.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
 
-    const proposalType = proposal.data?.proposalType ?? null;
-
-    if (proposalType == 1) {
-      console.log(`This is a general proposal skipping update`);
-      return;
-    }
-
     if (this.eventDrivenFunctionCall[typename]) {
       // Call the corresponding function from the dictionary
       console.log(

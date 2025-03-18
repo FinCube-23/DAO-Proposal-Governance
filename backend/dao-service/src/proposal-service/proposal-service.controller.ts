@@ -10,7 +10,6 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
@@ -94,7 +93,11 @@ export class ProposalServiceController {
   async findByStatus(@Param('status') status: ProposalStatus): Promise<ProposalEntity[]> {
     return this.proposalService.findByStatus(status);
   }
-
+  // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
+  @EventPattern('general-proposal-placed')
+  handleCreatedProposalPlaced(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+    this.proposalService.handleCreatedProposalPlacedEvent(proposal);
+  }
 
 }
 
