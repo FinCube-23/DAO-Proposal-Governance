@@ -20,11 +20,11 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
         },
       },
       {
-        name: 'USER_MANAGEMENT_SERVICE',
+        name: 'USER_MANAGEMENT_SERVICE', // Injectable
         transport: Transport.RMQ,
         options: {
           urls: ['amqp://rabbitmq:5672'],
-          queue: 'authorization',
+          queue: 'authorization', // Routing Key
         },
       },
     ]),

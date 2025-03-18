@@ -5,6 +5,8 @@ import {
   Body,
   Patch,
   Param,
+  Delete,
+  UseGuards,
   Req,
   DefaultValuePipe,
   ParseIntPipe,
@@ -16,6 +18,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -24,11 +27,14 @@ import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import {
   PaginatedProposalResponse,
   ProposalDto,
+  ProposalListDto,
   UpdateProposalDto,
 } from './dto/proposal.dto';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
+// import { ValidateAuth } from '@custom/validate-auth';
 
 @Controller('proposal-service')
 export class ProposalServiceController {
