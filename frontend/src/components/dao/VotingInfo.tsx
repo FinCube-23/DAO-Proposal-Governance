@@ -1,8 +1,98 @@
 import { Badge } from "@components/ui/badge";
+import {
+  useCancelProposalMutation,
+  useExecuteProposalMutation,
+} from "@redux/services/proposal";
+import {
+  simulateContract,
+  waitForTransactionReceipt,
+  writeContract,
+} from "@wagmi/core";
+import { useState } from "react";
+import contractABI from "../../contractABI/contractABI.json";
+import { config } from "../../main";
+import { toast } from "sonner";
+import { Button } from "@components/ui/button";
+import { useNavigate } from "react-router";
 
 export default function VotingInfo({ proposal }: any) {
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [executeProposal] = useExecuteProposalMutation();
+  const [cancelProposal] = useCancelProposalMutation();
+  const navigate = useNavigate();
   const convertStatusToVariant = (status: boolean) => {
     return status ? "success" : "warning";
+  };
+
+  const execute = async () => {
+    setLoadingStatus(true);
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "executeProposal",
+        args: [proposal.proposal_onchain_id],
+      });
+      const hash = await writeContract(config, request);
+
+      await executeProposal({
+        proposalId: Number(proposal.proposal_onchain_id),
+        transactionHash: hash,
+      });
+
+      await waitForTransactionReceipt(config, { hash });
+
+      toast.success("Proposal executed successfully");
+    } catch (e: any) {
+      let errorMessage = e.message;
+
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      console.log(e);
+      toast.error(errorMessage);
+    }
+    setLoadingStatus(false);
+  };
+
+  const cancel = async () => {
+    setLoadingStatus(true);
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: "cancelProposal",
+        args: [proposal.proposal_onchain_id],
+      });
+      const hash = await writeContract(config, request);
+
+      await cancelProposal({
+        proposalId: proposal.proposal_onchain_id,
+        transactionHash: hash,
+      });
+
+      await waitForTransactionReceipt(config, { hash });
+
+      toast.success("Proposal cancelled");
+    } catch (e: any) {
+      let errorMessage = e.message;
+
+      if (errorMessage.includes("reverted with the following reason:")) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
+    }
+    setLoadingStatus(false);
   };
 
   return (
@@ -51,7 +141,16 @@ export default function VotingInfo({ proposal }: any) {
           <div className="flex justify-between">
             <div className="text-muted-foreground">On-chain ID</div>
             {proposal.proposal_onchain_id !== null ? (
-              <div className="font-bold">{proposal.proposal_onchain_id}</div>
+              <div
+                onClick={() =>
+                  navigate(
+                    `/mfs/dao/fincube/proposals/${proposal.proposal_onchain_id}`
+                  )
+                }
+                className="font-bold underline cursor-pointer text-blue-400"
+              >
+                {proposal.proposal_onchain_id}
+              </div>
             ) : (
               <div className="text-red-600 font-bold">N/A</div>
             )}
@@ -97,6 +196,27 @@ export default function VotingInfo({ proposal }: any) {
               )}
             </a>
           </div>
+          {proposal.proposal_onchain_id !== null && (
+            <div className="flex justify-between items-center mt-10">
+              <div className="text-xl">Action:</div>
+              <div>
+                <Button
+                  isLoading={loadingStatus}
+                  onClick={execute}
+                  className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 mx-2 text-white"
+                >
+                  Execute
+                </Button>
+                <Button
+                  isLoading={loadingStatus}
+                  onClick={cancel}
+                  className="bg-red-400 hover:bg-red-500 font-bold mt-2 mx-2 text-white"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -53,7 +53,7 @@ export default function DaoDashboard() {
   const navigate = useNavigate();
   const [daoURI, setDaoURI] = useState<IDaoInfo>();
 
-  const [ongoingProposalCount, setOngoingProposalCount] = useState("");
+  const [proposalCount, setProposalCount] = useState(0);
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [toggle, setToggle] = useState(0);
   const [version, setVersion] = useState("");
@@ -83,7 +83,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVotingPeriod(result);
     } catch (e) {
       console.error(e);
@@ -99,7 +98,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVotingDelay(result);
     } catch (e) {
       console.error(e);
@@ -125,15 +123,16 @@ export default function DaoDashboard() {
     }
   };
 
-  const getOngoingProposalCount = async () => {
+  const getProposalCount = async () => {
     try {
       const response: any = await readContract(config, {
         abi: contractABI,
         address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
-        functionName: "getOngoingProposalsCount",
+        functionName: "proposalCount",
       });
-      const result = response.toString();
-      setOngoingProposalCount(result);
+      const result = Number(response);
+      setProposalCount(result);
+      setOnchainPageNumber(result);
     } catch (e) {
       console.error(e);
     }
@@ -148,7 +147,6 @@ export default function DaoDashboard() {
       });
       const result = response.toString();
 
-      console.log(result);
       setVersion(result);
     } catch (e) {
       console.error(e);
@@ -166,7 +164,6 @@ export default function DaoDashboard() {
         const parsedObj = JSON.parse(response);
 
         setDaoURI(parsedObj);
-        console.log("DaoURI", parsedObj.name);
       } catch (e) {
         console.error(e);
       }
@@ -179,21 +176,22 @@ export default function DaoDashboard() {
           abi: contractABI,
           address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
           functionName: "getProposalsByPage",
-          args: [page, page + 5],
+          args: [page - 5, page],
         });
 
-        const filteredProposals = response[0].filter(
-          (proposal: any) =>
-            proposal.proposer !== "0x0000000000000000000000000000000000000000"
-        );
+        const filteredProposals = response[0]
+          .filter(
+            (proposal: any) =>
+              proposal.proposer !== "0x0000000000000000000000000000000000000000"
+          )
+          .reverse();
 
         setProposalsPerPage(filteredProposals.length);
         setProposalsByPage(filteredProposals);
-        console.log(filteredProposals);
 
         setPageLoading(false);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       } finally {
         setLoading(false);
       }
@@ -211,7 +209,6 @@ export default function DaoDashboard() {
       }
 
       setProposalsFromBE(response.data || []);
-      console.log("Backend data:", response);
 
       setTotalPages(Math.ceil(response.total / response.limit));
     };
@@ -219,7 +216,6 @@ export default function DaoDashboard() {
     getProposalsByPage(onchainPageNumber);
     fetchOngoingProposals();
     getProposalsFromBE();
-    getOngoingProposalCount();
     getDAOInfo();
     getVersion();
     getVotingDelay();
@@ -236,13 +232,13 @@ export default function DaoDashboard() {
 
   const handleOnchainNextPage = () => {
     setPageLoading(true);
-    setOnchainPageNumber((prevPage) => prevPage + 5);
+    setOnchainPageNumber((prevPage) => prevPage - 5);
   };
 
   const handleOnchainPrevPage = () => {
     if (onchainPageNumber > 0) {
       setPageLoading(true);
-      setOnchainPageNumber((prevPage) => prevPage - 5);
+      setOnchainPageNumber((prevPage) => prevPage + 5);
     }
   };
 
@@ -264,6 +260,7 @@ export default function DaoDashboard() {
     };
 
     filter(filterStatus);
+    getProposalCount();
   }, [filterProposals, filterStatus]);
 
   return (
@@ -336,7 +333,7 @@ export default function DaoDashboard() {
               <p>
                 {loading
                   ? "Loading proposals..."
-                  : `Ongoing proposals: ${Number(ongoingProposalCount)}`}
+                  : `Total proposals: ${proposalCount}`}
               </p>
             </div>
             <Dialog>
@@ -489,7 +486,7 @@ export default function DaoDashboard() {
                   <PaginationPrevious
                     onClick={handleOnchainPrevPage}
                     className={`${
-                      onchainPageNumber === 0 &&
+                      onchainPageNumber === proposalCount &&
                       "pointer-events-none opacity-50"
                     } cursor-pointer`}
                   />
