@@ -40,10 +40,19 @@ export const mfsApis = api.injectEndpoints({
       },
       providesTags: ["mfs"],
     }),
-    getAllMFS: build.query<GetAllMFSBusinessResponse, void>({
-      query: () => {
+    getAllMFS: build.query<
+      GetAllMFSBusinessResponse,
+      { page: number; limit: number; status?: string }
+    >({
+      query: ({ page, limit, status }) => {
+        let url = `${MFS_ENDPOINT.BASE}?page=${page}&limit=${limit}`;
+
+        if (status) {
+          url += `&status=${status}`;
+        }
+
         return {
-          url: MFS_ENDPOINT.BASE,
+          url,
           method: "GET",
         };
       },

@@ -1,4 +1,4 @@
-import { BadgeCheck, Bell, LogOut, Sparkles } from "lucide-react";
+import { BadgeCheck, LogOut } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
 import {
@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@components/ui/sidebar";
-import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useDisconnect } from "wagmi";
 import { useDispatch } from "react-redux";
 import { clearAuthState } from "@redux/slices/auth";

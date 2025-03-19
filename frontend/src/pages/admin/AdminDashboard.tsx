@@ -25,7 +25,6 @@ import contractABI from "../../contractABI/contractABI.json";
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -33,6 +32,21 @@ import {
 } from "@components/ui/table";
 import { useLazyGetAllMFSQuery } from "@redux/services/mfs";
 import { MFSBusiness } from "@redux/api/types";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/ui/select";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -48,8 +62,12 @@ export default function AdminDashboard() {
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
   const [proposalCount, setProposalCount] = useState<string>();
   const [activeTab, setActiveTab] = useState("overview");
-  const [getAllMFS] = useLazyGetAllMFSQuery();
-  const [allMfs, setAllMfs] = useState<MFSBusiness[]>([]);
+  const [getAllMFS, { data, error, isLoading }] = useLazyGetAllMFSQuery();
+  const [mfsList, setMfsList] = useState<MFSBusiness[]>([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [status, setStatus] = useState<string | undefined>();
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -135,15 +153,31 @@ export default function AdminDashboard() {
   useEffect(() => {
     const getMFSs = async () => {
       try {
-        const response: any = await getAllMFS();
-        setAllMfs(response.data.data);
+        const response: any = await getAllMFS({
+          page: page,
+          limit: limit,
+          status: status,
+        });
+
+        console.log("MFS data", response.data);
+        setMfsList(response.data.data);
       } catch (e) {
         console.error(e);
       }
     };
 
     getMFSs();
-  }, [getAllMFS]);
+  }, [page, status, getAllMFS, limit]);
+
+  useEffect(() => {
+    if (data) {
+      setMfsList(data.data);
+      setTotalPages(data.totalPages);
+    }
+  }, [data]);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Error loading data</p>;
 
   const formatDate = (timestamp: string) => {
     const date = new Date(timestamp);
@@ -286,22 +320,39 @@ export default function AdminDashboard() {
               </div>
             </TabsContent>
             <TabsContent value="mfs-list" className="space-y-4">
+              <div className="flex justify-end">
+                <div className="w-[200px]">
+                  <Select
+                    value={status}
+                    onValueChange={(value) => setStatus(value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Filter by status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="register">Registered</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="cancelled">Canceled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
               <Table>
-                <TableCaption>A list of all MFS.</TableCaption>
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Location</TableHead>
-                    <TableHead>On-chain Membership Status</TableHead>
+                    <TableHead>Membership Status</TableHead>
                     <TableHead>Created At</TableHead>
                     <TableHead>Updated At</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {allMfs.map((mfs, idx) => (
-                    <TableRow key={idx}>
+                  {mfsList.map((mfs) => (
+                    <TableRow key={mfs.id}>
                       <TableCell>{mfs.id}</TableCell>
                       <TableCell>{mfs.name}</TableCell>
                       <TableCell>{mfs.type}</TableCell>
@@ -313,11 +364,53 @@ export default function AdminDashboard() {
                   ))}
                 </TableBody>
               </Table>
+              {mfsList.length === 0 && (
+                <p className="text-center font-bold">No data found</p>
+              )}
+              {mfsList.length > 0 && (
+                <Pagination className="my-5">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious
+                        className={`${
+                          page === 1 && "pointer-events-none opacity-50"
+                        } cursor-pointer`}
+                        onClick={() => {
+                          setPage((prev) => Math.max(1, prev - 1));
+                        }}
+                      />
+                    </PaginationItem>
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (pageNum) => (
+                        <PaginationItem key={pageNum}>
+                          <PaginationLink
+                            className="cursor-pointer"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setPage(pageNum);
+                            }}
+                            isActive={Number(setPage) === pageNum}
+                          >
+                            {pageNum}
+                          </PaginationLink>
+                        </PaginationItem>
+                      )
+                    )}
+                    <PaginationItem>
+                      <PaginationNext
+                        className={`${
+                          page === totalPages &&
+                          "pointer-events-none opacity-50"
+                        } cursor-pointer`}
+                        onClick={() => {
+                          setPage((prev) => Math.min(totalPages, prev + 1));
+                        }}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
             </TabsContent>
-            <TabsContent
-              value="trx-history"
-              className="space-y-4"
-            ></TabsContent>
           </Tabs>
         </div>
       </div>
