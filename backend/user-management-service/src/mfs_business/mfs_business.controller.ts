@@ -10,10 +10,11 @@ import {
   Request,
   Req,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
 import { MfsBusiness } from './entities/mfs_business.entity';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
 import {
@@ -23,6 +24,8 @@ import {
   EventPattern,
 } from '@nestjs/microservices';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
+import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
 
 
 @Controller('mfs-business')
@@ -31,6 +34,7 @@ export class MfsBusinessController {
 
   @Post()
   @ApiBody({ type: MfsBusiness })
+  @ApiTags("Organization")
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully created.',
@@ -49,15 +53,14 @@ export class MfsBusinessController {
   }
 
   @Get()
-  @ApiResponse({ status: 200, type: [MfsBusiness] })
-  @ApiResponse({ status: 404, description: 'Not Found.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findAll(@Req() req): Promise<MfsBusiness[]> {
-    console.log(req.user);
-    return this.mfsBusinessService.findAll(req.user);
+  @ApiTags("Organization")
+  @ApiOkResponse({ type: OrganizationListResponseDto })
+  async findAll(@Query() query: ListOrganizationQueryDto): Promise<OrganizationListResponseDto> {
+    return this.mfsBusinessService.findAll(query);
   }
 
   @Get(':id')
+  @ApiTags("Organization")
   @ApiResponse({ status: 200, type: MfsBusiness })
   @ApiResponse({ status: 404, description: 'Not Found.' })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
@@ -71,6 +74,7 @@ export class MfsBusinessController {
   }
 
   @Patch(':id')
+  @ApiTags("Organization")
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated.',
@@ -82,21 +86,5 @@ export class MfsBusinessController {
     @Body() updateMfsBusinessDto: MfsBusiness,
   ): Promise<MfsBusiness> {
     return this.mfsBusinessService.update(+id, updateMfsBusinessDto);
-  }
-
-  @Delete(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'The record has been successfully deleted.',
-    type: MfsBusiness,
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async remove(@Param('id') id: string, @Req() req): Promise<any> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
-    if (!mfs_business) {
-      throw new NotFoundException(`MFS business doesn't exist`);
-    } else {
-      return this.mfsBusinessService.remove(+id, req.user);
-    }
   }
 }

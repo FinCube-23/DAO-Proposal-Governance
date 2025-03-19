@@ -12,6 +12,8 @@ import {
 import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ResponseTransactionStatusDto } from './dtos/response-transaction-status.dto';
+import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
+import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
 
 @Injectable()
 export class MfsBusinessService {
@@ -38,12 +40,49 @@ export class MfsBusinessService {
     return mfsInfo;
   }
 
-  async findAll(sub: string): Promise<MfsBusiness[]> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    return this.mfsBusinessRepository.find();
+  async findAll(query: ListOrganizationQueryDto): Promise<OrganizationListResponseDto> {
+    const { page = 1, limit = 10, status, type, location } = query;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.mfsBusinessRepository.createQueryBuilder('business');
+
+    // Apply filters if provided
+    if (status) {
+      queryBuilder.andWhere('business.membership_onchain_status = :status', { status });
+    }
+    if (type) {
+      queryBuilder.andWhere('business.type = :type', { type });
+    }
+    if (location) {
+      queryBuilder.andWhere('business.location = :location', { location });
+    }
+
+    // Get total count for pagination
+    const total = await queryBuilder.getCount();
+
+    // Apply pagination
+    queryBuilder
+      .select([
+        'business.id',
+        'business.name',
+        'business.type',
+        'business.location',
+        'business.membership_onchain_status',
+      ])
+      .skip(skip)
+      .take(limit)
+      .orderBy('business.created_at', 'DESC');
+
+    const businesses = await queryBuilder.getMany();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: businesses,
+      total,
+      page,
+      limit,
+      totalPages,
+    };
   }
 
   async findOne(id: number, sub: string): Promise<MfsBusiness> {
@@ -82,15 +121,6 @@ export class MfsBusinessService {
     updatedBusiness.updated_at = new Date();
 
     return this.mfsBusinessRepository.save(updatedBusiness);
-  }
-
-  async remove(id: number, sub: string): Promise<string> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    await this.mfsBusinessRepository.delete(id);
-    return `Removed #${id} MFS Business`;
   }
 
   async updateOnChainProposalId(walletAddress: string, proposalId: number) {
