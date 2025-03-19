@@ -47,6 +47,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@components/ui/select";
+import { useNavigate } from "react-router";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -68,6 +69,7 @@ export default function AdminDashboard() {
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string | undefined>();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -224,7 +226,6 @@ export default function AdminDashboard() {
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="mfs-list">MFS List</TabsTrigger>
-              <TabsTrigger value="trx-history">Transaction History</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -352,7 +353,13 @@ export default function AdminDashboard() {
                 </TableHeader>
                 <TableBody>
                   {mfsList.map((mfs) => (
-                    <TableRow key={mfs.id}>
+                    <TableRow
+                      onClick={() =>
+                        navigate(`/admin/dashboard/mfs-details/${mfs.id}`)
+                      }
+                      className="hover:bg-gray-800 hover:cursor-pointer"
+                      key={mfs.id}
+                    >
                       <TableCell>{mfs.id}</TableCell>
                       <TableCell>{mfs.name}</TableCell>
                       <TableCell>{mfs.type}</TableCell>

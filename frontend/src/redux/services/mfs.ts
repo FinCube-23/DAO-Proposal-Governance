@@ -58,6 +58,17 @@ export const mfsApis = api.injectEndpoints({
       },
       providesTags: ["mfs"],
     }),
+    getStatusByEmail: build.query<
+      { id: number; email: string; membership_onchain_status: string },
+      string
+    >({
+      query: (email) => {
+        return {
+          url: `${MFS_ENDPOINT.BASE}/status-by-email?email=${email}`,
+          method: "GET",
+        };
+      },
+    }),
   }),
 });
 
@@ -65,4 +76,6 @@ export const {
   useCreateMFSMutation,
   useUpdateMFSMutation,
   useLazyGetAllMFSQuery,
+  useLazyGetMFSQuery,
+  useLazyGetStatusByEmailQuery,
 } = mfsApis;

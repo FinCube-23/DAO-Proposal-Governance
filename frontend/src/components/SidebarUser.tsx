@@ -21,8 +21,9 @@ import { useDisconnect } from "wagmi";
 import { useDispatch } from "react-redux";
 import { clearAuthState } from "@redux/slices/auth";
 import { Dialog, DialogContent, DialogHeader } from "./ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { useLazyGetStatusByEmailQuery } from "@redux/services/mfs";
 
 interface Organization {
   name: string;
@@ -56,6 +57,21 @@ export default function SidebarUser({
   const { disconnect } = useDisconnect();
   const dispatch = useDispatch();
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [getStatusByEmail] = useLazyGetStatusByEmailQuery();
+  const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getStatus = async () => {
+      try {
+        const response: any = await getStatusByEmail(mfsBusiness?.email || "");
+        setStatus(response.data.membership_onchain_status);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getStatus();
+  }, [mfsBusiness, getStatusByEmail]);
 
   return (
     <SidebarMenu>
@@ -228,9 +244,7 @@ export default function SidebarUser({
                             <p className="text-sm font-medium text-gray-400">
                               Membership Status
                             </p>
-                            <p className="text-cyan-400 capitalize">
-                              {mfsBusiness?.membership_onchain_status}
-                            </p>
+                            <p className="text-cyan-400 capitalize">{status}</p>
                           </div>
                         </div>
 

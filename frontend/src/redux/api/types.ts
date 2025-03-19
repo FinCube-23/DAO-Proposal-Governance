@@ -68,15 +68,26 @@ export type FetchMeResponse = {
 };
 
 export type GetMFSBusinessResponse = {
-  created_at: string;
-  updated_at: string;
   id: number;
   name: string;
   email: string;
-  password: string;
-  role: string;
-  mfsBusiness: Organization | null;
-  exchangeUser: null;
+  context: string;
+  type: string;
+  location: string;
+  is_approved: boolean;
+  wallet_address: string;
+  native_currency: string;
+  certificate: string;
+  trx_hash: string;
+  proposal_onchain_id: number;
+  membership_onchain_status: string;
+  created_at: string;
+  updated_at: string;
+  user: {
+    id: number;
+    name: string;
+    email: string;
+  };
 };
 
 export type MFSBusiness = {

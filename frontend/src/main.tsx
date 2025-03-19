@@ -28,6 +28,7 @@ import { polygonAmoy, sepolia } from "viem/chains";
 import { injected } from "@wagmi/core";
 import AdminLayout from "@layouts/AdminLayout";
 import AdminDashboard from "@pages/admin/AdminDashboard";
+import MFSDetails from "@pages/admin/MFSDetails";
 
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
@@ -103,6 +104,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                       element={<Navigate to="/admin/dashboard" />}
                     />
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route
+                      path="dashboard/mfs-details/:id"
+                      element={<MFSDetails />}
+                    />
                   </Route>
                 </Routes>
               </BrowserRouter>
