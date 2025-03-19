@@ -14,6 +14,7 @@ import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ResponseTransactionStatusDto } from './dtos/response-transaction-status.dto';
 import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
 import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
+import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
 
 @Injectable()
 export class MfsBusinessService {
@@ -85,12 +86,39 @@ export class MfsBusinessService {
     };
   }
 
-  async findOne(id: number, sub: string): Promise<MfsBusiness> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    return this.mfsBusinessRepository.findOne({ where: { id } });
+
+  async findOne(id: number): Promise<OrganizationDetailResponseDto> {
+    const organization = await this.mfsBusinessRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!organization) {
+      throw new NotFoundException(`organization with ID ${id} not found`);
+    }
+
+    return {
+      id: organization.id,
+      name: organization.name,
+      email: organization.email,
+      context: organization.context,
+      type: organization.type,
+      location: organization.location,
+      is_approved: organization.is_approved,
+      wallet_address: organization.wallet_address,
+      native_currency: organization.native_currency,
+      certificate: organization.certificate,
+      trx_hash: organization.trx_hash,
+      proposal_onchain_id: organization.proposal_onchain_id,
+      membership_onchain_status: organization.membership_onchain_status,
+      created_at: organization.created_at,
+      updated_at: organization.updated_at,
+      user: organization.user ? {
+        id: organization.user.id,
+        name: organization.user.name,
+        email: organization.user.email,
+      } : null,
+    };
   }
 
   async findByEmail(email: string): Promise<MfsBusiness> {

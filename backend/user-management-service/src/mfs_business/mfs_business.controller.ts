@@ -11,6 +11,7 @@ import {
   Req,
   Patch,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
 import { MfsBusiness } from './entities/mfs_business.entity';
@@ -26,6 +27,7 @@ import {
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
 import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
+import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
 
 
 @Controller('mfs-business')
@@ -61,16 +63,9 @@ export class MfsBusinessController {
 
   @Get(':id')
   @ApiTags("Organization")
-  @ApiResponse({ status: 200, type: MfsBusiness })
-  @ApiResponse({ status: 404, description: 'Not Found.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findOne(@Param('id') id: string, @Req() req): Promise<MfsBusiness> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
-    if (!mfs_business) {
-      throw new NotFoundException(`MFS business doesn't exist`);
-    } else {
-      return mfs_business;
-    }
+  @ApiOkResponse({ type: OrganizationDetailResponseDto })
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<OrganizationDetailResponseDto> {
+    return this.mfsBusinessService.findOne(id);
   }
 
   @Patch(':id')
