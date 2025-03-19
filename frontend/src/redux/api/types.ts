@@ -79,6 +79,24 @@ export type GetMFSBusinessResponse = {
   exchangeUser: null;
 };
 
+export type MFSBusiness = {
+  created_at: string;
+  updated_at: string;
+  id: number;
+  name: string;
+  type: string;
+  location: string;
+  membership_onchain_status: string;
+};
+
+export type GetAllMFSBusinessResponse = {
+  data: MFSBusiness[];
+  total: number;
+  page: string;
+  limit: string;
+  totalPages: number;
+};
+
 export type LoginPayload = {
   email: string;
   password: string;

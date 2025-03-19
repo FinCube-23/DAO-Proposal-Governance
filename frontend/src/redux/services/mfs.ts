@@ -3,6 +3,7 @@ import { MFS_ENDPOINT } from "@redux/api/endpoints";
 import {
   CreateMFSPayload,
   CreateMFSResponse,
+  GetAllMFSBusinessResponse,
   GetMFSBusinessResponse,
   UpdateMFSPayload,
   UpdateMFSResponse,
@@ -39,7 +40,20 @@ export const mfsApis = api.injectEndpoints({
       },
       providesTags: ["mfs"],
     }),
+    getAllMFS: build.query<GetAllMFSBusinessResponse, void>({
+      query: () => {
+        return {
+          url: MFS_ENDPOINT.BASE,
+          method: "GET",
+        };
+      },
+      providesTags: ["mfs"],
+    }),
   }),
 });
 
-export const { useCreateMFSMutation, useUpdateMFSMutation } = mfsApis;
+export const {
+  useCreateMFSMutation,
+  useUpdateMFSMutation,
+  useLazyGetAllMFSQuery,
+} = mfsApis;

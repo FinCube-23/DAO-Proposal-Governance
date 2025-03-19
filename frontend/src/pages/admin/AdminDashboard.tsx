@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@components/ui/card";
-import { Tabs, TabsContent } from "@components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { IProposal } from "@lib/interfaces";
 import { config } from "../../main";
 import {
@@ -22,6 +22,17 @@ import { useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import contractABI from "../../contractABI/contractABI.json";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@components/ui/table";
+import { useLazyGetAllMFSQuery } from "@redux/services/mfs";
+import { MFSBusiness } from "@redux/api/types";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -36,6 +47,9 @@ export default function AdminDashboard() {
   const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
   const [proposalCount, setProposalCount] = useState<string>();
+  const [activeTab, setActiveTab] = useState("overview");
+  const [getAllMFS] = useLazyGetAllMFSQuery();
+  const [allMfs, setAllMfs] = useState<MFSBusiness[]>([]);
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -118,6 +132,32 @@ export default function AdminDashboard() {
     address,
   ]);
 
+  useEffect(() => {
+    const getMFSs = async () => {
+      try {
+        const response: any = await getAllMFS();
+        setAllMfs(response.data.data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getMFSs();
+  }, [getAllMFS]);
+
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+  };
+
   return (
     <>
       <div className="md:hidden">
@@ -142,7 +182,16 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           </div>
-          <Tabs defaultValue="overview" className="space-y-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="space-y-4"
+          >
+            <TabsList>
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="mfs-list">MFS List</TabsTrigger>
+              <TabsTrigger value="trx-history">Transaction History</TabsTrigger>
+            </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -236,6 +285,39 @@ export default function AdminDashboard() {
                 </Card>
               </div>
             </TabsContent>
+            <TabsContent value="mfs-list" className="space-y-4">
+              <Table>
+                <TableCaption>A list of all MFS.</TableCaption>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>On-chain Membership Status</TableHead>
+                    <TableHead>Created At</TableHead>
+                    <TableHead>Updated At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allMfs.map((mfs, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{mfs.id}</TableCell>
+                      <TableCell>{mfs.name}</TableCell>
+                      <TableCell>{mfs.type}</TableCell>
+                      <TableCell>{mfs.location}</TableCell>
+                      <TableCell>{mfs.membership_onchain_status}</TableCell>
+                      <TableCell>{formatDate(mfs.created_at)}</TableCell>
+                      <TableCell>{formatDate(mfs.updated_at)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
+            <TabsContent
+              value="trx-history"
+              className="space-y-4"
+            ></TabsContent>
           </Tabs>
         </div>
       </div>
