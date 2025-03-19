@@ -284,8 +284,10 @@ export class ProposalServiceService {
         );
       }
 
-      this.logger.log(
-        `Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
+      this.logger.log({
+        message: `Transaction status successfully updated to status: ${newStatus} | Result: ${result.raw[0]} for hash: `,
+        trxHash: trxHash,
+      }
       );
       return result.raw[0];
     } catch (err) {
@@ -337,7 +339,7 @@ export class ProposalServiceService {
   })
   async handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
     this.logger.log(
-      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE: ${JSON.stringify(proposal)}`,
+      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE:}`,
     );
     const typename = proposal?.data?.__typename ?? null;
     this.logger.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
@@ -354,8 +356,10 @@ export class ProposalServiceService {
 
   async handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
-      this.logger.log(
-        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
+      this.logger.log({
+        message: `Received a proposal transaction update in event pattern - hash:`,
+        trxHash: proposal.transactionHash
+      }
       );
 
       const proposalId =
@@ -384,8 +388,10 @@ export class ProposalServiceService {
     proposal: ResponseTransactionStatusDto
   ) {
     try {
-      this.logger.log(
-        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
+      this.logger.log({
+        message: `Received a proposal transaction update in event pattern - hash:`,
+        trxHash: proposal.transactionHash
+      }
       );
 
       const proposalId =

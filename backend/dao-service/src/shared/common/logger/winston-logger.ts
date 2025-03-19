@@ -19,39 +19,39 @@ export class WinstonLogger implements LoggerService {
         jwtFields: ['jwtToken'],
         stringFields: ['ssn', 'licenseNumber'],
         genericStrings: [
-          { config: { maskWith: "*", unmaskedStartCharacters: 4, unmaskedEndCharacters: 2 }, fields: ['trxHash'] },
+            { config: { maskWith: "*", unmaskedStartCharacters: 4, unmaskedEndCharacters: 2 }, fields: ['trxHash'] },
         ], // This is an object, not an array of strings
-      };
+    };
 
     constructor() {
         this.logger = winston.createLogger({
-        format: winston.format.combine(
-            winston.format.timestamp(),
-            winston.format.printf(({ level, message, timestamp, context }) => {
-                const maskedMessage = this.maskSensitiveData(message);
-                // Ensure the message is stringified
-                return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
-            })
-        ),
-        transports: [
-            new winston.transports.Console({
-                format: winston.format.combine(
-                    winston.format.colorize(),
-                    winston.format.printf(({ level, message, timestamp, context }) => {
-                        const maskedMessage = this.maskSensitiveData(message);
-                        return `[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`;
-                        //return JSON.stringify(`[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`);
-                    })
-                )
-            }),
-            new winston.transports.File({ filename: 'logs/app.log' }),
-            new LokiTransport({
-                host: process.env.LOG_SERVER,
-                labels: { service: "dao-service" },
-                json: true
-            })
-        ]
-    });
+            format: winston.format.combine(
+                winston.format.timestamp(),
+                winston.format.printf(({ level, message, timestamp, context }) => {
+                    const maskedMessage = this.maskSensitiveData(message);
+                    // Ensure the message is stringified
+                    return `[${timestamp}] [${context || 'App'}] ${level}: ${maskedMessage}}`;
+                })
+            ),
+            transports: [
+                new winston.transports.Console({
+                    format: winston.format.combine(
+                        winston.format.colorize(),
+                        winston.format.printf(({ level, message, timestamp, context }) => {
+                            const maskedMessage = this.maskSensitiveData(message);
+                            return `[${timestamp}] [${context || 'App'}] ${level}: ${maskedMessage}`;
+                            //return JSON.stringify(`[${timestamp}] [${context || 'App'}] ${level}: ${JSON.stringify(maskedMessage)}`);
+                        })
+                    )
+                }),
+                new winston.transports.File({ filename: 'logs/app.log' }),
+                new LokiTransport({
+                    host: process.env.LOG_SERVER,
+                    labels: { service: "dao-service" },
+                    json: true
+                })
+            ]
+        });
 
     }
 
@@ -68,17 +68,17 @@ export class WinstonLogger implements LoggerService {
                     // Make sure `field` is a string before checking if it exists in `data`
                     return typeof field === 'string' && field in data;
                 });
-    
+
                 if (foundFields.length > 0) {
                     (config as any)[configKey] = foundFields;
                 }
             } else if (configKey === 'genericStrings' && Array.isArray(fields)) {
-              // Special case for `genericStrings`, which contains objects
-              (config as any)[configKey] = fields;
+                // Special case for `genericStrings`, which contains objects
+                (config as any)[configKey] = fields;
             }
-          }
-        
-          return config;
+        }
+
+        return config;
     }
 
     private maskSensitiveData(data: any) {
@@ -100,23 +100,36 @@ export class WinstonLogger implements LoggerService {
     }
 
     log(message: any) {
-        const maskedMessage = JSON.stringify(this.maskSensitiveData(message));
-        this.logger.info(this.stringifyMessage(maskedMessage), { context: this.context });
+        const maskedMessage = this.maskSensitiveData(message);
+
+        // Create the log entry with flattened numeric fields
+        const logEntry = {
+            message: this.stringifyMessage(maskedMessage), // Stringify the message (if needed)
+            context: this.context,                        // Add context
+            level: 'info',                                // Add log level
+        };
+
+        // Log the flattened object
+        this.logger.info(logEntry);
     }
 
     error(message: any, trace?: string) {
-        this.logger.error({ message, trace, context: this.context });
+        const maskedMessage = this.maskSensitiveData(message);
+        this.logger.error({ message: this.stringifyMessage(maskedMessage), trace, context: this.context, level: "error" });
     }
 
     warn(message: any) {
-        this.logger.warn({ message, context: this.context });
+        const maskedMessage = this.maskSensitiveData(message);
+        this.logger.warn({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "warn" });
     }
 
     debug(message: any) {
-        this.logger.debug({ message, context: this.context });
+        const maskedMessage = this.maskSensitiveData(message);
+        this.logger.debug({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "debug" });
     }
 
     verbose(message: any) {
-        this.logger.verbose({ message, context: this.context });
+        const maskedMessage = this.maskSensitiveData(message);
+        this.logger.verbose({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "verbose" });
     }
 }
