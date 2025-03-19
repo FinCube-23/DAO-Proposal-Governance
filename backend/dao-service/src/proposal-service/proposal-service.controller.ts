@@ -179,7 +179,7 @@ export class ProposalServiceController {
   async testDecorator(
     @Req() req,
     @Body() packet: ValidateAuthorizationDto,
-  ): Promise<boolean> {
+  ): Promise<any> {
     return await this.proposalService.test(req, packet);
   }
 }

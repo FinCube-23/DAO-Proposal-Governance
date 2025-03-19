@@ -233,7 +233,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -258,7 +258,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -416,15 +416,13 @@ export class ProposalServiceService {
     }
   }
 
-  async test(req: any, packet: ValidateAuthorizationDto): Promise<boolean> {
-    console.log('Auth Message Call Test');
+  async test(req: any, packet: ValidateAuthorizationDto): Promise<any> {
     const res = await validateAuth(
       req,
       this.umsRabbitClient as any,
       packet.options,
     );
 
-    console.log('res', res);
-    return true;
+    return res;
   }
 }

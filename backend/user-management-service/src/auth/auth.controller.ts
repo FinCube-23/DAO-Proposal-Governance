@@ -21,7 +21,7 @@ import { ValidateAuthorizationDto } from './dto/validate-authorization.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -35,8 +35,7 @@ export class AuthController {
     @Payload() data_packet: ValidateAuthorizationDto,
     @Ctx() context: RmqContext,
   ) {
-    console.log(JSON.stringify(data_packet));
-    return true;
+    return this.authService.handleValidateAuthorization(data_packet, context);
   }
 
   @HttpCode(HttpStatus.OK)
