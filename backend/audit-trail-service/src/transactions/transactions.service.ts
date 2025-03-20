@@ -8,6 +8,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
 import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
+import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 
 @Injectable()
 export class TransactionsService {
@@ -80,6 +81,44 @@ export class TransactionsService {
       page,
       limit,
       totalPages,
+    };
+  }
+
+  async findById(id: number): Promise<TransactionDetailResponseDto> {
+    let transaction: TransactionEntity;
+    transaction = await this.transactionRepository.findOne({
+      where: { id: id },
+    });
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+    return {
+      id: transaction.id,
+      trx_hash: transaction.trx_hash,
+      trx_status: transaction.trx_status,
+      source: transaction.confirmation_source,
+      metaData: transaction.trx_metadata,
+      created_at: transaction.created_at,
+      updated_at: transaction.updated_at,
+    };
+  }
+
+  async findByHash(hash: string): Promise<TransactionDetailResponseDto> {
+    let transaction: TransactionEntity;
+    transaction = await this.transactionRepository.findOne({
+      where: { trx_hash: hash },
+    });
+    if (!transaction) {
+      throw new NotFoundException('Transaction not found');
+    }
+    return {
+      id: transaction.id,
+      trx_hash: transaction.trx_hash,
+      trx_status: transaction.trx_status,
+      source: transaction.confirmation_source,
+      metaData: transaction.trx_metadata,
+      created_at: transaction.created_at,
+      updated_at: transaction.updated_at,
     };
   }
 
