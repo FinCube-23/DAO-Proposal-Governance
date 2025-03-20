@@ -29,6 +29,7 @@ import { injected } from "@wagmi/core";
 import AdminLayout from "@layouts/AdminLayout";
 import AdminDashboard from "@pages/admin/AdminDashboard";
 import MFSDetails from "@pages/admin/MFSDetails";
+import TrxDetails from "@pages/admin/TrxDetails";
 
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
@@ -108,6 +109,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                       path="dashboard/mfs-details/:id"
                       element={<MFSDetails />}
                     />
+                    <Route
+                      path="dashboard/trx-details/:id"
+                      element={<TrxDetails />}
+                    ></Route>
                   </Route>
                 </Routes>
               </BrowserRouter>

@@ -100,6 +100,22 @@ export type MFSBusiness = {
   membership_onchain_status: string;
 };
 
+export type Transaction = {
+  id: number;
+  trx_hash: string;
+  trx_status: boolean;
+  confirmation_source: string;
+  updated_at: string;
+};
+
+export type GetTrxResponse = {
+  data: Transaction[];
+  total: number;
+  page: string;
+  limit: string;
+  totalPages: number;
+};
+
 export type GetAllMFSBusinessResponse = {
   data: MFSBusiness[];
   total: number;

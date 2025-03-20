@@ -18,6 +18,6 @@ const baseQuery = fetchBaseQuery({
 export const api = createApi({
   reducerPath: "splitApi",
   baseQuery: baseQuery,
-  tagTypes: ["mfs", "auth", "dao", "proposal", "proxy"],
+  tagTypes: ["mfs", "auth", "dao", "proposal", "proxy", "audit"],
   endpoints: () => ({}),
 });
