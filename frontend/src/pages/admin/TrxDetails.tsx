@@ -102,7 +102,9 @@ const TrxDetails = () => {
 
             <Card className="col-span-full">
               <CardHeader>
-                <CardTitle className="text-lg">Transaction Details</CardTitle>
+                <CardTitle className="text-lg">
+                  Transaction Details (Metadata)
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <Table>
