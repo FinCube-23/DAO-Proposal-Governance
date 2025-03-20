@@ -94,7 +94,7 @@ const TrxDetails = () => {
                 <CardTitle className="text-lg">Sources</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge variant="outline" className="capitalize">
+                <Badge variant="secondary" className="capitalize">
                   {trx.source}
                 </Badge>
               </CardContent>
@@ -107,6 +107,20 @@ const TrxDetails = () => {
               <CardContent>
                 <Table>
                   <TableBody>
+                    <TableRow>
+                      <TableCell>Proposal ID:</TableCell>
+                      <TableCell>{parsedMetadata.data.proposalId}</TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Proposal Type:</TableCell>
+                      <TableCell>
+                        {!parsedMetadata.data.proposalType ? (
+                          <Badge>Membership</Badge>
+                        ) : (
+                          <Badge>General</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
                     <TableRow>
                       <TableCell className="font-medium">Hash</TableCell>
                       <TableCell className="font-mono break-all">
@@ -121,22 +135,6 @@ const TrxDetails = () => {
                         </a>
                       </TableCell>
                     </TableRow>
-                    {Object.entries(parsedMetadata).map(([key, value]) => (
-                      <TableRow key={key}>
-                        <TableCell className="font-medium capitalize">
-                          {key}
-                        </TableCell>
-                        <TableCell className="break-all">
-                          {key === "blockTimestamp"
-                            ? formatDate(
-                                new Date(Number(value) * 1000).toISOString()
-                              )
-                            : typeof value === "object"
-                            ? JSON.stringify(value)
-                            : String(value)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
                   </TableBody>
                 </Table>
               </CardContent>

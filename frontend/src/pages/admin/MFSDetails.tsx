@@ -27,8 +27,17 @@ const MFSDetails = () => {
   if (error) return <div>Error loading MFS details</div>;
   if (!mfs) return <div>MFS not found</div>;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
   };
 
   return (
@@ -88,7 +97,15 @@ const MFSDetails = () => {
                   </p>
                   <p>
                     <span className="font-medium">Transaction Hash:</span>{" "}
-                    {mfs.trx_hash || "N/A"}
+                    <a
+                      className="hover:underline text-blue-300"
+                      target="_blank"
+                      href={`${import.meta.env.VITE_TRX_EXPLORER}${
+                        mfs.trx_hash
+                      }`}
+                    >
+                      {mfs.trx_hash}
+                    </a>
                   </p>
                 </div>
               </div>
@@ -100,7 +117,7 @@ const MFSDetails = () => {
                 <div className="mt-2 space-y-2">
                   <p>
                     <span className="font-medium">Membership Status:</span>{" "}
-                    <Badge variant="outline">
+                    <Badge variant="secondary">
                       {mfs.membership_onchain_status}
                     </Badge>
                   </p>
@@ -128,7 +145,7 @@ const MFSDetails = () => {
               <Separator />
               <Card className="p-5">
                 <div>
-                  <Label>Associated User</Label>
+                  <Label className="font-bold">Associated User</Label>
                   <div className="mt-2 space-y-2">
                     <p>
                       <span className="font-medium">User ID:</span>{" "}
