@@ -1,167 +1,162 @@
-import { useLazyGetMFSQuery } from "@redux/services/mfs";
+import { useLazyGetTransactionQuery } from "@redux/services/auditTrail";
 import { useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { useNavigate, useParams } from "react-router";
+import { useParams } from "react-router";
+import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
+import { Table, TableBody, TableCell, TableRow } from "@components/ui/table";
+import { Badge } from "@components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 
 const TrxDetails = () => {
   const { id } = useParams();
-  const [getMFS, { data: mfs, isFetching, error }] = useLazyGetMFSQuery();
-  const navigate = useNavigate();
+  const [getTransaction, { data: trx, isFetching, error }] =
+    useLazyGetTransactionQuery();
 
   useEffect(() => {
-    const fetchMFS = async () => {
+    const getTrx = async () => {
       try {
-        await getMFS(Number(id));
+        await getTransaction(Number(id));
       } catch (e) {
         console.error(e);
       }
     };
-    fetchMFS();
-  }, [id, getMFS]);
+    getTrx();
+  }, [id, getTransaction]);
 
-  if (isFetching) return <div>Loading...</div>;
-  if (error) return <div>Error loading MFS details</div>;
-  if (!mfs) return <div>MFS not found</div>;
+  if (isFetching) return <div className="text-center p-8">Loading...</div>;
+  if (error)
+    return (
+      <div className="text-red-500 text-center p-8">
+        Error loading transaction details
+      </div>
+    );
+  if (!trx) return <div className="text-center p-8">Transaction not found</div>;
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+  // Parse metadata
+  const parsedMetadata =
+    typeof trx.metaData === "string" ? JSON.parse(trx.metaData) : trx.metaData;
+
+  const newTrx = { ...trx, metaData: parsedMetadata };
+
+  const formatDate = (timestamp: string) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <Button variant="outline" onClick={() => navigate(-1)} className="mb-6">
-        Back
-      </Button>
+    <div className="p-6 max-w-6xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Transaction Details</h1>
+        <p className="text-muted-foreground my-5 text-xl">ID: {trx.id}</p>
+      </div>
 
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold">{mfs.name}</h1>
-              <p className="text-gray-500">
-                {mfs.type} • {mfs.location}
-              </p>
-            </div>
-            <Badge variant={mfs.is_approved ? "success" : "warning"}>
-              {mfs.is_approved ? "Approved" : "Pending"}
-            </Badge>
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="raw">Raw Data</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Transaction Status</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge
+                  variant={trx.trx_status ? "success" : "warning"}
+                  className="text-sm"
+                >
+                  {trx.trx_status ? "Confirmed" : "Pending"}
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Activity</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <p>Created At: {formatDate(trx.created_at)}</p>
+                <p>Updated At: {formatDate(trx.updated_at)}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg">Sources</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Badge variant="outline" className="capitalize">
+                  {trx.source}
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="col-span-full">
+              <CardHeader>
+                <CardTitle className="text-lg">Transaction Details</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="font-medium">Hash</TableCell>
+                      <TableCell className="font-mono break-all">
+                        <a
+                          className="hover:underline text-blue-300"
+                          href={`${import.meta.env.VITE_TRX_EXPLORER}${
+                            trx.trx_hash
+                          }`}
+                          target="_"
+                        >
+                          {trx.trx_hash}
+                        </a>
+                      </TableCell>
+                    </TableRow>
+                    {Object.entries(parsedMetadata).map(([key, value]) => (
+                      <TableRow key={key}>
+                        <TableCell className="font-medium capitalize">
+                          {key}
+                        </TableCell>
+                        <TableCell className="break-all">
+                          {key === "blockTimestamp"
+                            ? formatDate(
+                                new Date(Number(value) * 1000).toISOString()
+                              )
+                            : typeof value === "object"
+                            ? JSON.stringify(value)
+                            : String(value)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
+        </TabsContent>
 
-          <Separator />
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label className="font-bold">General Information</Label>
-                <div className="mt-2 space-y-2">
-                  <p>
-                    <span className="font-medium">ID:</span> {mfs.id}
-                  </p>
-                  <p>
-                    <span className="font-medium">Email:</span> {mfs.email}
-                  </p>
-                  <Card className="px-1 py-5">
-                    <p>
-                      <span className="font-medium">Context:</span>{" "}
-                      {mfs.context}
-                    </p>
-                  </Card>
-                  <p>
-                    <span className="font-medium">Native Currency:</span>{" "}
-                    {mfs.native_currency}
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <Label className="font-bold">Wallet Details</Label>
-                <div className="mt-2 space-y-2">
-                  <p>
-                    <span className="font-medium">Wallet Address:</span>{" "}
-                    {mfs.wallet_address}
-                  </p>
-                  <p>
-                    <span className="font-medium">Transaction Hash:</span>{" "}
-                    {mfs.trx_hash || "N/A"}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <Label className="font-bold">On-chain Status</Label>
-                <div className="mt-2 space-y-2">
-                  <p>
-                    <span className="font-medium">Membership Status:</span>{" "}
-                    <Badge variant="outline">
-                      {mfs.membership_onchain_status}
-                    </Badge>
-                  </p>
-                  <p>
-                    <span className="font-medium">Proposal ID:</span>{" "}
-                    {mfs.proposal_onchain_id || "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <div className="mt-2 space-y-2">
-                  <p>
-                    <span className="font-medium">Created At:</span>{" "}
-                    {formatDate(mfs.created_at)}
-                  </p>
-                  <p>
-                    <span className="font-medium">Updated At:</span>{" "}
-                    {formatDate(mfs.updated_at)}
-                  </p>
-                </div>
-              </div>
-              <Separator />
-              <Card className="p-5">
-                <div>
-                  <Label>Associated User</Label>
-                  <div className="mt-2 space-y-2">
-                    <p>
-                      <span className="font-medium">User ID:</span>{" "}
-                      {mfs.user.id}
-                    </p>
-                    <p>
-                      <span className="font-medium">User Name:</span>{" "}
-                      {mfs.user.name}
-                    </p>
-                    <p>
-                      <span className="font-medium">User Email:</span>{" "}
-                      {mfs.user.email}
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </div>
-          </div>
-
-          {mfs.certificate && (
-            <div className="mt-4">
-              <a
-                href={mfs.certificate}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:underline"
-              >
-                View Certificate
-              </a>
-            </div>
-          )}
-        </div>
-      </Card>
+        <TabsContent value="raw">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Raw Transaction Data</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+                {JSON.stringify(newTrx, null, 2)}
+              </pre>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

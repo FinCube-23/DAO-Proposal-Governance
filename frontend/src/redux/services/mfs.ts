@@ -47,7 +47,7 @@ export const mfsApis = api.injectEndpoints({
       query: ({ page, limit, status }) => {
         let url = `${MFS_ENDPOINT.BASE}?page=${page}&limit=${limit}`;
 
-        if (status) {
+        if (status && status !== "all") {
           url += `&status=${status}`;
         }
 

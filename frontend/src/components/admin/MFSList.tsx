@@ -30,9 +30,9 @@ const MFSList = () => {
   const [getAllMFS, { data, error, isLoading }] = useLazyGetAllMFSQuery();
   const [mfsList, setMfsList] = useState<MFSBusiness[]>([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
-  const [status, setStatus] = useState<string | undefined>();
+  const [status, setStatus] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -85,6 +85,7 @@ const MFSList = () => {
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="register">Registered</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>

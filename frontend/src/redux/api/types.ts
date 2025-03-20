@@ -116,6 +116,16 @@ export type GetTrxResponse = {
   totalPages: number;
 };
 
+export type GetOneTrxResponse = {
+  id: number;
+  trx_hash: string;
+  trx_status: boolean;
+  source: string;
+  metaData: string;
+  created_at: string;
+  updated_at: string;
+};
+
 export type GetAllMFSBusinessResponse = {
   data: MFSBusiness[];
   total: number;

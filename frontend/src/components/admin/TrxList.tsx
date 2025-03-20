@@ -32,9 +32,9 @@ const TrxList = () => {
     useLazyGetTransactionsQuery();
   const [trxList, setTrxList] = useState<Transaction[]>([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
-  const [status, setStatus] = useState<string | undefined>();
+  const [status, setStatus] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -82,11 +82,15 @@ const TrxList = () => {
     <>
       <div className="flex justify-end">
         <div className="w-[200px]">
-          <Select value={status} onValueChange={(value) => setStatus(value)}>
+          <Select
+            value={`${status}`}
+            onValueChange={(value) => setStatus(value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="0">Pending</SelectItem>
               <SelectItem value="1">Confirmed</SelectItem>
             </SelectContent>
