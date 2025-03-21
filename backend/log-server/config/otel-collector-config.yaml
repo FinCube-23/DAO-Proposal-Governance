@@ -52,7 +52,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [otlphttp, debug, otlphttp]
+      exporters: [otlphttp, debug]
   extensions: [health_check]
   telemetry:
     metrics:

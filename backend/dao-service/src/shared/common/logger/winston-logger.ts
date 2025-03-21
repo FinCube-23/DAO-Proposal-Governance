@@ -32,7 +32,7 @@ apiLogs.logs.setGlobalLoggerProvider(loggerProvider);
 export class WinstonLogger implements LoggerService {
     [x: string]: any;
     private logger: winston.Logger;
-    // private context = 'Application'; // Default context
+    private defaultContext = 'Application';  // Default context
     // Define sensitive fields to mask
     private MASK_CONFIG: Partial<JsonMask2Configs> = {
         emailFields: ['email'],
@@ -52,41 +52,45 @@ export class WinstonLogger implements LoggerService {
         return activeSpan ? activeSpan.spanContext().traceId : 'N/A';
     }
 
+    private getSpanId(): string {
+        const activeSpan = trace.getSpan(context.active());
+        return activeSpan ? activeSpan.spanContext().spanId : 'N/A';
+    }
+
     constructor() {
         this.logger = winston.createLogger({
+            // Use a JSON format for better structured logging and correlation
             format: winston.format.combine(
                 winston.format.timestamp(),
-                winston.format.printf(({ level, message, timestamp, context }) => {
-                    const maskedMessage = this.maskSensitiveData(message);
-                    const traceId = this.getTraceId();
-                    return `[${timestamp}] [${context || 'App'}] [traceId: ${traceId}] ${level}: ${maskedMessage}`;
-                })
+                winston.format.json()
             ),
             transports: [
                 new winston.transports.Console({
                     format: winston.format.combine(
                         winston.format.colorize(),
-                        winston.format.printf(({ level, message, timestamp, context }) => {
+                        winston.format.printf(({ level, message, timestamp, context, trace_id, span_id }) => {
                             const maskedMessage = this.maskSensitiveData(message);
-                            const traceId = this.getTraceId();
-                            return `[${timestamp}] [${context || 'App'}] [traceId: ${traceId}] ${level}: ${maskedMessage}`;
+                            return `[${timestamp}] [${context || 'App'}] [trace_id=${trace_id}] [span_id=${span_id}] ${level}: ${maskedMessage}`;
                         })
                     )
                 }),
                 new winston.transports.File({ filename: 'logs/app.log' }),
                 new LokiTransport({
                     host: process.env.LOG_SERVER,
-                    labels: { service: "dao-service" },
-                    json: true
+                    labels: { job: "dao-service" },
+                    format: winston.format.json(),
+                    json: true,
+                    // The following ensures traceID is correctly derived
+                    // for Grafana's trace-to-logs feature
+                    batching: false,
                 }),
                 new OpenTelemetryTransportV3()
             ]
         });
-
     }
 
     setContext(context: string) {
-        this.context = context; // Set module name dynamically
+        this.defaultContext = context;
     }
 
     private generateMaskConfig(data: Record<string, any>): JsonMask2Configs {
@@ -129,37 +133,38 @@ export class WinstonLogger implements LoggerService {
         return message;
     }
 
-    log(message: any) {
+    private createLogEntry(message: any, level: string, trace?: string, contextValue?: string) {
         const maskedMessage = this.maskSensitiveData(message);
+        const traceId = this.getTraceId();
+        const spanId = this.getSpanId();
 
-        // Create the log entry with flattened numeric fields
-        const logEntry = {
-            message: this.stringifyMessage(maskedMessage), // Stringify the message (if needed)
-            context: this.context,                        // Add context
-            level: 'info',                                // Add log level
+        return {
+            message: this.stringifyMessage(maskedMessage),
+            context: contextValue || this.defaultContext,
+            level: level,
+            trace_id: traceId,
+            span_id: spanId,
+            ...(trace && { error_stack: trace })
         };
-
-        // Log the flattened object
-        this.logger.info(logEntry);
     }
 
-    error(message: any, trace?: string) {
-        const maskedMessage = this.maskSensitiveData(message);
-        this.logger.error({ message: this.stringifyMessage(maskedMessage), trace, context: this.context, level: "error" });
+    log(message: any, contextValue?: string) {
+        this.logger.info(this.createLogEntry(message, 'info', undefined, contextValue));
     }
 
-    warn(message: any) {
-        const maskedMessage = this.maskSensitiveData(message);
-        this.logger.warn({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "warn" });
+    error(message: any, trace?: string, contextValue?: string) {
+        this.logger.error(this.createLogEntry(message, 'error', trace, contextValue));
     }
 
-    debug(message: any) {
-        const maskedMessage = this.maskSensitiveData(message);
-        this.logger.debug({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "debug" });
+    warn(message: any, contextValue?: string) {
+        this.logger.warn(this.createLogEntry(message, 'warn', undefined, contextValue));
     }
 
-    verbose(message: any) {
-        const maskedMessage = this.maskSensitiveData(message);
-        this.logger.verbose({ message: this.stringifyMessage(maskedMessage), context: this.context, level: "verbose" });
+    debug(message: any, contextValue?: string) {
+        this.logger.debug(this.createLogEntry(message, 'debug', undefined, contextValue));
+    }
+
+    verbose(message: any, contextValue?: string) {
+        this.logger.verbose(this.createLogEntry(message, 'verbose', undefined, contextValue));
     }
 }
