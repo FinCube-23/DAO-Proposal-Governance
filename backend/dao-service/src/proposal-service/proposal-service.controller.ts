@@ -10,10 +10,8 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { TracingInterceptor } from 'src/shared/common/otel/tracing-interceptor';
 
 @Controller('proposal-service')
-@UseInterceptors(TracingInterceptor)
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) { }
 
