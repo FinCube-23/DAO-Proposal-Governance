@@ -21,5 +21,5 @@
       "@custom/validate-auth": ["node_modules/@custom/validate-auth"]
     }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts", "src/tracing.ts"]
 }

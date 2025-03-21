@@ -96,7 +96,7 @@ export class WinstonLogger implements LoggerService {
                 typeof value === 'object' && value !== null ? JSON.stringify(value) : value
             );
         }
-        return message.toString();
+        return message;
     }
 
     log(message: any) {

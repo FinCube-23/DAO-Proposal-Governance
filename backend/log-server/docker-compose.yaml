@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   loki:
     image: grafana/loki:latest
@@ -45,6 +43,30 @@ services:
           editable: false
         EOF
         /run.sh
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    networks:
+      - fincube23_network
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config", "/etc/otel-collector-config.yaml"]
+    ports:
+      - "4320:4317"  # OTLP gRPC endpoint
+      - "4321:4318"  # OTLP HTTP endpoint
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/var/tempo
+    ports:
+      - "3201:3200"   # tempo
+    networks:
+      - fincube23_network
 
 networks:
   fincube23_network:

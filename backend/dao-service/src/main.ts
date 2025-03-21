@@ -3,8 +3,11 @@ import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservices';
+import { otelSDK } from './tracing';
+
 
 async function bootstrap() {
+  await otelSDK.start();
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
   });

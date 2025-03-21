@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, DefaultValuePipe, ParseIntPipe, Query, } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Req, DefaultValuePipe, ParseIntPipe, Query, UseInterceptors } from '@nestjs/common';
 import { ProposalServiceService } from './proposal-service.service';
 import { ApiBody, ApiOkResponse, ApiOperation, ApiParam, ApiProperty, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
@@ -10,8 +10,10 @@ import {
   RmqContext,
 } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
+import { TracingInterceptor } from 'src/shared/common/otel/tracing-interceptor';
 
 @Controller('proposal-service')
+@UseInterceptors(TracingInterceptor)
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) { }
 
