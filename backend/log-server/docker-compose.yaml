@@ -22,27 +22,10 @@ services:
       - "3200:3000"  # Expose Grafana's UI port
     depends_on:
       - loki  # Ensure Loki is up before starting Grafana
+      - tempo
     volumes:
       - grafana-data:/var/lib/grafana  # Persistent storage for Grafana dashboards and settings
-    entrypoint:
-      - sh
-      - -euc
-      - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-        - name: Loki
-          type: loki
-          access: proxy
-          orgId: 1
-          url: http://loki:3100
-          basicAuth: false
-          isDefault: true
-          version: 1
-          editable: false
-        EOF
-        /run.sh
+      - ./config/grafana.yaml:/etc/grafana/provisioning/datasources/ds.yaml 
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:latest

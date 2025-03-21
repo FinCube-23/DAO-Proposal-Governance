@@ -12,9 +12,10 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { AmqplibInstrumentation } from "@opentelemetry/instrumentation-amqplib";
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
+require('dotenv').config();
 
 const collectorOptions = {
-  url: 'http://otel-collector:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
+  url: process.env.OTEL_TRACE_COLLECTOR, // url is optional and can be omitted - default is http://localhost:4318/v1/traces
   headers: {}, // an optional object containing custom headers to be sent with each request
   concurrencyLimit: 10, // an optional limit on the number of concurrent requests
 };

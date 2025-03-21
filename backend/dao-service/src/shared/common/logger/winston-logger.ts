@@ -16,7 +16,7 @@ import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 
 //Define the collector endpoint for OTLP
 const collectorOptions = {
-    url: 'http://otel-collector:4318/v1/logs',
+    url: process.env.OTEL_LOG_COLLECTOR,
     headers: {}, // an optional object containing custom headers to be sent with each request
     concurrencyLimit: 1, // an optional limit on pending requests
 };
