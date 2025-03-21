@@ -226,7 +226,7 @@ export default function SidebarUser({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Approval Status
+                              Membership Status
                             </p>
                             <span
                               className={`px-2 py-1 rounded ${
@@ -242,7 +242,7 @@ export default function SidebarUser({
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Membership Status
+                              Proposal Status
                             </p>
                             <p className="text-cyan-400 capitalize">{status}</p>
                           </div>

@@ -39,7 +39,7 @@ export class TransactionsService {
   async findAll(
     query: ListTransactionsQueryDto,
   ): Promise<TransactionListResponseDto> {
-    const { page = 1, limit = 10, status, source } = query;
+    const { page = 1, limit = 10, status, source, hash } = query;
     const skip = (page - 1) * limit;
 
     const queryBuilder =
@@ -54,6 +54,10 @@ export class TransactionsService {
       queryBuilder.andWhere('transaction.confirmation_source = :source', {
         source,
       });
+    }
+
+    if (hash) {
+      queryBuilder.andWhere('transaction.trx_hash = :hash', { hash });
     }
 
     // Get total count for pagination

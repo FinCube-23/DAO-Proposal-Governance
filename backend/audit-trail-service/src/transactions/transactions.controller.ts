@@ -1,5 +1,5 @@
 // src/transactions/transactions.controller.ts
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -9,10 +9,7 @@ import {
 } from '@nestjs/swagger';
 import { TransactionsService } from './transactions.service';
 import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
-import {
-  TransactionListItemDto,
-  TransactionListResponseDto,
-} from './dto/transaction-list-response.dto';
+import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 
 @Controller('transactions')

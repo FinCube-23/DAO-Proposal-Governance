@@ -1,6 +1,9 @@
 // src/transactions/dto/list-transactions.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { TransactionConfirmationSource, TransactionStatus } from '../entities/transaction.entity';
+import {
+  TransactionConfirmationSource,
+  TransactionStatus,
+} from '../entities/transaction.entity';
 
 export class ListTransactionsQueryDto {
   @ApiProperty({ required: false, default: 1 })
@@ -14,4 +17,7 @@ export class ListTransactionsQueryDto {
 
   @ApiProperty({ required: false, enum: TransactionConfirmationSource })
   source?: TransactionConfirmationSource;
+
+  @ApiProperty({ required: false })
+  hash?: string;
 }

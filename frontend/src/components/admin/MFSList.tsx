@@ -146,12 +146,14 @@ const MFSList = () => {
               (pageNum) => (
                 <PaginationItem key={pageNum}>
                   <PaginationLink
-                    className="cursor-pointer"
+                    className={`cursor-pointer ${
+                      page === pageNum ? "border-2 border-green-400" : ""
+                    }`}
                     onClick={(e) => {
                       e.preventDefault();
                       setPage(pageNum);
                     }}
-                    isActive={Number(setPage) === pageNum}
+                    isActive={page === pageNum}
                   >
                     {pageNum}
                   </PaginationLink>

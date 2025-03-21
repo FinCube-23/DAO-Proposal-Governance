@@ -407,9 +407,10 @@ export default function DaoDashboard() {
           {toggle === 2 && (
             <Select value={filterStatus} onValueChange={handleFilterChange}>
               <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Filters" />
+                <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="cancel">Canceled</SelectItem>
                 <SelectItem value="executed">Executed</SelectItem>
@@ -518,7 +519,11 @@ export default function DaoDashboard() {
                     (pageNum) => (
                       <PaginationItem key={pageNum}>
                         <PaginationLink
-                          className="cursor-pointer"
+                          className={`cursor-pointer ${
+                            offchainPage === pageNum
+                              ? "border-2 border-green-400"
+                              : ""
+                          }`}
                           onClick={(e) => {
                             e.preventDefault();
                             setPageLoading(true);

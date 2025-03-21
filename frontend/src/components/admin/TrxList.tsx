@@ -1,4 +1,5 @@
 import { Badge } from "@components/ui/badge";
+import { Input } from "@components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -32,10 +33,12 @@ const TrxList = () => {
     useLazyGetTransactionsQuery();
   const [trxList, setTrxList] = useState<Transaction[]>([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(15);
+  const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string>("");
+  const [source, setSource] = useState<string>("");
   const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
     const getTrxs = async () => {
@@ -44,16 +47,24 @@ const TrxList = () => {
           page: page,
           limit: limit,
           status: status,
+          source: source,
+          hash: searchTerm,
         });
 
         setTrxList(response.data.data);
+
+        console.log(response.data.data);
       } catch (e) {
         console.error(e);
       }
     };
 
-    getTrxs();
-  }, [page, status, getTransactions, limit]);
+    const debounceTimer = setTimeout(() => {
+      getTrxs();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [page, status, getTransactions, limit, source, searchTerm]);
 
   useEffect(() => {
     if (data) {
@@ -80,21 +91,51 @@ const TrxList = () => {
 
   return (
     <>
-      <div className="flex justify-end">
-        <div className="w-[200px]">
-          <Select
-            value={`${status}`}
-            onValueChange={(value) => setStatus(value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              <SelectItem value="0">Pending</SelectItem>
-              <SelectItem value="1">Confirmed</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="flex justify-between">
+        <div className="w-[200px] flex flex-col">
+          <div className="flex w-[500px]">
+            <span className="text-xs mb-1">Search by Transaction Hash</span>
+            <Input
+              className="w"
+              placeholder="Filter by transaction hash"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="flex gap-5">
+          <div className="w-[200px] flex">
+            <span className="text-xs">Filter by Source:</span>
+            <Select value={source} onValueChange={(value) => setSource(value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by source" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="alchemy">Alchemy</SelectItem>
+                <SelectItem value="infura">Infura</SelectItem>
+                <SelectItem value="graph">The Graph</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="w-[200px] flex">
+            <span className="text-xs">Filter by Status:</span>
+
+            <Select
+              value={`${status}`}
+              onValueChange={(value) => setStatus(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="0">Pending</SelectItem>
+                <SelectItem value="1">Confirmed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
       <Table>
@@ -123,8 +164,18 @@ const TrxList = () => {
                   <Badge variant="warning">Pending</Badge>
                 )}
               </TableCell>
-              <TableCell className="capitalize">
-                {trx.confirmation_source}
+              <TableCell>
+                {trx.confirmation_source === "alchemy" ? (
+                  <Badge className="bg-blue-400 text-white">Alchemy</Badge>
+                ) : trx.confirmation_source === "graph" ? (
+                  <Badge className="bg-purple-400 text-white">Purple</Badge>
+                ) : trx.confirmation_source === "infura" ? (
+                  <Badge variant="secondary">Infura</Badge>
+                ) : (
+                  trx.confirmation_source === "manual" && (
+                    <Badge variant="warning">Manual</Badge>
+                  )
+                )}
               </TableCell>
               <TableCell>{formatDate(trx.updated_at)}</TableCell>
             </TableRow>
@@ -151,12 +202,14 @@ const TrxList = () => {
               (pageNum) => (
                 <PaginationItem key={pageNum}>
                   <PaginationLink
-                    className="cursor-pointer"
+                    className={`cursor-pointer ${
+                      page === pageNum ? "border-2 border-green-400" : ""
+                    }`}
                     onClick={(e) => {
                       e.preventDefault();
                       setPage(pageNum);
                     }}
-                    isActive={Number(setPage) === pageNum}
+                    isActive={page === pageNum}
                   >
                     {pageNum}
                   </PaginationLink>

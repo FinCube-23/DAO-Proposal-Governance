@@ -152,7 +152,7 @@ export default function AdminDashboard() {
           >
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="mfs-list">MFS List</TabsTrigger>
+              <TabsTrigger value="mfs-list">Organization List</TabsTrigger>
               <TabsTrigger value="trx-list">Transaction History</TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
