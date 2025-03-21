@@ -26,11 +26,20 @@ export class TracingInterceptor implements NestInterceptor {
         const spanContext = activeSpan.spanContext();
         const beforeMessage = 'TracingInterceptor: Request handling initiated for span: ' + JSON.stringify(spanContext);
 
+        const controllerName = context.getClass().name;
+        const handlerName = context.getHandler().name;
+
         if (activeSpan) {
             activeSpan.addEvent(beforeMessage);
         }
         this.logger.log(beforeMessage);
-        const span = this.tracer.startSpan("Trace Started");
+        const span = this.tracer.startSpan(JSON.stringify({
+            message: "Trace Started",
+            traceId: spanContext.traceId,
+            spanId: spanContext.spanId,
+            controller: controllerName,
+            handler: handlerName
+        }));
 
         // Continue with the request handling and log after processing is complete
         return next.handle().pipe(

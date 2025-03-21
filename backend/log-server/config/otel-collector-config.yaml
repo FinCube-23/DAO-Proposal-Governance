@@ -9,34 +9,10 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
-
-  tcplog:
-    listen_address: 0.0.0.0:54526
-    operators:
-      - type: regex_parser
-        regex: (?P<timestamp_field>\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z)
-      - type: add
-        field: body
-        value: EXPR(replace(body, attributes.timestamp_field, 'Oct 11 22:14:15'))
-      - type: syslog_parser
-        protocol: rfc3164
-        location: UTC
-      - type: time_parser
-        parse_from: attributes.timestamp_field
-        layout: "%Y-%m-%dT%H:%M:%SZ"
-        layout_type: strptime
-      - type: move
-        if: "attributes.message != nil"
-        from: attributes.message
-        to: body
-      - type: remove
-        field: attributes.timestamp_field
-      - type: remove
-        field: attributes.proc_id
-      - type: remove
-        field: attributes.priority
-      - type: remove
-        field: attributes.facility
+        cors:
+          allowed_origins:
+            - http://*
+            - https://*
 
 processors:
   memory_limiter:
@@ -74,9 +50,9 @@ service:
       processors: [memory_limiter, batch]
       exporters: [otlp]
     logs:
-      receivers: [tcplog]
+      receivers: [otlp]
       processors: [memory_limiter, resource, batch]
-      exporters: [otlphttp, debug]
+      exporters: [otlphttp, debug, otlphttp]
   extensions: [health_check]
   telemetry:
     metrics:

@@ -1,5 +1,4 @@
 import {
-  ConsoleSpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
 import { NodeSDK } from '@opentelemetry/sdk-node';
@@ -10,6 +9,9 @@ import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core'
 import { resourceFromAttributes } from '@opentelemetry/resources';
 import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_NAMESPACE, SEMRESATTRS_SERVICE_VERSION, SEMRESATTRS_SERVICE_INSTANCE_ID } from '@opentelemetry/semantic-conventions';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
+import { AmqplibInstrumentation } from "@opentelemetry/instrumentation-amqplib";
+import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
+import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 
 const collectorOptions = {
   url: 'http://otel-collector:4318/v1/traces', // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -18,7 +20,6 @@ const collectorOptions = {
 };
 
 
-const consoleExporter = new ConsoleSpanExporter();
 
 const traceExporter = new OTLPTraceExporter(collectorOptions);
 
@@ -30,7 +31,7 @@ export const otelSDK = new NodeSDK({
     [SEMRESATTRS_SERVICE_INSTANCE_ID]: "1",
   }),
   spanProcessor: new SimpleSpanProcessor(traceExporter),
-  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation(), new NestInstrumentation()],
+  instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation(), new NestInstrumentation(), new PgInstrumentation(), new AmqplibInstrumentation(), new WinstonInstrumentation()],
 });
 
 // gracefully shut down the SDK on process exit

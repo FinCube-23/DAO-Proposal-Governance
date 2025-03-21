@@ -2,7 +2,31 @@ import { LoggerService, Injectable } from '@nestjs/common';
 import * as winston from 'winston';
 import { maskJSON2, JsonMask2Configs, UuidMaskOptions } from 'maskdata';
 const LokiTransport = require('winston-loki');
+import api, { trace } from '@opentelemetry/api';
+
 require('dotenv').config();
+import * as apiLogs from '@opentelemetry/api-logs';
+
+import {
+    BatchLogRecordProcessor,
+    LoggerProvider
+} from '@opentelemetry/sdk-logs';
+import { OpenTelemetryTransportV3 } from '@opentelemetry/winston-transport'
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
+
+//Define the collector endpoint for OTLP
+const collectorOptions = {
+    url: 'http://otel-collector:4318/v1/logs',
+    headers: {}, // an optional object containing custom headers to be sent with each request
+    concurrencyLimit: 1, // an optional limit on pending requests
+};
+const logExporter = new OTLPLogExporter(collectorOptions);
+const loggerProvider = new LoggerProvider();
+
+//Ship winston logs to OTEL
+loggerProvider.addLogRecordProcessor(new BatchLogRecordProcessor(logExporter));
+apiLogs.logs.setGlobalLoggerProvider(loggerProvider);
+
 
 @Injectable()
 export class WinstonLogger implements LoggerService {
@@ -27,10 +51,10 @@ export class WinstonLogger implements LoggerService {
         this.logger = winston.createLogger({
             format: winston.format.combine(
                 winston.format.timestamp(),
-                winston.format.printf(({ level, message, timestamp, context }) => {
+                winston.format.printf(({ level, message, timestamp, context, traceId }) => {
                     const maskedMessage = this.maskSensitiveData(message);
                     // Ensure the message is stringified
-                    return `[${timestamp}] [${context || 'App'}] ${level}: ${maskedMessage}}`;
+                    return `[${timestamp}] [${context || 'App'}] ${level}: ${maskedMessage}`;
                 })
             ),
             transports: [
@@ -49,7 +73,8 @@ export class WinstonLogger implements LoggerService {
                     host: process.env.LOG_SERVER,
                     labels: { service: "dao-service" },
                     json: true
-                })
+                }),
+                new OpenTelemetryTransportV3()
             ]
         });
 
