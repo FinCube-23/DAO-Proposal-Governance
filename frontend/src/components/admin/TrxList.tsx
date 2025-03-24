@@ -1,4 +1,5 @@
 import { Badge } from "@components/ui/badge";
+import { Button } from "@components/ui/button";
 import { Input } from "@components/ui/input";
 import {
   Pagination,
@@ -48,7 +49,6 @@ const TrxList = () => {
           limit: limit,
           status: status,
           source: source,
-          hash: searchTerm,
         });
 
         setTrxList(response.data.data);
@@ -93,14 +93,27 @@ const TrxList = () => {
     <>
       <div className="flex justify-between">
         <div className="w-[200px] flex flex-col">
-          <div className="flex w-[500px]">
-            <span className="text-xs mb-1">Search by Transaction Hash</span>
+          <div className="flex w-[500px] gap-2">
+            <span className="text-xs">Search by Hash:</span>
             <Input
-              className="w"
               placeholder="Filter by transaction hash"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
+            {searchTerm !== "" ? (
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  navigate(`/admin/dashboard/trx-details/${searchTerm}`)
+                }
+              >
+                Search
+              </Button>
+            ) : (
+              <Button variant="secondary" disabled>
+                Search
+              </Button>
+            )}
           </div>
         </div>
         <div className="flex gap-5">
@@ -168,7 +181,7 @@ const TrxList = () => {
                 {trx.confirmation_source === "alchemy" ? (
                   <Badge className="bg-blue-400 text-white">Alchemy</Badge>
                 ) : trx.confirmation_source === "graph" ? (
-                  <Badge className="bg-purple-400 text-white">Purple</Badge>
+                  <Badge className="bg-purple-400 text-white">The Graph</Badge>
                 ) : trx.confirmation_source === "infura" ? (
                   <Badge variant="secondary">Infura</Badge>
                 ) : (

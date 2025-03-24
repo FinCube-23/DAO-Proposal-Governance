@@ -117,7 +117,7 @@ export type GetTrxResponse = {
 };
 
 export type GetOneTrxResponse = {
-  id: number;
+  id: string;
   trx_hash: string;
   trx_status: boolean;
   source: string;

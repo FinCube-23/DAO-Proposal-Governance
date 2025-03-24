@@ -26,6 +26,15 @@ import { useLazyGetAllMFSQuery } from "@redux/services/mfs";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+const locations = [
+  { label: "Australia", value: "AUS" },
+  { label: "Bangladesh", value: "BGD" },
+  { label: "Canada", value: "CAD" },
+  { label: "China", value: "CN" },
+  { label: "Netherlands", value: "NL" },
+  { label: "United States", value: "USA" },
+];
+
 const MFSList = () => {
   const [getAllMFS, { data, error, isLoading }] = useLazyGetAllMFSQuery();
   const [mfsList, setMfsList] = useState<MFSBusiness[]>([]);
@@ -33,15 +42,19 @@ const MFSList = () => {
   const [limit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string>("");
+  const [type, setType] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const getMFSs = async () => {
       try {
         const response: any = await getAllMFS({
-          page: page,
-          limit: limit,
-          status: status,
+          page,
+          limit,
+          status,
+          location,
+          type,
         });
 
         setMfsList(response.data.data);
@@ -51,7 +64,7 @@ const MFSList = () => {
     };
 
     getMFSs();
-  }, [page, status, getAllMFS, limit]);
+  }, [page, status, location, getAllMFS, limit, type]);
 
   useEffect(() => {
     if (data) {
@@ -78,8 +91,9 @@ const MFSList = () => {
 
   return (
     <>
-      <div className="flex justify-end">
-        <div className="w-[200px]">
+      <div className="flex justify-end space-x-4">
+        <div className="w-[200px] flex">
+          <span className="text-xs">Filter by Status:</span>
           <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by status" />
@@ -90,6 +104,38 @@ const MFSList = () => {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="cancelled">Canceled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-[200px] flex">
+          <span className="text-xs">Filter by Location:</span>
+          <Select
+            value={location}
+            onValueChange={(value) => setLocation(value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              {locations.map((loc, idx) => (
+                <SelectItem key={idx} value={loc.value}>
+                  {loc.value}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="w-[200px] flex">
+          <span className="text-xs">Filter by Type:</span>
+          <Select value={type} onValueChange={(value) => setType(value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Filter by Type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="DAO">DAO</SelectItem>
+              <SelectItem value="MFS">MFS</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -126,9 +172,11 @@ const MFSList = () => {
           ))}
         </TableBody>
       </Table>
+
       {mfsList.length === 0 && (
         <p className="text-center font-bold">No data found</p>
       )}
+
       {mfsList.length > 0 && (
         <Pagination className="my-5">
           <PaginationContent>

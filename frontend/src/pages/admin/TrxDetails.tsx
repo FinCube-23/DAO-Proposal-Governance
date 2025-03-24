@@ -14,7 +14,7 @@ const TrxDetails = () => {
   useEffect(() => {
     const getTrx = async () => {
       try {
-        await getTransaction(Number(id));
+        await getTransaction(id);
       } catch (e) {
         console.error(e);
       }

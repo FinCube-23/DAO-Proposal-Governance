@@ -14,7 +14,7 @@ export const auditTrailApis = api.injectEndpoints({
         hash?: string;
       }
     >({
-      query: ({ page, limit, status, source, hash }) => {
+      query: ({ page, limit, status, source }) => {
         let url = `${AUDIT_ENDPOINT.BASE}/transactions?page=${page}&limit=${limit}`;
 
         if (status && status !== "all") {
@@ -25,10 +25,6 @@ export const auditTrailApis = api.injectEndpoints({
           url += `&source=${source}`;
         }
 
-        if (hash) {
-          url += `&hash=${hash}`;
-        }
-
         return {
           url,
           method: "GET",
@@ -36,7 +32,7 @@ export const auditTrailApis = api.injectEndpoints({
       },
       providesTags: ["audit"],
     }),
-    getTransaction: build.query<GetOneTrxResponse, number>({
+    getTransaction: build.query<GetOneTrxResponse, string>({
       query: (id) => {
         return {
           url: `${AUDIT_ENDPOINT.BASE}/transactions/${id}`,

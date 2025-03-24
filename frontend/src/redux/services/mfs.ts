@@ -42,13 +42,27 @@ export const mfsApis = api.injectEndpoints({
     }),
     getAllMFS: build.query<
       GetAllMFSBusinessResponse,
-      { page: number; limit: number; status?: string }
+      {
+        page: number;
+        limit: number;
+        status?: string;
+        location?: string;
+        type?: string;
+      }
     >({
-      query: ({ page, limit, status }) => {
+      query: ({ page, limit, status, location, type }) => {
         let url = `${MFS_ENDPOINT.BASE}?page=${page}&limit=${limit}`;
 
         if (status && status !== "all") {
           url += `&status=${status}`;
+        }
+
+        if (location && location !== "all") {
+          url += `&location=${location}`;
+        }
+
+        if (type && type !== "all") {
+          url += `&type=${type}`;
         }
 
         return {

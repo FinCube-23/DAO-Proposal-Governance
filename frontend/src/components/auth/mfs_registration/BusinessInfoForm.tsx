@@ -20,6 +20,15 @@ import { setMfsBusiness } from "@redux/slices/auth";
 import { Organization } from "@redux/api/types";
 import { CircleChevronUp } from "lucide-react";
 
+const locations = [
+  { label: "Australia", value: "AUS" },
+  { label: "Bangladesh", value: "BGD" },
+  { label: "Canada", value: "CAD" },
+  { label: "China", value: "CN" },
+  { label: "Netherlands", value: "NL" },
+  { label: "United States", value: "USA" },
+];
+
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
   email: z.string().email(),
