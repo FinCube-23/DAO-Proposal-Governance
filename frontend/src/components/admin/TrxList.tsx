@@ -179,14 +179,31 @@ const TrxList = () => {
               </TableCell>
               <TableCell>
                 {trx.confirmation_source === "alchemy" ? (
-                  <Badge className="bg-blue-400 text-white">Alchemy</Badge>
+                  <Badge
+                    variant="outline"
+                    className="border-2 border-blue-400 text-white"
+                  >
+                    Alchemy
+                  </Badge>
                 ) : trx.confirmation_source === "graph" ? (
-                  <Badge className="bg-purple-400 text-white">The Graph</Badge>
+                  <Badge
+                    variant="outline"
+                    className="border-2 border-purple-400 text-white"
+                  >
+                    The Graph
+                  </Badge>
                 ) : trx.confirmation_source === "infura" ? (
-                  <Badge variant="secondary">Infura</Badge>
+                  <Badge variant="outline" className="border-2 border-gray-400">
+                    Infura
+                  </Badge>
                 ) : (
                   trx.confirmation_source === "manual" && (
-                    <Badge variant="warning">Manual</Badge>
+                    <Badge
+                      variant="outline"
+                      className="border-2 border-yellow-400"
+                    >
+                      Manual
+                    </Badge>
                   )
                 )}
               </TableCell>

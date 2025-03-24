@@ -1,15 +1,18 @@
 import { useLazyGetTransactionQuery } from "@redux/services/auditTrail";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card";
-import { Table, TableBody, TableCell, TableRow } from "@components/ui/table";
 import { Badge } from "@components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
+import { Button } from "@components/ui/button";
+import { CheckIcon, CopyIcon } from "lucide-react";
 
 const TrxDetails = () => {
   const { id } = useParams();
   const [getTransaction, { data: trx, isFetching, error }] =
     useLazyGetTransactionQuery();
+  const [copiedMetadata, setCopiedMetadata] = useState(false);
+  const [copiedRawData, setCopiedRawData] = useState(false);
 
   useEffect(() => {
     const getTrx = async () => {
@@ -50,6 +53,134 @@ const TrxDetails = () => {
     });
   };
 
+  const defaultTheme = {
+    key: "#9CDCFE",
+    string: "#CE9178",
+    number: "#B5CEA8",
+    boolean: "#569CD6",
+    null: "#569CD6",
+    undefined: "#569CD6",
+    function: "#DCDCAA",
+    symbol: "#DCDCAA",
+    date: "#B5CEA8",
+    punctuation: "#D4D4D4",
+    text: "#D4D4D4",
+  };
+
+  const JsonRenderer = ({
+    data,
+    depth = 0,
+    theme = defaultTheme,
+  }: {
+    data: any;
+    depth?: number;
+    theme?: typeof defaultTheme;
+  }) => {
+    const getValueType = (value: any) => {
+      if (value === null) return "null";
+      if (Array.isArray(value)) return "array";
+      if (typeof value === "object") return "object";
+      if (typeof value === "number") return "number";
+      if (typeof value === "boolean") return "boolean";
+      if (typeof value === "function") return "function";
+      if (typeof value === "string") {
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value))
+          return "date";
+        if (/^0x[a-fA-F0-9]+$/.test(value)) return "hex";
+      }
+      return typeof value;
+    };
+
+    const renderValue = (value: any) => {
+      const type = getValueType(value);
+
+      switch (type) {
+        case "string":
+          return (
+            <span style={{ color: theme.string }}>{JSON.stringify(value)}</span>
+          );
+        case "number":
+          return <span style={{ color: theme.number }}>{value}</span>;
+        case "boolean":
+          return (
+            <span style={{ color: theme.boolean }}>{value.toString()}</span>
+          );
+        case "null":
+          return <span style={{ color: theme.null }}>null</span>;
+        case "date":
+          return (
+            <>
+              <span style={{ color: theme.string }}>
+                {JSON.stringify(value)}
+              </span>
+              <span style={{ color: theme.text, marginLeft: "8px" }}>
+                ({new Date(value).toLocaleString()})
+              </span>
+            </>
+          );
+        case "hex":
+          return (
+            <span style={{ color: theme.string }}>
+              {JSON.stringify(value)}
+              <span style={{ color: theme.text, marginLeft: "8px" }}>
+                (hex)
+              </span>
+            </span>
+          );
+        default:
+          return (
+            <span style={{ color: theme.text }}>{JSON.stringify(value)}</span>
+          );
+      }
+    };
+
+    if (typeof data !== "object" || data === null) {
+      return renderValue(data);
+    }
+
+    if (Array.isArray(data)) {
+      return (
+        <span>
+          <span style={{ color: theme.punctuation }}>[</span>
+          <div style={{ marginLeft: `${depth * 20}px` }}>
+            {data.map((item, index) => (
+              <div key={index}>
+                <JsonRenderer data={item} depth={depth + 1} theme={theme} />
+                {index < data.length - 1 && (
+                  <span style={{ color: theme.punctuation }}>,</span>
+                )}
+              </div>
+            ))}
+          </div>
+          <span style={{ color: theme.punctuation }}>]</span>
+        </span>
+      );
+    }
+
+    return (
+      <span>
+        <span style={{ color: theme.punctuation }}>{"{"}</span>
+        <div style={{ marginLeft: `${depth * 20}px` }}>
+          {Object.entries(data).map(([key, value], index, array) => (
+            <div key={key}>
+              <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
+              <span style={{ color: theme.punctuation }}>: </span>
+              <JsonRenderer data={value} depth={depth + 1} theme={theme} />
+              {index < array.length - 1 && (
+                <span style={{ color: theme.punctuation }}>,</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <span style={{ color: theme.punctuation }}>{"}"}</span>
+      </span>
+    );
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+  };
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-6">
@@ -58,11 +189,14 @@ const TrxDetails = () => {
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="raw">Raw Data</TabsTrigger>
+        <TabsList className="mb-2 rounded-xl">
+          <TabsTrigger className="rounded-xl" value="overview">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger className="rounded-xl" value="raw">
+            Raw Data
+          </TabsTrigger>
         </TabsList>
-
         <TabsContent value="overview">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <Card>
@@ -94,7 +228,10 @@ const TrxDetails = () => {
                 <CardTitle className="text-lg">Sources</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge variant="secondary" className="capitalize">
+                <Badge
+                  variant="outline"
+                  className="capitalize border-2 border-blue-400"
+                >
                   {trx.source}
                 </Badge>
               </CardContent>
@@ -102,56 +239,70 @@ const TrxDetails = () => {
 
             <Card className="col-span-full">
               <CardHeader>
-                <CardTitle className="text-lg">
-                  Transaction Details (Metadata)
-                </CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle className="text-lg">Metadata</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary"
+                    onClick={() => {
+                      copyToClipboard(
+                        JSON.stringify(parsedMetadata.data, null, 2)
+                      );
+                      setCopiedMetadata(true);
+                      setTimeout(() => setCopiedMetadata(false), 2000);
+                    }}
+                  >
+                    {copiedMetadata ? (
+                      <>
+                        <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="h-4 w-4 mr-2" />
+                      </>
+                    )}
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell>Proposal ID:</TableCell>
-                      <TableCell>{parsedMetadata.data.proposalId}</TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell>Proposal Type:</TableCell>
-                      <TableCell>
-                        {!parsedMetadata.data.proposalType ? (
-                          <Badge>Membership</Badge>
-                        ) : (
-                          <Badge>General</Badge>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                    <TableRow>
-                      <TableCell className="font-medium">Hash</TableCell>
-                      <TableCell className="font-mono break-all">
-                        <a
-                          className="hover:underline text-blue-300"
-                          href={`${import.meta.env.VITE_TRX_EXPLORER}${
-                            trx.trx_hash
-                          }`}
-                          target="_"
-                        >
-                          {trx.trx_hash}
-                        </a>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+                <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+                  <JsonRenderer data={parsedMetadata.data} />
+                </pre>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
-
         <TabsContent value="raw">
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Raw Transaction Data</CardTitle>
+              <div className="flex justify-between items-center">
+                <CardTitle className="text-lg">Raw Transaction Data</CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-muted-foreground hover:text-primary"
+                  onClick={() => {
+                    copyToClipboard(JSON.stringify(newTrx, null, 2));
+                    setCopiedRawData(true);
+                    setTimeout(() => setCopiedRawData(false), 2000);
+                  }}
+                >
+                  {copiedRawData ? (
+                    <>
+                      <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                    </>
+                  ) : (
+                    <>
+                      <CopyIcon className="h-4 w-4 mr-2" />
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
-                {JSON.stringify(newTrx, null, 2)}
+                <JsonRenderer data={newTrx} />
               </pre>
             </CardContent>
           </Card>

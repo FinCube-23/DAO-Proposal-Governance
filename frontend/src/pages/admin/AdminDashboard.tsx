@@ -150,10 +150,16 @@ export default function AdminDashboard() {
             onValueChange={setActiveTab}
             className="space-y-4"
           >
-            <TabsList>
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="mfs-list">Organization List</TabsTrigger>
-              <TabsTrigger value="trx-list">Transaction History</TabsTrigger>
+            <TabsList className="rounded-xl">
+              <TabsTrigger className="rounded-xl" value="overview">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger className="rounded-xl" value="mfs-list">
+                Organization List
+              </TabsTrigger>
+              <TabsTrigger className="rounded-xl" value="trx-list">
+                Transaction History
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

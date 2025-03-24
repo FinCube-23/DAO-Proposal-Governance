@@ -1,16 +1,136 @@
 import { useLazyGetMFSQuery } from "@redux/services/mfs";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router";
+import { CheckIcon, CopyIcon } from "lucide-react";
+
+const defaultTheme = {
+  key: "#9CDCFE",
+  string: "#CE9178",
+  number: "#B5CEA8",
+  boolean: "#569CD6",
+  null: "#569CD6",
+  undefined: "#569CD6",
+  function: "#DCDCAA",
+  symbol: "#DCDCAA",
+  date: "#B5CEA8",
+  punctuation: "#D4D4D4",
+  text: "#D4D4D4",
+};
+
+const JsonRenderer = ({
+  data,
+  depth = 0,
+  theme = defaultTheme,
+}: {
+  data: any;
+  depth?: number;
+  theme?: typeof defaultTheme;
+}) => {
+  const getValueType = (value: any) => {
+    if (value === null) return "null";
+    if (Array.isArray(value)) return "array";
+    if (typeof value === "object") return "object";
+    if (typeof value === "number") return "number";
+    if (typeof value === "boolean") return "boolean";
+    if (typeof value === "function") return "function";
+    if (typeof value === "string") {
+      if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z$/.test(value))
+        return "date";
+      if (/^0x[a-fA-F0-9]+$/.test(value)) return "hex";
+    }
+    return typeof value;
+  };
+
+  const renderValue = (value: any) => {
+    const type = getValueType(value);
+
+    switch (type) {
+      case "string":
+        return (
+          <span style={{ color: theme.string }}>{JSON.stringify(value)}</span>
+        );
+      case "number":
+        return <span style={{ color: theme.number }}>{value}</span>;
+      case "boolean":
+        return <span style={{ color: theme.boolean }}>{value.toString()}</span>;
+      case "null":
+        return <span style={{ color: theme.null }}>null</span>;
+      case "date":
+        return (
+          <>
+            <span style={{ color: theme.string }}>{JSON.stringify(value)}</span>
+            <span style={{ color: theme.text, marginLeft: "8px" }}>
+              ({new Date(value).toLocaleString()})
+            </span>
+          </>
+        );
+      case "hex":
+        return (
+          <span style={{ color: theme.string }}>
+            {JSON.stringify(value)}
+            <span style={{ color: theme.text, marginLeft: "8px" }}>(hex)</span>
+          </span>
+        );
+      default:
+        return (
+          <span style={{ color: theme.text }}>{JSON.stringify(value)}</span>
+        );
+    }
+  };
+
+  if (typeof data !== "object" || data === null) {
+    return renderValue(data);
+  }
+
+  if (Array.isArray(data)) {
+    return (
+      <span>
+        <span style={{ color: theme.punctuation }}>[</span>
+        <div style={{ marginLeft: `${depth * 20}px` }}>
+          {data.map((item, index) => (
+            <div key={index}>
+              <JsonRenderer data={item} depth={depth + 1} theme={theme} />
+              {index < data.length - 1 && (
+                <span style={{ color: theme.punctuation }}>,</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <span style={{ color: theme.punctuation }}>]</span>
+      </span>
+    );
+  }
+
+  return (
+    <span>
+      <span style={{ color: theme.punctuation }}>{"{"}</span>
+      <div style={{ marginLeft: `${depth * 20}px` }}>
+        {Object.entries(data).map(([key, value], index, array) => (
+          <div key={key}>
+            <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
+            <span style={{ color: theme.punctuation }}>: </span>
+            <JsonRenderer data={value} depth={depth + 1} theme={theme} />
+            {index < array.length - 1 && (
+              <span style={{ color: theme.punctuation }}>,</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <span style={{ color: theme.punctuation }}>{"}"}</span>
+    </span>
+  );
+};
 
 const MFSDetails = () => {
   const { id } = useParams();
   const [getMFS, { data: mfs, isFetching, error }] = useLazyGetMFSQuery();
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchMFS = async () => {
@@ -38,6 +158,23 @@ const MFSDetails = () => {
       second: "2-digit",
       hour12: false,
     });
+  };
+
+  // Parse context
+  const parseContext = () => {
+    try {
+      return typeof mfs.context === "string"
+        ? JSON.parse(mfs.context)
+        : mfs.context;
+    } catch (e) {
+      return { error: "Invalid JSON format" };
+    }
+  };
+
+  const contextData = parseContext();
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -73,11 +210,33 @@ const MFSDetails = () => {
                   <p>
                     <span className="font-medium">Email:</span> {mfs.email}
                   </p>
-                  <Card className="px-1 py-5">
-                    <p>
-                      <span className="font-medium">Context:</span>{" "}
-                      {mfs.context}
-                    </p>
+                  <Card className="p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <Label className="font-bold">Context:</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-muted-foreground hover:text-primary"
+                        onClick={() => {
+                          copyToClipboard(JSON.stringify(contextData, null, 2));
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                      >
+                        {copied ? (
+                          <CheckIcon className="h-4 w-4 text-green-400" />
+                        ) : (
+                          <CopyIcon className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+                      {contextData.error ? (
+                        <span className="text-red-500">{mfs.context}</span>
+                      ) : (
+                        <JsonRenderer data={contextData} />
+                      )}
+                    </pre>
                   </Card>
                   <p>
                     <span className="font-medium">Native Currency:</span>{" "}
