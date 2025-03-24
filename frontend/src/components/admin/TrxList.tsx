@@ -96,7 +96,7 @@ const TrxList = () => {
           <div className="flex w-[500px] gap-2">
             <span className="text-xs">Search by Hash:</span>
             <Input
-              placeholder="Filter by transaction hash"
+              placeholder="Filter by hash"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -121,7 +121,7 @@ const TrxList = () => {
             <span className="text-xs">Filter by Source:</span>
             <Select value={source} onValueChange={(value) => setSource(value)}>
               <SelectTrigger>
-                <SelectValue placeholder="Filter by source" />
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>
@@ -140,7 +140,7 @@ const TrxList = () => {
               onValueChange={(value) => setStatus(value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Filter by status" />
+                <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All</SelectItem>

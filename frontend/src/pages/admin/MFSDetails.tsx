@@ -110,16 +110,18 @@ const JsonRenderer = ({
     <span>
       <span style={{ color: theme.punctuation }}>{"{"}</span>
       <div style={{ marginLeft: `${depth * 20}px` }}>
-        {Object.entries(data).map(([key, value], index, array) => (
-          <div key={key}>
-            <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
-            <span style={{ color: theme.punctuation }}>: </span>
-            <JsonRenderer data={value} depth={depth + 1} theme={theme} />
-            {index < array.length - 1 && (
-              <span style={{ color: theme.punctuation }}>,</span>
-            )}
-          </div>
-        ))}
+        <div className="ml-4">
+          {Object.entries(data).map(([key, value], index, array) => (
+            <div key={key}>
+              <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
+              <span style={{ color: theme.punctuation }}>: </span>
+              <JsonRenderer data={value} depth={depth + 1} theme={theme} />
+              {index < array.length - 1 && (
+                <span style={{ color: theme.punctuation }}>,</span>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
       <span style={{ color: theme.punctuation }}>{"}"}</span>
     </span>

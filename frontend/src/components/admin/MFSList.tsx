@@ -96,7 +96,7 @@ const MFSList = () => {
           <span className="text-xs">Filter by Status:</span>
           <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by status" />
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
@@ -114,7 +114,7 @@ const MFSList = () => {
             onValueChange={(value) => setLocation(value)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Filter by location" />
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
@@ -130,7 +130,7 @@ const MFSList = () => {
           <span className="text-xs">Filter by Type:</span>
           <Select value={type} onValueChange={(value) => setType(value)}>
             <SelectTrigger>
-              <SelectValue placeholder="Filter by Type" />
+              <SelectValue placeholder="All" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>

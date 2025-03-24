@@ -54,16 +54,16 @@ const TrxDetails = () => {
   };
 
   const defaultTheme = {
-    key: "#9CDCFE",
-    string: "#CE9178",
-    number: "#B5CEA8",
-    boolean: "#569CD6",
-    null: "#569CD6",
-    undefined: "#569CD6",
-    function: "#DCDCAA",
-    symbol: "#DCDCAA",
-    date: "#B5CEA8",
-    punctuation: "#D4D4D4",
+    key: "#9CDCFE", // Keep field names (keys) the same light blue
+    string: "#47d147", // Green for strings
+    number: "#2563EB", // Dark blue for numbers
+    boolean: "#FF6B6B", // Red for booleans
+    null: "#569CD6", // Keep original blue for null
+    undefined: "#569CD6", // Keep original blue for undefined
+    function: "#DCDCAA", // Keep original for functions
+    symbol: "#DCDCAA", // Keep original for symbols
+    date: "#B5CEA8", // Keep original for dates
+    punctuation: "#D4D4D4", //
     text: "#D4D4D4",
   };
 
@@ -161,16 +161,18 @@ const TrxDetails = () => {
       <span>
         <span style={{ color: theme.punctuation }}>{"{"}</span>
         <div style={{ marginLeft: `${depth * 20}px` }}>
-          {Object.entries(data).map(([key, value], index, array) => (
-            <div key={key}>
-              <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
-              <span style={{ color: theme.punctuation }}>: </span>
-              <JsonRenderer data={value} depth={depth + 1} theme={theme} />
-              {index < array.length - 1 && (
-                <span style={{ color: theme.punctuation }}>,</span>
-              )}
-            </div>
-          ))}
+          <div className="ml-4">
+            {Object.entries(data).map(([key, value], index, array) => (
+              <div key={key}>
+                <span style={{ color: theme.key }}>{JSON.stringify(key)}</span>
+                <span style={{ color: theme.punctuation }}>: </span>
+                <JsonRenderer data={value} depth={depth + 1} theme={theme} />
+                {index < array.length - 1 && (
+                  <span style={{ color: theme.punctuation }}>,</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
         <span style={{ color: theme.punctuation }}>{"}"}</span>
       </span>
