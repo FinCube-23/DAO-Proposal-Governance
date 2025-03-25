@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@components/ui/card";
-import { Tabs, TabsContent } from "@components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@components/ui/tabs";
 import { IProposal } from "@lib/interfaces";
 import { config } from "../../main";
 import {
@@ -22,6 +22,9 @@ import { useEffect, useState } from "react";
 import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import contractABI from "../../contractABI/contractABI.json";
+import MFSList from "@components/admin/MFSList";
+import TrxList from "@components/admin/TrxList";
+import { useLocation, useNavigate } from "react-router";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -29,6 +32,8 @@ export default function AdminDashboard() {
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [approvalStatus, setApprovalStatus] = useState<boolean>();
   const { address } = useAccount();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // RTK Query
   const [getBalance] = useLazyGetBalanceQuery();
@@ -36,6 +41,18 @@ export default function AdminDashboard() {
   const [getOngoingProposals] = useLazyGetOngoingProposalsQuery();
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
   const [proposalCount, setProposalCount] = useState<string>();
+  const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes("/organizations")) {
+      setActiveTab("mfs-list");
+    } else if (path.includes("/transactions")) {
+      setActiveTab("trx-list");
+    } else {
+      setActiveTab("overview");
+    }
+  }, [location]);
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -142,7 +159,35 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between space-y-2">
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           </div>
-          <Tabs defaultValue="overview" className="space-y-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={(value) => {
+              let newPath;
+              switch (value) {
+                case "mfs-list":
+                  newPath = "dashboard/organizations";
+                  break;
+                case "trx-list":
+                  newPath = "dashboard/transactions";
+                  break;
+                default:
+                  newPath = "";
+              }
+              navigate(`/admin/${newPath}`);
+            }}
+            className="space-y-4"
+          >
+            <TabsList className="rounded-xl">
+              <TabsTrigger className="rounded-xl" value="overview">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger className="rounded-xl" value="mfs-list">
+                Organization List
+              </TabsTrigger>
+              <TabsTrigger className="rounded-xl" value="trx-list">
+                Transaction History
+              </TabsTrigger>
+            </TabsList>
             <TabsContent value="overview" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -235,6 +280,12 @@ export default function AdminDashboard() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+            <TabsContent value="mfs-list" className="space-y-4">
+              <MFSList />
+            </TabsContent>
+            <TabsContent value="trx-list" className="space-y-4">
+              <TrxList />
             </TabsContent>
           </Tabs>
         </div>

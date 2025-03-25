@@ -1,4 +1,4 @@
-import { BadgeCheck, Bell, LogOut, Sparkles } from "lucide-react";
+import { BadgeCheck, LogOut } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar";
 import {
@@ -16,13 +16,14 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@components/ui/sidebar";
-import { CaretSortIcon, ComponentPlaceholderIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useDisconnect } from "wagmi";
 import { useDispatch } from "react-redux";
 import { clearAuthState } from "@redux/slices/auth";
 import { Dialog, DialogContent, DialogHeader } from "./ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import { useLazyGetStatusByEmailQuery } from "@redux/services/mfs";
 
 interface Organization {
   name: string;
@@ -56,6 +57,21 @@ export default function SidebarUser({
   const { disconnect } = useDisconnect();
   const dispatch = useDispatch();
   const [dialogueOpen, setDialogueOpen] = useState(false);
+  const [getStatusByEmail] = useLazyGetStatusByEmailQuery();
+  const [status, setStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getStatus = async () => {
+      try {
+        const response: any = await getStatusByEmail(mfsBusiness?.email || "");
+        setStatus(response.data.membership_onchain_status);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    getStatus();
+  }, [mfsBusiness, getStatusByEmail]);
 
   return (
     <SidebarMenu>
@@ -210,7 +226,7 @@ export default function SidebarUser({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Approval Status
+                              Membership Status
                             </p>
                             <span
                               className={`px-2 py-1 rounded ${
@@ -226,11 +242,9 @@ export default function SidebarUser({
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Membership Status
+                              Proposal Status
                             </p>
-                            <p className="text-cyan-400 capitalize">
-                              {mfsBusiness?.membership_onchain_status}
-                            </p>
+                            <p className="text-cyan-400 capitalize">{status}</p>
                           </div>
                         </div>
 
@@ -266,14 +280,6 @@ export default function SidebarUser({
                 </DialogContent>
               </Dialog>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer">
-                <Sparkles />
-                Upgrade to Pro
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <div
                 className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer"
@@ -282,14 +288,6 @@ export default function SidebarUser({
                 <BadgeCheck />
                 Account
               </div>
-              <DropdownMenuItem className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer">
-                <ComponentPlaceholderIcon />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer">
-                <Bell />
-                Notifications
-              </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem

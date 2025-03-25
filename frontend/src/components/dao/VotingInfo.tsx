@@ -103,9 +103,16 @@ export default function VotingInfo({ proposal }: any) {
           <div className="flex justify-between">
             <div className="text-muted-foreground">Audit ID</div>
             {proposal.audit_id !== null ? (
-              <div className="font-bold">{proposal.audit_id}</div>
+              <div
+                onClick={() =>
+                  navigate(`/admin/dashboard/transactions/${proposal.audit_id}`)
+                }
+                className="font-bold underline cursor-pointer text-blue-400"
+              >
+                {proposal.audit_id}
+              </div>
             ) : (
-              <div className="text-red-600">N/A</div>
+              <div className="text-red-600 font-bold">N/A</div>
             )}
           </div>
           <div className="flex justify-between">
