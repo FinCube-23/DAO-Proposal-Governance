@@ -300,40 +300,42 @@ const TrxDetails = () => {
                 </a>
               </CardContent>
             </Card>
-            <Card className="col-span-full">
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle className="text-lg">Metadata</CardTitle>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-primary"
-                    onClick={() => {
-                      copyToClipboard(
-                        JSON.stringify(parsedMetadata.data, null, 2)
-                      );
-                      setCopiedMetadata(true);
-                      setTimeout(() => setCopiedMetadata(false), 2000);
-                    }}
-                  >
-                    {copiedMetadata ? (
-                      <>
-                        <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon className="h-4 w-4 mr-2" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
-                  <JsonRenderer data={parsedMetadata} />
-                </pre>
-              </CardContent>
-            </Card>
+            {parsedMetadata !== null && (
+              <Card className="col-span-full">
+                <CardHeader>
+                  <div className="flex justify-between items-center">
+                    <CardTitle className="text-lg">Metadata</CardTitle>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-muted-foreground hover:text-primary"
+                      onClick={() => {
+                        copyToClipboard(
+                          JSON.stringify(parsedMetadata.data, null, 2)
+                        );
+                        setCopiedMetadata(true);
+                        setTimeout(() => setCopiedMetadata(false), 2000);
+                      }}
+                    >
+                      {copiedMetadata ? (
+                        <>
+                          <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                        </>
+                      ) : (
+                        <>
+                          <CopyIcon className="h-4 w-4 mr-2" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+                    <JsonRenderer data={parsedMetadata} />
+                  </pre>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </TabsContent>
         <TabsContent value="raw">
