@@ -2,10 +2,21 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Transport, MicroserviceOptions } from '@nestjs/microservices';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.connectMicroservice<MicroserviceOptions>({
+    transport: Transport.RMQ,
+    options: {
+      urls: ['amqp://rabbitmq:5672'],
+      queue: 'authorization', // Queue name
+      queueOptions: {
+        durable: true, // Make the queue durable (survive restarts)
+      },
+    },
+  });
 
   const config = new DocumentBuilder()
     .setTitle('User Management Service API')
@@ -25,6 +36,7 @@ async function bootstrap() {
     },
   });
   app.startAllMicroservices();
+  app.enableCors();
   await app.listen(3000);
 }
 bootstrap();
