@@ -200,7 +200,14 @@ export class ProposalServiceService {
     }
   }
 
-  async findById(id: number): Promise<ProposalEntity> {
+  async findById(req: any, id: number): Promise<ProposalEntity> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
     const proposal = await this.proposalRepository.findOne({
       where: { id },
     });

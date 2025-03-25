@@ -51,7 +51,7 @@ export class ProposalServiceController {
     @Req() req,
     @Body() proposal_entity: ProposalDto,
   ): Promise<ProposalEntity> {
-    return this.proposalService.create(proposal_entity, req.user);
+    return this.proposalService.create(req, proposal_entity);
   }
 
   // 💬 MessagePattern expects a response | This is a Producer
@@ -119,8 +119,11 @@ export class ProposalServiceController {
   @ApiOperation({ summary: 'Get proposal by ID' })
   @ApiResponse({ status: 200, type: ProposalEntity })
   @ApiResponse({ status: 404, description: 'Proposal not found' })
-  async findOne(@Param('id') id: number): Promise<ProposalEntity> {
-    return this.proposalService.findById(id);
+  async findOne(
+    @Param('id') id: number,
+    @Req() req: any,
+  ): Promise<ProposalEntity> {
+    return this.proposalService.findById(req, id);
   }
 
   @Get()
@@ -138,8 +141,9 @@ export class ProposalServiceController {
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Req() req,
   ): Promise<PaginatedProposalResponse> {
-    return this.proposalService.findAll(page, limit);
+    return this.proposalService.findAll(req, page, limit);
   }
 
   @Get('filter/:status')
