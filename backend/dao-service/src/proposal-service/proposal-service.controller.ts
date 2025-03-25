@@ -5,8 +5,6 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
-  UseGuards,
   Req,
   DefaultValuePipe,
   ParseIntPipe,
@@ -18,7 +16,6 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
-  ApiProperty,
   ApiQuery,
   ApiResponse,
   ApiTags,
@@ -27,12 +24,10 @@ import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import {
   PaginatedProposalResponse,
   ProposalDto,
-  ProposalListDto,
   UpdateProposalDto,
 } from './dto/proposal.dto';
-import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
+import { EventPattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
 
 @Controller('proposal-service')
@@ -86,7 +81,7 @@ export class ProposalServiceController {
     @Req() req,
     @Body() executeProposalDto: UpdateProposalDto,
   ): Promise<ProposalEntity> {
-    return this.proposalService.executeProposal(executeProposalDto);
+    return this.proposalService.executeProposal(req, executeProposalDto);
   }
 
   // 💬 MessagePattern expects a response | This is a Producer
@@ -116,7 +111,7 @@ export class ProposalServiceController {
     @Req() req,
     @Body() cancelProposalDto: UpdateProposalDto,
   ): Promise<ProposalEntity> {
-    return this.proposalService.cancelProposal(cancelProposalDto);
+    return this.proposalService.cancelProposal(req, cancelProposalDto);
   }
 
   @Get(':id')
@@ -158,12 +153,15 @@ export class ProposalServiceController {
   @ApiParam({ name: 'status', required: true, enum: ProposalStatus }) // Use ApiParam instead of ApiQuery
   async findByStatus(
     @Param('status') status: ProposalStatus,
+    @Req() req,
   ): Promise<ProposalEntity[]> {
-    return this.proposalService.findByStatus(status);
+    return this.proposalService.findByStatus(req, status);
   }
   // 📡 EventPattern is fire-and-forget, so no return value as no response expected | This is a Consumer
   @EventPattern('general-proposal-placed')
-  handleCreatedProposalPlaced(@Payload() proposal: ResponseTransactionStatusDto, @Ctx() context: RmqContext) {
+  handleCreatedProposalPlaced(
+    @Payload() proposal: ResponseTransactionStatusDto,
+  ) {
     this.proposalService.handleCreatedProposalPlacedEvent(proposal);
   }
 

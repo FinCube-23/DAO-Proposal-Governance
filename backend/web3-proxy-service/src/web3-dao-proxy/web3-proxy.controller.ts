@@ -1,18 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
 import { Web3ProxyService } from './web3-proxy.service';
-import { AuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { RegisterMemberBody } from './entities/RegisterMemberInterface';
-import { Proposal } from './entities/ProposalInterface';
 
 @Controller('web3-dao-proxy')
 export class Web3ProxyController {
-  constructor(private readonly web3ProxyService: Web3ProxyService) { }
+  constructor(private readonly web3ProxyService: Web3ProxyService) {}
 
   @Post('balance')
-  @ApiOperation({ summary: "Get the balance of user address" })
+  @ApiOperation({ summary: 'Get the balance of user address' })
   @ApiBody({
-    description: "Ethereum address to check balance",
+    description: 'Ethereum address to check balance',
     schema: {
       type: 'object',
       properties: {
@@ -23,38 +20,43 @@ export class Web3ProxyController {
         },
       },
       required: ['address'], // Mark required fields
-    }
+    },
   })
   async getBalance(@Req() req, @Body('address') address: string) {
-    return this.web3ProxyService.getBalance(address, req.user);
+    return this.web3ProxyService.getBalance(req, address);
   }
 
   @Get('proposal-threshold')
-  @ApiOperation({ summary: "Get the proposal threshold of contract" })
+  @ApiOperation({ summary: 'Get the proposal threshold of contract' })
   async getProposalThreshold(@Req() req): Promise<number> {
-    return this.web3ProxyService.getProposalThreshold(req.user);
+    return this.web3ProxyService.getProposalThreshold(req);
   }
 
   @Get('ongoing-proposals')
-  @ApiOperation({ summary: "Get the ongoing proposals" })
+  @ApiOperation({ summary: 'Get the ongoing proposals' })
   async getOngoingProposals(@Req() req): Promise<any> {
-    return this.web3ProxyService.getOngoingProposals(req.user);
+    return this.web3ProxyService.getOngoingProposals(req);
   }
 
   @Get('proposal-by-id/:proposalId')
-  @ApiOperation({ summary: "Get the proposal as per ID" })
+  @ApiOperation({ summary: 'Get the proposal as per ID' })
   @ApiParam({
     name: 'proposalId',
     type: Number,
     description: 'ID of the proposal to retrieve',
     example: 123,
   })
-  async getProposalById(@Param('proposalId') proposalId: number) {
-    return this.web3ProxyService.getProposalById(proposalId);
+  async getProposalById(
+    @Param('proposalId') proposalId: number,
+    @Req() req: any,
+  ) {
+    return this.web3ProxyService.getProposalById(req, proposalId);
   }
 
   @Post('proposals-by-page')
-  @ApiOperation({ summary: "Get proposals by specifying how many you want to retrieve" })
+  @ApiOperation({
+    summary: 'Get proposals by specifying how many you want to retrieve',
+  })
   @ApiBody({
     description: 'Pagination details for fetching proposals',
     schema: {
@@ -70,17 +72,21 @@ export class Web3ProxyController {
           example: 10,
           description: 'Number of proposals to fetch',
         },
-      }
+      },
     },
   })
-  async getProposalsByPage(@Req() req, @Body('cursor') cursor: number, @Body('howMany') howMany: number): Promise<any> {
-    return this.web3ProxyService.getProposalsByPage(cursor, howMany, req.user);
+  async getProposalsByPage(
+    @Req() req,
+    @Body('cursor') cursor: number,
+    @Body('howMany') howMany: number,
+  ): Promise<any> {
+    return this.web3ProxyService.getProposalsByPage(req, cursor, howMany);
   }
 
   @Post('register-member')
-  @ApiOperation({ summary: "PAYABLE: Register a new member to DAO" })
+  @ApiOperation({ summary: 'PAYABLE: Register a new member to DAO' })
   @ApiBody({
-    description: "Ethereum address to check balance",
+    description: 'Ethereum address to check balance',
     schema: {
       type: 'object',
       properties: {
@@ -98,24 +104,33 @@ export class Web3ProxyController {
       required: ['address', '_memberURI'], // Mark required fields
     },
   })
-  async registerMember(@Req() req, @Body('address') address: string, @Body('_memberURI') _memberURI: string): Promise<any> {
-    return this.web3ProxyService.registerMember(address, _memberURI, req.user);
+  async registerMember(
+    @Req() req,
+    @Body('address') address: string,
+    @Body('_memberURI') _memberURI: string,
+  ): Promise<any> {
+    return this.web3ProxyService.registerMember(req, address, _memberURI);
   }
 
   @Post('execute-proposal')
-  @ApiOperation({ summary: "PAYABLE: Execute a proposal whose vote is completed" })
-  @ApiBody({
-    description: "Proposal ID of the proposal to execute",
-    type: Number
+  @ApiOperation({
+    summary: 'PAYABLE: Execute a proposal whose vote is completed',
   })
-  async executeProposal(@Req() req, @Body('proposalId') proposalId: number): Promise<any> {
-    return this.web3ProxyService.executeProposal(proposalId, req.user);
+  @ApiBody({
+    description: 'Proposal ID of the proposal to execute',
+    type: Number,
+  })
+  async executeProposal(
+    @Req() req,
+    @Body('proposalId') proposalId: number,
+  ): Promise<any> {
+    return this.web3ProxyService.executeProposal(req, proposalId);
   }
 
   @Post('is-member-approved')
-  @ApiOperation({ summary: "Check if a member is approved or not" })
+  @ApiOperation({ summary: 'Check if a member is approved or not' })
   @ApiBody({
-    description: "Ethereum address to check member approval",
+    description: 'Ethereum address to check member approval',
     schema: {
       type: 'object',
       properties: {
@@ -126,12 +141,12 @@ export class Web3ProxyController {
         },
       },
       required: ['address'], // Mark required fields
-    }
+    },
   })
-  async checkIsMemberApproved(@Req() req, @Body('address') memberAddress: string): Promise<any> {
-    return this.web3ProxyService.checkIsMemberApproved(memberAddress, req.user);
+  async checkIsMemberApproved(
+    @Req() req,
+    @Body('address') memberAddress: string,
+  ): Promise<any> {
+    return this.web3ProxyService.checkIsMemberApproved(req, memberAddress);
   }
-
-
-
 }

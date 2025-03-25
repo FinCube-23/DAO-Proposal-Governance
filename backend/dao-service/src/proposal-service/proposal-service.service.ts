@@ -3,26 +3,18 @@ import {
   Inject,
   NotFoundException,
   UnauthorizedException,
-  Logger,
-  Req,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  ProposalEntity,
-  ProposalStatus,
-  ProposalType,
-} from './entities/proposal.entity';
-import axios from 'axios';
-
-import { ClientProxy, RmqContext, Ctx } from '@nestjs/microservices';
+import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
+import { ClientProxy } from '@nestjs/microservices';
 import {
   ProposalDto,
   PendingTransactionDto,
   PaginatedProposalResponse,
   UpdateProposalDto,
 } from './dto/proposal.dto';
-import { firstValueFrom, timeout } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
@@ -32,7 +24,10 @@ import { validateAuth } from '@fincube/validate-auth';
 @Injectable()
 export class ProposalServiceService {
   public update_proposals: ProposalDto[];
-  private eventDrivenFunctionCall: Record<string, (proposal: ResponseTransactionStatusDto) => void>;
+  private eventDrivenFunctionCall: Record<
+    string,
+    (proposal: ResponseTransactionStatusDto) => void
+  >;
   constructor(
     @InjectRepository(ProposalEntity)
     private proposalRepository: Repository<ProposalEntity>,
@@ -44,18 +39,26 @@ export class ProposalServiceService {
     this.update_proposals = [];
     // Open for Extension Close for Modification
     this.eventDrivenFunctionCall = {
-      'ProposalCanceled': this.handleProposalUpdatedEvent.bind(this),
-      'ProposalExecuted': this.handleProposalUpdatedEvent.bind(this),
-      'ProposalAdded': this.handleCreatedProposalPlacedEvent.bind(this),
+      ProposalCanceled: this.handleProposalUpdatedEvent.bind(this),
+      ProposalExecuted: this.handleProposalUpdatedEvent.bind(this),
+      ProposalAdded: this.handleCreatedProposalPlacedEvent.bind(this),
       // Add more strings and corresponding functions as needed
     };
   }
 
   // 💬 MessagePattern expects a response | This is a publisher
   async create(
+    req,
     proposal: Partial<ProposalEntity>,
-    sub: string,
   ): Promise<ProposalEntity> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
     try {
       // First verify we have the required fields
       if (!proposal.trx_hash || !proposal.proposer_address) {
@@ -92,7 +95,18 @@ export class ProposalServiceService {
     }
   }
 
-  async executeProposal(executedProposalDto: UpdateProposalDto): Promise<any> {
+  async executeProposal(
+    req: any,
+    executedProposalDto: UpdateProposalDto,
+  ): Promise<any> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
     try {
       if (
         !executedProposalDto.proposalId ||
@@ -135,7 +149,18 @@ export class ProposalServiceService {
     }
   }
 
-  async cancelProposal(cancelProposalDto: UpdateProposalDto): Promise<any> {
+  async cancelProposal(
+    req: any,
+    cancelProposalDto: UpdateProposalDto,
+  ): Promise<any> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
     try {
       if (!cancelProposalDto.proposalId || !cancelProposalDto.transactionHash) {
         throw new Error('Proposal ID and Transaction Hash is required');
@@ -188,9 +213,18 @@ export class ProposalServiceService {
   }
 
   async findAll(
+    req,
     page: number = 1,
     limit: number = 10,
   ): Promise<PaginatedProposalResponse> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
     // Calculate records to skip: e.g., page 3 with limit 10 = skip 20 records (returns records 21-30)
     const skip = (page - 1) * limit;
 
@@ -216,7 +250,18 @@ export class ProposalServiceService {
     };
   }
 
-  async findByStatus(status: ProposalStatus): Promise<ProposalEntity[]> {
+  async findByStatus(
+    req: any,
+    status: ProposalStatus,
+  ): Promise<ProposalEntity[]> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
     return this.proposalRepository.find({ where: { proposal_status: status } });
   }
 
@@ -233,7 +278,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -258,7 +303,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -356,7 +401,9 @@ export class ProposalServiceService {
     }
   }
 
-  async handleCreatedProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
+  async handleCreatedProposalPlacedEvent(
+    proposal: ResponseTransactionStatusDto,
+  ) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
@@ -384,9 +431,7 @@ export class ProposalServiceService {
   }
 
   // 📡 Listening Event from Publisher
-  async handleProposalUpdatedEvent(
-    proposal: ResponseTransactionStatusDto
-  ) {
+  async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
         `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
@@ -410,7 +455,6 @@ export class ProposalServiceService {
         return;
       }
       await this.updateProposalStatus(proposal.web3Status, proposalId);
-
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
@@ -422,6 +466,12 @@ export class ProposalServiceService {
       this.umsRabbitClient as any,
       packet.options,
     );
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
 
     return res;
   }
