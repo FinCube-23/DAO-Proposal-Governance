@@ -155,7 +155,9 @@ const MFSList = () => {
         <TableBody>
           {mfsList.map((mfs) => (
             <TableRow
-              onClick={() => navigate(`/admin/dashboard/mfs-details/${mfs.id}`)}
+              onClick={() =>
+                navigate(`/admin/dashboard/organizations/${mfs.id}`)
+              }
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={mfs.id}
             >

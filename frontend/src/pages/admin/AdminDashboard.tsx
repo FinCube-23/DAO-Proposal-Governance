@@ -24,6 +24,7 @@ import { useAccount } from "wagmi";
 import contractABI from "../../contractABI/contractABI.json";
 import MFSList from "@components/admin/MFSList";
 import TrxList from "@components/admin/TrxList";
+import { useLocation, useNavigate } from "react-router";
 
 export default function AdminDashboard() {
   const [balance, setBalance] = useState<string>();
@@ -31,6 +32,8 @@ export default function AdminDashboard() {
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [approvalStatus, setApprovalStatus] = useState<boolean>();
   const { address } = useAccount();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   // RTK Query
   const [getBalance] = useLazyGetBalanceQuery();
@@ -39,6 +42,17 @@ export default function AdminDashboard() {
   const [checkIsMemberApproved] = useLazyCheckIsMemberApprovedQuery();
   const [proposalCount, setProposalCount] = useState<string>();
   const [activeTab, setActiveTab] = useState("overview");
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes("/organizations")) {
+      setActiveTab("mfs-list");
+    } else if (path.includes("/transactions")) {
+      setActiveTab("trx-list");
+    } else {
+      setActiveTab("overview");
+    }
+  }, [location]);
 
   useEffect(() => {
     const checkIsMember = async () => {
@@ -147,7 +161,20 @@ export default function AdminDashboard() {
           </div>
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={(value) => {
+              let newPath;
+              switch (value) {
+                case "mfs-list":
+                  newPath = "dashboard/organizations";
+                  break;
+                case "trx-list":
+                  newPath = "dashboard/transactions";
+                  break;
+                default:
+                  newPath = "";
+              }
+              navigate(`/admin/${newPath}`);
+            }}
             className="space-y-4"
           >
             <TabsList className="rounded-xl">

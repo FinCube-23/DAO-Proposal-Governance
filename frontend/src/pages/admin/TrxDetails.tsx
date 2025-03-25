@@ -13,6 +13,7 @@ const TrxDetails = () => {
     useLazyGetTransactionQuery();
   const [copiedMetadata, setCopiedMetadata] = useState(false);
   const [copiedRawData, setCopiedRawData] = useState(false);
+  const [copiedTrxHash, setCopiedTrxHash] = useState(false);
 
   useEffect(() => {
     const getTrx = async () => {
@@ -184,10 +185,12 @@ const TrxDetails = () => {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Transaction Details</h1>
-        <p className="text-muted-foreground my-5 text-xl">ID: {trx.id}</p>
+        <p className="text-muted-foreground my-5 text-xl">
+          Off-Chain ID: {trx.id}
+        </p>
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
@@ -200,7 +203,7 @@ const TrxDetails = () => {
           </TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Transaction Status</CardTitle>
@@ -230,15 +233,73 @@ const TrxDetails = () => {
                 <CardTitle className="text-lg">Sources</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge
-                  variant="outline"
-                  className="capitalize border-2 border-blue-400"
-                >
-                  {trx.source}
-                </Badge>
+                {trx.source === "alchemy" ? (
+                  <Badge
+                    variant="outline"
+                    className="border-2 border-blue-400 text-white"
+                  >
+                    Alchemy
+                  </Badge>
+                ) : trx.source === "graph" ? (
+                  <Badge
+                    variant="outline"
+                    className="border-2 border-purple-400 text-white"
+                  >
+                    The Graph
+                  </Badge>
+                ) : trx.source === "infura" ? (
+                  <Badge variant="outline" className="border-2 border-gray-400">
+                    Infura
+                  </Badge>
+                ) : (
+                  trx.source === "manual" && (
+                    <Badge
+                      variant="outline"
+                      className="border-2 border-yellow-400"
+                    >
+                      Manual
+                    </Badge>
+                  )
+                )}
               </CardContent>
             </Card>
 
+            <Card className="md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg">Transaction Hash</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-muted-foreground hover:text-primary"
+                    onClick={() => {
+                      copyToClipboard(trx.trx_hash);
+                      setCopiedTrxHash(true);
+                      setTimeout(() => setCopiedTrxHash(false), 2000);
+                    }}
+                  >
+                    {copiedTrxHash ? (
+                      <>
+                        <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                      </>
+                    ) : (
+                      <>
+                        <CopyIcon className="h-4 w-4 mr-2" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <a
+                  href={`${import.meta.env.VITE_TRX_EXPLORER}${trx.trx_hash}`}
+                  target="_blank"
+                  className="text-sm text-blue-400 hover:underline"
+                >
+                  {trx.trx_hash}
+                </a>
+              </CardContent>
+            </Card>
             <Card className="col-span-full">
               <CardHeader>
                 <div className="flex justify-between items-center">
@@ -269,7 +330,7 @@ const TrxDetails = () => {
               </CardHeader>
               <CardContent>
                 <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
-                  <JsonRenderer data={parsedMetadata.data} />
+                  <JsonRenderer data={parsedMetadata} />
                 </pre>
               </CardContent>
             </Card>

@@ -164,7 +164,9 @@ const TrxList = () => {
         <TableBody>
           {trxList.map((trx) => (
             <TableRow
-              onClick={() => navigate(`/admin/dashboard/trx-details/${trx.id}`)}
+              onClick={() =>
+                navigate(`/admin/dashboard/transactions/${trx.id}`)
+              }
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={trx.id}
             >

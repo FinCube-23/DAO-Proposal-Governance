@@ -276,12 +276,12 @@ const MFSDetails = () => {
               <div>
                 <Label className="font-bold">On-chain Status</Label>
                 <div className="mt-2 space-y-2">
-                  <p>
-                    <span className="font-medium">Membership Status:</span>{" "}
-                    <Badge variant="secondary">
+                  <div className="flex gap-2 items-center">
+                    <p className="font-medium">Membership Status: </p>
+                    <p className="border-2 border-blue-400 px-2 py-1 rounded-full capitalize">
                       {mfs.membership_onchain_status}
-                    </Badge>
-                  </p>
+                    </p>
+                  </div>
                   <p>
                     <span className="font-medium">Proposal ID:</span>{" "}
                     {mfs.proposal_onchain_id || "N/A"}

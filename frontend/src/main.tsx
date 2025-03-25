@@ -106,11 +106,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route
-                      path="dashboard/mfs-details/:id"
+                      path="dashboard/organizations"
+                      element={<AdminDashboard />}
+                    />
+                    <Route
+                      path="dashboard/transactions"
+                      element={<AdminDashboard />}
+                    />
+                    <Route
+                      path="dashboard/organizations/:id"
                       element={<MFSDetails />}
                     />
                     <Route
-                      path="dashboard/trx-details/:id"
+                      path="dashboard/transactions/:id"
                       element={<TrxDetails />}
                     ></Route>
                   </Route>
