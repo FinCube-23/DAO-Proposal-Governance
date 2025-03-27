@@ -52,7 +52,7 @@ export default function MFSSidebar({
         <BrandCard
           name={auth.profile?.organization?.name || "N/A"}
           logo={GalleryVerticalEnd}
-          type="MFS"
+          type="Org."
         />
       </SidebarHeader>
       <SidebarContent>

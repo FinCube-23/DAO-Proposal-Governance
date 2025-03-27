@@ -93,6 +93,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                           element={<DaoDashboard />}
                         />
                         <Route
+                          path={`off-chain-proposals/:id/transaction`}
+                          element={<TrxDetails />}
+                        />
+                        <Route
                           path="ongoing-proposals"
                           element={<DaoDashboard />}
                         />

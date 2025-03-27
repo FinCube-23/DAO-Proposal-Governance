@@ -62,10 +62,14 @@ export default function ProposalCard({ proposal, proposalId }: any) {
         </div>
         {votingStatus !== "Voting not started" ? (
           <div className="flex gap-3 justify-end">
-            <Badge variant="outline">{votingStatus}</Badge>
-            {votingStatus !== "Voting has ended" && (
+            {!proposal.canceled && (
               <>
-                <Badge variant="outline">{formatTime(timeLeft)}</Badge>
+                <Badge variant="outline">{votingStatus}</Badge>
+                {votingStatus !== "Voting has ended" && (
+                  <>
+                    <Badge variant="outline">{formatTime(timeLeft)}</Badge>
+                  </>
+                )}
               </>
             )}
           </div>

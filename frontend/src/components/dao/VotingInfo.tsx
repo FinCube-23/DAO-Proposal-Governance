@@ -117,7 +117,9 @@ export default function VotingInfo({ proposal }: any) {
             {proposal.audit_id !== null ? (
               <div
                 onClick={() =>
-                  navigate(`/admin/dashboard/transactions/${proposal.audit_id}`)
+                  navigate(
+                    `/organization/dao/fincube/off-chain-proposals/${proposal.audit_id}/transaction`
+                  )
                 }
                 className="font-bold underline cursor-pointer text-blue-400"
               >
