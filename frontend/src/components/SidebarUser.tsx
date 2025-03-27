@@ -210,7 +210,12 @@ export default function SidebarUser({
                               Wallet Address
                             </p>
                             <p className="text-blue-400 break-words font-mono text-sm">
-                              {mfsBusiness?.wallet_address}
+                              {mfsBusiness?.wallet_address
+                                ? `${mfsBusiness.wallet_address.slice(
+                                    0,
+                                    6
+                                  )}...${mfsBusiness.wallet_address.slice(-6)}`
+                                : ""}
                             </p>
                           </div>
                           <div>

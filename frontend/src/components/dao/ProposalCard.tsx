@@ -47,7 +47,9 @@ export default function ProposalCard({ proposal, proposalId }: any) {
   return (
     <Card
       className="hover:border-green-500 cursor-pointer"
-      onClick={() => navigate(`/mfs/dao/fincube/proposals/${proposalId}`)}
+      onClick={() =>
+        navigate(`/organization/dao/fincube/proposals/${proposalId}`)
+      }
     >
       <CardHeader>
         <div className="flex justify-between mb-2">

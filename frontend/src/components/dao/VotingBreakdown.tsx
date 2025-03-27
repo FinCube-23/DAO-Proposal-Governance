@@ -31,7 +31,9 @@ export default function VotingBreakdown({ proposalId }: any) {
   const voteRef = useRef({ proposalId: "", support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<IProposal>();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [voteDialogOpen, setVoteDialogOpen] = useState(false);
+  const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [voteStatus, setVoteStatus] = useState(true);
   const navigate = useNavigate();
   const [executeProposal] = useExecuteProposalMutation();
@@ -49,6 +51,8 @@ export default function VotingBreakdown({ proposalId }: any) {
       });
       const hash = await writeContract(config, request);
 
+      setVoteDialogOpen(true);
+
       await waitForTransactionReceipt(config, { hash });
 
       toast.success(
@@ -56,9 +60,6 @@ export default function VotingBreakdown({ proposalId }: any) {
           value ? "SUPPORT" : "AGAINST"
         } for proposal ID: ${proposalId}`
       );
-      console.log("Proposal ID:", proposalId);
-
-      setDialogOpen(true);
     } catch (e: any) {
       let errorMessage = e.message;
 
@@ -86,6 +87,8 @@ export default function VotingBreakdown({ proposalId }: any) {
         args: [proposalId],
       });
       const hash = await writeContract(config, request);
+
+      setExecuteDialogOpen(true);
 
       await executeProposal({
         proposalId: Number(proposalId),
@@ -122,6 +125,8 @@ export default function VotingBreakdown({ proposalId }: any) {
         args: [proposalId],
       });
       const hash = await writeContract(config, request);
+
+      setCancelDialogOpen(true);
 
       await cancelProposal({ proposalId: proposalId, transactionHash: hash });
 
@@ -249,10 +254,10 @@ export default function VotingBreakdown({ proposalId }: any) {
           )}
       </div>
       <Dialog
-        open={dialogOpen}
+        open={voteDialogOpen}
         onOpenChange={(open) => {
-          setDialogOpen(open);
-          if (!open) navigate("/mfs/dao/fincube");
+          setVoteDialogOpen(open);
+          if (!open) navigate("/organization/dao/fincube");
         }}
       >
         <DialogContent>
@@ -260,12 +265,60 @@ export default function VotingBreakdown({ proposalId }: any) {
             <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
           </DialogHeader>
           <p className="text-center text-yellow-400">
-            You have successfully casted your vote
+            You have successfully casted your vote and is now under process!
           </p>
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate("/mfs/dao/fincube")}
+              onClick={() => navigate("/organization/dao/fincube")}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={executeDialogOpen}
+        onOpenChange={(open) => {
+          setExecuteDialogOpen(open);
+          if (!open) navigate("/organization/dao/fincube");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+          </DialogHeader>
+          <p className="text-center text-yellow-400">
+            Proposal execution is now under process.
+          </p>
+          <DialogFooter>
+            <Button
+              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+              onClick={() => navigate("/organization/dao/fincube")}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={cancelDialogOpen}
+        onOpenChange={(open) => {
+          setCancelDialogOpen(open);
+          if (!open) navigate("/organization/dao/fincube");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+          </DialogHeader>
+          <p className="text-center text-yellow-400">
+            Proposal cancellation is now under process.
+          </p>
+          <DialogFooter>
+            <Button
+              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+              onClick={() => navigate("/organization/dao/fincube")}
             >
               Back to Dashboard
             </Button>

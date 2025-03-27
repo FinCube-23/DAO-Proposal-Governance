@@ -19,7 +19,7 @@ export default function OffchainCard({ proposal, proposalId }: any) {
     <Card
       className="hover:border-green-500 cursor-pointer"
       onClick={() =>
-        navigate(`/mfs/dao/fincube/off-chain-proposals/${proposalId}`)
+        navigate(`/organization/dao/fincube/off-chain-proposals/${proposalId}`)
       }
     >
       <CardHeader>
