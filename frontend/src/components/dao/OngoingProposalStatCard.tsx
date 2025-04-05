@@ -60,17 +60,15 @@ export const OngoingProposalStatCard = ({ proposal, proposalId }: any) => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="breakdown">
+          <Tabs className="rounded-xl" defaultValue="breakdown">
             <TabsList>
-              <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-              {/* <TabsTrigger value="voters">Voters</TabsTrigger> */}
+              <TabsTrigger value="breakdown" className="rounded-xl">
+                Breakdown
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="breakdown" className="mt-4">
               <VotingBreakdown proposalId={proposalId} />
             </TabsContent>
-            {/* <TabsContent value="voters" className="mt-4">
-              <VoterList />
-            </TabsContent> */}
           </Tabs>
         </CardContent>
       </Card>

@@ -9,10 +9,10 @@ export default function VotingProgressBar({ total, yes, no }: Props) {
   const noPercent = (no / total) * 100;
   const neutralPercent = (neutral / total) * 100;
   return (
-    <div className="border h-4 my-2 text-xs flex rounded-lg bg-emerald-200">
+    <div className="border h-4 my-2 text-xs flex rounded-xl bg-emerald-100">
       <div
         style={{ width: `${yesPercent}%` }}
-        className="shadow-none flex flex-col text-center whitespace-nowrap rounded-l-lg text-white justify-center bg-green-400"
+        className="shadow-none flex flex-col text-center whitespace-nowrap rounded-l-xl text-white justify-center bg-green-400"
       ></div>
       <div
         style={{ width: `${noPercent}%` }}
@@ -20,7 +20,7 @@ export default function VotingProgressBar({ total, yes, no }: Props) {
       ></div>
       <div
         style={{ width: `${neutralPercent}%` }}
-        className="shadow-none flex flex-col text-center rounded-r-lg whitespace-nowrap text-black justify-center bg-gray-300"
+        className="shadow-none flex flex-col text-center rounded-r-xl whitespace-nowrap text-black justify-center bg-gray-300"
       ></div>
     </div>
   );

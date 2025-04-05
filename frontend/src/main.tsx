@@ -66,13 +66,16 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                   </Route>
-                  <Route path="mfs" element={<MfsLayout />}>
-                    <Route path="" element={<Navigate to="/mfs/dashboard" />} />
+                  <Route path="organization" element={<MfsLayout />}>
+                    <Route
+                      path=""
+                      element={<Navigate to="/organization/dashboard" />}
+                    />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
                       <Route
                         path=""
-                        element={<Navigate to="/mfs/dao/fincube" />}
+                        element={<Navigate to="/organization/dao/fincube" />}
                       />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
@@ -83,6 +86,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                         <Route
                           path="approval-proposal"
                           element={<NewMemberApprovalProposal />}
+                        />
+                        <Route path="proposals" element={<DaoDashboard />} />
+                        <Route
+                          path="off-chain-proposals"
+                          element={<DaoDashboard />}
+                        />
+                        <Route
+                          path={`off-chain-proposals/:id/transaction`}
+                          element={<TrxDetails />}
+                        />
+                        <Route
+                          path="ongoing-proposals"
+                          element={<DaoDashboard />}
                         />
                         <Route
                           path="proposals/:id"

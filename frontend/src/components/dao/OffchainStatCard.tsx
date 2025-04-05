@@ -30,8 +30,10 @@ export const OffchainStatCard = ({ proposal }: any) => {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="info">
-          <TabsList>
-            <TabsTrigger value="info">Info</TabsTrigger>
+          <TabsList className="rounded-xl">
+            <TabsTrigger value="info" className="rounded-xl">
+              Info
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="info" className="mt-4">
             <VotingInfo proposal={proposal} />

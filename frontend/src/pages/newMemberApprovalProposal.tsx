@@ -121,7 +121,7 @@ const NewMemberApprovalProposal = () => {
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) navigate("/mfs/dao/fincube");
+          if (!open) navigate("/organization/dao/fincube");
         }}
       >
         <DialogContent>
@@ -144,7 +144,7 @@ const NewMemberApprovalProposal = () => {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate("/mfs/dao/fincube")}
+              onClick={() => navigate("/organization/dao/fincube")}
             >
               Back to Dashboard
             </Button>

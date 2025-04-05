@@ -14,10 +14,18 @@ import { config } from "../../main";
 import { toast } from "sonner";
 import { Button } from "@components/ui/button";
 import { useNavigate } from "react-router";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from "@components/ui/dialog";
 
 export default function VotingInfo({ proposal }: any) {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [executeProposal] = useExecuteProposalMutation();
+  const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [cancelProposal] = useCancelProposalMutation();
   const navigate = useNavigate();
   const convertStatusToVariant = (status: boolean) => {
@@ -34,6 +42,8 @@ export default function VotingInfo({ proposal }: any) {
         args: [proposal.proposal_onchain_id],
       });
       const hash = await writeContract(config, request);
+
+      setExecuteDialogOpen(true);
 
       await executeProposal({
         proposalId: Number(proposal.proposal_onchain_id),
@@ -71,6 +81,8 @@ export default function VotingInfo({ proposal }: any) {
       });
       const hash = await writeContract(config, request);
 
+      setCancelDialogOpen(true);
+
       await cancelProposal({
         proposalId: proposal.proposal_onchain_id,
         transactionHash: hash,
@@ -105,7 +117,9 @@ export default function VotingInfo({ proposal }: any) {
             {proposal.audit_id !== null ? (
               <div
                 onClick={() =>
-                  navigate(`/admin/dashboard/transactions/${proposal.audit_id}`)
+                  navigate(
+                    `/organization/dao/fincube/off-chain-proposals/${proposal.audit_id}/transaction`
+                  )
                 }
                 className="font-bold underline cursor-pointer text-blue-400"
               >
@@ -151,7 +165,7 @@ export default function VotingInfo({ proposal }: any) {
               <div
                 onClick={() =>
                   navigate(
-                    `/mfs/dao/fincube/proposals/${proposal.proposal_onchain_id}`
+                    `/organization/dao/fincube/proposals/${proposal.proposal_onchain_id}`
                   )
                 }
                 className="font-bold underline cursor-pointer text-blue-400"
@@ -225,6 +239,54 @@ export default function VotingInfo({ proposal }: any) {
             </div>
           )}
         </div>
+        <Dialog
+          open={executeDialogOpen}
+          onOpenChange={(open) => {
+            setExecuteDialogOpen(open);
+            if (!open) navigate("/organization/dao/fincube");
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+            </DialogHeader>
+            <p className="text-center text-yellow-400">
+              Proposal execution is now under process.
+            </p>
+            <DialogFooter>
+              <Button
+                className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+                onClick={() => navigate("/organization/dao/fincube")}
+              >
+                Back to Dashboard
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Dialog
+          open={cancelDialogOpen}
+          onOpenChange={(open) => {
+            setCancelDialogOpen(open);
+            if (!open) navigate("/organization/dao/fincube");
+          }}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+            </DialogHeader>
+            <p className="text-center text-yellow-400">
+              Proposal cancellation is now under process.
+            </p>
+            <DialogFooter>
+              <Button
+                className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+                onClick={() => navigate("/organization/dao/fincube")}
+              >
+                Back to Dashboard
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </>
   );
