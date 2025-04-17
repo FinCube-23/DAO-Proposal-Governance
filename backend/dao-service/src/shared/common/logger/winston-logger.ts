@@ -59,7 +59,6 @@ export class WinstonLogger implements LoggerService {
 
     constructor() {
         this.logger = winston.createLogger({
-            // Use a JSON format for better structured logging and correlation
             format: winston.format.combine(
                 winston.format.timestamp(),
                 winston.format.json()
@@ -77,11 +76,13 @@ export class WinstonLogger implements LoggerService {
                 new winston.transports.File({ filename: 'logs/app.log' }),
                 new LokiTransport({
                     host: process.env.LOG_SERVER,
-                    labels: { job: "dao-service" },
+                    labels: { 
+                        service_name: "dao-service", 
+                        service_namespace: "dao-service-api"
+                    },
+                    // Keep trace_id as a top-level field for queryability
                     format: winston.format.json(),
                     json: true,
-                    // The following ensures traceID is correctly derived
-                    // for Grafana's trace-to-logs feature
                     batching: false,
                 }),
                 new OpenTelemetryTransportV3()
