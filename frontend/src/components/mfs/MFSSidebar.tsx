@@ -14,27 +14,22 @@ import { RootState } from "@redux/store";
 
 const menus = [
   {
-    name: "MFS",
+    name: "Organization",
     items: [
       {
         name: "Dashboard",
-        url: "/mfs/dashboard",
+        url: "/organization/dashboard",
         icon: LayoutDashboard,
       },
-    ],
-  },
-  {
-    name: "DAO",
-    items: [
       {
         name: "FinCube",
-        url: "/mfs/dao/fincube",
+        url: "/organization/dao/fincube",
         icon: Landmark,
       },
     ],
   },
   {
-    name: "Admin",
+    name: "Admin Panel",
     items: [
       {
         name: "Dashboard",
@@ -57,7 +52,7 @@ export default function MFSSidebar({
         <BrandCard
           name={auth.profile?.organization?.name || "N/A"}
           logo={GalleryVerticalEnd}
-          type="MFS"
+          type="Org."
         />
       </SidebarHeader>
       <SidebarContent>

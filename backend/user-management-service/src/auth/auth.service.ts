@@ -22,7 +22,7 @@ export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-  ) {}
+  ) { }
 
   async signIn(email: string, pass: string): Promise<{ access_token: string }> {
     const user = await this.usersService.findByEmail(email);
@@ -43,74 +43,59 @@ export class AuthService {
     data_packet: ValidateAuthorizationDto,
     @Ctx() context: RmqContext,
   ): Promise<MessageResponse> {
-    const token = data_packet.access_token;
-    if (!token) {
-      this.logger.error('Error processing pending proposal:', {
-        error: 'No token found',
-        access_token: data_packet?.access_token,
-        options: data_packet?.options,
-      });
-      return {
-        status: 'FAILED',
-        message_id: data_packet?.access_token || 'unknown',
-        timestamp: new Date().toISOString(),
-        data: {
-          db_record_id: 0,
-          current_status: 'UNKNOWN',
-        },
+    const { access_token: token, options } = data_packet;
+    console.log('payload', data_packet);
+    const buildResponse = (
+      status: 'SUCCESS' | 'FAILED',
+      message: string,
+      db_record_id = 0,
+    ): MessageResponse => ({
+      status,
+      message_id: token || 'unknown',
+      timestamp: new Date().toISOString(),
+      data: {
+        db_record_id,
+        current_status: status === 'SUCCESS' ? 'VALIDATED' : 'UNKNOWN',
+      },
+      ...(status === 'FAILED' && {
         error: {
           code: 'PROCESSING_ERROR',
-          message: 'No token found',
-          details: {
-            access_token: data_packet?.access_token,
-            options: data_packet?.options,
-          },
+          message,
+          details: { access_token: token, options },
         },
-      };
+      }),
+    });
+
+    if (!token) {
+      this.logger.error('Error processing pending proposal: No token found', {
+        token,
+        options,
+      });
+      return buildResponse('FAILED', 'No token found');
     }
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.JWT_SECRET,
       });
+
+      console.log('payload', payload);
+
       const user = await this.usersService.findOne(payload.email);
+      console.log('user', user);
+      this.logger.log(
+        `Replying to Service: ${context.getMessage().properties.replyTo}`,
+      );
 
-      const originalMsg = context.getMessage();
-      const replyTo = originalMsg.properties.replyTo;
-      this.logger.log('Replying to Service: ' + replyTo);
-
-      return {
-        status: 'SUCCESS',
-        message_id: data_packet.access_token,
-        timestamp: new Date().toISOString(),
-        data: {
-          db_record_id: user.id,
-          current_status: 'VALIDATED',
-        },
-      };
+      return buildResponse('SUCCESS', 'Validation successful', user.id);
     } catch (error) {
       this.logger.error('Error processing pending proposal:', {
-        error: error.message,
-        access_token: data_packet?.access_token,
-        options: data_packet?.options,
+        message: error.message,
+        stack: error.stack,
+        token,
+        options,
       });
-      return {
-        status: 'FAILED',
-        message_id: data_packet?.access_token || 'unknown',
-        timestamp: new Date().toISOString(),
-        data: {
-          db_record_id: 0,
-          current_status: 'UNKNOWN',
-        },
-        error: {
-          code: 'PROCESSING_ERROR',
-          message: error.message,
-          details: {
-            access_token: data_packet?.access_token,
-            options: data_packet?.options,
-          },
-        },
-      };
+      return buildResponse('FAILED', error.message);
     }
   }
 

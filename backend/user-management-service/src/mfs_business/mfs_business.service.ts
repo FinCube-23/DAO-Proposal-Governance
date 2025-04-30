@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -9,25 +10,29 @@ import {
   MfsBusiness,
   OnChainProposalStatus,
 } from './entities/mfs_business.entity';
-import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
+import { MfsBusinessDTO, StatusResponseDto } from './dtos/MfsBusinessDto';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ResponseTransactionStatusDto } from './dtos/response-transaction-status.dto';
+import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
+import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
+import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
 
 @Injectable()
 export class MfsBusinessService {
-
-  private eventDrivenFunctionCall: Record<string, (proposal: ResponseTransactionStatusDto) => void>;
+  private eventDrivenFunctionCall: Record<
+    string,
+    (proposal: ResponseTransactionStatusDto) => void
+  >;
 
   constructor(
     @InjectRepository(MfsBusiness)
     private readonly mfsBusinessRepository: Repository<MfsBusiness>,
   ) {
-
     // Open for Extension Close for Modification
     this.eventDrivenFunctionCall = {
-      'ProposalCanceled': this.handleProposalUpdatedEvent.bind(this),
-      'ProposalExecuted': this.handleProposalUpdatedEvent.bind(this),
-      'ProposalAdded': this.handleCreatedProposalPlacedEvent.bind(this),
+      ProposalCanceled: this.handleProposalUpdatedEvent.bind(this),
+      ProposalExecuted: this.handleProposalUpdatedEvent.bind(this),
+      ProposalAdded: this.handleCreatedProposalPlacedEvent.bind(this),
       // Add more strings and corresponding functions as needed
     };
   }
@@ -38,20 +43,111 @@ export class MfsBusinessService {
     return mfsInfo;
   }
 
-  async findAll(sub: string): Promise<MfsBusiness[]> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    return this.mfsBusinessRepository.find();
+  async findAll(
+    query: ListOrganizationQueryDto,
+  ): Promise<OrganizationListResponseDto> {
+    const { page = 1, limit = 10, status, type, location } = query;
+    const skip = (page - 1) * limit;
+
+    const queryBuilder =
+      this.mfsBusinessRepository.createQueryBuilder('business');
+
+    // Apply filters if provided
+    if (status) {
+      queryBuilder.andWhere('business.membership_onchain_status = :status', {
+        status,
+      });
+    }
+    if (type) {
+      queryBuilder.andWhere('business.type = :type', { type });
+    }
+    if (location) {
+      queryBuilder.andWhere('business.location = :location', { location });
+    }
+
+    // Get total count for pagination
+    const total = await queryBuilder.getCount();
+
+    // Apply pagination
+    queryBuilder
+      .select([
+        'business.id',
+        'business.name',
+        'business.type',
+        'business.location',
+        'business.membership_onchain_status',
+      ])
+      .skip(skip)
+      .take(limit)
+      .orderBy('business.created_at', 'DESC');
+
+    const businesses = await queryBuilder.getMany();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: businesses,
+      total,
+      page,
+      limit,
+      totalPages,
+    };
   }
 
-  async findOne(id: number, sub: string): Promise<MfsBusiness> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    return this.mfsBusinessRepository.findOne({ where: { id } });
+  async findOne(id: number): Promise<OrganizationDetailResponseDto> {
+    const organization = await this.mfsBusinessRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
+
+    if (!organization) {
+      throw new NotFoundException(`organization with ID ${id} not found`);
+    }
+
+    return {
+      id: organization.id,
+      name: organization.name,
+      email: organization.email,
+      context: organization.context,
+      type: organization.type,
+      location: organization.location,
+      is_approved: organization.is_approved,
+      wallet_address: organization.wallet_address,
+      native_currency: organization.native_currency,
+      certificate: organization.certificate,
+      trx_hash: organization.trx_hash,
+      proposal_onchain_id: organization.proposal_onchain_id,
+      membership_onchain_status: organization.membership_onchain_status,
+      created_at: organization.created_at,
+      updated_at: organization.updated_at,
+      user: organization.user
+        ? {
+            id: organization.user.id,
+            name: organization.user.name,
+            email: organization.user.email,
+          }
+        : null,
+    };
+  }
+
+  async getStatusByEmail(email: string): Promise<StatusResponseDto> {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    const business = await this.mfsBusinessRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'membership_onchain_status'],
+    });
+
+    if (!business) {
+      throw new NotFoundException(`Business with email ${email} not found`);
+    }
+
+    return {
+      id: business.id,
+      email: business.email,
+      membership_onchain_status: business.membership_onchain_status,
+    };
   }
 
   async findByEmail(email: string): Promise<MfsBusiness> {
@@ -84,15 +180,6 @@ export class MfsBusinessService {
     return this.mfsBusinessRepository.save(updatedBusiness);
   }
 
-  async remove(id: number, sub: string): Promise<string> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    await this.mfsBusinessRepository.delete(id);
-    return `Removed #${id} MFS Business`;
-  }
-
   async updateOnChainProposalId(walletAddress: string, proposalId: number) {
     try {
       const normalizedWalletAddress = walletAddress.toLowerCase();
@@ -123,9 +210,11 @@ export class MfsBusinessService {
     }
   }
 
-  async updateOnChainProposalStatus(proposalId: number, status: OnChainProposalStatus) {
+  async updateOnChainProposalStatus(
+    proposalId: number,
+    status: OnChainProposalStatus,
+  ) {
     try {
-
       const business = await this.mfsBusinessRepository.findOne({
         where: { proposal_onchain_id: proposalId },
       });
@@ -144,10 +233,7 @@ export class MfsBusinessService {
         `Successfully updated proposal status into ${status} of proposal id ${business.proposal_onchain_id} (on-chain)`,
       );
     } catch (error) {
-      console.error(
-        'Proposal on-chain ID issue found | Error:',
-        error,
-      );
+      console.error('Proposal on-chain ID issue found | Error:', error);
     }
   }
 
@@ -200,19 +286,27 @@ export class MfsBusinessService {
     }
   }
 
-  async handleProposalUpdatedEvent(
-    proposal: ResponseTransactionStatusDto,
-  ) {
+  async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto) {
     const typename = proposal?.data?.__typename ?? null;
     const proposalId =
       'error' in proposal ? null : Number(proposal.data?.proposalId ?? null);
-    console.log(`Processed on-chain proposal ID: ${proposalId}`)
+    console.log(`Processed on-chain proposal ID: ${proposalId}`);
     if (typename == 'ProposalExecuted') {
-      console.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
-      await this.updateOnChainProposalStatus(proposalId, OnChainProposalStatus.APPROVED);
+      console.log(
+        'Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal',
+      );
+      await this.updateOnChainProposalStatus(
+        proposalId,
+        OnChainProposalStatus.APPROVED,
+      );
     } else {
-      console.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
-      await this.updateOnChainProposalStatus(proposalId, OnChainProposalStatus.CANCELLED);
+      console.log(
+        'Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal',
+      );
+      await this.updateOnChainProposalStatus(
+        proposalId,
+        OnChainProposalStatus.CANCELLED,
+      );
     }
   }
 }

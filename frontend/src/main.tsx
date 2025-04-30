@@ -28,6 +28,8 @@ import { polygonAmoy, sepolia } from "viem/chains";
 import { injected } from "@wagmi/core";
 import AdminLayout from "@layouts/AdminLayout";
 import AdminDashboard from "@pages/admin/AdminDashboard";
+import MFSDetails from "@pages/admin/MFSDetails";
+import TrxDetails from "@pages/admin/TrxDetails";
 
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
@@ -64,13 +66,16 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                   </Route>
-                  <Route path="mfs" element={<MfsLayout />}>
-                    <Route path="" element={<Navigate to="/mfs/dashboard" />} />
+                  <Route path="organization" element={<MfsLayout />}>
+                    <Route
+                      path=""
+                      element={<Navigate to="/organization/dashboard" />}
+                    />
                     <Route path="dashboard" element={<MfsDashboard />} />
                     <Route path="dao">
                       <Route
                         path=""
-                        element={<Navigate to="/mfs/dao/fincube" />}
+                        element={<Navigate to="/organization/dao/fincube" />}
                       />
                       <Route path="fincube">
                         <Route path="" element={<DaoDashboard />} />
@@ -81,6 +86,19 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                         <Route
                           path="approval-proposal"
                           element={<NewMemberApprovalProposal />}
+                        />
+                        <Route path="proposals" element={<DaoDashboard />} />
+                        <Route
+                          path="off-chain-proposals"
+                          element={<DaoDashboard />}
+                        />
+                        <Route
+                          path={`off-chain-proposals/:id/transaction`}
+                          element={<TrxDetails />}
+                        />
+                        <Route
+                          path="ongoing-proposals"
+                          element={<DaoDashboard />}
                         />
                         <Route
                           path="proposals/:id"
@@ -103,6 +121,22 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                       element={<Navigate to="/admin/dashboard" />}
                     />
                     <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route
+                      path="dashboard/organizations"
+                      element={<AdminDashboard />}
+                    />
+                    <Route
+                      path="dashboard/transactions"
+                      element={<AdminDashboard />}
+                    />
+                    <Route
+                      path="dashboard/organizations/:id"
+                      element={<MFSDetails />}
+                    />
+                    <Route
+                      path="dashboard/transactions/:id"
+                      element={<TrxDetails />}
+                    ></Route>
                   </Route>
                 </Routes>
               </BrowserRouter>

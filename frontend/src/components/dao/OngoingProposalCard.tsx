@@ -48,7 +48,7 @@ export default function OngoingProposalCard({ proposal, proposalId }: any) {
     <Card
       className="hover:border-green-500 cursor-pointer"
       onClick={() =>
-        navigate(`/mfs/dao/fincube/ongoing-proposals/${proposalId}`)
+        navigate(`/organization/dao/fincube/ongoing-proposals/${proposalId}`)
       }
     >
       <CardHeader>

@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { readContract } from "@wagmi/core";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import contractABI from "../contractABI/contractABI.json";
 import { useAccount } from "wagmi";
 import { config } from "../main";
@@ -73,6 +73,14 @@ export default function DaoDashboard() {
   const [filterProposals] = useLazyFilterProposalsQuery();
   const [filtered, setFiltered] = useState([]);
   const [filterToggle, setFilterToggle] = useState<boolean>(false);
+  const location = useLocation();
+
+  const getToggleValue = () => {
+    if (location.pathname === "/proposals") return 0;
+    if (location.pathname === "/ongoing-proposals") return 1;
+    if (location.pathname === "/off-chain-proposals") return 2;
+    return 0;
+  };
 
   const getVotingPeriod = async () => {
     try {
@@ -349,7 +357,7 @@ export default function DaoDashboard() {
                 <div className="flex flex-col items-center">
                   <Button
                     onClick={() =>
-                      navigate("/mfs/dao/fincube/general-proposal")
+                      navigate("/organization/dao/fincube/general-proposal")
                     }
                     className="my-2 w-60 hover:bg-green-400"
                   >
@@ -357,7 +365,7 @@ export default function DaoDashboard() {
                   </Button>
                   <Button
                     onClick={() =>
-                      navigate("/mfs/dao/fincube/approval-proposal")
+                      navigate("/organization/dao/fincube/approval-proposal")
                     }
                     className="my-2 w-60 hover:bg-orange-400"
                   >
@@ -374,9 +382,12 @@ export default function DaoDashboard() {
               onClick={() => {
                 setToggle(0);
                 setFilterToggle(false);
+                navigate("/organization/dao/fincube/proposals");
               }}
               className={`${
-                toggle == 0 ? "border-4 border-orange-600" : "bg-gray-400"
+                getToggleValue() === 0
+                  ? "border-4 border-orange-600"
+                  : "bg-gray-400"
               }`}
             >
               All proposals
@@ -385,9 +396,12 @@ export default function DaoDashboard() {
               onClick={() => {
                 setToggle(1);
                 setFilterToggle(false);
+                navigate("/organization/dao/fincube/ongoing-proposals");
               }}
               className={`${
-                toggle == 1 ? "border-4 border-orange-600" : "bg-gray-400"
+                getToggleValue() === 1
+                  ? "border-4 border-orange-600"
+                  : "bg-gray-400"
               }`}
             >
               Ongoing proposals
@@ -396,9 +410,12 @@ export default function DaoDashboard() {
               onClick={() => {
                 setToggle(2);
                 setFilterToggle(false);
+                navigate("/organization/dao/fincube/off-chain-proposals");
               }}
               className={`${
-                toggle == 2 ? "border-4 border-orange-600" : "bg-gray-400"
+                getToggleValue() === 2
+                  ? "border-4 border-orange-600"
+                  : "bg-gray-400"
               }`}
             >
               Off-chain records
@@ -407,9 +424,10 @@ export default function DaoDashboard() {
           {toggle === 2 && (
             <Select value={filterStatus} onValueChange={handleFilterChange}>
               <SelectTrigger className="w-[120px]">
-                <SelectValue placeholder="Filters" />
+                <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="cancel">Canceled</SelectItem>
                 <SelectItem value="executed">Executed</SelectItem>
@@ -518,7 +536,11 @@ export default function DaoDashboard() {
                     (pageNum) => (
                       <PaginationItem key={pageNum}>
                         <PaginationLink
-                          className="cursor-pointer"
+                          className={`cursor-pointer ${
+                            offchainPage === pageNum
+                              ? "border-2 border-green-400"
+                              : ""
+                          }`}
                           onClick={(e) => {
                             e.preventDefault();
                             setPageLoading(true);

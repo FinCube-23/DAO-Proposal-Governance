@@ -10,27 +10,28 @@ import {
   Request,
   Req,
   Patch,
+  Query,
+  ParseIntPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { MfsBusinessService } from './mfs_business.service';
 import { MfsBusiness } from './entities/mfs_business.entity';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { MfsBusinessDTO } from './dtos/MfsBusinessDto';
-import {
-  Ctx,
-  RmqContext,
-  Payload,
-  EventPattern,
-} from '@nestjs/microservices';
+import { MfsBusinessDTO, StatusResponseDto } from './dtos/MfsBusinessDto';
+import { Ctx, RmqContext, Payload, EventPattern } from '@nestjs/microservices';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-
+import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
+import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
+import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
 
 @Controller('mfs-business')
 export class MfsBusinessController {
-  constructor(private readonly mfsBusinessService: MfsBusinessService) { }
+  constructor(private readonly mfsBusinessService: MfsBusinessService) {}
 
   @Post()
   @ApiBody({ type: MfsBusiness })
+  @ApiTags('Organization')
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully created.',
@@ -48,29 +49,39 @@ export class MfsBusinessController {
     );
   }
 
+  @Get('status-by-email')
+  @ApiTags('Organization-Profile-Status')
+  @ApiOkResponse({ type: StatusResponseDto })
+  @ApiQuery({ name: 'email', required: true, type: String })
+  async getStatusByEmail(
+    @Query('email') email: string
+  ): Promise<StatusResponseDto> {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+    return this.mfsBusinessService.getStatusByEmail(email);
+  }
+
   @Get()
-  @ApiResponse({ status: 200, type: [MfsBusiness] })
-  @ApiResponse({ status: 404, description: 'Not Found.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findAll(@Req() req): Promise<MfsBusiness[]> {
-    console.log(req.user);
-    return this.mfsBusinessService.findAll(req.user);
+  @ApiTags('Organization')
+  @ApiOkResponse({ type: OrganizationListResponseDto })
+  async findAll(
+    @Query() query: ListOrganizationQueryDto,
+  ): Promise<OrganizationListResponseDto> {
+    return this.mfsBusinessService.findAll(query);
   }
 
   @Get(':id')
-  @ApiResponse({ status: 200, type: MfsBusiness })
-  @ApiResponse({ status: 404, description: 'Not Found.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async findOne(@Param('id') id: string, @Req() req): Promise<MfsBusiness> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
-    if (!mfs_business) {
-      throw new NotFoundException(`MFS business doesn't exist`);
-    } else {
-      return mfs_business;
-    }
+  @ApiTags('Organization')
+  @ApiOkResponse({ type: OrganizationDetailResponseDto })
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<OrganizationDetailResponseDto> {
+    return this.mfsBusinessService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiTags('Organization')
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated.',
@@ -82,21 +93,5 @@ export class MfsBusinessController {
     @Body() updateMfsBusinessDto: MfsBusiness,
   ): Promise<MfsBusiness> {
     return this.mfsBusinessService.update(+id, updateMfsBusinessDto);
-  }
-
-  @Delete(':id')
-  @ApiResponse({
-    status: 200,
-    description: 'The record has been successfully deleted.',
-    type: MfsBusiness,
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async remove(@Param('id') id: string, @Req() req): Promise<any> {
-    const mfs_business = await this.mfsBusinessService.findOne(+id, req.user);
-    if (!mfs_business) {
-      throw new NotFoundException(`MFS business doesn't exist`);
-    } else {
-      return this.mfsBusinessService.remove(+id, req.user);
-    }
   }
 }

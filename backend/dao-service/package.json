@@ -20,7 +20,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
-    "@custom/validate-auth": "file:../libs/validate-auth",
+    "@fincube/validate-auth": "github:FinCube-23/validate-auth",
     "@golevelup/nestjs-rabbitmq": "^5.7.0",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.0",
