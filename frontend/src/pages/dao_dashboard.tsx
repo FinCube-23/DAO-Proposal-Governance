@@ -71,7 +71,7 @@ export default function DaoDashboard() {
   const [totalPages, setTotalPages] = useState(0);
   const [filterStatus, setFilterStatus] = useState<string>("pending");
   const [filterProposals] = useLazyFilterProposalsQuery();
-  const [filtered, setFiltered] = useState([]);
+  const [filtered, setFiltered] = useState<IOffchainProposalCard[]>([]);
   const [filterToggle, setFilterToggle] = useState<boolean>(false);
   const location = useLocation();
 
@@ -261,7 +261,7 @@ export default function DaoDashboard() {
         const response = await filterProposals(status);
 
         console.log(response.data);
-        setFiltered(response.data);
+        setFiltered(response.data as any);
       } catch (e) {
         console.error(e);
       }

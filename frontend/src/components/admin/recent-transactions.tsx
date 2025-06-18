@@ -7,7 +7,8 @@ import { useEffect, useState } from "react";
 import { Badge } from "@components/ui/badge";
 import { Loader } from "lucide-react";
 
-export function RecentTransactions({ proposalCount }: any) {
+// export function RecentTransactions({ proposalCount }: any) {}
+export function RecentTransactions() {
   const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
   const [loading, setLoading] = useState<boolean>();
 
