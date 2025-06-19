@@ -20,7 +20,7 @@ jobs:
           script: |
             cd ~/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
-            git pull origin main
+            git pull
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 22
