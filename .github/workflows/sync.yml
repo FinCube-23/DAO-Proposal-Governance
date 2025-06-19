@@ -18,6 +18,8 @@ jobs:
           key: ${{ secrets.VM_PRIVATE_KEY }}
           port: ${{ secrets.VM_PORT }}
           script: |
+            export NVM_DIR="$HOME/.nvm"
+            source "$NVM_DIR/nvm.sh"
             cd ~/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
             git pull
