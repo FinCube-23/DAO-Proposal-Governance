@@ -22,7 +22,7 @@ jobs:
             cd /home/web3/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
             git pull
-            export NVM_DIR="/home/web3/.nvm"
+            export NVM_DIR=".nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 22
             npm install
