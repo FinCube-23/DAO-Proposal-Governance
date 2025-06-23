@@ -1,3 +1,5 @@
+# FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services
+
 ![Layer 1: Ethereum](https://img.shields.io/badge/Layer%201-Ethereum-blue)
 ![Layer 2: Polygon](https://img.shields.io/badge/Layer%202-Polygon-blueviolet)
 ![Technology: Blockchain](https://img.shields.io/badge/Technology-Blockchain-lightgrey)
