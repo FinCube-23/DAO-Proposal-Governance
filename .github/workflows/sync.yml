@@ -19,10 +19,10 @@ jobs:
           port: ${{ secrets.VM_PORT }}
           script: |
             echo "=== Navigating to project directory ==="
-            cd /home/web3/projects/DAO-Proposal-Governance
+            cd ~/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
-            git pull
-            export NVM_DIR=".nvm"
+            git pull origin dev
+            export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             nvm use 22
             npm install
