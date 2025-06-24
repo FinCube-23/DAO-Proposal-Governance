@@ -285,7 +285,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -310,7 +310,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -395,18 +395,18 @@ export class ProposalServiceService {
   })
   async handleProposalEventAction(proposal: ResponseTransactionStatusDto) {
     this.logger.log(
-      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE:}`,
+      `THE GRAPH: Got this response before AUDIT TRAIL SERVICE:}, ${JSON.stringify(proposal)}`,
     );
     const typename = proposal?.data?.__typename ?? null;
-    this.logger.log(`Redirected on-chain event by AUDIT-TRAIL: ${typename}`);
+    this.logger.log(`Redirected on - chain event by AUDIT - TRAIL: ${typename}`);
     if (this.eventDrivenFunctionCall[typename]) {
       // Call the corresponding function from the dictionary
       this.logger.log(
-        `Calling function for on-chain event: ${this.eventDrivenFunctionCall[typename]?.name ?? 'Unknown function'}`,
+        `Calling function for on - chain event: ${this.eventDrivenFunctionCall[typename]?.name ?? 'Unknown function'} `,
       );
       await this.eventDrivenFunctionCall[typename](proposal);
     } else {
-      this.logger.warn(`On-chain event type "${typename}" is not recognized.`);
+      this.logger.warn(`On - chain event type "${typename}" is not recognized.`);
     }
   }
 
@@ -415,7 +415,7 @@ export class ProposalServiceService {
   ) {
     try {
       this.logger.log({
-        message: `Received a proposal transaction update in event pattern - hash:`,
+        message: `Received a proposal transaction update in event pattern - hash: `,
         trxHash: proposal.transactionHash
       }
       );
