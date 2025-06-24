@@ -48,7 +48,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [otlp, debug]
+      exporters: [otlp]
     logs:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
@@ -56,6 +56,7 @@ service:
   extensions: [health_check]
   telemetry:
     metrics:
+      address: 127.0.0.1:8888
       level: detailed
     logs:
       level: debug
