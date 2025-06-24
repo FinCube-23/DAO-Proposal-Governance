@@ -26,11 +26,7 @@ export default function OffchainCard({ proposal, proposalId }: any) {
         <div className="flex justify-between mb-2">
           <Badge variant="secondary">Off-chain</Badge>
           <Badge variant={convertStatusToVariant(proposal.proposal_status)}>
-            <p className="capitalize">
-              {proposal.proposal_status === "cancel"
-                ? "Canceled"
-                : `${proposal.proposal_status}`}
-            </p>
+            <p className="capitalize">{proposal.proposal_status}</p>
           </Badge>
         </div>
         <div className="font-bold text-2xl">Proposal ID: {proposal.id}</div>
