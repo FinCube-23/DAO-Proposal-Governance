@@ -13,7 +13,7 @@ datasources:
         enabled: true
       tracesToLogsV2:
         customQuery: true
-        query: '{appname="grafana"} |~ "\\\\\"traceID\\\\\":\\\\\"$${__trace.traceId}\\\\"'
+        query: '{service_name=~".+"} |~ "trace_id.*$${__trace.traceId}"'
         spanEndTimeShift: 1m
         spanStartTimeShift: -1m
         datasourceUid: loki
