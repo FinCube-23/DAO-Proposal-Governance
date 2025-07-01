@@ -3,7 +3,7 @@ name: Remote SSH
 on:
   push:
     branches:
-      - dev
+      - main
 
 jobs:
   deploy:
@@ -21,5 +21,5 @@ jobs:
             echo "=== Navigating to project directory ==="
             cd ~/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
-            git pull origin dev
+            git pull origin main
             echo "Script executed successfully"
