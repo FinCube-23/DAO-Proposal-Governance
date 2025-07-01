@@ -1,28 +1,33 @@
-# Multistage Dockerfile for User Management Service
-From node:20-alpine as builder
+# Use official Node.js LTS image
+# Needed for Otel as node:20 has certificates which the SDK needs
+FROM node:20 as builder
+
 WORKDIR /app
+
+# Copy only package.json and package-lock.json first for better caching
 COPY package*.json ./
 
-# Install all dependencies (including devDependencies for build)
-RUN npm ci --legacy-peer-deps --only=production=false
+# Install dependencies
+RUN npm install --legacy-peer-deps
+
+# Copy the rest of the app
 COPY . .
 
-# Build the application (if you have a build step)
 RUN npm run build
 
-#----- PRODUCTION--------
+#----- PRODUCTION---------
 FROM node:20-alpine as production
 WORKDIR /app
+
 COPY package*.json ./
-
 # Install only production dependencies
-RUN npm ci --legacy-peer-deps --only=production && npm cache clean --force
+RUN npm ci --legacy-peer-deps --omit-dev && npm cache clean --force
 
-# Copy built application from builder stage
-# --chown=app:app, ensures your security best practices and avoids file permission issues
+# Copy only the necessary files
 COPY --from=builder --chown=app:app /app/dist ./dist
 
-EXPOSE 3001
 
-# Use production command
+EXPOSE 3000
+
 CMD ["node", "dist/main.js"]
+

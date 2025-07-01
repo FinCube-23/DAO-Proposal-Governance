@@ -34,9 +34,21 @@ export const otelSDK = new NodeSDK({
     spanProcessor: new SimpleSpanProcessor(traceExporter),
     instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation(), new NestInstrumentation(), new PgInstrumentation(), new AmqplibInstrumentation(), new WinstonInstrumentation()],
 });
+otelSDK.start();
+console.log('OpenTelemetry SDK started');
 
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {
+    otelSDK
+        .shutdown()
+        .then(
+            () => console.log('SDK shut down successfully'),
+            (err) => console.log('Error shutting down SDK', err),
+        )
+        .finally(() => process.exit(0));
+});
+
+process.on('SIGINT', () => {
     otelSDK
         .shutdown()
         .then(

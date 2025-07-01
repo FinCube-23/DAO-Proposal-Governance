@@ -1,5 +1,4 @@
-import * as tracer from './tracing';
-tracer.otelSDK.start();
+import './tracing';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';

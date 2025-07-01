@@ -1,31 +1,33 @@
-# lts-iron refers to Node.js LTS v20
-# Using this instead of node:20 to avoid dependabot updates
+# Use official Node.js LTS image
+# Needed for Otel as node:20 has certificates which the SDK needs
+FROM node:20 as builder
 
-# ======= Builder Stage =======
-FROM node:20-alpine AS builder
 WORKDIR /app
 
+# Copy only package.json and package-lock.json first for better caching
 COPY package*.json ./
-RUN npm ci
 
-COPY --chown=app:app . .
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the app
+COPY . .
+
 RUN npm run build
 
-# ======= Production Stage =======
-FROM node:20-alpine AS production
+#----- PRODUCTION---------
+FROM node:20-alpine as production
 WORKDIR /app
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-
 COPY package*.json ./
-RUN npm ci --omit-dev
+# Install only production dependencies
+RUN npm ci --omit-dev && npm cache clean --force
 
 # Copy only the necessary files
 COPY --from=builder --chown=app:app /app/dist ./dist
 
-USER node
 
 EXPOSE 3000
 
 CMD ["node", "dist/main.js"]
+
