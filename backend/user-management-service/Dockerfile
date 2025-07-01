@@ -1,16 +1,28 @@
-# lts-iron refers to Node.js LTS v20
-# Using this instead of node:20 to avoid dependabot updates
-FROM node:lts as builder
+# Multistage Dockerfile for User Management Service
+From node:20-alpine as builder
 WORKDIR /app
-
 COPY package*.json ./
 
-RUN npm install --legacy-peer-deps
+# Install all dependencies (including devDependencies for build)
+RUN npm ci --legacy-peer-deps --only=production=false
+COPY . .
 
+# Build the application (if you have a build step)
+RUN npm run build
+
+#----- PRODUCTION--------
+FROM node:20-alpine as production
+WORKDIR /app
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --legacy-peer-deps --only=production && npm cache clean --force
+
+# Copy built application from builder stage
 # --chown=app:app, ensures your security best practices and avoids file permission issues
-COPY --chown=app:app . .
+COPY --from=builder --chown=app:app /app/dist ./dist
 
-EXPOSE 3000
+EXPOSE 3001
 
-CMD ["npm", "run", "start:dev"]
-
+# Use production command
+CMD ["node", "dist/main.js"]
