@@ -1,0 +1,60 @@
+services:
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    networks:
+      - fincube23_network
+    ports:
+      - "3100:3100"  # Expose Loki's port for queries
+    volumes:
+      - ./config/loki-config.yaml:/etc/loki/local-config.yaml  # Mount the custom Loki config
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - fincube23_network
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=false
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    ports:
+      - "3200:3000"  # Expose Grafana's UI port
+    depends_on:
+      - loki  # Ensure Loki is up before starting Grafana
+      - tempo
+    volumes:
+      - grafana-data:/var/lib/grafana  # Persistent storage for Grafana dashboards and settings
+      - ./config/grafana.yaml:/etc/grafana/provisioning/datasources/ds.yaml 
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    networks:
+      - fincube23_network
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    command: ["--config", "/etc/otel-collector-config.yaml"]
+    ports:
+      - "4320:4317"  # OTLP gRPC endpoint
+      - "4321:4318"  # OTLP HTTP endpoint
+
+  tempo:
+    image: grafana/tempo:latest
+    container_name: tempo
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./config/tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/var/tempo
+    ports:
+      - "3201:3200"   # tempo
+    networks:
+      - fincube23_network
+
+networks:
+  fincube23_network:
+    external: true  # Use the external Docker network 'fincube23_network'
+
+volumes:
+  grafana-data:
+    driver: local  # Persistent volume for Grafana

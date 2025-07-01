@@ -1,0 +1,9 @@
+npm-debug.log
+.git
+.env
+.env.local
+local
+Dockerfile
+.dockerignore
+node_modules
+dist

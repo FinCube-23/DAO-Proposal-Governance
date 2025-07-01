@@ -1,0 +1,20 @@
+services:
+  web3-proxy-service:
+    container_name: web3_proxy
+    build:
+      context: ./
+      args:
+        - APP_ENV
+    ports:
+      - 3004:3000
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    env_file:
+      - .env.local
+    networks:
+      - fincube23_network
+
+networks:
+  fincube23_network:
+    external: true

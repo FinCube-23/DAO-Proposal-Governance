@@ -1,0 +1,37 @@
+services:
+  dao-app:
+    container_name: dao_service_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - APP_ENV
+    ports:
+      - '3002:3000'
+    volumes:
+      - .:/app # Mount dao-service code
+      - /app/node_modules
+      - ../libs:/app/libs:ro # Mount libs directory as read-only
+    env_file:
+      - .env.local
+    networks:
+      - fincube23_network
+
+  dao-service-pgsqldb:
+    container_name: dao-service-pgsqldb
+    image: postgres:16
+    env_file:
+      - .env.local
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - fincube23_network
+
+volumes:
+  postgres-data:
+
+networks:
+  fincube23_network:
+    external: true
