@@ -17,7 +17,8 @@
 <text text-anchor="start" x="230.35" y="-1122.85" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;mfs_businesses &#160;&#160;&#160;&#160;&#160;&#160;</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="121.29,-1041.65 121.29,-1101.65 693.29,-1101.65 693.29,-1041.65 121.29,-1041.65"/>
 <polygon fill="none" stroke="#29235c" points="121.29,-1041.65 121.29,-1101.65 693.29,-1101.65 693.29,-1041.65 121.29,-1041.65"/>
-<text text-anchor="start" x="132.29" y="-1061.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">id &#160;&#160;&#160;</text>
+<text text-anchor="start" x="132.29" y="-1062.85" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="157.18" y="-1062.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
 <text text-anchor="start" x="648.51" y="-1062.85" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="121.29,-981.65 121.29,-1041.65 693.29,-1041.65 693.29,-981.65 121.29,-981.65"/>
 <polygon fill="none" stroke="#29235c" points="121.29,-981.65 121.29,-1041.65 693.29,-1041.65 693.29,-981.65 121.29,-981.65"/>
@@ -98,7 +99,8 @@
 <text text-anchor="start" x="544.51" y="-1889.85" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="225.29,-1808.65 225.29,-1868.65 589.29,-1868.65 589.29,-1808.65 225.29,-1808.65"/>
 <polygon fill="none" stroke="#29235c" points="225.29,-1808.65 225.29,-1868.65 589.29,-1868.65 589.29,-1808.65 225.29,-1808.65"/>
-<text text-anchor="start" x="236.29" y="-1828.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">id &#160;&#160;&#160;</text>
+<text text-anchor="start" x="236.29" y="-1829.85" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="261.18" y="-1829.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
 <text text-anchor="start" x="544.51" y="-1829.85" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="225.29,-1748.65 225.29,-1808.65 589.29,-1808.65 589.29,-1748.65 225.29,-1748.65"/>
 <polygon fill="none" stroke="#29235c" points="225.29,-1748.65 225.29,-1808.65 589.29,-1808.65 589.29,-1748.65 225.29,-1748.65"/>
@@ -131,7 +133,8 @@
 <text text-anchor="start" x="228.17" y="-2724.85" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#ffffff"> &#160;&#160;&#160;&#160;&#160;&#160;exchange_users &#160;&#160;&#160;&#160;&#160;&#160;</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="217.29,-2643.65 217.29,-2703.65 598.29,-2703.65 598.29,-2643.65 217.29,-2643.65"/>
 <polygon fill="none" stroke="#29235c" points="217.29,-2643.65 217.29,-2703.65 598.29,-2703.65 598.29,-2643.65 217.29,-2643.65"/>
-<text text-anchor="start" x="228.29" y="-2663.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">id &#160;&#160;&#160;</text>
+<text text-anchor="start" x="228.29" y="-2664.85" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="253.18" y="-2664.85" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
 <text text-anchor="start" x="553.51" y="-2664.85" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="217.29,-2583.65 217.29,-2643.65 598.29,-2643.65 598.29,-2583.65 217.29,-2583.65"/>
 <polygon fill="none" stroke="#29235c" points="217.29,-2583.65 217.29,-2643.65 598.29,-2643.65 598.29,-2583.65 217.29,-2583.65"/>

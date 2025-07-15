@@ -58,20 +58,46 @@ async function exportSchema(config: typeof databases[0]) {
             dbml += `Table "${tableName}" {\n`;
 
             const columns = await client.query(`
-      SELECT column_name, data_type
-      FROM information_schema.columns
-      WHERE table_name = '${tableName}';
-    `);
+  SELECT
+    c.column_name,
+    c.data_type,
+    c.is_nullable,
+    (SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.table_constraints tc
+      JOIN information_schema.key_column_usage kcu
+        ON tc.constraint_name = kcu.constraint_name
+      WHERE tc.table_name = '${tableName}'
+        AND tc.constraint_type = 'PRIMARY KEY'
+        AND kcu.column_name = c.column_name
+    )) AS is_primary,
+    (SELECT EXISTS (
+      SELECT 1
+      FROM information_schema.table_constraints tc
+      JOIN information_schema.key_column_usage kcu
+        ON tc.constraint_name = kcu.constraint_name
+      WHERE tc.table_name = '${tableName}'
+        AND tc.constraint_type = 'FOREIGN KEY'
+        AND kcu.column_name = c.column_name
+    )) AS is_foreign
+  FROM information_schema.columns c
+  WHERE c.table_name = '${tableName}';
+`);
 
             for (const col of columns.rows) {
                 let dataType = col.data_type === 'USER-DEFINED' ? 'varchar' : col.data_type;
-
                 if (dataType.startsWith('timestamp')) dataType = 'timestamp';
                 if (dataType === 'character varying') dataType = 'varchar';
                 if (dataType === 'integer') dataType = 'int';
-                if (dataType === 'double precision') dataType = 'double'; // <-- Add this line
+                if (dataType === 'double precision') dataType = 'double';
 
-                dbml += `  "${col.column_name}" ${dataType}\n`;
+                let settings = [];
+                if (col.is_primary) settings.push('pk');
+                if (col.is_foreign) settings.push('ref');
+                if (col.is_nullable === 'YES') settings.push('null');
+
+                const settingsStr = settings.length ? ` [${settings.join(', ')}]` : '';
+                dbml += `  "${col.column_name}" ${dataType}${settingsStr}\n`;
             }
 
             dbml += `}\n\n`;

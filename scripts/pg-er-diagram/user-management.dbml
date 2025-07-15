@@ -1,16 +1,16 @@
 // DBML export for user-management
 
 Table "mfs_businesses" {
-  "id" int
+  "id" int [pk]
   "is_approved" boolean
-  "proposal_onchain_id" int
-  "membership_onchain_status" varchar
+  "proposal_onchain_id" int [null]
+  "membership_onchain_status" varchar [null]
   "created_at" timestamp
   "updated_at" timestamp
-  "trx_hash" varchar
-  "wallet_address" varchar
+  "trx_hash" varchar [null]
+  "wallet_address" varchar [null]
   "native_currency" varchar
-  "certificate" varchar
+  "certificate" varchar [null]
   "name" varchar
   "email" varchar
   "context" varchar
@@ -19,10 +19,10 @@ Table "mfs_businesses" {
 }
 
 Table "users" {
-  "exchangeUserId" int
+  "exchangeUserId" int [ref, null]
   "updated_at" timestamp
-  "mfsBusinessId" int
-  "id" int
+  "mfsBusinessId" int [ref, null]
+  "id" int [pk]
   "role" varchar
   "created_at" timestamp
   "name" varchar
@@ -31,7 +31,7 @@ Table "users" {
 }
 
 Table "exchange_users" {
-  "id" int
+  "id" int [pk]
   "balance" double
   "created_at" timestamp
   "updated_at" timestamp

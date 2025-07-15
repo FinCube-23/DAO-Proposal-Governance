@@ -2,16 +2,16 @@
 
 Table "Proposal" {
   "updated_at" timestamp
-  "proposal_onchain_id" int
+  "proposal_onchain_id" int [null]
   "proposal_type" varchar
-  "audit_id" int
+  "audit_id" int [null]
   "trx_status" int
   "created_at" timestamp
-  "id" int
+  "id" int [pk]
   "proposal_status" varchar
-  "metadata" varchar
+  "metadata" varchar [null]
   "proposer_address" varchar
-  "processed_by" varchar
+  "processed_by" varchar [null]
   "trx_hash" varchar
 }
 

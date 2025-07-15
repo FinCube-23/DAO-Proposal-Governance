@@ -29,7 +29,8 @@
 <text text-anchor="start" x="430.4" y="-363.44" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">varchar</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="96.73,-282.24 96.73,-342.24 547.73,-342.24 547.73,-282.24 96.73,-282.24"/>
 <polygon fill="none" stroke="#29235c" points="96.73,-282.24 96.73,-342.24 547.73,-342.24 547.73,-282.24 96.73,-282.24"/>
-<text text-anchor="start" x="107.73" y="-302.44" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">id &#160;&#160;&#160;</text>
+<text text-anchor="start" x="107.73" y="-303.44" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="132.62" y="-303.44" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
 <text text-anchor="start" x="502.95" y="-303.44" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="96.73,-222.24 96.73,-282.24 547.73,-282.24 547.73,-222.24 96.73,-222.24"/>
 <polygon fill="none" stroke="#29235c" points="96.73,-222.24 96.73,-282.24 547.73,-282.24 547.73,-222.24 96.73,-222.24"/>

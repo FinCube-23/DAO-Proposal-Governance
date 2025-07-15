@@ -41,7 +41,8 @@
 <text text-anchor="start" x="352.96" y="-545.57" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">timestamp</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="90.52,-464.37 90.52,-524.37 511.52,-524.37 511.52,-464.37 90.52,-464.37"/>
 <polygon fill="none" stroke="#29235c" points="90.52,-464.37 90.52,-524.37 511.52,-524.37 511.52,-464.37 90.52,-464.37"/>
-<text text-anchor="start" x="101.52" y="-484.57" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c">id &#160;&#160;&#160;</text>
+<text text-anchor="start" x="101.52" y="-485.57" font-family="Helvetica,sans-Serif" font-weight="bold" font-size="32.00" fill="#29235c">id</text>
+<text text-anchor="start" x="126.41" y="-485.57" font-family="Helvetica,sans-Serif" font-size="32.00" fill="#29235c"> &#160;&#160;&#160;</text>
 <text text-anchor="start" x="466.74" y="-485.57" font-family="Helvetica,sans-Serif" font-style="italic" font-size="32.00" fill="#29235c">int</text>
 <polygon fill="#e7e2dd" stroke="transparent" points="90.52,-404.37 90.52,-464.37 511.52,-464.37 511.52,-404.37 90.52,-404.37"/>
 <polygon fill="none" stroke="#29235c" points="90.52,-404.37 90.52,-464.37 511.52,-464.37 511.52,-404.37 90.52,-404.37"/>
