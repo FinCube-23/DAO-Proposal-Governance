@@ -1,0 +1,17 @@
+// DBML export for dao-service
+
+Table "Proposal" {
+  "updated_at" timestamp
+  "proposal_onchain_id" int
+  "proposal_type" varchar
+  "audit_id" int
+  "trx_status" int
+  "created_at" timestamp
+  "id" int
+  "proposal_status" varchar
+  "metadata" varchar
+  "proposer_address" varchar
+  "processed_by" varchar
+  "trx_hash" varchar
+}
+

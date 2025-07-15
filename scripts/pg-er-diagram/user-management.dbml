@@ -1,0 +1,41 @@
+// DBML export for user-management
+
+Table "mfs_businesses" {
+  "id" int
+  "is_approved" boolean
+  "proposal_onchain_id" int
+  "membership_onchain_status" varchar
+  "created_at" timestamp
+  "updated_at" timestamp
+  "trx_hash" varchar
+  "wallet_address" varchar
+  "native_currency" varchar
+  "certificate" varchar
+  "name" varchar
+  "email" varchar
+  "context" varchar
+  "type" varchar
+  "location" varchar
+}
+
+Table "users" {
+  "exchangeUserId" int
+  "updated_at" timestamp
+  "mfsBusinessId" int
+  "id" int
+  "role" varchar
+  "created_at" timestamp
+  "name" varchar
+  "email" varchar
+  "password" varchar
+}
+
+Table "exchange_users" {
+  "id" int
+  "balance" double
+  "created_at" timestamp
+  "updated_at" timestamp
+  "name" varchar
+  "email" varchar
+}
+

@@ -1,0 +1,12 @@
+// DBML export for audit-trail-service
+
+Table "transactions" {
+  "created_at" timestamp
+  "updated_at" timestamp
+  "confirmation_source" varchar
+  "id" int
+  "trx_status" varchar
+  "trx_metadata" varchar
+  "trx_hash" varchar
+}
+
