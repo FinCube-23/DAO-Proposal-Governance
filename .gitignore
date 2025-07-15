@@ -4,3 +4,4 @@ backend/user-management-service/src/database_seeder/exchange_users.json
 backend/user-management-service/src/database_seeder/mfs_businesses.json
 scripts/*/node_modules
 scripts/*/.env.local
+scripts/*/r*.json
