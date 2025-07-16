@@ -1,5 +1,6 @@
 const { execSync } = require("child_process");
 const fs = require("fs");
+const path = require("path");
 
 const CONTAINER = "rabbitmq"; // or your container name
 
@@ -140,7 +141,7 @@ function main() {
     )
   );
   console.log(
-    "\n✅ Saved: rabbitmq_edges.json, rabbitmq_report.json, rabbitmq_topology.json"
+    "\n Saved: rabbitmq_edges.json, rabbitmq_report.json, rabbitmq_topology.json"
   );
 }
 
