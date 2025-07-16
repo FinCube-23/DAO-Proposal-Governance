@@ -6,6 +6,6 @@ if ! command -v solidity-code-metrics &> /dev/null; then
 fi
 
 # Generate markdown report for all .sol files in contracts directory
-solidity-code-metrics ../../web3/contracts/*.sol > solidity-metrics-report.md
+solidity-code-metrics ../../web3/contracts/*.sol > ../exports/solidity-metrics-report.md
 
 echo "Markdown report written to solidity-metrics-report.md"

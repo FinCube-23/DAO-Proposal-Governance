@@ -34,6 +34,15 @@ const databases = [
     },
 ];
 
+const EXPORTS_DIR = path.join(__dirname, '../exports');
+
+function ensureExportsDirectory() {
+    if (!fs.existsSync(EXPORTS_DIR)) {
+        fs.mkdirSync(EXPORTS_DIR, { recursive: true });
+        console.log(`Created exports directory: ${EXPORTS_DIR}`);
+    }
+}
+
 async function exportSchema(config: typeof databases[0]) {
     const client = new Client({
         host: config.host,
@@ -105,30 +114,34 @@ async function exportSchema(config: typeof databases[0]) {
 
         await client.end();
 
-        fs.writeFileSync(`${config.name}.dbml`, dbml);
-        console.log(`Exported ${config.name} to ${config.name}.dbml`);
+        // Write to exports directory
+        const dbmlPath = path.join(EXPORTS_DIR, `${config.name}.dbml`);
+        fs.writeFileSync(dbmlPath, dbml);
+        console.log(`Exported ${config.name} to ${dbmlPath}`);
     } catch (err) {
         console.error(`Error connecting to DB ${err}`);
     }
 }
 
 //ConvertExportedschema to ER Diagram
-
-
 function convertDbmlToSvg(dbmlFile: string) {
-    const svgFile = dbmlFile.replace('.dbml', '.svg');
-    const cmd = `npx @softwaretechnik/dbml-renderer -i ${dbmlFile} -o ${svgFile}`;
+    const dbmlPath = path.join(EXPORTS_DIR, dbmlFile);
+    const svgPath = path.join(EXPORTS_DIR, dbmlFile.replace('.dbml', '.svg'));
+    const cmd = `npx @softwaretechnik/dbml-renderer -i ${dbmlPath} -o ${svgPath}`;
 
     exec(cmd, (error, stdout, stderr) => {
         if (error) {
             console.error(`Error rendering ${dbmlFile}:`, stderr);
         } else {
-            console.log(`Rendered ER diagram: ${svgFile}`);
+            console.log(`Rendered ER diagram: ${svgPath}`);
         }
     });
 }
 
 async function run() {
+    // Ensure exports directory exists
+    ensureExportsDirectory();
+
     for (const config of databases) {
         const fileName = `${config.name}.dbml`;
         await exportSchema(config);

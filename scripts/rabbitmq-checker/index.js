@@ -111,10 +111,21 @@ function main() {
   console.log(report);
 
   // Save outputs
-  fs.writeFileSync("rabbitmq_edges.json", JSON.stringify(edges, null, 2));
-  fs.writeFileSync("rabbitmq_report.json", JSON.stringify(report, null, 2));
+  const outputDir = path.resolve(__dirname, "..", "exports");
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true });
+  }
+
   fs.writeFileSync(
-    "rabbitmq_topology.json",
+    path.join(outputDir, "rabbitmq_edges.json"),
+    JSON.stringify(edges, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(outputDir, "rabbitmq_report.json"),
+    JSON.stringify(report, null, 2)
+  );
+  fs.writeFileSync(
+    path.join(outputDir, "rabbitmq_topology.json"),
     JSON.stringify(
       {
         report,
@@ -128,7 +139,6 @@ function main() {
       2
     )
   );
-
   console.log(
     "\n✅ Saved: rabbitmq_edges.json, rabbitmq_report.json, rabbitmq_topology.json"
   );

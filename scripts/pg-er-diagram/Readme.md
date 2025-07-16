@@ -27,6 +27,10 @@ docker build -t pg-schema-export .
 ```
 1. 
 ```bash
-docker run --rm   --network fincube23_network   -v $PWD:/app   pg-schema-export                                         
+docker run --rm \                                                                                           
+  --network fincube23_network \                                                                                                                                                         
+  -v $PWD:/app \
+  -v $PWD/../exports:/app/../exports \
+  pg-schema-export                                       
 ```
 Here PWD is the mount path
