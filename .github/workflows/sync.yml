@@ -1,0 +1,29 @@
+name: Remote SSH
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.2.2
+        with:
+          host: ${{ secrets.VM_IP }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_PRIVATE_KEY }}
+          port: ${{ secrets.VM_PORT }}
+          script: |
+            echo "=== Navigating to project directory ==="
+            cd ~/projects/DAO-Proposal-Governance
+            echo "Pulling latest changes from repository"
+            git pull origin main
+            echo "Stopping docker services"
+            ./run.sh down
+            echo "Starting docker services"
+            ./run.sh up-be
+            echo "Script executed successfully"

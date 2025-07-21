@@ -17,10 +17,12 @@ const TrxDetails = () => {
 
   useEffect(() => {
     const getTrx = async () => {
-      try {
-        await getTransaction(id);
-      } catch (e) {
-        console.error(e);
+      if (id) {
+        try {
+          await getTransaction(id);
+        } catch (e) {
+          console.error(e);
+        }
       }
     };
     getTrx();

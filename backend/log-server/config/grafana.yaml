@@ -1,0 +1,36 @@
+apiVersion: 1
+datasources:
+  - name: tempo
+    uid: tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    basicAuth: false
+    apiVersion: 1
+    jsonData:
+      httpMethod: GET
+      nodeGraph:
+        enabled: true
+      tracesToLogsV2:
+        customQuery: true
+        query: '{service_name=~".+"} |~ "trace_id.*$${__trace.traceId}"'
+        spanEndTimeShift: 1m
+        spanStartTimeShift: -1m
+        datasourceUid: loki
+        filterByTraceID: false
+      lokiSearch:
+        datasourceUid: loki
+
+  - name: loki
+    uid: loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    basicAuth: false
+    jsonData:
+      derivedFields:
+        - datasourceUid: tempo
+          matcherRegex: 'traceID\\":\\"([a-z0-9]+)\\"'
+          name: TraceID
+          url: $${__value.raw}
+          urlDisplayLabel: Find this trace in Tempo

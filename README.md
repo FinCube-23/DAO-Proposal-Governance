@@ -111,41 +111,47 @@ To get started with FinCube, follow these steps:
     ``` -->
 
 ## Run the application
-In the project root a `./run.sh` can be found. This will help to run the whole application including the frontend and its micro-services.   
+
+In the project root a `./run.sh` can be found. This will help to run the whole application including the frontend and its micro-services.
 
 1. **To run the whole application**:
-    ```bash
-    ./run.sh up
-    ```
+
+   ```bash
+   ./run.sh up
+   ```
 
 2. **To run the frontend only**:
-    ```bash
-    ./run.sh up-fe
-    ```
+
+   ```bash
+   ./run.sh up-fe
+   ```
 
 3. **To run the whole backend including its all micro-service nodes**:
-    ```bash
-    ./run.sh up-be
-    ```
+
+   ```bash
+   ./run.sh up-be
+   ```
 
 4. **To run a single service from the backend by passing the container name as argument**:
-    ```bash
-    ./run.sh up-one <SERVICE-NAME>
-    ```
+   ```bash
+   ./run.sh up-one <SERVICE-NAME>
+   ```
 5. **To shutdown the whole backend services**:
-    ```bash
-    ./run.sh down
-    ```
+
+   ```bash
+   ./run.sh down
+   ```
 
 6. **To shutdown a single service from the backend by passing the container name as argument**:
-    ```bash
-    ./run.sh down-one <SERVICE-NAME>
-    ```
 
-5. **To explore more with the commands**:
-    ```bash
-    ./run.sh help
-    ```
+   ```bash
+   ./run.sh down-one <SERVICE-NAME>
+   ```
+
+7. **To explore more with the commands**:
+   ```bash
+   ./run.sh help
+   ```
 
 ## Usage
 
@@ -194,13 +200,13 @@ Please ensure your code adheres to our coding standards and includes appropriate
 
 ## Core Contributors
 
-| Name             | Role        | Technical Contribution                                                                                  |
-|----------------------|-------------------------|------------------------------------------------------------------------------------------|
-| [@FahimDev](https://www.github.com/FahimDev)     | Technical Lead and Scrum Master                  |  Event Driven Architecture Design, Message queue, Backend Dev, The Graph integration |
-| [@antonin686](https://www.github.com/antonin686)      | Frontend Lead    | Full Stack, DevOps, Code Review, UI/UX       |
-| [@SampadSikder](https://www.github.com/SampadSikder)       | Backend Dev, System designer                | Smart contract dev, smart contract testing |
-| [@Raad05](https://github.com/Raad05)       | Frontend Dev                | API integration, Smart Contract Integration, RainbowKit wagmi |
-| [@mashiat0808](https://www.github.com/mashiat0808)  | Backend Dev, Policy analyst              | GraphQL, smart contract testing, FDX                           |
+| Name                                                 | Role                            | Technical Contribution                                                              |
+| ---------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------- |
+| [@FahimDev](https://www.github.com/FahimDev)         | Technical Lead and Scrum Master | Event Driven Architecture Design, Message queue, Backend Dev, The Graph integration |
+| [@antonin686](https://www.github.com/antonin686)     | Frontend Lead                   | Full Stack, DevOps, Code Review, UI/UX                                              |
+| [@SampadSikder](https://www.github.com/SampadSikder) | Backend Dev, System designer    | Smart contract dev, smart contract testing                                          |
+| [@Raad05](https://github.com/Raad05)                 | Frontend Dev                    | API integration, Smart Contract Integration, RainbowKit wagmi                       |
+| [@mashiat0808](https://www.github.com/mashiat0808)   | Backend Dev, Policy analyst     | GraphQL, smart contract testing, FDX                                                |
 
 ---
 

@@ -276,7 +276,8 @@ export default function AdminDashboard() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <RecentTransactions proposalCount={proposalCount} />
+                    {/* <RecentTransactions proposalCount={proposalCount} /> */}
+                    <RecentTransactions />
                   </CardContent>
                 </Card>
               </div>
