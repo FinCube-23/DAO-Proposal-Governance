@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -100,6 +101,7 @@ export class MfsBusinessService {
     });
 
     if (!organization) {
+      // this.logger.error(`Failed to fetch org ${id}: ${error.message}`);
       throw new NotFoundException(`organization with ID ${id} not found`);
     }
 

@@ -71,6 +71,7 @@ export class MfsBusinessController {
     return this.mfsBusinessService.findAll(query);
   }
 
+  // @Throttle(10, 60) // 10 requests per minute per user/IP
   @Get(':id')
   @ApiTags('Organization')
   @ApiOkResponse({ type: OrganizationDetailResponseDto })
