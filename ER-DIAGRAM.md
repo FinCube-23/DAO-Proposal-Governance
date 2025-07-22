@@ -10,7 +10,7 @@ erDiagram
         string trx_hash uk
         enum confirmation_source "['alchemy', 'infura', 'graph', 'manual']; default = 'alchemy'"
         string trx_metadata "nullable"
-        enum trx_status "[0 => pending, 1 => confirmed]: default = 0"
+        enum trx_status "[0 => pending, 1 => confirmed]; default = 0"
         timestamp created_at
         timestamp updated_at
     }
