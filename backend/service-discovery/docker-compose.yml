@@ -8,7 +8,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.${APP_ENV}.conf:/etc/nginx/nginx.conf:ro
     networks:
       - proxy_network
 
