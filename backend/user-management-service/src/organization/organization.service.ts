@@ -6,27 +6,33 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Organization } from './entities/organization.entity';
 import {
-  MfsBusiness,
-  OnChainProposalStatus,
-} from './entities/mfs_business.entity';
-import { MfsBusinessDTO, StatusResponseDto } from './dtos/MfsBusinessDto';
+  OrganizationRegistrationDTO,
+  OrganizationResponseDTO,
+  StatusResponseDto,
+} from './dtos/organization.dto';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ResponseTransactionStatusDto } from './dtos/response-transaction-status.dto';
 import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
-import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
+import {
+  OrganizationListItemDto,
+  OrganizationListResponseDto,
+} from './dtos/organization-list-response.dto';
 import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
+import { OnChainProposalStatus, Proposal } from './entities/proposal.entity';
 
 @Injectable()
-export class MfsBusinessService {
+export class OrganizationService {
   private eventDrivenFunctionCall: Record<
     string,
     (proposal: ResponseTransactionStatusDto) => void
   >;
 
   constructor(
-    @InjectRepository(MfsBusiness)
-    private readonly mfsBusinessRepository: Repository<MfsBusiness>,
+    @InjectRepository(Organization)
+    private readonly organizationRepository: Repository<Organization>,
+    private readonly proposalRepository: Repository<Proposal>,
   ) {
     // Open for Extension Close for Modification
     this.eventDrivenFunctionCall = {
@@ -37,10 +43,52 @@ export class MfsBusinessService {
     };
   }
 
-  async create(mfs_business: MfsBusiness): Promise<MfsBusinessDTO> {
-    const { user, ...mfsInfo } =
-      await this.mfsBusinessRepository.save(mfs_business);
-    return mfsInfo;
+  async create(
+    dto: OrganizationRegistrationDTO,
+    user: any,
+  ): Promise<OrganizationResponseDTO> {
+    // Step 1: Create Organization entity
+    const organization = this.organizationRepository.create({
+      name: dto.name,
+      email: dto.email,
+      type: dto.type,
+      location: dto.location,
+      native_currency: dto.native_currency,
+      certificate: dto.certificate,
+      is_active: false,
+      users: [user], // Assuming ManyToMany relation
+    });
+
+    const savedOrg = await this.organizationRepository.save(organization);
+
+    // Step 2: Create Proposal entity linked to organization
+    const proposal = this.proposalRepository.create({
+      trx_hash: null, // will be updated later
+      onchain_id: null,
+      context: dto.on_chain_registration.context,
+      onchain_status: OnChainProposalStatus.PENDING,
+      proposed_wallet: dto.on_chain_registration.proposed_wallet,
+      organization: savedOrg,
+    });
+
+    const savedProposal = await this.proposalRepository.save(proposal);
+
+    const response: OrganizationResponseDTO = {
+      id: savedOrg.id,
+      name: savedOrg.name,
+      email: savedOrg.email,
+      context: savedProposal.context,
+      type: savedOrg.type,
+      location: savedOrg.location,
+      wallet_address: dto.on_chain_registration.proposed_wallet,
+      native_currency: savedOrg.native_currency,
+      certificate: savedOrg.certificate,
+      proposal_onchain_id: savedProposal.id,
+      is_active: savedOrg.is_active,
+      membership_onchain_status: savedProposal.onchain_status,
+    };
+
+    return response;
   }
 
   async findAll(
@@ -49,43 +97,47 @@ export class MfsBusinessService {
     const { page = 1, limit = 10, status, type, location } = query;
     const skip = (page - 1) * limit;
 
-    const queryBuilder =
-      this.mfsBusinessRepository.createQueryBuilder('business');
+    const queryBuilder = this.organizationRepository
+      .createQueryBuilder('org')
+      .leftJoinAndSelect('org.proposals', 'proposal');
 
     // Apply filters if provided
     if (status) {
-      queryBuilder.andWhere('business.membership_onchain_status = :status', {
-        status,
-      });
+      queryBuilder.andWhere('proposal.onchain_status = :status', { status });
     }
     if (type) {
-      queryBuilder.andWhere('business.type = :type', { type });
+      queryBuilder.andWhere('org.type = :type', { type });
     }
     if (location) {
-      queryBuilder.andWhere('business.location = :location', { location });
+      queryBuilder.andWhere('org.location = :location', { location });
     }
 
-    // Get total count for pagination
-    const total = await queryBuilder.getCount();
+    queryBuilder.skip(skip).take(limit).orderBy('org.created_at', 'DESC');
 
-    // Apply pagination
-    queryBuilder
-      .select([
-        'business.id',
-        'business.name',
-        'business.type',
-        'business.location',
-        'business.membership_onchain_status',
-      ])
-      .skip(skip)
-      .take(limit)
-      .orderBy('business.created_at', 'DESC');
+    const [orgs, total] = await queryBuilder.getManyAndCount();
 
     const businesses = await queryBuilder.getMany();
     const totalPages = Math.ceil(total / limit);
 
+    const data: OrganizationListItemDto[] = orgs.map((org) => {
+      // Get latest proposal or null
+      const latestProposal = org.proposals.length
+        ? org.proposals[org.proposals.length - 1]
+        : null;
+
+      return {
+        id: org.id,
+        name: org.name,
+        type: org.type,
+        location: org.location,
+        membership_onchain_status: latestProposal
+          ? latestProposal.onchain_status
+          : null,
+      };
+    });
+
     return {
-      data: businesses,
+      data,
       total,
       page,
       limit,
@@ -94,98 +146,107 @@ export class MfsBusinessService {
   }
 
   async findOne(id: number): Promise<OrganizationDetailResponseDto> {
-    const organization = await this.mfsBusinessRepository.findOne({
+    const organization = await this.organizationRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'proposals'], // Include proposals for this org
     });
-
+  
     if (!organization) {
-      throw new NotFoundException(`organization with ID ${id} not found`);
+      throw new NotFoundException(`Organization with ID ${id} not found`);
     }
+  
+    // Find the latest proposal
+    const latestProposal = organization.proposals?.sort((a, b) => b.id - a.id)[0];
 
+    const firstUser = organization.users?.length ? organization.users[0] : null;
+  
     return {
       id: organization.id,
       name: organization.name,
       email: organization.email,
-      context: organization.context,
       type: organization.type,
+      context: latestProposal?.context ?? null,
       location: organization.location,
-      is_approved: organization.is_approved,
-      wallet_address: organization.wallet_address,
+      is_approved: organization.is_active, // Assuming `is_active` is approval flag
+      wallet_address: latestProposal?.proposed_wallet ?? null, // From proposal
       native_currency: organization.native_currency,
       certificate: organization.certificate,
-      trx_hash: organization.trx_hash,
-      proposal_onchain_id: organization.proposal_onchain_id,
-      membership_onchain_status: organization.membership_onchain_status,
+      trx_hash: latestProposal?.trx_hash ?? null,
+      proposal_onchain_id: latestProposal?.onchain_id ?? null,
+      membership_onchain_status: latestProposal?.onchain_status ?? null,
       created_at: organization.created_at,
       updated_at: organization.updated_at,
-      user: organization.user
+      admin: firstUser
         ? {
-            id: organization.user.id,
-            name: organization.user.name,
-            email: organization.user.email,
+            id: firstUser.id,
+            name: firstUser.name,
+            email: firstUser.email,
           }
         : null,
     };
   }
+  
 
   async getStatusByEmail(email: string): Promise<StatusResponseDto> {
     if (!email) {
       throw new BadRequestException('Email is required');
     }
 
-    const business = await this.mfsBusinessRepository.findOne({
+    const organization = await this.organizationRepository.findOne({
       where: { email },
-      select: ['id', 'email', 'membership_onchain_status'],
+      select: ['id', 'email', 'name'],
+      relations: ['proposals'],
     });
 
-    if (!business) {
+    if (!organization) {
       throw new NotFoundException(`Business with email ${email} not found`);
     }
 
+    const latestProposal = organization.proposals?.length
+      ? organization.proposals[organization.proposals.length - 1]
+      : null;
+
     return {
-      id: business.id,
-      email: business.email,
-      membership_onchain_status: business.membership_onchain_status,
+      id: organization.id,
+      email: organization.email,
+      membership_onchain_status: latestProposal
+        ? latestProposal.onchain_status
+        : null,
     };
   }
 
-  async findByEmail(email: string): Promise<MfsBusiness> {
-    // const role = await this.roleChecker.findOne(sub);
-    // if (role != 'MFS') {
-    //   throw new UnauthorizedException();
-    // }
-    return this.mfsBusinessRepository.findOne({ where: { email } });
+  async findByEmail(email: string): Promise<Organization> {
+    return this.organizationRepository.findOne({ where: { email } });
   }
 
   async update(
     id: number,
-    updateMfsBusinessDto: Partial<MfsBusiness>,
-  ): Promise<MfsBusiness> {
-    const existingBusiness = await this.mfsBusinessRepository.findOne({
+    updateOrganizationDto: Partial<Organization>,
+  ): Promise<Organization> {
+    const existingBusiness = await this.organizationRepository.findOne({
       where: { id },
     });
 
     if (!existingBusiness) {
-      throw new NotFoundException(`MFS Business with ID ${id} not found`);
+      throw new NotFoundException(`Organization with ID ${id} not found`);
     }
 
     // Merge the existing business with the update DTO
-    const updatedBusiness = this.mfsBusinessRepository.merge(
+    const updatedBusiness = this.organizationRepository.merge(
       existingBusiness,
-      updateMfsBusinessDto,
+      updateOrganizationDto,
     );
     updatedBusiness.updated_at = new Date();
 
-    return this.mfsBusinessRepository.save(updatedBusiness);
+    return this.organizationRepository.save(updatedBusiness);
   }
 
   async updateOnChainProposalId(walletAddress: string, proposalId: number) {
     try {
       const normalizedWalletAddress = walletAddress.toLowerCase();
 
-      const business = await this.mfsBusinessRepository.findOne({
-        where: { wallet_address: normalizedWalletAddress },
+      const business = await this.proposalRepository.findOne({
+        where: { proposed_wallet: normalizedWalletAddress },
       });
 
       if (!business) {
@@ -195,9 +256,9 @@ export class MfsBusinessService {
         return;
       }
 
-      business.proposal_onchain_id = proposalId;
-      business.membership_onchain_status = OnChainProposalStatus.PENDING;
-      await this.mfsBusinessRepository.save(business);
+      business.onchain_id = proposalId;
+      business.onchain_status = OnChainProposalStatus.PENDING;
+      await this.proposalRepository.save(business);
 
       console.log(
         `Successfully updated proposal_onchain_id to ${proposalId} for wallet address: ${normalizedWalletAddress}`,
@@ -215,22 +276,22 @@ export class MfsBusinessService {
     status: OnChainProposalStatus,
   ) {
     try {
-      const business = await this.mfsBusinessRepository.findOne({
-        where: { proposal_onchain_id: proposalId },
+      const organization = await this.proposalRepository.findOne({
+        where: { onchain_id: proposalId },
       });
 
-      if (!business) {
+      if (!organization) {
         console.error(
           `No organization found at on-chain proposal ID: ${proposalId}`,
         );
         return;
       }
 
-      business.membership_onchain_status = status;
-      await this.mfsBusinessRepository.save(business);
+      organization.onchain_status = status;
+      await this.proposalRepository.save(organization);
 
       console.log(
-        `Successfully updated proposal status into ${status} of proposal id ${business.proposal_onchain_id} (on-chain)`,
+        `Successfully updated proposal status into ${status} of proposal id ${organization.onchain_id} (on-chain)`,
       );
     } catch (error) {
       console.error('Proposal on-chain ID issue found | Error:', error);

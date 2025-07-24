@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../dtos/create-user.dto';
-import { MfsBusiness } from 'src/mfs_business/entities/mfs_business.entity';
+import { Organization } from 'src/organization/entities/organization.entity';
 
 export class UserDetailsDTO {
   @ApiProperty()
@@ -15,8 +15,8 @@ export class UserDetailsDTO {
   @ApiProperty()
   role: Role;
 
-  @ApiProperty({ type: () => MfsBusiness })
-  organization: MfsBusiness;
+  @ApiProperty({ type: () => Organization })
+  organization: Organization;
 
   @ApiProperty()
   created_at: Date;

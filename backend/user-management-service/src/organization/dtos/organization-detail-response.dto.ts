@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OnChainProposalStatus } from '../entities/mfs_business.entity';
+import { OnChainProposalStatus } from '../entities/proposal.entity';
 
 class UserDto {
   @ApiProperty()
@@ -59,5 +59,5 @@ export class OrganizationDetailResponseDto {
   updated_at: Date;
 
   @ApiProperty({ type: UserDto, nullable: true })
-  user: UserDto | null;
+  admin: UserDto | null;
 }

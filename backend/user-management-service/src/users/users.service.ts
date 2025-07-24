@@ -26,7 +26,7 @@ export class UsersService {
       name: user.name,
       email: user.email,
       role: user.role,
-      organization: user.mfsBusiness,
+      organization: user.organizations[0],
       created_at: user.created_at,
       updated_at: user.updated_at,
     };

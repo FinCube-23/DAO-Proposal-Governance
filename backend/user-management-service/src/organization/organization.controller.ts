@@ -14,39 +14,44 @@ import {
   ParseIntPipe,
   BadRequestException,
 } from '@nestjs/common';
-import { MfsBusinessService } from './mfs_business.service';
-import { MfsBusiness } from './entities/mfs_business.entity';
-import { ApiBody, ApiOkResponse, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { OrganizationService } from './organization.service';
+import { Organization } from './entities/organization.entity';
+import {
+  ApiBody,
+  ApiOkResponse,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { MfsBusinessDTO, StatusResponseDto } from './dtos/MfsBusinessDto';
+import {
+  OrganizationRegistrationDTO,
+  OrganizationResponseDTO,
+  StatusResponseDto,
+} from './dtos/organization.dto';
 import { Ctx, RmqContext, Payload, EventPattern } from '@nestjs/microservices';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { OrganizationListResponseDto } from './dtos/organization-list-response.dto';
 import { ListOrganizationQueryDto } from './dtos/list-organization.dto';
 import { OrganizationDetailResponseDto } from './dtos/organization-detail-response.dto';
 
-@Controller('mfs-business')
-export class MfsBusinessController {
-  constructor(private readonly mfsBusinessService: MfsBusinessService) {}
+@Controller('organization')
+export class OrganizationController {
+  constructor(private readonly organizationService: OrganizationService) {}
 
   @Post()
-  @ApiBody({ type: MfsBusiness })
   @ApiTags('Organization')
   @ApiResponse({
-    status: 200,
-    description: 'The record has been successfully created.',
-    type: MfsBusiness,
+    status: 201,
+    description: 'Organization successfully registered in off-chain.',
+    type: OrganizationResponseDTO,
   })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
   @UseGuards(AuthGuard)
   async create(
-    @Body() mfs_business_body: MfsBusiness,
+    @Body() organizationDto: OrganizationRegistrationDTO,
     @Request() req,
-  ): Promise<MfsBusinessDTO> {
-    console.log(mfs_business_body);
-    return this.mfsBusinessService.create(
-      new MfsBusiness({ ...mfs_business_body, user: req.user }),
-    );
+  ): Promise<OrganizationResponseDTO> {
+    return this.organizationService.create(organizationDto, req.user);
   }
 
   @Get('status-by-email')
@@ -54,12 +59,12 @@ export class MfsBusinessController {
   @ApiOkResponse({ type: StatusResponseDto })
   @ApiQuery({ name: 'email', required: true, type: String })
   async getStatusByEmail(
-    @Query('email') email: string
+    @Query('email') email: string,
   ): Promise<StatusResponseDto> {
     if (!email) {
       throw new BadRequestException('Email is required');
     }
-    return this.mfsBusinessService.getStatusByEmail(email);
+    return this.organizationService.getStatusByEmail(email);
   }
 
   @Get()
@@ -68,7 +73,7 @@ export class MfsBusinessController {
   async findAll(
     @Query() query: ListOrganizationQueryDto,
   ): Promise<OrganizationListResponseDto> {
-    return this.mfsBusinessService.findAll(query);
+    return this.organizationService.findAll(query);
   }
 
   @Get(':id')
@@ -77,7 +82,7 @@ export class MfsBusinessController {
   async findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<OrganizationDetailResponseDto> {
-    return this.mfsBusinessService.findOne(id);
+    return this.organizationService.findOne(id);
   }
 
   @Patch(':id')
@@ -85,13 +90,13 @@ export class MfsBusinessController {
   @ApiResponse({
     status: 200,
     description: 'The record has been successfully updated.',
-    type: MfsBusiness,
+    type: Organization,
   })
   @ApiResponse({ status: 401, description: 'Unauthorized.' })
   async update(
     @Param('id') id: string,
-    @Body() updateMfsBusinessDto: MfsBusiness,
-  ): Promise<MfsBusiness> {
-    return this.mfsBusinessService.update(+id, updateMfsBusinessDto);
+    @Body() updateOrganizationDto: Organization,
+  ): Promise<Organization> {
+    return this.organizationService.update(+id, updateOrganizationDto);
   }
 }

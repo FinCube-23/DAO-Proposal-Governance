@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
-import { OnChainProposalStatus } from '../entities/mfs_business.entity';
+import { OnChainProposalStatus } from '../entities/proposal.entity';
 
 export class ListOrganizationQueryDto {
   @ApiProperty({ required: false, default: 1 })

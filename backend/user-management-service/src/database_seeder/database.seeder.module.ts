@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { DatabaseSeederService } from './database.seeder.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ExchangeUser } from 'src/exchange_user/entities/exchange_user.entity';
-import { MfsBusiness } from 'src/mfs_business/entities/mfs_business.entity';
+import { Organization } from 'src/organization/entities/organization.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ExchangeUser]), TypeOrmModule.forFeature([MfsBusiness])],
+  imports: [TypeOrmModule.forFeature([ExchangeUser]), TypeOrmModule.forFeature([Organization])],
   providers: [DatabaseSeederService],
   exports: [DatabaseSeederService]
 })

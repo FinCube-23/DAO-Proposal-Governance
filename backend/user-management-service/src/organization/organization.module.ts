@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
-import { MfsBusinessService } from './mfs_business.service';
-import { MfsBusinessController } from './mfs_business.controller';
+import { OrganizationService } from './organization.service';
+import { OrganizationController } from './organization.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MfsBusiness } from 'src/mfs_business/entities/mfs_business.entity';
+import { Organization } from 'src/organization/entities/organization.entity';
 import { UsersModule } from 'src/users/users.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 @Module({
-  imports: [TypeOrmModule.forFeature([MfsBusiness]), UsersModule,
+  imports: [TypeOrmModule.forFeature([Organization]), UsersModule,
   RabbitMQModule.forRoot({
     uri: 'amqp://rabbitmq:5672',
     exchanges: [
@@ -31,7 +31,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
       timeout: 30000, // Increase RabbitMQ connection timeout to 30 seconds
     },
   })],
-  controllers: [MfsBusinessController],
-  providers: [MfsBusinessService]
+  controllers: [OrganizationController],
+  providers: [OrganizationService]
 })
-export class MfsBusinessModule { }
+export class OrganizationModule { }
