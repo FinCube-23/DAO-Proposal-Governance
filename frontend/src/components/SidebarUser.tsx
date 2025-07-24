@@ -24,6 +24,7 @@ import { Dialog, DialogContent, DialogHeader } from "./ui/dialog";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { useLazyGetStatusByEmailQuery } from "@redux/services/mfs";
+import { useNavigate } from "react-router";
 
 interface Organization {
   name: string;
@@ -72,6 +73,7 @@ export default function SidebarUser({
 
     getStatus();
   }, [mfsBusiness, getStatusByEmail]);
+  const navigate = useNavigate();
 
   return (
     <SidebarMenu>
@@ -164,10 +166,20 @@ export default function SidebarUser({
 
                     {/* Organization Information Section */}
                     <div className="border-t border-gray-700 pt-4">
-                      <h3 className="text-md font-semibold text-green-400 mb-4">
-                        Organization Profile
-                      </h3>
-
+                      <div className="flex justify-between item gap-2 mb-4">
+                        <h3 className="text-md font-semibold text-green-400">
+                          Organization Profile
+                        </h3>
+                        <Button
+                          onClick={() =>
+                            navigate("/organization/dashboard/users")
+                          }
+                          size="sm"
+                          variant="secondary"
+                        >
+                          View Members
+                        </Button>
+                      </div>
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>

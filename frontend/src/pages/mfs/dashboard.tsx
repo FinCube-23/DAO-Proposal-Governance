@@ -1,6 +1,5 @@
 import { AnnualTransferLine } from "@components/mfs/AnnualTransferLine";
 import DisplayCard from "@components/mfs/DisplayCard";
-import { ExchangeRatePie } from "@components/mfs/ExchangeRatePie";
 import { LiquidityRatioBar } from "@components/mfs/LiquidityRatioBar";
 import contractABI from "../../contractABI/contractABI.json";
 import StableCoinABI from "../../contractABI/StableCoinABI.json";
@@ -27,6 +26,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { getChainId, readContract } from "@wagmi/core";
 import { Button } from "@components/ui/button";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router";
 
 export const tokenConfig = {
   usdc: {
@@ -74,6 +74,7 @@ export default function MfsDashboard() {
   const [coinBalance, setCoinBalance] = useState(0);
   const chainId = getChainId(config);
   const { data: client } = useWalletClient();
+  const navigate = useNavigate();
 
   const handleAddToken = async () => {
     const tokenInfo =
@@ -214,9 +215,21 @@ export default function MfsDashboard() {
                 </Button>
               }
             />
-            <div className="w-64">
-              <ExchangeRatePie />
-            </div>
+            <DisplayCard
+              title="Total Members"
+              className="w-64"
+              value="10"
+              dataSource="Off-chain"
+              actionButton={
+                <Button
+                  onClick={() => navigate("/organization/dashboard/users")}
+                  title="All organization members"
+                  variant="outline"
+                >
+                  View All
+                </Button>
+              }
+            />
             <DisplayCard
               title="Total Proposals"
               className="w-64"

@@ -176,7 +176,7 @@ const MFSList = () => {
       </Table>
 
       {mfsList.length === 0 && (
-        <p className="text-center font-bold">No data found</p>
+        <p className="text-center font-bold">No organization found</p>
       )}
 
       {mfsList.length > 0 && (
@@ -187,37 +187,64 @@ const MFSList = () => {
                 className={`${
                   page === 1 && "pointer-events-none opacity-50"
                 } cursor-pointer`}
-                onClick={() => {
-                  setPage((prev) => Math.max(1, prev - 1));
-                }}
+                onClick={() => setPage((prev) => Math.max(1, prev - 1))}
               />
             </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (pageNum) => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    className={`cursor-pointer ${
-                      page === pageNum ? "border-2 border-green-400" : ""
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(pageNum);
-                    }}
-                    isActive={page === pageNum}
-                  >
-                    {pageNum}
-                  </PaginationLink>
+
+            {(() => {
+              const range: (number | string)[] = [];
+              const delta = 2; // how many pages before/after current page to show
+              const rangeStart = Math.max(2, page - delta);
+              const rangeEnd = Math.min(totalPages - 1, page + delta);
+
+              range.push(1); // Always show first page
+
+              if (rangeStart > 2) {
+                range.push("...");
+              }
+
+              for (let i = rangeStart; i <= rangeEnd; i++) {
+                range.push(i);
+              }
+
+              if (rangeEnd < totalPages - 1) {
+                range.push("...");
+              }
+
+              if (totalPages > 1) {
+                range.push(totalPages); // Always show last page if more than 1
+              }
+
+              return range.map((item, index) => (
+                <PaginationItem key={index}>
+                  {item === "..." ? (
+                    <span className="px-2 text-muted-foreground">...</span>
+                  ) : (
+                    <PaginationLink
+                      className={`cursor-pointer ${
+                        page === item ? "border-2 border-green-400" : ""
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(item as number);
+                      }}
+                      isActive={page === item}
+                    >
+                      {item}
+                    </PaginationLink>
+                  )}
                 </PaginationItem>
-              )
-            )}
+              ));
+            })()}
+
             <PaginationItem>
               <PaginationNext
                 className={`${
                   page === totalPages && "pointer-events-none opacity-50"
                 } cursor-pointer`}
-                onClick={() => {
-                  setPage((prev) => Math.min(totalPages, prev + 1));
-                }}
+                onClick={() =>
+                  setPage((prev) => Math.min(totalPages, prev + 1))
+                }
               />
             </PaginationItem>
           </PaginationContent>

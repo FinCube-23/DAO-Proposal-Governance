@@ -30,6 +30,7 @@ import AdminLayout from "@layouts/AdminLayout";
 import AdminDashboard from "@pages/admin/AdminDashboard";
 import MFSDetails from "@pages/admin/MFSDetails";
 import TrxDetails from "@pages/admin/TrxDetails";
+import UserList from "@components/mfs/UserList"; // or the correct path
 
 export const config = createConfig({
   chains: [sepolia, polygonAmoy],
@@ -72,6 +73,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                       element={<Navigate to="/organization/dashboard" />}
                     />
                     <Route path="dashboard" element={<MfsDashboard />} />
+                    <Route path="dashboard/users" element={<UserList />} />
                     <Route path="dao">
                       <Route
                         path=""

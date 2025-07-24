@@ -54,7 +54,7 @@ const OffchainProposals = () => {
         const { data } = await getFilteredProposals(selectedStatus);
 
         if (data) {
-          setProposalsFromBE(data || []);
+          setProposalsFromBE(data.data || []);
           setTotalPages(1);
           setIsFiltered(true);
         }
@@ -133,23 +133,41 @@ const OffchainProposals = () => {
               />
             </PaginationItem>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <PaginationItem key={page}>
-                <PaginationLink
-                  className={`cursor-pointer ${
-                    page === currentPage ? "border-2 border-green-400" : ""
-                  }`}
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCurrentPage(page);
-                  }}
-                  isActive={page === currentPage}
-                >
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-            ))}
+            {/* Updated windowed pagination */}
+            {(() => {
+              const delta = 2;
+              const range: (number | string)[] = [];
+              const rangeStart = Math.max(2, currentPage - delta);
+              const rangeEnd = Math.min(totalPages - 1, currentPage + delta);
+
+              range.push(1);
+              if (rangeStart > 2) range.push("...");
+              for (let i = rangeStart; i <= rangeEnd; i++) range.push(i);
+              if (rangeEnd < totalPages - 1) range.push("...");
+              if (totalPages > 1) range.push(totalPages);
+
+              return range.map((item, idx) => (
+                <PaginationItem key={idx}>
+                  {item === "..." ? (
+                    <span className="px-2 text-muted-foreground">...</span>
+                  ) : (
+                    <PaginationLink
+                      className={`cursor-pointer ${
+                        currentPage === item ? "border-2 border-green-400" : ""
+                      }`}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCurrentPage(item as number);
+                      }}
+                      isActive={currentPage === item}
+                    >
+                      {item}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ));
+            })()}
 
             <PaginationItem>
               <PaginationNext

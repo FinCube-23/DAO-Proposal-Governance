@@ -189,7 +189,16 @@ const MFSDetails = () => {
         <div className="space-y-4">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-bold">{mfs.name}</h1>
+              <div className="flex justify-center gap-2">
+                <h1 className="text-2xl font-bold">{mfs.name}</h1>
+                <Button
+                  onClick={() => navigate("/organization/dashboard/users")}
+                  size="sm"
+                  variant="secondary"
+                >
+                  View Members
+                </Button>
+              </div>
               <p className="text-gray-500">
                 {mfs.type} • {mfs.location}
               </p>
@@ -240,9 +249,9 @@ const MFSDetails = () => {
                       )}
                     </pre>
                   </Card>
-                  <p>
+                  <p className="flex items-center gap-1">
                     <span className="font-medium">Native Currency:</span>{" "}
-                    {mfs.native_currency}
+                    <Badge variant="secondary">{mfs.native_currency}</Badge>
                   </p>
                 </div>
               </div>
@@ -331,7 +340,7 @@ const MFSDetails = () => {
               <a
                 href={mfs.certificate}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="opener noreferrer"
                 className="text-blue-600 hover:underline"
               >
                 View Certificate
