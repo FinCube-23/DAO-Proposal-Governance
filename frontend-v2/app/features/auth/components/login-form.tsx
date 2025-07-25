@@ -33,7 +33,7 @@ export default function LoginForm() {
     onSuccess: (data) => {
       console.log("Login successful", data);
       authStore.setTokens({ access: data.access_token });
-      fetchMe();
+      fetchMeMutation.mutate();
     },
     onError: (error) => {
       console.error("Login failed", error);
