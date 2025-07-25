@@ -1,2 +1,2 @@
-npm run eslint:fix
+npm run lint:fix
 git add .
