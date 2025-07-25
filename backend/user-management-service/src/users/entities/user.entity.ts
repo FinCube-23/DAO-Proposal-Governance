@@ -48,9 +48,9 @@ export class User {
   @ApiProperty()
   role: Role;
 
-  @Column({ type: 'string', unique: true })
+  @Column({ type: 'varchar', length: 20, unique: true })
   @ApiProperty()
-  contact_number: string
+  contact_number: string;
 
   @Column({ type: 'boolean', default: false })
   @ApiProperty()

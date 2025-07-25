@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
@@ -13,7 +13,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.getOrThrow('POSTGRES_USER'),
         password: configService.getOrThrow('POSTGRES_PASSWORD'),
         autoLoadEntities: true,
-        synchronize: true
+        synchronize: false
       }),
       inject: [ConfigService],
     }),
