@@ -7,9 +7,9 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router'
-import { Toaster } from './components/ui/sonner'
+import { Toaster } from './shared/components/ui/sonner'
 import './app.css'
-import Header from './components/layout/header'
+import Header from './shared/components/layout/header'
 import { createConfig, http, injected, WagmiProvider } from 'wagmi'
 import { polygonAmoy, sepolia } from "viem/chains";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
