@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { LogOut } from "lucide-react";
 import { useDisconnect } from "wagmi";
 import { Button } from "../ui/button";
@@ -8,6 +8,15 @@ export default function Header() {
   const navigate = useNavigate();
   const authStore = useAuthStore((state) => state);
   const { disconnect } = useDisconnect();
+  const pathname = useLocation().pathname;
+
+  // Only show header on specific routes
+  const allowedRoutes = ['/', '/login', '/register'];
+  const shouldShowHeader = allowedRoutes.includes(pathname);
+
+  if (!shouldShowHeader) {
+    return null;
+  }
 
   return (
     <div className="w-full z-50 fixed top-0">

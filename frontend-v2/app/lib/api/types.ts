@@ -208,3 +208,5 @@ export type RegisterMemberPayload = {
 export type RegisterMemberResponse = Response;
 
 export type ExecuteProposalResponse = Response;
+
+export type GetStatusByEmailResponse = { id: number; email: string; membership_onchain_status: string }
