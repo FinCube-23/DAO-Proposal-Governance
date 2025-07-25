@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router";
 import { LogOut } from "lucide-react";
 import { useDisconnect } from "wagmi";
 import { Button } from "../ui/button";
-import useAuthStore from "@/stores/auth";
+import useAuthStore from "@/shared/stores/auth";
 
 export default function Header() {
   const navigate = useNavigate();

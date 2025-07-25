@@ -1,6 +1,6 @@
-import { SparklesCore } from "@/components/sparkles";
-import { Button } from "@/components/ui/button";
-import useAuthStore from "@/stores/auth";
+import { SparklesCore } from "@/shared/components/sparkles";
+import { Button } from "@/shared/components/ui/button";
+import useAuthStore from "@/shared/stores/auth";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 
