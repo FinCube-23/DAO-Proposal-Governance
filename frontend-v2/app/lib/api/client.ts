@@ -1,9 +1,15 @@
+import useAuthStore from "@/shared/stores/auth";
+
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 async function request<T>(url: string, method: HttpMethod, payload?: unknown): Promise<T> {
+  const accessToken = useAuthStore.getState().access;
   const options: RequestInit = {
     method,
-    headers: method === 'GET' ? {} : { 'Content-Type': 'application/json' },
+    headers: {
+      ...(method === 'GET' ? {} : { 'Content-Type': 'application/json' }),
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    },
   };
 
   if (payload && method !== 'GET') {
