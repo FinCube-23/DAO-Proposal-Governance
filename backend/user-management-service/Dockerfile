@@ -1,33 +1,25 @@
-# Use official Node.js LTS image
-# Needed for Otel as node:20 has certificates which the SDK needs
 FROM node:20 as builder
-
 WORKDIR /app
 
-# Copy only package.json and package-lock.json first for better caching
+# Copy package files
 COPY package*.json ./
-
-# Install dependencies
 RUN npm install --legacy-peer-deps
 
-# Copy the rest of the app
+# Copy source code
 COPY . .
 
 RUN npm run build
 
 #----- PRODUCTION---------
 FROM node:20-alpine as production
-WORKDIR /app
 
 COPY package*.json ./
-# Install only production dependencies
-RUN npm ci --legacy-peer-deps --omit-dev && npm cache clean --force
+RUN npm ci --legacy-peer-deps
 
-# Copy only the necessary files
-COPY --from=builder --chown=app:app /app/dist ./dist
+# Copy dist with proper permissions
+COPY --from=builder --chown=node:node /app/dist ./dist
 
-
+USER node
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
-
+CMD ["npm", "run", "start:prod"]

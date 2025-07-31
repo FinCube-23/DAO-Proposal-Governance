@@ -10,7 +10,7 @@ import {
   JoinTable,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { Organization } from 'src/organization/entities/organization.entity';
+import { Organization } from '../../organization/entities/organization.entity';
 import { Role } from '../dtos/create-user.dto';
 
 export enum UserProfileStatus {
@@ -68,7 +68,7 @@ export class User {
     cascade: true,
   })
   @JoinTable({
-    name: 'user_organizations', // name of the join table
+    name: 'organization_members', // name of the join table
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'organization_id', referencedColumnName: 'id' },
   })

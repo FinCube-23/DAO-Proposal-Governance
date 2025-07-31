@@ -10,8 +10,8 @@ import {
   ManyToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/users/entities/user.entity';
-import { Proposal } from 'src/organization/entities/proposal.entity';
+import { User } from '../../users/entities/user.entity';
+import { Proposal } from './proposal.entity';
 
 export enum OrganizationApprovalStatus {
   BANNED = 'banned',
@@ -70,7 +70,7 @@ export class Organization {
 
   @ManyToMany(() => User, (user) => user.organizations)
   users: User[];
-  
+
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
 

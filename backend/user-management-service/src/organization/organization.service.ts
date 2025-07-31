@@ -32,6 +32,7 @@ export class OrganizationService {
   constructor(
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
+    @InjectRepository(Proposal)
     private readonly proposalRepository: Repository<Proposal>,
   ) {
     // Open for Extension Close for Modification
@@ -150,16 +151,16 @@ export class OrganizationService {
       where: { id },
       relations: ['user', 'proposals'], // Include proposals for this org
     });
-  
+
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${id} not found`);
     }
-  
+
     // Find the latest proposal
     const latestProposal = organization.proposals?.sort((a, b) => b.id - a.id)[0];
 
     const firstUser = organization.users?.length ? organization.users[0] : null;
-  
+
     return {
       id: organization.id,
       name: organization.name,
@@ -178,14 +179,14 @@ export class OrganizationService {
       updated_at: organization.updated_at,
       admin: firstUser
         ? {
-            id: firstUser.id,
-            name: firstUser.name,
-            email: firstUser.email,
-          }
+          id: firstUser.id,
+          name: firstUser.name,
+          email: firstUser.email,
+        }
         : null,
     };
   }
-  
+
 
   async getStatusByEmail(email: string): Promise<StatusResponseDto> {
     if (!email) {
