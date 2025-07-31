@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { OnChainProposalStatus } from '../entities/proposal.entity';
 
-class UserDto {
+export class UserDto {
   @ApiProperty()
   id: number;
 

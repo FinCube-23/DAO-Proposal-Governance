@@ -84,7 +84,7 @@ export class OrganizationService {
       wallet_address: dto.on_chain_registration.proposed_wallet,
       native_currency: savedOrg.native_currency,
       certificate: savedOrg.certificate,
-      proposal_onchain_id: savedProposal.id,
+      proposal_onchain_id: savedProposal.onchain_id,
       is_active: savedOrg.is_active,
       membership_onchain_status: savedProposal.onchain_status,
     };
@@ -149,7 +149,7 @@ export class OrganizationService {
   async findOne(id: number): Promise<OrganizationDetailResponseDto> {
     const organization = await this.organizationRepository.findOne({
       where: { id },
-      relations: ['user', 'proposals'], // Include proposals for this org
+      relations: ['users', 'proposals'], // Include proposals for this org
     });
 
     if (!organization) {
@@ -246,20 +246,20 @@ export class OrganizationService {
     try {
       const normalizedWalletAddress = walletAddress.toLowerCase();
 
-      const business = await this.proposalRepository.findOne({
+      const proposal = await this.proposalRepository.findOne({
         where: { proposed_wallet: normalizedWalletAddress },
       });
 
-      if (!business) {
+      if (!proposal) {
         console.error(
           `No business found with wallet address: ${normalizedWalletAddress}`,
         );
         return;
       }
 
-      business.onchain_id = proposalId;
-      business.onchain_status = OnChainProposalStatus.PENDING;
-      await this.proposalRepository.save(business);
+      proposal.onchain_id = proposalId;
+      proposal.onchain_status = OnChainProposalStatus.PENDING;
+      await this.proposalRepository.save(proposal);
 
       console.log(
         `Successfully updated proposal_onchain_id to ${proposalId} for wallet address: ${normalizedWalletAddress}`,

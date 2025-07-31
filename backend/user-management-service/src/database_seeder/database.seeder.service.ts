@@ -11,9 +11,10 @@ export class DatabaseSeederService {
   constructor(
     @InjectRepository(ExchangeUser)
     private exchangeUserRepository: Repository<ExchangeUser>,
+    // In the constructor injection (around lines 14–15)
     @InjectRepository(Organization)
-    private mfsBusinessRepository: Repository<Organization>,
-  ) {}
+    private organizationRepository: Repository<Organization>,
+  ) { }
 
   async seed(): Promise<void> {
     const exchangeUsers = await this.readSeedDataFromFile(
@@ -26,7 +27,7 @@ export class DatabaseSeederService {
       'authentication.json',
     );
 
-    await this.mfsBusinessRepository.save(mfsBusinesses);
+    await this.organizationRepository.save(mfsBusinesses);
     await this.exchangeUserRepository.save(exchangeUsers);
   }
 

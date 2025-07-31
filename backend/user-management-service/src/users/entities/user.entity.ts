@@ -59,14 +59,11 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserProfileStatus,
-    default: UserProfileStatus.PENDING,
-    nullable: true,
+    default: UserProfileStatus.PENDING
   })
   onchain_status: UserProfileStatus;
 
-  @ManyToMany(() => Organization, (organization) => organization.users, {
-    cascade: true,
-  })
+  @ManyToMany(() => Organization, (organization) => organization.users, {})
   @JoinTable({
     name: 'organization_members', // name of the join table
     joinColumn: { name: 'user_id', referencedColumnName: 'id' },

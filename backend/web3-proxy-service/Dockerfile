@@ -23,11 +23,12 @@ COPY package*.json ./
 # Install only production dependencies
 RUN npm ci --omit-dev && npm cache clean --force
 
-# Copy only the necessary files
-COPY --from=builder --chown=app:app /app/dist ./dist
 
+# Copy dist with proper permissions
+COPY --from=builder --chown=node:node /app/dist ./dist
 
+USER node
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]
 
