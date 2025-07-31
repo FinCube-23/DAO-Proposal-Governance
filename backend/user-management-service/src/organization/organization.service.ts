@@ -58,6 +58,7 @@ export class OrganizationService {
       certificate: dto.certificate,
       is_active: false,
       users: [user], // Assuming ManyToMany relation
+      // LOGIC MUST BE CHANGED: Create ADMIN
     });
 
     const savedOrg = await this.organizationRepository.save(organization);

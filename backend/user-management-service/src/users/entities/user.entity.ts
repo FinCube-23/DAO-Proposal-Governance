@@ -72,14 +72,12 @@ export class User {
   organizations: Organization[];
 
   @CreateDateColumn({ name: 'created_at' })
-  'created_at': Date;
+  created_at: Date;
 
   @UpdateDateColumn({ name: 'updated_at' })
-  'updated_at': Date;
+  updated_at: Date;
 
   constructor(partial: Partial<User>) {
     Object.assign(this, partial);
-    this.created_at = new Date();
-    this.updated_at = new Date();
   }
 }
