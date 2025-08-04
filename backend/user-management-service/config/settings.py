@@ -11,19 +11,24 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Initialize environment
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-@zj6r=c(h+=g#*jquusa_hrg8p@nscc=2$k&(@s-u$-8pzffqg'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = []
 
@@ -37,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'event_handlers',   # New app for event handling
 ]
 
 MIDDLEWARE = [
@@ -120,3 +126,19 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+JWT_SECRET_KEY = env('JWT_SECRET_KEY')
+JWT_ALGORITHM = 'HS256'
+
+
+# RabbitMQ Settings
+RABBITMQ_HOST = env('RABBITMQ_HOST')
+RABBITMQ_PORT = env.int('RABBITMQ_PORT')
+RABBITMQ_USER = env('RABBITMQ_USER')
+RABBITMQ_PASSWORD = env('RABBITMQ_PASSWORD')
+RABBITMQ_VHOST = env('RABBITMQ_VHOST')
+RABBITMQ_QUEUES = {
+    'AUTHORIZATION_QUEUE': 'authorization',
+}
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq:5672//'
