@@ -1,7 +1,11 @@
 # FinCube: DAO Proposal Governance
+
 ## ER Diagram
 
+_Note: timestamptz is used so that we can keep everything in UTC_
+
 ### Audit Trail Service
+
 ```mermaid
 erDiagram
 
@@ -10,14 +14,15 @@ erDiagram
         string trx_hash uk
         enum confirmation_source "['alchemy', 'infura', 'graph', 'manual']; default = 'alchemy'"
         string trx_metadata "nullable"
-        enum trx_status "[0 => pending, 1 => confirmed]: default = 0"
-        timestamp created_at
-        timestamp updated_at
+        enum trx_status "[0 => pending, 1 => confirmed]; default = 0"
+        timestamptz created_at
+        timestamptz updated_at
     }
 
 ```
 
 ### DAO Service
+
 ```mermaid
 erDiagram
 
@@ -32,8 +37,8 @@ PROPOSAL {
         string trx_hash
         int audit_id "nullable; Assign by AUDIT TRAIL SERVICE"
         int trx_status "default = 0; Assign by AUDIT TRAIL SERVICE"
-        timestamp created_at
-        timestamp updated_at
+        timestamptz created_at
+        timestamptz updated_at
     }
 ```
 
@@ -46,7 +51,6 @@ _2. Organization Admin: Applies for an Organization. First member of its Organiz
 _3. Organization User: A generic member of the Organization. Works as an interface for more concrete dynamic roles depending on the Organization_
 _4. End User (optional): Some projects may require end users who are not part of any organization and act as consumers in the system_
 
-
 _There will also be a PERMISSIONS table and a ROLE_PERMISSIONS junction table which will vary based on different project needs_
 
 ```mermaid
@@ -56,47 +60,53 @@ USERS {
     int id pk
     string name
     string email uk
+    boolean is_verified_email "default = false"
     string password
-    string phone_number
-    boolean is_phone_number_verified "default = false"
+    string contact_number uk
+    boolean is_verified_contact_number "default = false"
     string wallet_address uk "nullable"
-    int roleId fk
-    enum status "['pending', 'approved', 'rejected', 'banned']" 
-    timestamp created_at
-    timestamp updated_at
+    enum status "['pending', 'approved', 'rejected', 'banned']"
+    int approved_by fk
+    timestamptz created_at
+    timestamptz updated_at
 }
 
 ORGANIZATIONS {
     int id pk
     string name uk
     string email uk
-    string context
-    string type
-    string location
-    enum status "['pending', 'approved', 'rejected', 'banned']; default = 'pending'"
-    string native_currency 
-    string certificate "nullable"
-    string trx_hash "nullable; default = null"
-    int proposal_onchain_id "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
-    enum membership_onchain_status "['register', 'pending', 'approved', 'cancelled']; nullable; default = 'register'"
-    int organizationAdminId fk
-    timestamp created_at
-    timestamp updated_at
+    string type "Will be transformed to an enum based on future project"
+    string address
+    boolean is_active
+    string legal_entity_identifier "ISO17442: Legal Entity Identifier"
+    enum status "['pending', 'approved', 'cancelled', 'banned']; default = 'pending'"
+    int organization_admin_id fk
+    timestamptz created_at
+    timestamptz updated_at
 }
 
-ORGANIZATION_MEMBERS {
+ORGANIZATIONS_USERS {
     int id pk
-    int userId fk
-    int organizationId fk
+    int user_id fk
+    int organization_id fk
 }
 
-ROLES {
+ONCHAIN_VERIFICATIONS {
     int id pk
-    string name
+    string trx_hash "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
+    int onchain_id "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
+    enum onchain_status "['register', 'pending', 'approved', 'cancelled']; nullable; default = 'register'"
+    json context
+    string proposer_wallet "This is suppose to be equal to organization admin wallet; if there is any discrepancy, the org admin will be notified that a new proposer wallet added"
+    int organization_id fk
+    timestamptz created_at
+    timestamptz updated_at
 }
 
-USERS ||--|| ORGANIZATION_MEMBERS : "is a"
-ORGANIZATION_MEMBERS }|--|| ORGANIZATIONS: "belongs to"
-USERS ||--|| ROLES : "has a"
+USERS ||--|{ ORGANIZATIONS_USERS : "is a"
+ORGANIZATIONS_USERS }|--|| ORGANIZATIONS: "belongs to"
+USERS ||--|| ORGANIZATIONS : "approves"
+ONCHAIN_VERIFICATIONS }|--|| ORGANIZATIONS: "proposes"
+USERS ||--|| USERS: "approves"
 
 ```
