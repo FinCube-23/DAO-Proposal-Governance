@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  user-management-service:
+    container_name: user_management_api
+    build: .
+    ports:
+      - "3001:8000"  # External:3001 → Internal:8000
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    environment:
+      - RABBITMQ_HOST=rabbitmq  # Connects to existing container
+      - RABBITMQ_PORT=5672
+    networks:
+      - fincube23_network
+
+networks:
+  fincube23_network:
+    external: true
