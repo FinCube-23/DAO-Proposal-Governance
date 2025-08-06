@@ -1,6 +1,8 @@
 # utils/types.py
-from typing import TypedDict, Literal, Optional
+from typing import TypedDict, Literal, Optional, Any, Dict
 from datetime import datetime
+
+# Message Pattern
 
 class ValidateAuthorizationDto(TypedDict):
     access_token: str
@@ -21,3 +23,16 @@ class MessageResponse(TypedDict):
     timestamp: str
     data: MessageData
     error: Optional[ErrorDetails]
+
+# Event Pattern
+
+class ResponseTransactionStatusDto(TypedDict):
+    web3Status: int
+    message: str
+    data: Optional[Dict[str, Any]]
+    blockNumber: int
+    transactionHash: str
+
+class ProposalEventData(TypedDict):
+    __typename: str
+    id: int
