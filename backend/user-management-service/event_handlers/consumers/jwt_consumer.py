@@ -1,59 +1,59 @@
+# event_handlers/consumers/jwt_consumer.py
 import pika
 import time
+import json
 from django.conf import settings
+from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
+from event_handlers.utils.authorization_processor import process_authorization_request
 
 def start_jwt_consumer():
     while True:
         try:
-            connection = pika.BlockingConnection(
-                pika.ConnectionParameters(
-                    host=settings.RABBITMQ_HOST,
-                    credentials=pika.PlainCredentials(
-                        settings.RABBITMQ_USER,
-                        settings.RABBITMQ_PASSWORD
-                    ),
-                    heartbeat=30
-                )
-            )
-            channel = connection.channel()
-            
-            # Choose ONE of these declarations:
-            
-            # For new durable queue:
-            channel.queue_declare(
-                queue='authorization',
-                durable=True,
-            )
-            
-            # OR for non-durable queue:
-            # channel.queue_declare(queue='authorization', durable=False)
-            
+            connection, channel = RabbitMQConnector.get_connection()
+            channel.queue_declare(queue='authorization', durable=True)
+            channel.basic_qos(prefetch_count=1)
+
             def callback(ch, method, properties, body):
-                print(f" [x] Received {body.decode()}")
-                # Process JWT validation here
-                
+                try:
+                    print(f"\n [✉] Received raw message: {body.decode()[:200]}...")
+                    response = process_authorization_request(body)
+                    print(f" [↻] Sending response: {json.dumps(response)[:200]}...")
+                    
+                    if properties.reply_to:
+                        ch.basic_publish(
+                            exchange='',
+                            routing_key=properties.reply_to,
+                            properties=pika.BasicProperties(
+                                correlation_id=properties.correlation_id,
+                                content_type='application/json'
+                            ),
+                            body=json.dumps(response)
+                        )
+                    
+                    ch.basic_ack(delivery_tag=method.delivery_tag)
+                    print(" [✓] Message processed successfully")
+
+                except json.JSONDecodeError as e:
+                    print(f" [✗] Invalid JSON: {str(e)}")
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+                except Exception as e:
+                    print(" [✗] Consumer stopped")
+                    print(f"Processing failed: {str(e)}")
+                    ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
+
             channel.basic_consume(
                 queue='authorization',
                 on_message_callback=callback,
-                auto_ack=True
+                auto_ack=False
             )
             
-            print(' [*] Waiting for messages. To exit press CTRL+C')
+            print(" [*] Authorization consumer ready (validation not implemented)")
             channel.start_consuming()
-            
-        except pika.exceptions.ChannelClosedByBroker as e:
-            if e.reply_code == 406:
-                print("\nERROR: Queue declaration mismatch. Please:")
-                print("1. Delete the queue:")
-                print("   docker exec rabbitmq rabbitmqadmin delete queue name=authorization")
-                print("OR")
-                print("2. Update the queue_declare parameters in jwt_consumer.py")
-            break
-        except pika.exceptions.AMQPConnectionError:
-            print("Connection failed, retrying...")
-            time.sleep(5)
-            continue
+
         except KeyboardInterrupt:
-            print("Consumer stopped")
-            connection.close()
+            if connection and connection.is_open:
+                connection.close()
             break
+        except Exception as e:
+            print(f"Connection error: {str(e)}")
+            time.sleep(5)
