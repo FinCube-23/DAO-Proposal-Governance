@@ -1,11 +1,48 @@
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField 
 
+class UserManager(BaseUserManager):
+    def create_user(self, email, name, contact_number, password=None, **extra_fields):
+        if not email:
+            raise ValueError('Users must have an email address')
+        if not contact_number:
+            raise ValueError('Users must have a contact number')
+            
+        user = self.model(
+            email=self.normalize_email(email),
+            name=name,
+            contact_number=contact_number,
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, name, contact_number, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_verified_email', True)
+        extra_fields.setdefault('is_verified_contact_number', True)
+        extra_fields.setdefault('status', 'approved')
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(
+            email=email,
+            name=name,
+            contact_number=contact_number,
+            password=password,
+            **extra_fields
+        )
+
 class User(AbstractUser):
-    # Remove default username field and make email the primary identifier
-    username = None
+    username = None # Removing Username Field
     email = models.EmailField(unique=True, verbose_name='email address')
     
     # Custom fields from your schema
@@ -45,7 +82,38 @@ class User(AbstractUser):
 
     # Set email as the USERNAME_FIELD
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']  # Removes email from REQUIRED_FIELDS
+    REQUIRED_FIELDS = ['name', 'contact_number']  # Removes email from REQUIRED_FIELDS
+
+    objects = UserManager()
+
+    def _link_to_default_organization(self):
+        """Handles the default organization linking"""
+        from organizations.models import Organization, OrganizationUser
+        
+        # Get or create the default organization
+        org, created = Organization.objects.get_or_create(
+            name="Brain Station 23",
+            defaults={
+                'email': 'sales@brainstation-23.com',
+                'type': 'plc',
+                'address': 'Dhaka, Bangladesh',
+                'is_active': True,
+                'status': 'approved',
+                'legal_entity_identifier': 'TIN 649010914667',
+                'organization_admin': self if self.is_superuser else None
+            }
+        )
+        
+        # If org was created but has no admin and this is a superuser
+        if created and not org.organization_admin and self.is_superuser:
+            org.organization_admin = self
+            org.save()
+        
+        # Create the membership
+        OrganizationUser.objects.get_or_create(
+            user=self,
+            organization=org
+        )
 
     class Meta:
         db_table = 'users'
@@ -54,11 +122,19 @@ class User(AbstractUser):
         ordering = ['-created_at']
 
     def save(self, *args, **kwargs):
-        """Ensure created_at is only set once and updated_at is always updated"""
-        if not self.id:
+        is_new = not self.pk
+        
+        # Handle timestamps
+        if is_new:
             self.created_at = timezone.now()
         self.updated_at = timezone.now()
+        
+        # Save user first to get an ID
         super().save(*args, **kwargs)
+        
+        # Link to default organization if new user
+        if is_new:
+            self._link_to_default_organization()
 
     def __str__(self):
         return f"{self.name} ({self.email})"
