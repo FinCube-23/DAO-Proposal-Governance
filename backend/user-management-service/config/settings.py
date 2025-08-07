@@ -44,8 +44,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'phonenumber_field',
     'event_handlers',   # New app for event handling
-    'users'
+    'users',
+    'organizations'
 ]
 
 MIDDLEWARE = [
@@ -91,6 +93,9 @@ DATABASES = {
         'PORT': env('DB_PORT'),
     }
 }
+
+PHONENUMBER_DEFAULT_REGION = "US"  # Default country for numbers without country code
+PHONENUMBER_DB_FORMAT = "E164"  # How to store numbers in DB
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

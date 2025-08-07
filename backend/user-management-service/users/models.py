@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
+from phonenumber_field.modelfields import PhoneNumberField 
 
 class User(AbstractUser):
     # Remove default username field and make email the primary identifier
@@ -10,7 +11,11 @@ class User(AbstractUser):
     # Custom fields from your schema
     name = models.CharField(max_length=255)
     is_verified_email = models.BooleanField(default=False)
-    contact_number = models.CharField(max_length=20, unique=True)
+    contact_number = PhoneNumberField(
+        unique=True, 
+        region='US',  # Set default region (optional)
+        verbose_name='Phone Number'
+    )
     is_verified_contact_number = models.BooleanField(default=False)
     wallet_address = models.CharField(max_length=255, unique=True, null=True, blank=True)
     
