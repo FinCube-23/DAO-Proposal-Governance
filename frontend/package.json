@@ -11,13 +11,15 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.536.0",
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "zod": "^4.0.15"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^5.2.0",
