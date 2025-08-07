@@ -5,8 +5,7 @@ FROM node:20 as builder
 WORKDIR /app
 
 # Copy only package.json and package-lock.json first for better caching
-COPY package*.json ./
-
+COPY package.*json ./
 # Install dependencies
 RUN npm install
 
@@ -24,10 +23,11 @@ COPY package*.json ./
 RUN npm ci --omit-dev && npm cache clean --force
 
 # Copy only the necessary files
-COPY --from=builder --chown=app:app /app/dist ./dist
+COPY --from=builder --chown=node:node /app/dist ./dist
 
 
+USER node
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]
 
