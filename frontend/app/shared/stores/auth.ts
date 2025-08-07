@@ -1,4 +1,4 @@
-import type { FetchMeResponse, Organization } from '@/core/api/types';
+import type { FetchMeResponse, Organization } from '@/core/services/org/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
