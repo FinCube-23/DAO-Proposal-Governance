@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { type FetchMeResponse, type Organization } from "@/lib/api/types";
+import { type FetchMeResponse, type Organization } from "@/core/api/types";
 
 type TokenPayload = {
   access: string;

@@ -6,99 +6,7 @@ interface Response {
   status: number;
 }
 
-// MFS
-export type CreateMFSPayload = {
-  name: string;
-  email: string;
-  context: string;
-  type: string;
-  location: string;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-};
 
-export type CreateMFSResponse = CreateMFSPayload & {
-  id: number;
-  is_approved: boolean;
-  trx_hash: string | null;
-};
-
-export type UpdateMFSPayload = {
-  id: number;
-  name?: string;
-  email?: string;
-  context?: string;
-  type?: string;
-  location?: string;
-  wallet_address?: string;
-  native_currency?: string;
-  certificate?: string;
-  trx_hash?: string;
-};
-
-export type UpdateMFSResponse = UpdateMFSPayload;
-
-export type Organization = {
-  id: number;
-  name: string;
-  email: string;
-  context: string;
-  type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  trx_hash: string | null;
-  membership_onchain_status: string;
-};
-
-// Auth
-export type FetchMeResponse = {
-  created_at: string;
-  updated_at: string;
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  organization: Organization | null;
-  exchangeUser: null;
-};
-
-export type GetMFSBusinessResponse = {
-  id: number;
-  name: string;
-  email: string;
-  context: string;
-  type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  trx_hash: string;
-  proposal_onchain_id: number;
-  membership_onchain_status: string;
-  created_at: string;
-  updated_at: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-  };
-};
-
-export type MFSBusiness = {
-  created_at: string;
-  updated_at: string;
-  id: number;
-  name: string;
-  type: string;
-  location: string;
-  membership_onchain_status: string;
-};
 
 export type Transaction = {
   id: number;
@@ -124,14 +32,6 @@ export type GetOneTrxResponse = {
   metaData: string;
   created_at: string;
   updated_at: string;
-};
-
-export type GetAllMFSBusinessResponse = {
-  data: MFSBusiness[];
-  total: number;
-  page: string;
-  limit: string;
-  totalPages: number;
 };
 
 export type LoginPayload = {

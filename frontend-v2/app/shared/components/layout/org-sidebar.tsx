@@ -1,6 +1,5 @@
 import { GalleryVerticalEnd, Landmark, LayoutDashboard } from "lucide-react";
-import SidebarUser from "@components/SidebarUser";
-import BrandCard from "@components/BrandCard";
+import BrandCard from "@/shared/components/layout/brand-card";
 import {
   Sidebar,
   SidebarContent,
@@ -9,6 +8,8 @@ import {
   SidebarRail,
 } from "@/shared/components/ui/sidebar";
 import SidebarNavMenu from "@/shared/components/layout/sidebar-nav-menu";
+import SidebarUser from "@/shared/components/layout/sidebar-user";
+import useAuthStore from "@/shared/stores/auth";
 
 const menus = [
   {
@@ -38,17 +39,15 @@ const menus = [
   },
 ];
 
-export default function MFSSidebar({
+export default function OrgSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
-  const auth = useSelector(
-    (state: RootState) => state.persistedReducer.authReducer
-  );
-  return (
+  const authStore = useAuthStore(state => state);
+    return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <BrandCard
-          name={auth.profile?.organization?.name || "N/A"}
+          name={authStore.profile?.organization?.name || "N/A"}
           logo={GalleryVerticalEnd}
           type="Org."
         />
@@ -60,11 +59,11 @@ export default function MFSSidebar({
       </SidebarContent>
       <SidebarFooter>
         <SidebarUser
-          name={auth.profile?.name || "N/A"}
-          email={auth.profile?.email || "N/A"}
-          role={auth.profile?.role || "N/A"}
-          created_at={auth.profile?.created_at || "N/A"}
-          mfsBusiness={auth.profile?.organization || null}
+          name={authStore.profile?.name || "N/A"}
+          email={authStore.profile?.email || "N/A"}
+          role={authStore.profile?.role || "N/A"}
+          created_at={authStore.profile?.created_at || "N/A"}
+          mfsBusiness={authStore.profile?.organization || null}
         />
       </SidebarFooter>
       <SidebarRail />

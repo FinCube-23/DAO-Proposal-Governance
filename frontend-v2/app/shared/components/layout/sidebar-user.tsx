@@ -17,18 +17,14 @@ import {
 } from "@/shared/components/ui/sidebar";
 import { useDisconnect } from "wagmi";
 import { Dialog, DialogContent, DialogHeader } from "@/shared/components/ui/dialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/shared/components/ui/button";
 import useAuthStore from "@/shared/stores/auth";
 import { useMutation } from "node_modules/wagmi/dist/types/utils/query";
 
-import { api } from "@/lib/api/client";
-import { MFS_ENDPOINT} from "@/lib/api/endpoints";
-import type { GetStatusByEmailResponse } from "@/lib/api/types";
-
-export function getStatusByEmail(payload: string) {
-  return api.get<GetStatusByEmailResponse>(MFS_ENDPOINT.BASE + `/status-by-email?email=${payload}`);
-}
+import { api } from "@/core/api/client";
+import { MFS_ENDPOINT} from "@/core/api/endpoints";
+import type { GetStatusByEmailResponse } from "@/core/api/types";
 
 interface Organization {
   name: string;
@@ -51,6 +47,10 @@ interface Props {
   avatar?: string;
 }
 
+export function getStatusByEmail(payload: string) {
+  return api.get<GetStatusByEmailResponse>(MFS_ENDPOINT.BASE + `/status-by-email?email=${payload}`);
+}
+
 export default function SidebarUser({
   name,
   email,
@@ -65,7 +65,7 @@ export default function SidebarUser({
   const [status, setStatus] = useState<string | null>(null);
   const authStore = useAuthStore((state) => state);
 
-  const getStatusByEmail = useMutation({
+  const getStatusMutation = useMutation({
     mutationFn: getStatusByEmail,
     onSuccess: (data) => {
       setStatus(data.membership_onchain_status);
@@ -75,6 +75,13 @@ export default function SidebarUser({
       setStatus("Unknown");
     },
   });
+
+  useEffect(() => {
+    if (mfsBusiness?.email) {
+      getStatusMutation.mutate(mfsBusiness.email);
+    }
+  }, [mfsBusiness])
+
 
   return (
     <SidebarMenu>

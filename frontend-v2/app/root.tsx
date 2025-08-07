@@ -8,22 +8,12 @@ import {
   ScrollRestoration,
 } from 'react-router'
 import { Toaster } from './shared/components/ui/sonner'
-import './app.css'
+import '@/app.css'
 import Header from './shared/components/layout/header'
-import { createConfig, http, injected, WagmiProvider } from 'wagmi'
-import { polygonAmoy, sepolia } from "viem/chains";
+import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { darkTheme, RainbowKitProvider } from "@rainbow-me/rainbowkit";
-
-export const config = createConfig({
-  chains: [sepolia, polygonAmoy],
-  connectors: [injected()],
-  ssr: true,
-  transports: {
-    [sepolia.id]: http(`${import.meta.env.VITE_SEPOLIA_RPC}`),
-    [polygonAmoy.id]: http(`${import.meta.env.VITE_AMOY_RPC}`),
-  },
-});
+import { config } from '@/core/config'
 
 const queryClient = new QueryClient();
 
