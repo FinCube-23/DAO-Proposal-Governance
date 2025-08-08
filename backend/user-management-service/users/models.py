@@ -4,7 +4,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, name, contact_number, password=None, **extra_fields):
+    def create_user(self, email, contact_number, password=None, **extra_fields):
         if not email:
             raise ValueError('Users must have an email address')
         if not contact_number:
@@ -12,7 +12,6 @@ class UserManager(BaseUserManager):
             
         user = self.model(
             email=self.normalize_email(email),
-            name=name,
             contact_number=contact_number,
             **extra_fields
         )
@@ -20,13 +19,17 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, name, contact_number, password=None, **extra_fields):
+    def create_superuser(self, email, contact_number, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_verified_email', True)
         extra_fields.setdefault('is_verified_contact_number', True)
         extra_fields.setdefault('status', 'approved')
+        
+        # Set first_name and last_name for superuser
+        extra_fields.setdefault('first_name', 'Admin')
+        extra_fields.setdefault('last_name', 'User')
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
@@ -35,7 +38,6 @@ class UserManager(BaseUserManager):
 
         return self.create_user(
             email=email,
-            name=name,
             contact_number=contact_number,
             password=password,
             **extra_fields
@@ -45,8 +47,8 @@ class User(AbstractUser):
     username = None # Removing Username Field
     email = models.EmailField(unique=True, verbose_name='email address')
     
+    # Using first_name and last_name from AbstractUser
     # Custom fields from your schema
-    name = models.CharField(max_length=255)
     is_verified_email = models.BooleanField(default=False)
     contact_number = PhoneNumberField(
         unique=True, 
@@ -77,12 +79,11 @@ class User(AbstractUser):
     )
     
     # UTC Timestamps
-    created_at = models.DateTimeField(default=timezone.now, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 
     # Set email as the USERNAME_FIELD
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name', 'contact_number']  # Removes email from REQUIRED_FIELDS
+    REQUIRED_FIELDS = ['contact_number']  # Removes email from REQUIRED_FIELDS
 
     objects = UserManager()
 
@@ -119,14 +120,12 @@ class User(AbstractUser):
         db_table = 'users'
         verbose_name = 'User'
         verbose_name_plural = 'Users'
-        ordering = ['-created_at']
+        ordering = ['-date_joined']
 
     def save(self, *args, **kwargs):
         is_new = not self.pk
         
         # Handle timestamps
-        if is_new:
-            self.created_at = timezone.now()
         self.updated_at = timezone.now()
         
         # Save user first to get an ID
@@ -137,4 +136,5 @@ class User(AbstractUser):
             self._link_to_default_organization()
 
     def __str__(self):
-        return f"{self.name} ({self.email})"
+        full_name = f"{self.first_name} {self.last_name}".strip()
+        return f"{full_name} ({self.email})" if full_name else self.email
