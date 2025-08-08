@@ -57,7 +57,7 @@ USERS {
     string contact_number uk
     boolean is_verified_contact_number "default = false"
     string wallet_address uk "nullable"
-    enum status "['pending', 'approved', 'rejected', 'banned']; Future work: will be shifted to ORGANIZATIONS_USERS table"
+    enum status "['pending', 'approved', 'rejected', 'banned']; Future work: Will be shifted to ORGANIZATIONS_USERS table"
     int approved_by_id fk
     boolean is_staff "django default; def: 'Allows this user to access the admin site.'"
     boolean is_active "django default; def: 'When false, disables login and permissions for a user (in Django's default backends) without deleting their account, preventing foreign key issues.'"
