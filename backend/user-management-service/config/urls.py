@@ -16,13 +16,26 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.http import HttpResponse
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView,
     SpectacularRedocView
 )
 
+def welcome_view(request):
+    return HttpResponse(
+        "<h1>Welcome to USER-MANAGEMENT-SERVICE node! &#x1F680;</h1>"
+        "<p>API Documentation:</p>"
+        "<ul>"
+        "<li><a href='/api/docs/'>Swagger UI</a></li>"
+        "<li><a href='/api/redoc/'>ReDoc</a></li>"
+        "</ul>",
+        content_type="text/html; charset=utf-8"
+    )
+
 urlpatterns = [
+    path('', welcome_view, name='welcome'),  # Root URL
     path('admin/', admin.site.urls),
     # Schema URLs
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
