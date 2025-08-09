@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
 from users.serializers import (
+    UserDetailSerializer,
     UserListSerializer,
     UserRegistrationSerializer,
     WalletUpdateSerializer,
@@ -107,28 +108,26 @@ class UserController(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=400)
 
-class WalletController(APIView):
-    permission_classes = [IsAuthenticated]
-    
-    def post(self, request):
-        serializer = WalletUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
+class UserProfileController(APIView):
+
+    @extend_schema(
+        responses={
+            200: UserDetailSerializer,
+            404: {"type": "object", "properties": {"error": {"type": "string"}}}
+        },
+        description="Retrieve a specific user by ID"
+    )
+    def get(self, request, user_id):
         try:
-            user = UserService.update_wallet(
-                user=request.user,
-                wallet_address=serializer.validated_data['wallet_address']
+            user = UserService.get_user_by_id(user_id)
+            
+            # Serialize response
+            serializer = UserDetailSerializer(user)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_404_NOT_FOUND if "not found" in str(e).lower() 
+                else status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            return Response({
-                'status': 'success',
-                'data': {
-                    'wallet_address': user.wallet_address,
-                    'is_verified': user.is_verified_wallet
-                }
-            })
-        except InvalidWalletAddressError as e:
-            return Response({
-                'status': 'error',
-                'message': str(e),
-                'code': 'invalid_wallet'
-            }, status=status.HTTP_422_UNPROCESSABLE_ENTITY)

@@ -39,6 +39,13 @@ class UserService:
         
         # Delegate to repository
         return UserRepository.get_users(page, limit, filters)
+    
+    @staticmethod
+    def get_user_by_id(user_id):
+        user = UserRepository.get_user_by_id(user_id)
+        if not user:
+            raise Exception("User not found")
+        return user
 
     @staticmethod
     def update_wallet(wallet_dto: WalletUpdateDTO):

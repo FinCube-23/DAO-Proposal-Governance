@@ -85,6 +85,19 @@ class UserListSerializer(serializers.ModelSerializer):
                  'is_active', 'is_staff']
         read_only_fields = fields
 
+class UserDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 
+                'contact_number', 'is_active', 'is_staff']
+        read_only_fields = ['id']
+
+    # Add custom validation if needed
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
+
 class WalletUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

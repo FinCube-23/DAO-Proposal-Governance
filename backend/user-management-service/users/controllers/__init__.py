@@ -1,9 +1,9 @@
 from .user_controller import (
     UserController,
-    WalletController
+    UserProfileController
 )
 
 __all__ = [
     'UserController',
-    'WalletController'
+    'UserProfileController'
 ]

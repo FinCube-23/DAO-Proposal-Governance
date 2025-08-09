@@ -41,3 +41,10 @@ class UserRepository:
             )
         except EmptyPage:
             raise Exception("Page not found")
+        
+    @staticmethod
+    def get_user_by_id(user_id):
+        try:
+            return User.objects.get(pk=user_id)
+        except User.DoesNotExist:
+            return None
