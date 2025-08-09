@@ -77,6 +77,13 @@ class UserResponseSerializer(serializers.ModelSerializer):
     @extend_schema_field(str)
     def get_contact_number(self, obj) -> Optional[str]:
         return str(obj.contact_number) if obj.contact_number else None
+    
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 
+                 'is_active', 'is_staff']
+        read_only_fields = fields
 
 class WalletUpdateSerializer(serializers.ModelSerializer):
     class Meta:

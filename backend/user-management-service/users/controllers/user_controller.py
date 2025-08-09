@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
 from users.serializers import (
+    UserListSerializer,
     UserRegistrationSerializer,
     WalletUpdateSerializer,
     UserResponseSerializer
@@ -14,9 +15,9 @@ from users.utils.exceptions import (
     UserNotFoundError,
     InvalidWalletAddressError
 )
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes, OpenApiParameter
 
-class UserRegistrationController(APIView):
+class UserController(APIView):
 
     @extend_schema(
         request=UserRegistrationSerializer,
@@ -55,6 +56,56 @@ class UserRegistrationController(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='page',
+                type=OpenApiTypes.INT,
+                description='Page number',
+            ),
+            OpenApiParameter(
+                name='limit',
+                type=OpenApiTypes.INT,
+                description='Items per page',
+            ),
+            OpenApiParameter(
+                name='status',
+                type=OpenApiTypes.STR,
+                description='Filter by status',
+                examples=[
+                    OpenApiExample(
+                        'Active users',
+                        value='active'
+                    ),
+                ],
+            ),
+            OpenApiParameter(
+                name='is_active',
+                type=OpenApiTypes.BOOL,
+                description='Filter active users',
+            ),
+            OpenApiParameter(
+                name='is_staff',
+                type=OpenApiTypes.BOOL,
+                description='Filter staff users',
+            ),
+        ],
+        responses={
+            200: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+        },
+    )  
+    def get(self, request):
+        try:
+            users, pagination = UserService.get_users(request.query_params)
+            serializer = UserListSerializer(users, many=True)
+            return Response({
+                'users': serializer.data,
+                'pagination': pagination
+            })
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)
 
 class WalletController(APIView):
     permission_classes = [IsAuthenticated]

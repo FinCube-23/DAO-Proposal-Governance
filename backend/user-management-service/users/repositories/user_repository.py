@@ -1,5 +1,6 @@
 # users/repositories/user_repository.py
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.paginator import Paginator, EmptyPage
 from users.models import User
 
 class UserRepository:
@@ -28,9 +29,15 @@ class UserRepository:
         user.save()
         return user
 
-    @classmethod
-    def get_user_list(cls, page=1, limit=10):
-        queryset = User.objects.filter(is_active=True).order_by('-date_joined')
-        paginator = StandardPagination()
-        paginated_queryset = paginator.paginate_queryset(queryset, page, limit)
-        return paginator.get_paginated_response(paginated_queryset)
+    @staticmethod
+    def get_users(page, limit, filters):
+        queryset = User.objects.filter(**filters).order_by('-date_joined')
+        paginator = Paginator(queryset, limit)
+        
+        try:
+            return (
+                list(paginator.page(page).object_list.values()),  # Serialized data
+                {'page': page, 'limit': limit, 'total': paginator.count}
+            )
+        except EmptyPage:
+            raise Exception("Page not found")
