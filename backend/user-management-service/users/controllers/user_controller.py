@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
+from users.models import User
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
 from users.serializers import (
@@ -17,6 +18,70 @@ from users.utils.exceptions import (
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes, OpenApiParameter
 
+class UserProfileController(APIView):
+
+    @extend_schema(
+        responses={
+            200: UserDetailSerializer,
+            404: {"type": "object", "properties": {"error": {"type": "string"}}}
+        },
+        description="Retrieve a specific user by ID"
+    )
+    def get(self, request, user_id):
+        try:
+            user = UserService.get_user_by_id(user_id)
+            
+            # Serialize response
+            serializer = UserDetailSerializer(user)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_404_NOT_FOUND if "not found" in str(e).lower() 
+                else status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    @extend_schema(
+        request=UserSelfUpdateSerializer,
+        responses=UserSelfUpdateSerializer
+    )
+    def patch(self, request, user_id):
+        """User self profile update (email/contact/wallet)"""
+        serializer = UserSelfUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            user = UserService.partial_update(user_id, serializer.validated_data)
+            return Response(UserSelfUpdateSerializer(user).data)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+class PasswordController(APIView):
+    @extend_schema(
+        request=PasswordUpdateSerializer,
+        responses={
+            200: {"type": "object", "properties": {"status": {"type": "string"}}},
+            400: {"type": "object", "properties": {"error": {"type": "string"}}}
+        }
+    )
+    def post(self, request, user_id):
+        serializer = PasswordUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            user = UserService.update_password(
+                user_id,
+                serializer.validated_data['current_password'],
+                serializer.validated_data['new_password']
+            )
+            return Response({"status": "Password updated successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+        
 class UserController(APIView):
 
     @extend_schema(
@@ -72,13 +137,8 @@ class UserController(APIView):
             OpenApiParameter(
                 name='status',
                 type=OpenApiTypes.STR,
-                description='Filter by status',
-                examples=[
-                    OpenApiExample(
-                        'Active users',
-                        value='active'
-                    ),
-                ],
+                description='Filter by user status',
+                enum=[choice[0] for choice in User.STATUS_CHOICES],  # Dynamically pull choices
             ),
             OpenApiParameter(
                 name='is_active',
@@ -106,67 +166,3 @@ class UserController(APIView):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=400)
-
-class UserProfileController(APIView):
-
-    @extend_schema(
-        responses={
-            200: UserDetailSerializer,
-            404: {"type": "object", "properties": {"error": {"type": "string"}}}
-        },
-        description="Retrieve a specific user by ID"
-    )
-    def get(self, request, user_id):
-        try:
-            user = UserService.get_user_by_id(user_id)
-            
-            # Serialize response
-            serializer = UserDetailSerializer(user)
-            return Response(serializer.data)
-            
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_404_NOT_FOUND if "not found" in str(e).lower() 
-                else status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
-        
-    @extend_schema(
-        request=UserSelfUpdateSerializer,
-        responses=UserSelfUpdateSerializer
-    )
-    def patch(self, request, user_id):
-        """User self profile update (email/contact/wallet/password)"""
-        serializer = UserSelfUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        try:
-            user = UserService.partial_update(user_id, serializer.validated_data)
-            return Response(UserSelfUpdateSerializer(user).data)
-        except Exception as e:
-            return Response(
-                {"error": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-class PasswordController(APIView):
-    @extend_schema(
-        request=PasswordUpdateSerializer,
-        responses={
-            200: {"type": "object", "properties": {"status": {"type": "string"}}},
-            400: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
-    )
-    def post(self, request, user_id):
-        serializer = PasswordUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        try:
-            user = UserService.update_password(
-                user_id,
-                serializer.validated_data['current_password'],
-                serializer.validated_data['new_password']
-            )
-            return Response({"status": "Password updated successfully"})
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
