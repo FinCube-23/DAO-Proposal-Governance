@@ -30,6 +30,12 @@ class UserRepository:
         return user
 
     @staticmethod
+    def get_user_with_organizations(user_id):
+        return User.objects.prefetch_related(
+            'organization_memberships__organization'
+        ).get(pk=user_id)
+
+    @staticmethod
     def get_users(page, limit, filters):
         queryset = User.objects.filter(**filters).order_by('-date_joined')
         paginator = Paginator(queryset, limit)

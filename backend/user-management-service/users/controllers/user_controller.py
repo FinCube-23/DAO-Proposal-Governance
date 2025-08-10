@@ -24,15 +24,16 @@ class UserProfileController(APIView):
         responses={
             200: UserDetailSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}}
-        },
-        description="Retrieve a specific user by ID"
+        }
     )
     def get(self, request, user_id):
         try:
-            user = UserService.get_user_by_id(user_id)
-            
-            # Serialize response
-            serializer = UserDetailSerializer(user)
+            user = UserService.get_user_with_organizations(user_id)
+            print(f"Memberships count: {user.organization_memberships.count()}")
+            serializer = UserDetailSerializer(user, context={
+                'request': request,
+                'user_id': user_id 
+            })
             return Response(serializer.data)
             
         except Exception as e:

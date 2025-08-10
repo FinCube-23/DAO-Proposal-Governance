@@ -86,17 +86,29 @@ class UserListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    organizations = serializers.SerializerMethodField()
+    
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 
-                'contact_number', 'is_active', 'is_staff']
-        read_only_fields = ['id']
+        fields = [
+            'id', 'email', 'first_name', 'last_name',
+            'contact_number', 'is_active', 'is_staff',
+            'status', 'organizations' 
+        ]
+        read_only_fields = fields
 
-    # Add custom validation if needed
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("Email already exists")
-        return value
+    def get_organizations(self, obj):
+        if not hasattr(obj, 'organization_memberships'):
+            return []
+            
+        return [
+            {
+                'id': m.organization.id,
+                'name': m.organization.name,
+                'is_admin': m.organization.organization_admin_id == obj.id
+            }
+            for m in obj.organization_memberships.all()
+        ]
 
 class UserSelfUpdateSerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,4 +1,5 @@
 from typing import Optional
+from users.models import User
 from users.repositories import UserRepository
 from users.dtos import UserRegistrationDTO, WalletUpdateDTO
 from django.core.paginator import Paginator, EmptyPage
@@ -47,6 +48,11 @@ class UserService:
         if not user:
             raise Exception("User not found")
         return user
+    
+    @staticmethod
+    def get_user_with_organizations(user_id):
+        
+        return UserRepository.get_user_with_organizations(user_id)
 
     @staticmethod
     def partial_update(user_id, update_data):
