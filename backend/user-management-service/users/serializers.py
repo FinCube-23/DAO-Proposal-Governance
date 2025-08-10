@@ -98,38 +98,20 @@ class UserDetailSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Email already exists")
         return value
 
-class WalletUpdateSerializer(serializers.ModelSerializer):
+class UserSelfUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['wallet_address']
+        fields = ['email', 'contact_number', 'wallet_address']
         extra_kwargs = {
-            'wallet_address': {
-                'required': True,
-                'allow_null': False
-            }
+            'email': {'required': False},
+            'contact_number': {'required': False},
+            'wallet_address': {'required': False}
         }
 
-    def validate_wallet_address(self, value):
-        if not value.startswith('0x') or len(value) != 42:
-            raise serializers.ValidationError(
-                "Invalid wallet address format. Must start with 0x and be 42 characters long."
-            )
-        return value
-
-class OrganizationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Organization
-        fields = [
-            'id',
-            'name',
-            'email',
-            'type',
-            'address',
-            'legal_entity_identifier',
-            'status'
-        ]
-        extra_kwargs = {
-            'name': {'required': True},
-            'email': {'required': True}
-        }
-
+    def validate(self, data):
+        # Block restricted fields even if somehow passed
+        restricted_fields = {'first_name', 'last_name', 'is_staff', 'is_active', 
+                           'is_superuser', 'is_verified_email', 'is_verified_contact_number', 'password', 'status'}
+        if restricted_fields.intersection(data.keys()):
+            raise serializers.ValidationError("Attempted to modify restricted fields")
+        return data

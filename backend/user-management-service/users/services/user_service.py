@@ -7,6 +7,7 @@ from users.utils.exceptions import (
     InvalidWalletAddressError,
     UserNotFoundError
 )
+from django.contrib.auth.hashers import make_password
 
 class UserService:
     
@@ -48,15 +49,18 @@ class UserService:
         return user
 
     @staticmethod
-    def update_wallet(wallet_dto: WalletUpdateDTO):
-        user = UserRepository.get_user_by_id(wallet_dto.user_id)
-        if not user:
-            raise UserNotFoundError()
+    def partial_update(user_id, update_data):
+        user = UserRepository.get_user_by_id(user_id)
         
-        if not wallet_dto.wallet_address.startswith('0x'):
-            raise InvalidWalletAddressError()
+        if 'email' in update_data and update_data['email'] != user.email:
+            user.is_verified_email = False
+        if 'contact_number' in update_data and update_data['contact_number'] != user.contact_number:
+            user.is_verified_contact_number = False
             
-        return UserRepository.update_wallet_address(
-            wallet_dto.user_id,
-            wallet_dto.wallet_address
-        )
+        allowed_fields = {'email', 'contact_number', 'wallet_address'}
+        for field in allowed_fields:
+            if field in update_data:
+                setattr(user, field, update_data[field])
+                
+        user.save()
+        return user

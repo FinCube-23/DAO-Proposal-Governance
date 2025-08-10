@@ -8,13 +8,11 @@ from users.serializers import (
     UserDetailSerializer,
     UserListSerializer,
     UserRegistrationSerializer,
-    WalletUpdateSerializer,
+    UserSelfUpdateSerializer,
     UserResponseSerializer
 )
 from users.utils.exceptions import (
-    EmailAlreadyExistsError,
-    UserNotFoundError,
-    InvalidWalletAddressError
+    EmailAlreadyExistsError
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes, OpenApiParameter
 
@@ -130,4 +128,22 @@ class UserProfileController(APIView):
                 {"error": str(e)},
                 status=status.HTTP_404_NOT_FOUND if "not found" in str(e).lower() 
                 else status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+    @extend_schema(
+        request=UserSelfUpdateSerializer,
+        responses=UserSelfUpdateSerializer
+    )
+    def patch(self, request, user_id):
+        """User self profile update (email/contact/wallet/password)"""
+        serializer = UserSelfUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            user = UserService.partial_update(user_id, serializer.validated_data)
+            return Response(UserSelfUpdateSerializer(user).data)
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
             )
