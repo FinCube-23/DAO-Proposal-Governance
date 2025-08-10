@@ -115,3 +115,13 @@ class UserSelfUpdateSerializer(serializers.ModelSerializer):
         if restricted_fields.intersection(data.keys()):
             raise serializers.ValidationError("Attempted to modify restricted fields")
         return data
+    
+class PasswordUpdateSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError("New passwords don't match")
+        return data

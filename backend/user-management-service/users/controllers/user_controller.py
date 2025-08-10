@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
 from users.serializers import (
+    PasswordUpdateSerializer,
     UserDetailSerializer,
     UserListSerializer,
     UserRegistrationSerializer,
@@ -147,3 +148,25 @@ class UserProfileController(APIView):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        
+class PasswordController(APIView):
+    @extend_schema(
+        request=PasswordUpdateSerializer,
+        responses={
+            200: {"type": "object", "properties": {"status": {"type": "string"}}},
+            400: {"type": "object", "properties": {"error": {"type": "string"}}}
+        }
+    )
+    def post(self, request, user_id):
+        serializer = PasswordUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            user = UserService.update_password(
+                user_id,
+                serializer.validated_data['current_password'],
+                serializer.validated_data['new_password']
+            )
+            return Response({"status": "Password updated successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)

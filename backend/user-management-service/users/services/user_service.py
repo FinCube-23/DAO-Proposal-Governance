@@ -7,7 +7,7 @@ from users.utils.exceptions import (
     InvalidWalletAddressError,
     UserNotFoundError
 )
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 
 class UserService:
     
@@ -62,5 +62,16 @@ class UserService:
             if field in update_data:
                 setattr(user, field, update_data[field])
                 
+        user.save()
+        return user
+    
+    @staticmethod
+    def update_password(user_id, current_password, new_password):
+        user = UserRepository.get_user_by_id(user_id)
+        
+        if not check_password(current_password, user.password):
+            raise Exception("Current password is incorrect")
+            
+        user.password = make_password(new_password)
         user.save()
         return user
