@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import HOC from '@/shared/components/layout/hoc';
+import { Toaster } from '@/shared/components/ui/sonner';
 import './globals.css';
 
 const geistSans = Geist({
@@ -23,11 +25,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
       >
-        {children}
+        <HOC children={children} />
+        <Toaster richColors />
       </body>
     </html>
   );
