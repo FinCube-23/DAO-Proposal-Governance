@@ -5,8 +5,7 @@ FROM node:20 AS builder
 WORKDIR /app
 
 # Copy only package.json and package-lock.json first for better caching
-COPY package*.json ./
-
+COPY package.*json ./
 # Install dependencies
 RUN npm install
 
@@ -28,6 +27,7 @@ WORKDIR /app
 COPY package*.json ./
 # Install only production dependencies
 RUN npm ci --omit-dev && npm cache clean --force
+
 
 COPY --from=builder --chown=node:node /app/dist ./dist
 

@@ -28,10 +28,6 @@ export class ExchangeUser {
   @ApiProperty()
   balance: number;
 
-  @OneToOne(() => User, (user) => user.exchangeUser)
-  @ApiProperty({ type: () => User })
-  user: User;
-
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;
 }
