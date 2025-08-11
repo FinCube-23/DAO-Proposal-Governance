@@ -123,7 +123,7 @@ class ERDiagramAgent:
     - }}o--o{{ : many to many
     4. Mark primary keys with "PK", foreign keys with "FK", unique keys with "UK"
     5. Also, describe each field as Mermaid comment. For enums, describe enum using definition from top of the file. Additionally, field properties like nullable, default values has to be described in the field description.
-    6. Join table is to be created between many-to-many relationships
+    6. Join table if present, hass to be created between many-to-many relationships
     7. Use this exact format:
 
     ```mermaid
