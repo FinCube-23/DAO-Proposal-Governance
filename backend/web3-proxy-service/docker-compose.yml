@@ -8,7 +8,7 @@ services:
     ports:
       - 3004:3000
     volumes:
-      - ./:/app
+      - ./artifacts:/app/artifacts
       - /app/node_modules
     env_file:
       - .env.local

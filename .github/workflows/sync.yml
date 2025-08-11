@@ -19,7 +19,7 @@ jobs:
           port: ${{ secrets.VM_PORT }}
           script: |
             echo "=== Navigating to project directory ==="
-            cd ~/projects/DAO-Proposal-Governance
+            cd /mnt/ext/projects/DAO-Proposal-Governance
             echo "Pulling latest changes from repository"
             git pull origin main
             echo "Stopping docker services"

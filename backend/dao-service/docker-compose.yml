@@ -9,7 +9,8 @@ services:
     ports:
       - '3002:3000'
     volumes:
-      - .:/app # Mount dao-service code
+      #- .:/app # Mount dao-service code
+      - ./logs:/app/logs # Mount logs directory
       - /app/node_modules
       - ../libs:/app/libs:ro # Mount libs directory as read-only
     env_file:
