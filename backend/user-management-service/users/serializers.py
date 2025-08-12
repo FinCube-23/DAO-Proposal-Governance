@@ -5,6 +5,8 @@ from users.models import User
 from typing import Optional 
 from drf_spectacular.utils import extend_schema_field, OpenApiExample
 from phonenumber_field.serializerfields import PhoneNumberField
+from users.utils import get_tokens_for_user
+from django.contrib.auth import authenticate
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(
@@ -54,6 +56,33 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         user = User.objects.create_user(**validated_data)
         return user
+    
+
+class UserLoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(
+        write_only=True,
+        required=True,
+    )
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        style={'input_type': 'password'},
+        min_length=8
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            'email', 
+            'password',
+        ]
+        extra_kwargs = {
+            'email': {'required': True},
+            'password': {'required': True},
+        }
+    
+            
+        
 
 class UserResponseSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
