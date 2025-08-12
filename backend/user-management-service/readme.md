@@ -1,4 +1,4 @@
-##  Development Setup — User Management Service
+##  Development Setup — User Management Service.
 
 Before starting the service in development mode, be sure to initialize your database and create an administrative user:
 
@@ -10,11 +10,11 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-## User Management Activity Diagram
+## User Management Activity Diagram.
 ![User Management Activity Diagram](Activity_diagram.png)
 
 
-## User Management Service
+## User Management Service ER Diagram.
 
 ```mermaid
 erDiagram
