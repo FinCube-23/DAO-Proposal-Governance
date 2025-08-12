@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 class OrganizationUserController(APIView):
-    def create(self, request):
+    def post(self, request):
         """
         Handle creation of organization user.
         in -> user_id, organization_id
