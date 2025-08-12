@@ -1,0 +1,106 @@
+# organizations/serializers/onchain_verification_serializers.py
+from rest_framework import serializers
+from organizations.models import OnchainVerification, Organization
+from typing import Optional
+from drf_spectacular.utils import extend_schema_field
+
+class OnchainVerificationCreateSerializer(serializers.ModelSerializer):
+    trx_hash = serializers.CharField(max_length=66, required=True)
+    context = serializers.JSONField(required=True)
+    proposer_wallet = serializers.CharField(max_length=42, required=True)
+    organization_id = serializers.IntegerField(write_only=True, required=True)
+    
+    class Meta:
+        model = OnchainVerification
+        fields = [
+            'trx_hash',
+            'context', 
+            'proposer_wallet',
+            'organization_id',
+        ]
+
+    def validate_organization_id(self, value):
+        try:
+            Organization.objects.get(id=value)
+        except Organization.DoesNotExist:
+            raise serializers.ValidationError("Organization does not exist")
+        return value
+
+    def validate_trx_hash(self, value):
+        # Check if transaction hash already exists
+        if OnchainVerification.objects.filter(trx_hash=value).exists():
+            raise serializers.ValidationError("Transaction hash already exists")
+        
+        # Basic validation for Ethereum transaction hash format
+        if not value.startswith('0x') or len(value) != 66:
+            raise serializers.ValidationError("Invalid transaction hash format")
+        return value
+
+    def validate_proposer_wallet(self, value):
+        # Basic validation for Ethereum wallet address format
+        if not value.startswith('0x') or len(value) != 42:
+            raise serializers.ValidationError("Invalid wallet address format")
+        return value
+
+    def validate(self, data):
+        # Block restricted fields even if somehow passed
+        restricted_fields = {'id', 'created_at', 'updated_at'}
+        if restricted_fields.intersection(data.keys()):
+            raise serializers.ValidationError("Attempted to modify restricted fields")
+        return data
+
+    def create(self, validated_data):
+        organization = Organization.objects.get(id=validated_data.pop('organization_id'))
+        
+        return OnchainVerification.objects.create(
+            organization=organization,
+            **validated_data
+        )
+
+class OnchainVerificationResponseSerializer(serializers.ModelSerializer):
+    organization_id = serializers.IntegerField(source='organization.id', read_only=True)
+    organization_name = serializers.CharField(source='organization.name', read_only=True)
+    onchain_status_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = OnchainVerification
+        fields = [
+            'id',
+            'trx_hash',
+            'onchain_id',
+            'onchain_status',
+            'onchain_status_display',
+            'context',
+            'proposer_wallet',
+            'organization_id',
+            'organization_name',
+            'created_at',
+            'updated_at'
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(str)
+    def get_onchain_status_display(self, obj) -> Optional[str]:
+        return obj.get_onchain_status_display()
+
+class OnchainVerificationListSerializer(serializers.ModelSerializer):
+    organization_name = serializers.CharField(source='organization.name', read_only=True)
+    onchain_status_display = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = OnchainVerification
+        fields = [
+            'id',
+            'trx_hash', 
+            'onchain_id',
+            'onchain_status',
+            'onchain_status_display',
+            'proposer_wallet',
+            'organization_name',
+            'created_at'
+        ]
+        read_only_fields = fields
+
+    @extend_schema_field(str)
+    def get_onchain_status_display(self, obj) -> Optional[str]:
+        return obj.get_onchain_status_display()
