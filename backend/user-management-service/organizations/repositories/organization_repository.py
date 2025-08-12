@@ -25,7 +25,7 @@ class OrganizationRepository:
         try:
             page_obj = paginator.page(page)
             return (
-                list(page_obj.object_list.values()),  # Return serialized data
+                list(page_obj.object_list),
                 {'page': page, 'limit': limit, 'total': paginator.count}
             )
         except EmptyPage:
