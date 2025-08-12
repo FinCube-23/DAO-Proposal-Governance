@@ -84,7 +84,6 @@ class OnchainVerificationCreateSerializer(serializers.ModelSerializer):
 class OnchainVerificationResponseSerializer(serializers.ModelSerializer):
     organization_id = serializers.IntegerField(source='organization.id', read_only=True)
     organization_name = serializers.CharField(source='organization.name', read_only=True)
-    onchain_status_display = serializers.SerializerMethodField()
     
     class Meta:
         model = OnchainVerification
@@ -93,7 +92,6 @@ class OnchainVerificationResponseSerializer(serializers.ModelSerializer):
             'trx_hash',
             'onchain_id',
             'onchain_status',
-            'onchain_status_display',
             'context',
             'proposer_wallet',
             'organization_id',
@@ -103,13 +101,8 @@ class OnchainVerificationResponseSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
-    @extend_schema_field(str)
-    def get_onchain_status_display(self, obj) -> Optional[str]:
-        return obj.get_onchain_status_display()
-
 class OnchainVerificationListSerializer(serializers.ModelSerializer):
     organization_name = serializers.CharField(source='organization.name', read_only=True)
-    onchain_status_display = serializers.SerializerMethodField()
     
     class Meta:
         model = OnchainVerification
@@ -118,13 +111,8 @@ class OnchainVerificationListSerializer(serializers.ModelSerializer):
             'trx_hash', 
             'onchain_id',
             'onchain_status',
-            'onchain_status_display',
             'proposer_wallet',
             'organization_name',
             'created_at'
         ]
         read_only_fields = fields
-
-    @extend_schema_field(str)
-    def get_onchain_status_display(self, obj) -> Optional[str]:
-        return obj.get_onchain_status_display()
