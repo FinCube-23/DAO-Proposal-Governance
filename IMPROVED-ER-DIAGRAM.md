@@ -89,7 +89,7 @@ ORGANIZATIONS_USERS {
 
 ONCHAIN_VERIFICATIONS {
     int id pk
-    string trx_hash uk "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
+    string trx_hash uk
     int onchain_id "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
     enum onchain_status "['register', 'pending', 'approved', 'cancelled']; nullable; default = 'register'"
     json context
