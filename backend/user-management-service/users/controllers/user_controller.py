@@ -1,7 +1,9 @@
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status,serializers
 from users.models import User
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
@@ -11,7 +13,8 @@ from users.serializers import (
     UserListSerializer,
     UserRegistrationSerializer,
     UserSelfUpdateSerializer,
-    UserResponseSerializer
+    UserResponseSerializer,
+    UserLoginSerializer
 )
 from users.utils.exceptions import (
     EmailAlreadyExistsError
@@ -61,27 +64,7 @@ class UserProfileController(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-class PasswordController(APIView):
-    @extend_schema(
-        request=PasswordUpdateSerializer,
-        responses={
-            200: {"type": "object", "properties": {"status": {"type": "string"}}},
-            400: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
-    )
-    def post(self, request, user_id):
-        serializer = PasswordUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        
-        try:
-            user = UserService.update_password(
-                user_id,
-                serializer.validated_data['current_password'],
-                serializer.validated_data['new_password']
-            )
-            return Response({"status": "Password updated successfully"})
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
+
         
 class UserController(APIView):
 
@@ -89,6 +72,9 @@ class UserController(APIView):
         request=UserRegistrationSerializer,
         responses={201: UserResponseSerializer}
     )
+    
+    
+
     def post(self, request):
         registration_serializer = UserRegistrationSerializer(data=request.data)
         registration_serializer.is_valid(raise_exception=True)
@@ -103,6 +89,7 @@ class UserController(APIView):
             )
             
             user = UserService.register_user(user_dto)
+
             
             response_serializer = UserResponseSerializer(user)
             
@@ -123,6 +110,9 @@ class UserController(APIView):
                 'message': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -157,8 +147,10 @@ class UserController(APIView):
             400: OpenApiTypes.OBJECT,
         },
     )  
+    
     def get(self, request):
         try:
+            
             users, pagination = UserService.get_users(request.query_params)
             serializer = UserListSerializer(users, many=True)
             return Response({

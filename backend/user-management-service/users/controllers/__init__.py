@@ -1,11 +1,14 @@
 from .user_controller import (
     UserController,
-    UserProfileController,
-    PasswordController
+    UserProfileController
 )
+from .auth_controller import (
+    AuthController,
+    PasswordController)
 
 __all__ = [
     'UserController',
     'UserProfileController',
-    'PasswordController'
+    'PasswordController',
+    'AuthController'
 ]

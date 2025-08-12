@@ -2,7 +2,8 @@ from django.urls import path
 from users.controllers import (
     UserController,
     UserProfileController,
-    PasswordController
+    PasswordController,
+    AuthController
 )
 
 app_name = 'users'  # Namespace
@@ -13,4 +14,5 @@ urlpatterns = [
     path('profile/<int:user_id>/password/', 
          PasswordController.as_view(), 
          name='user-password-update'),
+    path('auth/login',AuthController.as_view(),name='login')
 ]
