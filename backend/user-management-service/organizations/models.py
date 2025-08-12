@@ -77,7 +77,7 @@ class OnchainVerification(models.Model):
         ('cancelled', 'Cancelled'),
     ]
     
-    trx_hash = models.CharField(max_length=66, unique=True, blank=True, null=True)
+    trx_hash = models.CharField(max_length=66, unique=True)
     onchain_id = models.IntegerField(blank=True, null=True)
     onchain_status = models.CharField(
         max_length=20,
