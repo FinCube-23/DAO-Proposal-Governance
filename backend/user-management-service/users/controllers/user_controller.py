@@ -22,7 +22,6 @@ from users.utils.exceptions import (
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, OpenApiTypes, OpenApiParameter
 
 class UserProfileController(APIView):
-
     @extend_schema(
         responses={
             200: UserDetailSerializer,
@@ -67,14 +66,11 @@ class UserProfileController(APIView):
 
         
 class UserController(APIView):
-
     @extend_schema(
         request=UserRegistrationSerializer,
         responses={201: UserResponseSerializer}
     )
     
-    
-
     def post(self, request):
         registration_serializer = UserRegistrationSerializer(data=request.data)
         registration_serializer.is_valid(raise_exception=True)
@@ -150,7 +146,6 @@ class UserController(APIView):
     
     def get(self, request):
         try:
-            
             users, pagination = UserService.get_users(request.query_params)
             serializer = UserListSerializer(users, many=True)
             return Response({
@@ -159,3 +154,23 @@ class UserController(APIView):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=400)
+        
+
+
+class UserStatusController(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAdminUser]
+    @extend_schema(
+        responses={
+            200: {'properties': {'status': {'type': 'string'}}},
+            404: {'type': 'object', 'properties': {'error': {'type': 'string'}}}
+        }
+    )
+    def get(self, request,email):
+        if not email:
+            return Response({'error': 'Email parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            status_value = UserService.get_user_status_by_email(email)
+            return Response({'status': status_value}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
