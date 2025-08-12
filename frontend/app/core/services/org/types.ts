@@ -13,6 +13,7 @@ export type CreateOrgResponse = CreateOrgPayload & {
   id: number;
   is_approved: boolean;
   trx_hash: string | null;
+  membership_onchain_status: string;
 };
 
 export interface UpdateOrgPayload {

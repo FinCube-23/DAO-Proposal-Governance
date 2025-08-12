@@ -1,3 +1,5 @@
+'use client';
+
 import type { GetStatusByEmailResponse } from '@/core/api/types';
 import { useMutation } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
@@ -7,7 +9,6 @@ import { api } from '@/core/api/client';
 import { MFS_ENDPOINT } from '@/core/api/endpoints';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
 import { Button } from '@/shared/components/ui/button';
-
 import { Dialog, DialogContent, DialogHeader } from '@/shared/components/ui/dialog';
 import {
   DropdownMenu,
@@ -43,7 +44,7 @@ interface Props {
   email: string;
   role: string;
   created_at: string;
-  mfsBusiness: Organization | null;
+  organization: Organization | null;
   avatar?: string;
 }
 
@@ -56,7 +57,7 @@ export default function SidebarUser({
   email,
   role,
   created_at,
-  mfsBusiness,
+  organization,
   avatar,
 }: Props) {
   const { isMobile } = useSidebar();
@@ -77,10 +78,10 @@ export default function SidebarUser({
   });
 
   useEffect(() => {
-    if (mfsBusiness?.email) {
-      getStatusMutation.mutate(mfsBusiness.email);
+    if (organization?.email) {
+      getStatusMutation.mutate(organization.email);
     }
-  }, [mfsBusiness]);
+  }, [organization]);
 
   return (
     <SidebarMenu>
@@ -183,7 +184,7 @@ export default function SidebarUser({
                               Organization Name
                             </p>
                             <p className="text-white font-semibold">
-                              {mfsBusiness?.name}
+                              {organization?.name}
                             </p>
                           </div>
                           <div>
@@ -191,7 +192,7 @@ export default function SidebarUser({
                               Organization Email
                             </p>
                             <p className="text-blue-300">
-                              {mfsBusiness?.email}
+                              {organization?.email}
                             </p>
                           </div>
                           <div>
@@ -199,7 +200,7 @@ export default function SidebarUser({
                               Organization Type
                             </p>
                             <p className="text-purple-300">
-                              {mfsBusiness?.type}
+                              {organization?.type}
                             </p>
                           </div>
                           <div>
@@ -207,7 +208,7 @@ export default function SidebarUser({
                               Location
                             </p>
                             <p className="text-amber-300">
-                              {mfsBusiness?.location}
+                              {organization?.location}
                             </p>
                           </div>
                         </div>
@@ -218,11 +219,11 @@ export default function SidebarUser({
                               Wallet Address
                             </p>
                             <p className="text-blue-400 break-words font-mono text-sm">
-                              {mfsBusiness?.wallet_address
-                                ? `${mfsBusiness.wallet_address.slice(
+                              {organization?.wallet_address
+                                ? `${organization.wallet_address.slice(
                                   0,
                                   6,
-                                )}...${mfsBusiness.wallet_address.slice(-6)}`
+                                )}...${organization.wallet_address.slice(-6)}`
                                 : ''}
                             </p>
                           </div>
@@ -231,7 +232,7 @@ export default function SidebarUser({
                               Native Currency
                             </p>
                             <p className="text-emerald-400">
-                              {mfsBusiness?.native_currency}
+                              {organization?.native_currency}
                             </p>
                           </div>
                         </div>
@@ -243,12 +244,12 @@ export default function SidebarUser({
                             </p>
                             <span
                               className={`px-2 py-1 rounded ${
-                                mfsBusiness?.is_approved
+                                organization?.is_approved
                                   ? 'bg-green-600'
                                   : 'bg-yellow-600'
                               } text-xs`}
                             >
-                              {mfsBusiness?.is_approved
+                              {organization?.is_approved
                                 ? 'Approved'
                                 : 'Pending'}
                             </span>
@@ -266,12 +267,12 @@ export default function SidebarUser({
                             Certificate
                           </p>
                           <a
-                            href={mfsBusiness?.certificate}
+                            href={organization?.certificate}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-400 hover:text-blue-300 underline break-words"
                           >
-                            {mfsBusiness?.certificate
+                            {organization?.certificate
                               || 'No certificate available'}
                           </a>
                         </div>

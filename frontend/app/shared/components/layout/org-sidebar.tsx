@@ -1,3 +1,5 @@
+'use client';
+
 import { GalleryVerticalEnd, Landmark, LayoutDashboard } from 'lucide-react';
 import BrandCard from '@/shared/components/layout/brand-card';
 import SidebarNavMenu from '@/shared/components/layout/sidebar-nav-menu';
@@ -63,7 +65,7 @@ export default function OrgSidebar({
           email={authStore.profile?.email || 'N/A'}
           role={authStore.profile?.role || 'N/A'}
           created_at={authStore.profile?.created_at || 'N/A'}
-          mfsBusiness={authStore.profile?.organization || null}
+          organization={authStore.profile?.organization || null}
         />
       </SidebarFooter>
       <SidebarRail />

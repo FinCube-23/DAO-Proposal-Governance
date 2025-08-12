@@ -14,8 +14,8 @@ interface AuthStoreState {
 
   setTokens: (payload: TokenPayload | null) => void;
   setProfile: (payload: ProfilePayload | null) => void;
-  setMfsBusiness: (org: Organization | null) => void;
-  setMfsBusinessTrxHash: (hash: string | null) => void;
+  setOrg: (org: Organization | null) => void;
+  setOrgTrxHash: (hash: string | null) => void;
   clearAuthState: () => void;
 }
 
@@ -31,7 +31,7 @@ const useAuthStore = create<AuthStoreState>()(
       setProfile: payload =>
         set({ profile: payload }),
 
-      setMfsBusiness: (org) => {
+      setOrg: (org) => {
         const profile = get().profile;
         if (profile) {
           set({
@@ -43,7 +43,7 @@ const useAuthStore = create<AuthStoreState>()(
         }
       },
 
-      setMfsBusinessTrxHash: (hash) => {
+      setOrgTrxHash: (hash) => {
         const profile = get().profile;
         if (profile?.organization) {
           set({

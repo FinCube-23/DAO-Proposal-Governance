@@ -33,7 +33,7 @@ export default function LoginForm() {
     onSuccess: (data) => {
       authStore.setProfile(data);
       if (data?.role === 'mfs') {
-        router.push('/organization/dashboard');
+        router.push('/organization');
       }
     },
     onError: (error) => {

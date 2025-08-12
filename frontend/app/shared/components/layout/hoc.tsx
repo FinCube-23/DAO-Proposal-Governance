@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { config } from '@/core/config';
 import Header from './header';
+import '@rainbow-me/rainbowkit/styles.css';
 
 interface Props {
   children: React.ReactNode;
