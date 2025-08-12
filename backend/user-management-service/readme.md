@@ -11,7 +11,7 @@ python manage.py createsuperuser
 ```
 
 ## User Management Activity Diagram
-[!User Management Activity Diagram](Activity_diagram.png)
+![User Management Activity Diagram](Activity_diagram.png)
 
 
 ## User Management Service
