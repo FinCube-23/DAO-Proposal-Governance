@@ -81,3 +81,10 @@ class UserService:
         user.password = make_password(new_password)
         user.save()
         return user
+    
+    @staticmethod
+    def get_user_status_by_email(email):
+        user = UserRepository.get_user_by_email(email)
+        if not user:
+            raise Exception("User not found")
+        return user.status

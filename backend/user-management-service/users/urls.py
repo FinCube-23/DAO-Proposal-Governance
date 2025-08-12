@@ -3,7 +3,8 @@ from users.controllers import (
     UserController,
     UserProfileController,
     PasswordController,
-    AuthController
+    AuthController,
+    UserStatusController
 )
 
 app_name = 'users'  # Namespace
@@ -14,5 +15,6 @@ urlpatterns = [
     path('profile/<int:user_id>/password/', 
          PasswordController.as_view(), 
          name='user-password-update'),
-    path('auth/login',AuthController.as_view(),name='login')
+    path('login',AuthController.as_view(),name='login'),
+    path('status/<str:email>',UserStatusController.as_view(),name='user-status')
 ]
