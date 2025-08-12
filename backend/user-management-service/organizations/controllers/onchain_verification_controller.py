@@ -11,7 +11,7 @@ class OnchainVerificationController(APIView):
         # Implementation logic goes here
         return Response({"message": "On-chain verification created"})
 
-    def getByOrgId(self, request, org_id):
+    def get_by_org_id(self, request, org_id):
         """
         Handle retrieval of on-chain verifications by organization ID.
         in -> org_id

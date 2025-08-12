@@ -11,7 +11,7 @@ class OrganizationController(APIView):
         # Implementation logic goes here
         return Response({"message": "Organization created"})
 
-    def getAll(self, request):
+    def get_all(self, request):
         """
         Handle retrieval of all organizations.
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id
@@ -19,7 +19,7 @@ class OrganizationController(APIView):
         # Implementation logic goes here
         return Response({"message": "All organizations retrieved"})
 
-    def getById(self, request, org_id):
+    def get_by_id(self, request, org_id):
         """
         Handle retrieval of a specific organization by ID.
         in -> org_id
@@ -28,7 +28,7 @@ class OrganizationController(APIView):
         # Implementation logic goes here
         return Response({"message": f"Organization with ID {org_id} retrieved"})
 
-    def updateById(self, request, org_id):
+    def update(self, request, org_id):
         """
         Handle update of a specific organization by ID.
         in -> org_id, email, address (only email and address can be updated)
