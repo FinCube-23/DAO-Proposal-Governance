@@ -47,6 +47,30 @@ class OnchainVerificationCreateSerializer(serializers.ModelSerializer):
         restricted_fields = {'id', 'created_at', 'updated_at'}
         if restricted_fields.intersection(data.keys()):
             raise serializers.ValidationError("Attempted to modify restricted fields")
+        
+        # Validate proposer wallet matches organization admin's wallet
+        organization_id = data.get('organization_id')
+        proposer_wallet = data.get('proposer_wallet')
+        
+        if organization_id and proposer_wallet:
+            try:
+                organization = Organization.objects.get(id=organization_id)
+                organization_admin = organization.organization_admin
+                
+                if not organization_admin.wallet_address:
+                    raise serializers.ValidationError(
+                        "Organization admin does not have a wallet address set"
+                    )
+                
+                if organization_admin.wallet_address.lower() != proposer_wallet.lower():
+                    raise serializers.ValidationError(
+                        "Proposer wallet address must match the organization admin's wallet address"
+                    )
+                    
+            except Organization.DoesNotExist:
+                # This will be caught by validate_organization_id, so we don't need to handle it here
+                pass
+        
         return data
 
     def create(self, validated_data):
