@@ -19,7 +19,7 @@ const menus = [
     items: [
       {
         name: 'Dashboard',
-        url: '/organization/dashboard',
+        url: '/organization',
         icon: LayoutDashboard,
       },
       {

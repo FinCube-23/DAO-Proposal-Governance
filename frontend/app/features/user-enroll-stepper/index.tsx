@@ -30,7 +30,7 @@ export default function UserEnrollStepper() {
 
     useEffect(() => {
         if (auth.profile?.organization?.trx_hash == null) {
-            setShowModal(true);
+            setShowModal(false);
         }
     }, [auth.profile?.organization?.trx_hash]);
 
@@ -43,7 +43,7 @@ export default function UserEnrollStepper() {
                             <Prompt incrementStep={incrementStep} />
                         )}
 
-                        {current > 0 && current < 4 && (
+                        {current > 0 && current < 3 && (
                             <>
                                 <StepperProgress current={current} />
                                 <StepperBody

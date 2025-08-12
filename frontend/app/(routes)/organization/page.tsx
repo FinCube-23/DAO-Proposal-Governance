@@ -1,5 +1,9 @@
+import OrganizationDashboard from '@/features/org-dashboard';
+
 export default function OrganizationPage() {
   return (
-    <div>Hello</div>
+    <div>
+      <OrganizationDashboard />
+    </div>
   );
 }

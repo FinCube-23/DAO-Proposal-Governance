@@ -22,7 +22,7 @@ export default function StepOrgInfo({
       </div>
       <div className="w-full my-5">
         <OrgInfoForm
-          mfsBusiness={authStore.profile?.organization ?? null}
+          organization={authStore.profile?.organization ?? null}
         />
       </div>
       <div className="flex justify-between w-full">

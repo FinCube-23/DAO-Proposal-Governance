@@ -9,14 +9,13 @@ export default function OrganizationLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="w-full bg-black bg-grid-small-white/[0.2] relative flex items-center justify-center">
-      <div className="absolute pointer-events-none inset-0 flex items-center justify-center bg-black [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
+    <div className="w-full relative flex items-center justify-center">
       <SidebarProvider className="z-50">
         <UserEnrollStepper />
         <OrgSidebar />
-        <main className="w-full h-screen">
+        <main className="w-full">
           <OrgHeader />
-          <div className="container mx-auto mt-24 h-full">
+          <div className="container mx-auto my-24 px-4 lg:px-8">
             {children}
           </div>
         </main>
