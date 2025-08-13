@@ -8,7 +8,7 @@ from drf_spectacular.utils import (
 )
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from django.contrib.auth import authenticate
@@ -68,7 +68,7 @@ class AuthController(APIView):
 
 class PasswordController(APIView):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=PasswordUpdateSerializer,
@@ -77,13 +77,14 @@ class PasswordController(APIView):
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
     )
-    def post(self, request, user_id):
+    def post(self, request):
         serializer = PasswordUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         try:
+            user = request.user
             user = UserService.update_password(
-                user_id,
+                user.id,
                 serializer.validated_data["current_password"],
                 serializer.validated_data["new_password"],
             )

@@ -13,7 +13,7 @@ urlpatterns = [
     path("", UserController.as_view(), name="user-list"),
     path("<int:user_id>", UserProfileController.as_view(), name="user-profile"),
     path(
-        "profile/<int:user_id>/password/",
+        "profile/update-password/",
         PasswordController.as_view(),
         name="user-password-update",
     ),
