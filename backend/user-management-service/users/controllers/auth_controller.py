@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,7 +18,7 @@ from users.services import UserService
 from users.utils import get_tokens_for_user
 
 
-class AuthController(APIView):
+class AuthController(ViewSet):
 
     @extend_schema(
         request=UserLoginSerializer,
@@ -27,7 +27,7 @@ class AuthController(APIView):
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
     )
-    def post(self, request):
+    def login(self, request):
         login_serializer = UserLoginSerializer(data=request.data)
         login_serializer.is_valid(raise_exception=True)
 
@@ -66,7 +66,7 @@ class AuthController(APIView):
             )
 
 
-class PasswordController(APIView):
+class PasswordController(ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -77,7 +77,7 @@ class PasswordController(APIView):
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
     )
-    def post(self, request):
+    def update_password(self, request):
         serializer = PasswordUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

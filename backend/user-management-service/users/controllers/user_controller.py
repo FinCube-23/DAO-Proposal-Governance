@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAdminUser
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -8,7 +8,6 @@ from users.models import User
 from users.services import UserService
 from users.dtos import UserRegistrationDTO
 from users.serializers import (
-    PasswordUpdateSerializer,
     UserDetailSerializer,
     UserListSerializer,
     UserRegistrationSerializer,
@@ -20,20 +19,19 @@ from users.utils.exceptions import EmailAlreadyExistsError
 from drf_spectacular.utils import (
     extend_schema,
     OpenApiParameter,
-    OpenApiExample,
     OpenApiTypes,
     OpenApiParameter,
 )
 
 
-class UserProfileController(APIView):
+class UserProfileController(ViewSet):
     @extend_schema(
         responses={
             200: UserDetailSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get(self, request, user_id):
+    def get_user_detail(self, request, user_id):
         try:
             user = UserService.get_user_with_organizations(user_id)
             print(f"Memberships count: {user.organization_memberships.count()}")
@@ -53,7 +51,7 @@ class UserProfileController(APIView):
             )
 
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
-    def patch(self, request, user_id):
+    def update_user(self, request, user_id):
         """User self profile update (email/contact/wallet)"""
         serializer = UserSelfUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -65,11 +63,11 @@ class UserProfileController(APIView):
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserController(APIView):
+class UserController(ViewSet):
     @extend_schema(
         request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
     )
-    def post(self, request):
+    def register(self, request):
         registration_serializer = UserRegistrationSerializer(data=request.data)
         registration_serializer.is_valid(raise_exception=True)
 
@@ -142,7 +140,7 @@ class UserController(APIView):
             400: OpenApiTypes.OBJECT,
         },
     )
-    def get(self, request):
+    def get_user_list(self, request):
         try:
             users, pagination = UserService.get_users(request.query_params)
             serializer = UserListSerializer(users, many=True)
@@ -151,7 +149,7 @@ class UserController(APIView):
             return Response({"error": str(e)}, status=400)
 
 
-class UserStatusController(APIView):
+class UserStatusController(ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAdminUser]
 
@@ -161,7 +159,7 @@ class UserStatusController(APIView):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get(self, request, email):
+    def get_user_status(self, request, email):
         if not email:
             return Response(
                 {"error": "Email parameter is required"},
