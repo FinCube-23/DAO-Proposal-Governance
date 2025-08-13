@@ -4,17 +4,21 @@ from users.controllers import (
     UserProfileController,
     PasswordController,
     AuthController,
-    UserStatusController
+    UserStatusController,
 )
 
-app_name = 'users'  # Namespace
+app_name = "users"  # Namespace
 
 urlpatterns = [
-    path('', UserController.as_view(), name='user-list'),
-    path('<int:user_id>', UserProfileController.as_view(), name='user-profile'),
-    path('profile/<int:user_id>/password/', 
-         PasswordController.as_view(), 
-         name='user-password-update'),
-    path('login',AuthController.as_view(),name='login'),
-    path('status/<str:email>',UserStatusController.as_view(),name='user-status')
+    path("", UserController.as_view(), name="user-list"),
+    path("<int:user_id>", UserProfileController.as_view(), name="user-profile"),
+    path(
+        "profile/<int:user_id>/password/",
+        PasswordController.as_view(),
+        name="user-password-update",
+    ),
+    path("login", AuthController.as_view(), name="login"),
+    path(
+        "profile/status/<str:email>", UserStatusController.as_view(), name="user-status"
+    ),
 ]
