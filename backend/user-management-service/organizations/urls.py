@@ -1,7 +1,6 @@
 from django.urls import path
 from organizations.controllers import (
-    OrganizationListController,
-    OrganizationDetailController,
+    OrganizationController,
     OrganizationUserController,
     OnchainVerificationController,
 )
@@ -9,13 +8,20 @@ from organizations.controllers import (
 app_name = 'organizations'  # Namespace
 
 urlpatterns = [
-    path('', OrganizationListController.as_view(), name='organization-list'),
-    path('<int:org_id>/', OrganizationDetailController.as_view(), name='organization-detail'),
+    # Organization management - manual ViewSet action mappings
+    path('', 
+         OrganizationController.as_view({'get': 'get_list', 'post': 'create'}), 
+         name='organization-list'),
+    path('<int:org_id>/', 
+         OrganizationController.as_view({'get': 'get_by_id', 'patch': 'update_organization_info'}), 
+         name='organization-detail'),
     
+    # Organization users - manual ViewSet action mapping
     path('users/', 
          OrganizationUserController.as_view({'post': 'add_user_to_organization'}), 
          name='organization-users'),
     
+    # Onchain verifications - manual ViewSet action mappings
     path('onchain-verifications/', 
          OnchainVerificationController.as_view({'post': 'create'}), 
          name='onchain-verifications-create'),

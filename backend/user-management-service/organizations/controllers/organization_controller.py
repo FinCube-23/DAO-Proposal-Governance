@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from organizations.models import Organization
@@ -12,7 +12,7 @@ from organizations.serializers.organization_serializers import (
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-class OrganizationListController(APIView):
+class OrganizationController(ViewSet):
     """
     Handle organization list operations: GET (all) and POST (create)
     """
@@ -22,11 +22,13 @@ class OrganizationListController(APIView):
         responses={
             201: OrganizationResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
+        },
+        summary="Create organization",
+        description="Create a new organization with proper validation."
     )
-    def post(self, request):
+    def create(self, request):
         """
-        Handle creation of an organization.
+        Create a new organization.
         in -> name, email, type, address, legal_entity_identifier, organization_admin_id
         out -> id, name, email, type, address, legal_entity_identifier, organization_admin_id
         """
@@ -82,10 +84,12 @@ class OrganizationListController(APIView):
             200: OpenApiTypes.OBJECT,
             400: OpenApiTypes.OBJECT,
         },
+        summary="List all organizations",
+        description="Retrieve a paginated list of all organizations with optional filtering."
     )
-    def get(self, request):
+    def get_list(self, request):
         """
-        Handle retrieval of all organizations.
+        Retrieve all organizations with pagination and filtering.
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id, organization_admin_name
         """
         try:
@@ -98,21 +102,26 @@ class OrganizationListController(APIView):
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class OrganizationDetailController(APIView):
-    """
-    Handle individual organization operations: GET (by ID), PATCH (update)
-    """
-    
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='org_id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description='Organization ID',
+                required=True
+            ),
+        ],
         responses={
             200: OrganizationDetailSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
+        },
+        summary="Get organization details",
+        description="Retrieve detailed information about a specific organization by ID."
     )
-    def get(self, request, org_id):
+    def get_by_id(self, request, org_id):
         """
-        Handle retrieval of a specific organization by ID.
+        Retrieve a specific organization by ID with detailed information.
         in -> org_id
         out -> org data, org_admin data, on_chain_verification data
         """
@@ -132,16 +141,27 @@ class OrganizationDetailController(APIView):
             )
 
     @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name='org_id',
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.PATH,
+                description='Organization ID',
+                required=True
+            ),
+        ],
         request=OrganizationUpdateSerializer,
         responses={
             200: OrganizationDetailSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
             404: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
+        },
+        summary="Update organization",
+        description="Update specific fields of an organization (email and address only)."
     )
-    def patch(self, request, org_id):
+    def update_organization_info(self, request, org_id):
         """
-        Handle update of a specific organization by ID.
+        Update a specific organization by ID.
         in -> org_id, email, address (only email and address can be updated)
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id
         """
