@@ -37,5 +37,6 @@ COPY --from=builder --chown=node:node /app/dist ./dist
 USER node
 EXPOSE 3000
 
+
 CMD ["npm", "run", "start:prod"]
 

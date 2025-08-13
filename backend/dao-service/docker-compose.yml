@@ -10,9 +10,11 @@ services:
       - '3002:3000'
     volumes:
       #- .:/app # Mount dao-service code
-      - ./logs:/app/logs # Mount logs directory
-      - /app/node_modules
-      - ../libs:/app/libs:ro # Mount libs directory as read-only
+      - ./src:/app/src              # Only sync source code
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./logs:/app/logs
+
     env_file:
       - .env.local
     networks:

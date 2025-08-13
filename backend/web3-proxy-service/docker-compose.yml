@@ -9,7 +9,10 @@ services:
       - 3004:3000
     volumes:
       - ./artifacts:/app/artifacts
-      - /app/node_modules
+      - ./src:/app/src              # Only sync source code
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+
     env_file:
       - .env.local
     networks:

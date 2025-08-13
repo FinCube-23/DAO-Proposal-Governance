@@ -8,8 +8,10 @@ services:
     ports:
       - 3003:3000
     volumes:
-      #- ./:/app
-      - /app/node_modules
+      - ./src:/app/src              # Only sync source code
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+
     env_file:
       # Add this line to specify the environment file
       - .env.local # Specify the path to your .env file
