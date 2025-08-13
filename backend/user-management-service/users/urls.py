@@ -10,12 +10,12 @@ app_name = "users"  # Namespace
 
 urlpatterns = [
     path(
-        "profile/",
+        "profile/<int:user_id>",
         UserProfileController.as_view({"get": "get_user_detail"}),
         name="user-profile",
     ),
     path(
-        "profile/update/",
+        "profile/update/<int:user_id>",
         UserProfileController.as_view({"patch": "update_user"}),
         name="user-profile-update",
     ),
