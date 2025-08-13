@@ -1,6 +1,7 @@
-from rest_framework.views import APIView
+from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 from organizations.services.onchain_verification_service import OnchainVerificationService
 from organizations.serializers.onchain_verification_serializers import (
     OnchainVerificationCreateSerializer,
@@ -9,23 +10,26 @@ from organizations.serializers.onchain_verification_serializers import (
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
-class OnchainVerificationController(APIView):
+class OnchainVerificationController(ViewSet):
     
     @extend_schema(
         request=OnchainVerificationCreateSerializer,
         responses={
             201: OnchainVerificationResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}}
-        }
+        },
+        summary="Create on-chain verification",
+        description="Create a new on-chain verification record for an organization."
     )
-    def post(self, request):
+    def create(self, request):
         """
         Create a new on-chain verification.
         Creates an on-chain verification record for an organization.
+        Standard POST /onchain-verifications/
         """
         serializer = OnchainVerificationCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        
+
         try:
             verification = OnchainVerificationService.create_onchain_verification(
                 serializer.validated_data
@@ -43,8 +47,6 @@ class OnchainVerificationController(APIView):
                 'status': 'error',
                 'message': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
-
-class OnchainVerificationByOrganizationController(APIView):
     
     @extend_schema(
         parameters=[
@@ -71,8 +73,10 @@ class OnchainVerificationByOrganizationController(APIView):
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
             404: {"type": "object", "properties": {"error": {"type": "string"}}}
         },
+        summary="Get verifications by organization",
+        description="Retrieve a paginated list of on-chain verifications for a specific organization."
     )
-    def get(self, request, org_id):
+    def get_verifications_by_organization(self, request, org_id):
         """
         Retrieve on-chain verifications by organization ID.
         Returns a paginated list of on-chain verifications for the specified organization.

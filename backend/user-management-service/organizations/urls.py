@@ -4,7 +4,6 @@ from organizations.controllers import (
     OrganizationDetailController,
     OrganizationUserController,
     OnchainVerificationController,
-    OnchainVerificationByOrganizationController
 )
 
 app_name = 'organizations'  # Namespace
@@ -13,6 +12,12 @@ urlpatterns = [
     path('', OrganizationListController.as_view(), name='organization-list'),
     path('<int:org_id>/', OrganizationDetailController.as_view(), name='organization-detail'),
     path('users/', OrganizationUserController.as_view(), name='organization-users'),
-    path('onchain-verifications/', OnchainVerificationController.as_view(), name='organization-onchain-verifications'),
-    path('onchain-verifications/<int:org_id>/', OnchainVerificationByOrganizationController.as_view(), name='organization-onchain-verifications-by-org'),
+    
+    # Manual ViewSet action mappings (no router needed)
+    path('onchain-verifications/', 
+         OnchainVerificationController.as_view({'post': 'create'}), 
+         name='onchain-verifications-create'),
+    path('onchain-verifications/by-organization/<int:org_id>/', 
+         OnchainVerificationController.as_view({'get': 'get_verifications_by_organization'}), 
+         name='onchain-verifications-by-org'),
 ]
