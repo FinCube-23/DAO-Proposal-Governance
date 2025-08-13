@@ -18,6 +18,6 @@ urlpatterns = [
          OnchainVerificationController.as_view({'post': 'create'}), 
          name='onchain-verifications-create'),
     path('onchain-verifications/by-organization/<int:org_id>/', 
-         OnchainVerificationController.as_view({'get': 'get_verifications_by_organization'}), 
+         OnchainVerificationController.as_view({'get': 'get_onchain_verifications_by_organization'}), 
          name='onchain-verifications-by-org'),
 ]

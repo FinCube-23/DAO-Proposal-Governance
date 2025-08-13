@@ -73,10 +73,10 @@ class OnchainVerificationController(ViewSet):
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
             404: {"type": "object", "properties": {"error": {"type": "string"}}}
         },
-        summary="Get verifications by organization",
+        summary="Get on-chain verifications by organization",
         description="Retrieve a paginated list of on-chain verifications for a specific organization."
     )
-    def get_verifications_by_organization(self, request, org_id):
+    def get_onchain_verifications_by_organization(self, request, org_id):
         """
         Retrieve on-chain verifications by organization ID.
         Returns a paginated list of on-chain verifications for the specified organization.
