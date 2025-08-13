@@ -11,9 +11,11 @@ app_name = 'organizations'  # Namespace
 urlpatterns = [
     path('', OrganizationListController.as_view(), name='organization-list'),
     path('<int:org_id>/', OrganizationDetailController.as_view(), name='organization-detail'),
-    path('users/', OrganizationUserController.as_view(), name='organization-users'),
     
-    # Manual ViewSet action mappings (no router needed)
+    path('users/', 
+         OrganizationUserController.as_view({'post': 'add_user_to_organization'}), 
+         name='organization-users'),
+    
     path('onchain-verifications/', 
          OnchainVerificationController.as_view({'post': 'create'}), 
          name='onchain-verifications-create'),
