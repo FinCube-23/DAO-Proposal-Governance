@@ -1,11 +1,5 @@
 from rest_framework.views import APIView
-from drf_spectacular.utils import (
-    extend_schema,
-    OpenApiParameter,
-    OpenApiExample,
-    OpenApiTypes,
-    OpenApiParameter,
-)
+from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
@@ -14,16 +8,22 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.contrib.auth import authenticate
 
 
-from users.serializers import PasswordUpdateSerializer, UserLoginSerializer
+from users.serializers import (
+    PasswordUpdateSerializer,
+    UserLoginSerializer,
+    PasswordUpdateResponseSerializer,
+    LoginResponseSerializer,
+)
 from users.services import UserService
 from users.utils import get_tokens_for_user
 
 
 class AuthController(APIView):
+
     @extend_schema(
         request=UserLoginSerializer,
         responses={
-            200: {"type": "object", "properties": {"status": {"type": "string"}}},
+            200: LoginResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
     )
@@ -73,7 +73,7 @@ class PasswordController(APIView):
     @extend_schema(
         request=PasswordUpdateSerializer,
         responses={
-            200: {"type": "object", "properties": {"status": {"type": "string"}}},
+            200: PasswordUpdateResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
     )

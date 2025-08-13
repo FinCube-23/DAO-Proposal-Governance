@@ -14,7 +14,7 @@ from users.serializers import (
     UserRegistrationSerializer,
     UserSelfUpdateSerializer,
     UserResponseSerializer,
-    UserLoginSerializer,
+    UserStatusResponseSerializer,
 )
 from users.utils.exceptions import EmailAlreadyExistsError
 from drf_spectacular.utils import (
@@ -157,7 +157,7 @@ class UserStatusController(APIView):
 
     @extend_schema(
         responses={
-            200: {"properties": {"status": {"type": "string"}}},
+            200: UserStatusResponseSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
@@ -168,8 +168,12 @@ class UserStatusController(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         try:
-            status_value = UserService.get_user_status_by_email(email)
-            return Response({"status": status_value}, status=status.HTTP_200_OK)
+            user = UserService.get_user_status_by_email(email)
+            response_serializer = UserStatusResponseSerializer(user)
+            return Response(
+                {"status": "success", "data": response_serializer.data},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR

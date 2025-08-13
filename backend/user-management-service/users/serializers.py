@@ -171,3 +171,38 @@ class PasswordUpdateSerializer(serializers.Serializer):
         if data["new_password"] != data["confirm_password"]:
             raise serializers.ValidationError("New passwords don't match")
         return data
+
+
+class PasswordUpdateResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+
+
+class TokenSerializer(serializers.Serializer):
+    refresh = serializers.CharField()
+    access = serializers.CharField()
+
+
+class LoginResponseSerializer(serializers.Serializer):
+    status = serializers.CharField()
+    tokens = TokenSerializer()
+
+
+class UserStatusResponseSerializer(serializers.ModelSerializer):
+    status = serializers.CharField()
+    is_superuser = serializers.BooleanField()
+    is_staff = serializers.BooleanField()
+    is_active = serializers.BooleanField()
+    is_verified_email = serializers.BooleanField()
+    is_verified_contact_number = serializers.BooleanField()
+
+    class Meta:
+        model = User
+        fields = [
+            "status",
+            "is_superuser",
+            "is_staff",
+            "is_active",
+            "is_verified_email",
+            "is_verified_contact_number",
+        ]
+        read_only_fields = fields
