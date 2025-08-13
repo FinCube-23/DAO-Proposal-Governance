@@ -1,7 +1,7 @@
 import UserEnrollStepper from '@/features/user-enroll-stepper';
 import OrgHeader from '@/shared/components/layout/org-header';
 import OrgSidebar from '@/shared/components/layout/org-sidebar';
-import { SidebarProvider } from '@/shared/components/ui/sidebar';
+import { SidebarInset, SidebarProvider } from '@/shared/components/ui/sidebar';
 
 export default function OrganizationLayout({
   children,
@@ -9,17 +9,17 @@ export default function OrganizationLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="w-full relative flex items-center justify-center">
-      <SidebarProvider className="z-50">
-        <UserEnrollStepper />
-        <OrgSidebar />
-        <main className="w-full">
-          <OrgHeader />
-          <div className="container mx-auto my-24 px-4 lg:px-8">
+    <SidebarProvider>
+      <UserEnrollStepper />
+      <OrgSidebar />
+      <SidebarInset>
+        <OrgHeader />
+        <main>
+          <div className="container mx-auto my-12 px-4 lg:px-8">
             {children}
           </div>
         </main>
-      </SidebarProvider>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

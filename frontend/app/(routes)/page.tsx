@@ -40,7 +40,7 @@ export default function Home() {
           Seamless
         </h2>
         <div className="z-40">
-          <Link href={`/${authStore.access ? 'organization/dashboard' : 'login'}`}>
+          <Link href={`/${authStore.access ? 'organization' : 'login'}`}>
             <Button variant="secondary">
               Get Started
               {' '}

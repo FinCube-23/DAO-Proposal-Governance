@@ -15,15 +15,20 @@ import useAuthStore from '@/shared/stores/auth';
 
 const menus = [
   {
-    name: 'Organization',
+    name: '',
     items: [
       {
         name: 'Dashboard',
         url: '/organization',
         icon: LayoutDashboard,
       },
+    ],
+  },
+  {
+    name: 'DAOs',
+    items: [
       {
-        name: 'FinCube',
+        name: 'Fincube',
         url: '/organization/dao/fincube',
         icon: Landmark,
       },
