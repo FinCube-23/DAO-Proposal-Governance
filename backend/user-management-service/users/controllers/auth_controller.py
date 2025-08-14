@@ -2,8 +2,9 @@ from rest_framework.viewsets import ViewSet
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
 
 from django.contrib.auth import authenticate
 
@@ -67,9 +68,8 @@ class AuthController(ViewSet):
 
 
 class PasswordController(ViewSet):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
+    # @authentication_classes([JWTAuthentication])
+    # @permission_classes([IsAuthenticated])
     @extend_schema(
         request=PasswordUpdateSerializer,
         responses={
