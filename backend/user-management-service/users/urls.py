@@ -4,18 +4,24 @@ from users.controllers import (
     UserStatusController,
     AuthController,
     PasswordController,
+    UserController,
 )
 
 app_name = "users"  # Namespace
 
 urlpatterns = [
     path(
-        "profile/<int:user_id>",
+        "",
+        UserController.as_view({"get": "get_user_list", "post": "register"}),
+        name="users-list",
+    ),
+    path(
+        "profile",
         UserProfileController.as_view({"get": "get_user_detail"}),
         name="user-profile",
     ),
     path(
-        "profile/update/<int:user_id>",
+        "profile/update",
         UserProfileController.as_view({"patch": "update_user"}),
         name="user-profile-update",
     ),

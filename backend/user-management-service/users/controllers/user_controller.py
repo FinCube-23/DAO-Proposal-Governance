@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ViewSet
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from rest_framework.response import Response
@@ -25,14 +25,18 @@ from drf_spectacular.utils import (
 
 
 class UserProfileController(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @extend_schema(
         responses={
             200: UserDetailSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get_user_detail(self, request, user_id):
+    def get_user_detail(self, request):
         try:
+            user_id = request.user.id
             user = UserService.get_user_with_organizations(user_id)
             print(f"Memberships count: {user.organization_memberships.count()}")
             serializer = UserDetailSerializer(
@@ -50,9 +54,13 @@ class UserProfileController(ViewSet):
                 ),
             )
 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
-    def update_user(self, request, user_id):
+    def update_user(self, request):
         """User self profile update (email/contact/wallet)"""
+        user_id = request.user.id
         serializer = UserSelfUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
