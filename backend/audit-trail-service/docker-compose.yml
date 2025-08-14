@@ -4,7 +4,7 @@ services:
     build:
       context: ./
       args:
-        - APP_ENV
+        - APP_ENV=${APP_ENV}
     ports:
       - 3003:3000
     volumes:

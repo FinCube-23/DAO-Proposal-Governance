@@ -38,7 +38,7 @@ USER node
 EXPOSE 3000
 
 #checking APP_ENV and deciding in which mode to run
-CMD if [ "$APP_ENV" = "dev" ]; then \
+CMD if [ "$APP_ENV" = "DEVELOPMENT" ]; then \
       npm run start:dev; \
     else \
       npm run start:prod; \
