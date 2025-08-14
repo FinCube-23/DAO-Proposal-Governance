@@ -1,17 +1,10 @@
-from .user_controller import (
-    UserController,
-    # UserProfileController,
-    # UserStatusController
-)
+from .user_controller import UserController, UserProfileController
 
-# from .auth_controller import (
-#     AuthController,
-#     PasswordController)
+from .auth_controller import AuthController, PasswordController
 
 __all__ = [
     "UserController",
-    # 'UserProfileController',
-    # 'PasswordController',
-    # 'AuthController',
-    # 'UserStatusController'
+    "UserProfileController",
+    "PasswordController",
+    "AuthController",
 ]

@@ -25,7 +25,7 @@ from drf_spectacular.utils import (
 )
 
 
-class UserProfileController(ModelViewSet):
+class UserProfileController(ViewSet):
 
     @extend_schema(
         responses={
@@ -60,8 +60,6 @@ class UserProfileController(ModelViewSet):
                 ),
             )
 
-    # @authentication_classes([JWTAuthentication])
-    # @permission_classes([IsAuthenticated])
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
     @action(
         detail=False,
@@ -81,6 +79,38 @@ class UserProfileController(ModelViewSet):
             return Response(UserSelfUpdateSerializer(user).data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        responses={
+            200: UserStatusResponseSerializer,
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+        }
+    )
+    @action(
+        detail=False,
+        methods=["get"],
+        authentication_classes=[JWTAuthentication],
+        permission_classes=[IsAdminUser],
+        url_path=r"status/(?P<email>.+)",
+    )
+    def get_user_status(self, request, email):
+        print("email is ", email)
+        if not email:
+            return Response(
+                {"error": "Email parameter is required"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        try:
+            user = UserService.get_user_status_by_email(email)
+            response_serializer = UserStatusResponseSerializer(user)
+            return Response(
+                {"status": "success", "data": response_serializer.data},
+                status=status.HTTP_200_OK,
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 
 class UserController(ViewSet):
@@ -179,38 +209,3 @@ class UserController(ViewSet):
             return Response({"users": serializer.data, "pagination": pagination})
         except Exception as e:
             return Response({"error": str(e)}, status=400)
-
-
-class UserStatusController(ModelViewSet):
-    # @authentication_classes([JWTAuthentication])
-    # @permission_classes([IsAdminUser])
-    @extend_schema(
-        responses={
-            200: UserStatusResponseSerializer,
-            404: {"type": "object", "properties": {"error": {"type": "string"}}},
-        }
-    )
-    @action(
-        detail=False,
-        methods=["get"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAuthenticated],
-        url_path="status/(?P<email>[^/.]+)",
-    )
-    def get_user_status(self, request, email):
-        if not email:
-            return Response(
-                {"error": "Email parameter is required"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            user = UserService.get_user_status_by_email(email)
-            response_serializer = UserStatusResponseSerializer(user)
-            return Response(
-                {"status": "success", "data": response_serializer.data},
-                status=status.HTTP_200_OK,
-            )
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
