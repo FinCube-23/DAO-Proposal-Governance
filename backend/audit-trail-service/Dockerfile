@@ -37,5 +37,12 @@ COPY --from=builder --chown=node:node /app/dist ./dist
 USER node
 EXPOSE 3000
 
-CMD ["npm", "run", "start:prod"]
+#checking APP_ENV and deciding in which mode to run
+CMD if [ "$APP_ENV" = "dev" ]; then \
+      npm run start:dev; \
+    else \
+      npm run start:prod; \
+    fi
+
+
 
