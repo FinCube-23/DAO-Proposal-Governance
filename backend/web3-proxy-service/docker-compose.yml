@@ -4,17 +4,17 @@ services:
     build:
       context: ./
       args:
-        - APP_ENV
+        - APP_ENV=${APP_ENV}
     ports:
       - 3004:3000
     volumes:
       - ./artifacts:/app/artifacts
-      - ./src:/app/src              # Only sync source code
+      - ./src:/app/src # Only sync source code
       - ./package.json:/app/package.json
       - ./package-lock.json:/app/package-lock.json
 
     env_file:
-      - .env.local
+      - .env
     networks:
       - fincube23_network
 
