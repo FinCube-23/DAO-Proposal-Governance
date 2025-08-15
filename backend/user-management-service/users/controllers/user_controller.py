@@ -42,7 +42,34 @@ class ProtectedUserController(ViewSet):
         try:
             user_id = request.user.id
             user = UserService.get_user_with_organizations(user_id)
-            print(f"Memberships count: {user.organization_memberships.count()}")
+            serializer = UserDetailSerializer(
+                user, context={"request": request, "user_id": user_id}
+            )
+            return Response(serializer.data)
+
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=(
+                    status.HTTP_404_NOT_FOUND
+                    if "not found" in str(e).lower()
+                    else status.HTTP_500_INTERNAL_SERVER_ERROR
+                ),
+            )
+
+    """"
+    This will return details of the logged in user along with their organization memberships.
+    """
+
+    @extend_schema(
+        responses={
+            200: UserDetailSerializer,
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+        }
+    )
+    def get_user_detail_by_id(self, request, user_id):
+        try:
+            user = UserService.get_user_with_organizations(user_id)
             serializer = UserDetailSerializer(
                 user, context={"request": request, "user_id": user_id}
             )

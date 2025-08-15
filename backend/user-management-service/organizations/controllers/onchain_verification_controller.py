@@ -35,12 +35,15 @@ class ProtectedOnchainVerificationController(ViewSet):
         Creates an on-chain verification record for an organization.
         Standard POST /onchain-verifications/
         """
+        request.data["proposer_wallet"] = request.user.wallet_address
+
         serializer = OnchainVerificationCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
 
         try:
             verification = OnchainVerificationService.create_onchain_verification(
-                serializer.validated_data
+                validated_data
             )
 
             response_serializer = OnchainVerificationResponseSerializer(verification)

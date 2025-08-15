@@ -37,6 +37,11 @@ urlpatterns = [
         name="user-profile",
     ),
     path(
+        "profile/<int:user_id>/",
+        ProtectedUserController.as_view({"get": "get_user_detail_by_id"}),
+        name="user-details-by-id",
+    ),
+    path(
         "profile/update",
         ProtectedUserController.as_view({"patch": "update_user"}),
         name="user-profile-update",

@@ -38,6 +38,7 @@ class ProtectedOrganizationController(ViewSet):
         in -> name, email, type, address, legal_entity_identifier, organization_admin_id
         out -> id, name, email, type, address, legal_entity_identifier, organization_admin_id
         """
+        request.data["organization_admin_id"] = request.user.id
         serializer = OrganizationCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
