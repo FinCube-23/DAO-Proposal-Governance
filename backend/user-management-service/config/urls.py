@@ -38,6 +38,10 @@ def welcome_view(request):
 
 
 urlpatterns = [
+    path('', welcome_view, name='welcome'),  # Root URL
+    path('api/users/', include(('users.urls', 'users'), namespace='users')),
+    path('api/organizations/', include(('organizations.urls', 'organizations'), namespace='organizations')),
+    path('admin/', admin.site.urls),
     path("", welcome_view, name="welcome"),  # Root URL
     path("api/users/", include(("users.urls", "users"), namespace="users")),
     path("admin/", admin.site.urls),

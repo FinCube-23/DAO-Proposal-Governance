@@ -26,6 +26,8 @@ from drf_spectacular.utils import (
 
 
 class UserProfileController(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         responses={
@@ -33,13 +35,13 @@ class UserProfileController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    @action(
-        detail=False,
-        methods=["get"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAuthenticated],
-        url_path="details",
-    )
+    # @action(
+    #     detail=False,
+    #     methods=["get"],
+    #     authentication_classes=[JWTAuthentication],
+    #     permission_classes=[IsAuthenticated],
+    #     url_path="details",
+    # )
     def get_user_detail(self, request):
         try:
             user_id = request.user.id
@@ -61,13 +63,13 @@ class UserProfileController(ViewSet):
             )
 
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
-    @action(
-        detail=False,
-        methods=["patch"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAuthenticated],
-        url_path="update",
-    )
+    # @action(
+    #     detail=False,
+    #     methods=["patch"],
+    #     authentication_classes=[JWTAuthentication],
+    #     permission_classes=[IsAuthenticated],
+    #     url_path="update",
+    # )
     def update_user(self, request):
         """User self profile update (email/contact/wallet)"""
         user_id = request.user.id
@@ -86,13 +88,13 @@ class UserProfileController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    @action(
-        detail=False,
-        methods=["get"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAdminUser],
-        url_path=r"status/(?P<email>.+)",
-    )
+    # @action(
+    #     detail=False,
+    #     methods=["get"],
+    #     authentication_classes=[JWTAuthentication],
+    #     permission_classes=[IsAdminUser],
+    #     url_path=r"status/(?P<email>.+)",
+    # )
     def get_user_status(self, request, email):
         print("email is ", email)
         if not email:
@@ -114,17 +116,13 @@ class UserProfileController(ViewSet):
 
 
 class UserController(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
     )
-    @action(
-        detail=False,
-        methods=["post"],
-        authentication_classes=[],
-        permission_classes=[AllowAny],
-        url_path="register",
-    )
+    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
     def register(self, request):
         registration_serializer = UserRegistrationSerializer(data=request.data)
         registration_serializer.is_valid(raise_exception=True)
@@ -159,13 +157,13 @@ class UserController(ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
-    @action(
-        detail=False,
-        methods=["get"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAdminUser],
-        url_path="user_list",
-    )
+    # @action(
+    #     detail=False,
+    #     methods=["get"],
+    #     authentication_classes=[JWTAuthentication],
+    #     permission_classes=[IsAdminUser],
+    #     url_path="user-list",
+    # )
     @extend_schema(
         parameters=[
             OpenApiParameter(

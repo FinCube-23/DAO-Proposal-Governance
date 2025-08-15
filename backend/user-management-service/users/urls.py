@@ -7,15 +7,13 @@ from users.controllers import (
     UserController,
 )
 
-app_name = "users"
 
-router = DefaultRouter()
-router.register(r"", UserController, basename="user-list")
-router.register(r"profile", UserProfileController, basename="user-profile")
-router.register(r"", AuthController, basename="auth")
-router.register(r"password", PasswordController, basename="password")
-
+app_name = "users"  # Namespace
 
 urlpatterns = [
-    path("", include(router.urls)),
+    path(
+        "",
+        UserController.as_view({"get": "get_user_list", "post": "register"}),
+        name="user-list",
+    ),
 ]
