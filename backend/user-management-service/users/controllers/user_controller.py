@@ -1,7 +1,6 @@
-from rest_framework.viewsets import ModelViewSet, ViewSet
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
+from rest_framework.viewsets import ViewSet
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import authentication_classes, permission_classes, action
 
 from rest_framework.response import Response
 from rest_framework import status, serializers
@@ -25,9 +24,13 @@ from drf_spectacular.utils import (
 )
 
 
-class UserProfileController(ViewSet):
+class ProtectedUserController(ViewSet):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
+
+    """"
+    This will return details of the logged in user along with their organization memberships.
+    """
 
     @extend_schema(
         responses={
@@ -35,15 +38,9 @@ class UserProfileController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    # @action(
-    #     detail=False,
-    #     methods=["get"],
-    #     authentication_classes=[JWTAuthentication],
-    #     permission_classes=[IsAuthenticated],
-    #     url_path="details",
-    # )
     def get_user_detail(self, request):
         try:
+            print("REQ => ", request.user, request.user.role)
             user_id = request.user.id
             user = UserService.get_user_with_organizations(user_id)
             print(f"Memberships count: {user.organization_memberships.count()}")
@@ -62,14 +59,11 @@ class UserProfileController(ViewSet):
                 ),
             )
 
+    """
+    This will allow the user to update their own profile information such as email, contact number, and wallet address.
+    """
+
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
-    # @action(
-    #     detail=False,
-    #     methods=["patch"],
-    #     authentication_classes=[JWTAuthentication],
-    #     permission_classes=[IsAuthenticated],
-    #     url_path="update",
-    # )
     def update_user(self, request):
         """User self profile update (email/contact/wallet)"""
         user_id = request.user.id
@@ -82,21 +76,17 @@ class UserProfileController(ViewSet):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+    """
+    This will allow the user to check their status by email.
+    """
+
     @extend_schema(
         responses={
             200: UserStatusResponseSerializer,
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    # @action(
-    #     detail=False,
-    #     methods=["get"],
-    #     authentication_classes=[JWTAuthentication],
-    #     permission_classes=[IsAdminUser],
-    #     url_path=r"status/(?P<email>.+)",
-    # )
     def get_user_status(self, request, email):
-        print("email is ", email)
         if not email:
             return Response(
                 {"error": "Email parameter is required"},
@@ -114,56 +104,6 @@ class UserProfileController(ViewSet):
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-class UserController(ViewSet):
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
-    )
-    @action(detail=False, methods=["post"], permission_classes=[AllowAny])
-    def register(self, request):
-        registration_serializer = UserRegistrationSerializer(data=request.data)
-        registration_serializer.is_valid(raise_exception=True)
-
-        try:
-            user_dto = UserRegistrationDTO(
-                email=registration_serializer.validated_data["email"],
-                first_name=registration_serializer.validated_data["first_name"],
-                last_name=registration_serializer.validated_data["last_name"],
-                contact_number=registration_serializer.validated_data["contact_number"],
-                password=registration_serializer.validated_data["password"],
-            )
-
-            user = UserService.register_user(user_dto)
-
-            response_serializer = UserResponseSerializer(user)
-
-            return Response(
-                {"status": "success", "data": response_serializer.data},
-                status=status.HTTP_201_CREATED,
-            )
-
-        except EmailAlreadyExistsError as e:
-            return Response(
-                {"status": "error", "message": "Email already exists"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        except Exception as e:
-            return Response(
-                {"status": "error", "message": str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
-
-    # @action(
-    #     detail=False,
-    #     methods=["get"],
-    #     authentication_classes=[JWTAuthentication],
-    #     permission_classes=[IsAdminUser],
-    #     url_path="user-list",
-    # )
     @extend_schema(
         parameters=[
             OpenApiParameter(
@@ -207,3 +147,43 @@ class UserController(ViewSet):
             return Response({"users": serializer.data, "pagination": pagination})
         except Exception as e:
             return Response({"error": str(e)}, status=400)
+
+
+class PublicUserController(ViewSet):
+
+    @extend_schema(
+        request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
+    )
+    def register(self, request):
+        registration_serializer = UserRegistrationSerializer(data=request.data)
+        registration_serializer.is_valid(raise_exception=True)
+
+        try:
+            user_dto = UserRegistrationDTO(
+                email=registration_serializer.validated_data["email"],
+                first_name=registration_serializer.validated_data["first_name"],
+                last_name=registration_serializer.validated_data["last_name"],
+                contact_number=registration_serializer.validated_data["contact_number"],
+                password=registration_serializer.validated_data["password"],
+            )
+
+            user = UserService.register_user(user_dto)
+
+            response_serializer = UserResponseSerializer(user)
+
+            return Response(
+                {"status": "success", "data": response_serializer.data},
+                status=status.HTTP_201_CREATED,
+            )
+
+        except EmailAlreadyExistsError as e:
+            return Response(
+                {"status": "error", "message": "Email already exists"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        except Exception as e:
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

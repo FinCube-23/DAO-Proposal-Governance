@@ -2,9 +2,8 @@ from rest_framework.viewsets import ViewSet
 from drf_spectacular.utils import extend_schema
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.decorators import authentication_classes, permission_classes, action
 
 from django.contrib.auth import authenticate
 
@@ -19,7 +18,7 @@ from users.services import UserService
 from users.utils import get_tokens_for_user
 
 
-class AuthController(ViewSet):
+class PublicAuthController(ViewSet):
 
     @extend_schema(
         request=UserLoginSerializer,
@@ -27,13 +26,6 @@ class AuthController(ViewSet):
             200: LoginResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
-    )
-    @action(
-        detail=False,
-        methods=["post"],
-        authentication_classes=[],
-        permission_classes=[AllowAny],
-        url_path="login",
     )
     def login(self, request):
         login_serializer = UserLoginSerializer(data=request.data)
@@ -74,20 +66,16 @@ class AuthController(ViewSet):
             )
 
 
-class PasswordController(ViewSet):
+class ProtectedAuthController(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
     @extend_schema(
         request=PasswordUpdateSerializer,
         responses={
             200: PasswordUpdateResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
         },
-    )
-    @action(
-        detail=False,
-        methods=["patch"],
-        authentication_classes=[JWTAuthentication],
-        permission_classes=[IsAuthenticated],
-        url_path="update",
     )
     def update_password(self, request):
         serializer = PasswordUpdateSerializer(data=request.data)

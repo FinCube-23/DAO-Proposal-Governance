@@ -1,10 +1,10 @@
-from .user_controller import UserController, UserProfileController
+from .user_controller import ProtectedUserController, PublicUserController
 
-from .auth_controller import AuthController, PasswordController
+from .auth_controller import ProtectedAuthController, PublicAuthController
 
 __all__ = [
-    "UserController",
-    "UserProfileController",
-    "PasswordController",
-    "AuthController",
+    "ProtectedUserController",
+    "PublicUserController",
+    "ProtectedAuthController",
+    "PublicAuthController",
 ]
