@@ -29,6 +29,8 @@ class ProtectedOrganizationUserController(ViewSet):
         Add a user to an organization.
         Creates a new organization user membership with proper validation.
         """
+        
+        # organization_id=
         serializer = OrganizationUserCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 

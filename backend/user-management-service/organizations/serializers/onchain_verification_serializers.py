@@ -8,7 +8,7 @@ from drf_spectacular.utils import extend_schema_field
 class OnchainVerificationCreateSerializer(serializers.ModelSerializer):
     trx_hash = serializers.CharField(max_length=66, required=True)
     context = serializers.JSONField(required=True)
-    proposer_wallet = serializers.CharField(max_length=42, required=False)
+    proposer_wallet = serializers.CharField(max_length=42, required=True)
     organization_id = serializers.IntegerField(write_only=True, required=True)
 
     class Meta:

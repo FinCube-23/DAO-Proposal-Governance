@@ -19,7 +19,7 @@ class RestrictedFieldsMixin:
 
 
 class OrganizationCreateSerializer(RestrictedFieldsMixin, serializers.ModelSerializer):
-    organization_admin_id = serializers.IntegerField(write_only=True, required=False)
+    organization_admin_id = serializers.IntegerField(write_only=True, required=True)
     email = serializers.EmailField(
         validators=[UniqueValidator(queryset=Organization.objects.all())]
     )
