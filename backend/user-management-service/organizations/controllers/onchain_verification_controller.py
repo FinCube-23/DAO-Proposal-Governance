@@ -11,17 +11,14 @@ from organizations.serializers.onchain_verification_serializers import (
     OnchainVerificationListSerializer,
 )
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from rest_framework.permissions import (
-    IsAdminUser,
-    IsAuthenticated,
-    AllowAny,
-)
-from rest_framework.decorators import authentication_classes, permission_classes, action
+from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 
-class OnchainVerificationController(ViewSet):
+class ProtectedOnchainVerificationController(ViewSet):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=OnchainVerificationCreateSerializer,

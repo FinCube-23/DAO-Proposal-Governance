@@ -40,7 +40,6 @@ class ProtectedUserController(ViewSet):
     )
     def get_user_detail(self, request):
         try:
-            print("REQ => ", request.user, request.user.role)
             user_id = request.user.id
             user = UserService.get_user_with_organizations(user_id)
             print(f"Memberships count: {user.organization_memberships.count()}")
