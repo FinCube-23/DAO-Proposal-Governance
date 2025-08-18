@@ -3,8 +3,8 @@ import { DataSourceOptions } from "typeorm/data-source/DataSourceOptions";
 import { config } from 'dotenv';
 import { join } from 'path';
 
-// Load .env.local file
-config({ path: join(__dirname, '../.env.local') });
+// Load .env file
+config({ path: join(__dirname, '../.env') });
 
 let connectionOptions: DataSourceOptions = {
   type: "postgres",

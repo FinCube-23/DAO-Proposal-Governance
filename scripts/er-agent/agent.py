@@ -332,7 +332,7 @@ async def main():
     parser.add_argument("--src", required=True)
     args = parser.parse_args()
 
-    load_dotenv(dotenv_path=Path(__file__).parent / ".env.local")
+    load_dotenv(dotenv_path=Path(__file__).parent / ".env")
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
         raise EnvironmentError("Missing GOOGLE_API_KEY")

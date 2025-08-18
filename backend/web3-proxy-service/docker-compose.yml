@@ -12,7 +12,9 @@ services:
       - ./src:/app/src # Only sync source code
       - ./package.json:/app/package.json
       - ./package-lock.json:/app/package-lock.json
-
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+      
     env_file:
       - .env
     networks:
