@@ -6,6 +6,7 @@ export default function StatTotalMembers() {
     <StatCard
       title="Total Members"
       value="7"
+      variants="blue"
       icon={UsersIcon}
     />
   );

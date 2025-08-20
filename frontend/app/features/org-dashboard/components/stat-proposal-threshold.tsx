@@ -38,6 +38,7 @@ export default function StatProposalThreshold() {
       title="Proposal Threshold"
       value={proposalThreshold || '0'}
       icon={InfinityIcon}
+      variants="red"
       isFromOnChain
     />
   );

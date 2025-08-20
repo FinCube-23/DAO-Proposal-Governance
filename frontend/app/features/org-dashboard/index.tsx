@@ -17,8 +17,7 @@ export default function OrganizationDashboard() {
   return (
     <div className="flex flex-col lg:gap-6 gap-4">
       <div>
-
-        <h1 className="text-2xl font-bold mb-2">
+        <h1 className="text-2xl font-bold my-1">
           Welcome back,
           {' '}
           {authStore.profile?.name || 'User'}
@@ -27,9 +26,9 @@ export default function OrganizationDashboard() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 gap-4">
         <StatTotalBalance />
-        <StatProposalThreshold />
-        <StatTotalProposals />
         <StatTotalMembers />
+        <StatTotalProposals />
+        <StatProposalThreshold />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 lg:gap-6 gap-4">
         <ProposalAllocation />

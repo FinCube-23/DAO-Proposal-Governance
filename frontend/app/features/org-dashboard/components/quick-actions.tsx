@@ -35,8 +35,8 @@ export default function QuickActions() {
   // Utility to handle dynamic classNames for disabled state
   const getButtonClass = (disabled: boolean) =>
     [
-      'w-full flex items-center justify-between p-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors',
-      disabled ? 'cursor-not-allowed bg-gray-700 opacity-60 hover:bg-gray-700' : 'cursor-pointer',
+      'w-full flex items-center justify-between p-3 bg-white/5 border border-white/10 hover:bg-gray-700 rounded-lg transition-colors',
+      disabled ? 'cursor-not-allowed bg-gray-700 opacity-40 hover:bg-gray-700' : 'cursor-pointer',
     ].join(' ');
 
   return (

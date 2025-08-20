@@ -38,6 +38,7 @@ export default function StatTotalProposals() {
       title="Total Proposals"
       value={proposalCount || '0'}
       icon={ScrollTextIcon}
+      variants="purple"
       isFromOnChain
     />
   );

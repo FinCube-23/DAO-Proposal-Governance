@@ -11,7 +11,7 @@ import { Separator } from '../ui/separator';
 export default function OrgHeader() {
   const pathnames = usePathname().split('/').filter(x => x);
   return (
-    <div className="flex sticky bg-sidebar/60 top-0 w-full shrink-0 items-center gap-2 border-b py-4 px-2">
+    <div className="flex sticky bg-black/20 backdrop-blur-xl top-0 w-full shrink-0 items-center gap-2 border-b p-2">
       <div className="flex flex-1 items-center gap-2 px-3">
         <SidebarTrigger />
         <Separator
@@ -39,7 +39,7 @@ export default function OrgHeader() {
           })}
         </div>
       </div>
-      <div className="ml-auto">
+      <div className="ml-auto pr-2">
         <ConnectButton />
       </div>
     </div>

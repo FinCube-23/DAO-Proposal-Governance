@@ -37,6 +37,7 @@ export default function StatTotalBalance() {
       title="Total Balance"
       value={`${coinBalance || '0'} USDC`}
       icon={CoinsIcon}
+      variants="emrald"
       isFromOnChain
     />
   );
