@@ -15,7 +15,7 @@ export default function OrganizationLayout({
       <SidebarInset>
         <OrgHeader />
         <main>
-          <div className="container mx-auto my-12 px-4 lg:px-8">
+          <div className="container mx-auto my-8 px-4 lg:px-8">
             {children}
           </div>
         </main>
