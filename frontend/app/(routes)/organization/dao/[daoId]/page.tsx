@@ -4,11 +4,12 @@ export function generateStaticParams() {
   ];
 }
 
-export default function Dao({ params }: { params: { daoId: string } }) {
+export default async function Dao({ params }: { params: { daoId: string } }) {
+  const { daoId } = await params;
   return (
     <div>
       Hello
-      {params.daoId}
+      {daoId}
     </div>
   );
 }

@@ -1,12 +1,14 @@
-export default function OrganizationLayout({
+import DaoDetails from '@/features/dao-details';
+
+export default function DaoLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
   params: { daoId: string };
 }>) {
   return (
     <div>
+      <DaoDetails />
       {children}
     </div>
   );

@@ -25,9 +25,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className="dark bg-background">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen `}
       >
         <HOC children={children} />
         <Toaster richColors />

@@ -8,6 +8,8 @@ import React from 'react';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
 import { Separator } from '../ui/separator';
 
+const blacklistedRoutesTitle = ['dao'];
+
 export default function OrgHeader() {
   const pathnames = usePathname().split('/').filter(x => x);
   return (
@@ -27,6 +29,14 @@ export default function OrgHeader() {
 
             if (isLast) {
               return <span key={name} className="text-muted-foreground">{name}</span>;
+            }
+            else if (blacklistedRoutesTitle.includes(name)) {
+              return (
+                <React.Fragment key={name}>
+                  <span key={name} className="text-muted-foreground">{name}</span>
+                  <ChevronRightIcon />
+                </React.Fragment>
+              );
             }
             return (
               <React.Fragment key={name}>

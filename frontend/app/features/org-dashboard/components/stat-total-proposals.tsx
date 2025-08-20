@@ -1,5 +1,5 @@
 import { readContract } from '@wagmi/core';
-import { InfinityIcon, ScrollTextIcon } from 'lucide-react';
+import { ScrollTextIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
