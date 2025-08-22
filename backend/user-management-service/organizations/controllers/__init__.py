@@ -1,9 +1,9 @@
-from .organization_controller import OrganizationController
-from .onchain_verification_controller import OnchainVerificationController
-from .organization_user_controller import OrganizationUserController
+from .organization_controller import ProtectedOrganizationController
+from .onchain_verification_controller import ProtectedOnchainVerificationController
+from .organization_user_controller import ProtectedOrganizationUserController
 
 __all__ = [
-    "OrganizationController",
-    "OnchainVerificationController",
-    "OrganizationUserController"
+    "ProtectedOrganizationController",
+    "ProtectedOnchainVerificationController",
+    "ProtectedOrganizationUserController",
 ]
