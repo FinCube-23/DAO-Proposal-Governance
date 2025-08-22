@@ -1,6 +1,6 @@
 'use client';
 
-import { GalleryVerticalEnd, Landmark, LayoutDashboard } from 'lucide-react';
+import { GalleryVerticalEnd, Home, Landmark, Layers, LayoutDashboard, ScrollTextIcon } from 'lucide-react';
 import BrandCard from '@/shared/components/layout/brand-card';
 import SidebarNavMenu from '@/shared/components/layout/sidebar-nav-menu';
 import SidebarUser from '@/shared/components/layout/sidebar-user';
@@ -25,12 +25,17 @@ const menus = [
     ],
   },
   {
-    name: 'DAOs',
+    name: 'DAO',
     items: [
       {
-        name: 'Fincube',
-        url: '/organization/dao/fincube',
-        icon: Landmark,
+        name: 'Overview',
+        url: '/organization/dao',
+        icon: Layers,
+      },
+      {
+        name: 'Proposals',
+        url: '/organization/dao/proposals',
+        icon: ScrollTextIcon,
       },
     ],
   },
