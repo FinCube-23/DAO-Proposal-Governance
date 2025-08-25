@@ -4,15 +4,19 @@ services:
     build:
       context: ./
       args:
-        - APP_ENV
+        - APP_ENV=${APP_ENV}
     ports:
       - 3003:3000
     volumes:
-      - ./:/app
-      - /app/node_modules
+      - ./src:/app/src              # Only sync source code
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+
     env_file:
       # Add this line to specify the environment file
-      - .env.local # Specify the path to your .env file
+      - .env # Specify the path to your .env file
     networks:
       - fincube23_network
 
@@ -20,7 +24,7 @@ services:
     container_name: audit-trail-pgsqldb
     image: postgres:16
     env_file:
-      - .env.local
+      - .env
     ports:
       - 5434:5432
     volumes:
@@ -32,7 +36,7 @@ services:
     container_name: pgadmin4-audit-trail
     image: dpage/pgadmin4:8.0
     env_file:
-      - .env.local
+      - .env
     ports:
       - '5070:80'
     depends_on:

@@ -17,7 +17,11 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "typeorm:generate": "npx typeorm-ts-node-commonjs migration:generate -d db/data-source.local.ts",
+    "typeorm:migrate": "npx typeorm-ts-node-commonjs migration:run -d db/data-source.local.ts",
+    "typeorm:revert": "npx typeorm-ts-node-commonjs migration:revert -d db/data-source.local.ts",
+    "typeorm:drop": "npx typeorm-ts-node-commonjs schema:drop -d db/data-source.local.ts"
   },
   "dependencies": {
     "@fincube/validate-auth": "github:FinCube-23/validate-auth",

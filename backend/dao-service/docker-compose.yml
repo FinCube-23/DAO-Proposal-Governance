@@ -2,18 +2,22 @@ services:
   dao-app:
     container_name: dao_service_api
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./
       args:
-        - APP_ENV
+        - APP_ENV=${APP_ENV}
     ports:
       - '3002:3000'
     volumes:
-      - .:/app # Mount dao-service code
-      - /app/node_modules
-      - ../libs:/app/libs:ro # Mount libs directory as read-only
+      #- .:/app # Mount dao-service code
+      - ./src:/app/src              # Only sync source code
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./logs:/app/logs
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./tsconfig.json:/app/tsconfig.json
+
     env_file:
-      - .env.local
+      - .env
     networks:
       - fincube23_network
 
@@ -21,7 +25,7 @@ services:
     container_name: dao-service-pgsqldb
     image: postgres:16
     env_file:
-      - .env.local
+      - .env
     ports:
       - '5433:5432'
     volumes:

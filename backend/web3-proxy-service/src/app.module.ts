@@ -2,16 +2,18 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { Web3ProxyModule } from './web3-dao-proxy/web3-proxy.module';
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule } from '@nestjs/config';
 import { AuthzModule } from './authz/authz.module';
 @Module({
-  imports: [Web3ProxyModule,
+  imports: [
+    Web3ProxyModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.local'
+      envFilePath: '.env',
     }),
-    AuthzModule],
+    AuthzModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

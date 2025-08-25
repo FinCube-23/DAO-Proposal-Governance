@@ -3,7 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { passportJwtSecret } from 'jwks-rsa';
 import * as dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
+dotenv.config({ path: '.env' });
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
