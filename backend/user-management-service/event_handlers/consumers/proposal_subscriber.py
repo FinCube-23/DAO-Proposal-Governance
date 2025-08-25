@@ -113,12 +113,12 @@ class ProposalSubscriber:
 
         # Prepare on-chain verification data (currently uses dummy data)
         onchainVerificationData = {
-            "organization_id": event.get('organization_id', 3),  # Default to 1 if not provided
+            "organization_id": event.get('organization_id', 3),  # Default to 3 if not provided
             "trx_hash": event['transactionHash'],
             "context": {
                 "block_number": event['blockNumber'],
             },
-            "proposer_wallet": event.get('proposer_wallet', "0x1234567890123456789012345678901234567890"),
+            "proposer_wallet": event.get('proposer_wallet', "0x1234567890123456789012345678901234567890"),  # Default to dummy wallet if not provided
         }
 
         try:
