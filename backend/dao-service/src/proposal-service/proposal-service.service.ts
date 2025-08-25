@@ -3,6 +3,8 @@ import {
   Inject,
   NotFoundException,
   UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,7 +16,7 @@ import {
   PaginatedProposalResponse,
   UpdateProposalDto,
 } from './dto/proposal.dto';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
@@ -91,7 +93,13 @@ export class ProposalServiceService {
     } catch (err) {
       this.logger.error(`Failed to create proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
-      throw new Error(`Failed to create proposal`);
+      throw new HttpException(
+        {
+          status: HttpStatus.SERVICE_UNAVAILABLE,
+          error: 'Audit trail service is currently unavailable',
+        },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
     }
   }
 
@@ -280,7 +288,19 @@ export class ProposalServiceService {
     });
     // Convert Observable to Promise and await the response
     const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('queue-pending-proposal', proposal),
+      this.rabbitClient.send('queue-pending-proposal', proposal).pipe(
+        timeout(50000), // Nginx default timeout is 60 seconds. So we are setting Message Broker Response as 50 seconds.
+        catchError((err) => {
+          throw new Error('AUDIT-TRAIL-SERVICE timeout or unreachable');
+        }),
+        /* Note:
+                As this project architecture is designed with low number of services 
+                we are covering this type of cross service synchronization with Producer-Consumer
+                model where a response is expected. But for larger infrastructure we will mostly rely on
+                Pub/Sub model where Fire and Forget will be implemented.
+                Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.   
+        */ 
+      ),
     );
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
@@ -289,6 +309,9 @@ export class ProposalServiceService {
       );
       return messageResponse;
     } else {
+      this.logger.error(
+        `Audit service returned failure: ${JSON.stringify(messageResponse.error)}`,
+      );
       throw new Error(
         messageResponse.error?.message || 'Proposal processing failed',
       );

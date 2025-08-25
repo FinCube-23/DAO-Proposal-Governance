@@ -13,10 +13,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         username: configService.getOrThrow('POSTGRES_USER'),
         password: configService.getOrThrow('POSTGRES_PASSWORD'),
         autoLoadEntities: true,
-        synchronize: true, // Only for Development
+        synchronize: false, // Only for Development
       }),
       inject: [ConfigService],
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }
