@@ -1,49 +1,39 @@
-# compiled output
-/dist
-/node_modules
-*/*.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-# Logs
-logs
+# Django
 *.log
-npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+db.sqlite3-journal
 
-# dotenv environment variable files
-*/.env
-*/.env.development.local
-*/.env.test.local
-*/.env.production.local
-*/.env.local
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
-# OS
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build/install files
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Testing
+.coverage
+htmlcov/
+.coverage.*
+.cache
+.pytest_cache/
+
+# OS-specific
 .DS_Store
-
-# Tests
-/coverage
-/.nyc_output
-
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+Thumbs.db

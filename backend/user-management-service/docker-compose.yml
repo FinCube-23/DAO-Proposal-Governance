@@ -1,25 +1,26 @@
+version: '3.8'
+
 services:
   user-management-service:
     container_name: user_management_api
-    build:
-      context: ./
-      args:
-        - APP_ENV
+    build: .
     ports:
-      - 3001:3000
+      - "3001:8000"  # External:3001 → Internal:8000
     volumes:
-      - ./:/app
-      - /app/node_modules
+      - .:/app
     env_file:
-      - .env.local
+      - .env
+    environment:
+      - RABBITMQ_HOST=rabbitmq  # Connects to existing container
+      - RABBITMQ_PORT=5672
     networks:
       - fincube23_network
-      
+
   user-management-pgsqldb:
     container_name: user-management-pgsqldb
     image: postgres
     env_file:
-      - .env.local
+      - .env
     ports:
       - '5432:5432'
     volumes:
@@ -31,7 +32,7 @@ services:
     container_name: pgadmin4-user-management
     image: dpage/pgadmin4:8.0
     env_file:
-      - .env.local
+      - .env
     ports:
       - '5050:80'
     depends_on:
@@ -41,7 +42,6 @@ services:
 
 volumes:
   postgres_data:
-
 
 networks:
   fincube23_network:

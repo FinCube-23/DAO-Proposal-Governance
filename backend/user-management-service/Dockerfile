@@ -1,25 +1,28 @@
-FROM node:20 as builder
+# Use official Python image
+FROM python:3.12-slim
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Set work directory
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy source code
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project
 COPY . .
 
-RUN npm run build
+# Expose Django's default port
+EXPOSE 8000
 
-#----- PRODUCTION---------
-FROM node:20-alpine as production
-
-COPY package*.json ./
-RUN npm ci --legacy-peer-deps
-
-# Copy dist with proper permissions
-COPY --from=builder --chown=node:node /app/dist ./dist
-
-USER node
-EXPOSE 3000
-
-CMD ["npm", "run", "start:prod"]
+# Command to run the application
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
