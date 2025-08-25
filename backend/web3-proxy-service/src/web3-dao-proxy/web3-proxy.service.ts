@@ -36,6 +36,76 @@ export class Web3ProxyService {
     );
     return provider;
   }
+
+  async placeProposalWithMultipleWallets(): Promise<any> {
+    // Load 15 wallets from environment variables
+    const wallets = [];
+    for (let i = 1; i <= 15; i++) {
+      const privateKey = process.env[`WALLET${i}_PRIVATE_KEY`];
+      if (!privateKey) {
+        throw new Error(`Missing WALLET${i} credentials in environment`);
+      }
+      const wallet = new ethers.Wallet(privateKey, this.provider());
+      wallets.push(wallet);
+    }
+
+    // Place proposal with each wallet in parallel
+    const results = await Promise.all(
+      wallets.map(async (wallet) => {
+        this.contract = new ethers.Contract(
+          this.daoContract.address,
+          this.daoContract.abi,
+          wallet,
+        );
+        try {
+          // Use the correct contract function and pass extracted params
+          const tx = await this.contract.newMemberApprovalProposal();
+          await tx.wait();
+
+          console.log('Hash:', tx.hash);
+          console.log('Wallet address:', wallet.address);
+
+          // Ensure values are properly defined before creating body
+          if (!tx.hash || !wallet.address) {
+            throw new Error('Transaction hash or wallet address is undefined');
+          }
+
+          const body = {
+            proposal_type: 'membership',
+            metadata: 'Dummy metadata',
+            proposer_address: String(wallet.address).trim(),
+            trx_hash: String(tx.hash).trim(),
+          };
+
+          // Validate JSON can be stringified before sending
+          try {
+            JSON.stringify(body);
+          } catch (jsonError) {
+            console.error('JSON stringify error:', jsonError);
+            throw new Error(`Invalid JSON body: ${jsonError.message}`);
+          }
+
+          console.log('Body before sending:', JSON.stringify(body, null, 2));
+
+          // Use Docker Compose service name for inter-container communication
+          await axios.post('http://dao-app:3000/proposal-service', body, {
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          });
+
+          console.log('POST request sent successfully');
+
+          return { address: wallet.address, txHash: tx.hash };
+        } catch (err) {
+          console.error('Full error:', err);
+          return { address: wallet.address, error: err.message };
+        }
+      }),
+    );
+    return results;
+  }
+
   async getBalance(req: any, address: string): Promise<number> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 

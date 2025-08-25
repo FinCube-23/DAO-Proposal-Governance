@@ -106,29 +106,29 @@ export class ProposalUpdateRepository {
             this.logger.log(`Raw query response: ${JSON.stringify(result)}`);
 
             const {
-                proposalExecuteds,
-                proposalAddeds,
-                proposalCreateds,
-                proposalCanceleds,
-                ownershipTransferreds,
-                memberRegistereds,
-                memberApproveds,
+                proposalExecuted,
+                proposalAdded,
+                proposalCreated,
+                proposalCanceled,
+                ownershipTransferred,
+                memberRegistered,
+                memberApproved,
             } = result.data || {};
 
-            if (!proposalExecuteds && !proposalAddeds && !proposalCreateds && !proposalCanceleds &&
-                !ownershipTransferreds && !memberRegistereds && !memberApproveds) {
+            if (!proposalExecuted && !proposalAdded && !proposalCreated && !proposalCanceled &&
+                !ownershipTransferred && !memberRegistered && !memberApproved) {
                 this.logger.warn(`No relevant events found for transaction hashes: ${transactionHashes.join(', ')}`);
                 throw new Error(`NO_EVENT_DATA_FOUND`);
             }
 
             const transactionsData = {
-                proposalExecuteds: proposalExecuteds || [],
-                proposalAddeds: proposalAddeds || [],
-                proposalCreateds: proposalCreateds || [],
-                proposalCanceleds: proposalCanceleds || [],
-                ownershipTransferreds: ownershipTransferreds || [],
-                memberRegistereds: memberRegistereds || [],
-                memberApproveds: memberApproveds || [],
+                proposalExecuted: proposalExecuted || [],
+                proposalAdded: proposalAdded || [],
+                proposalCreated: proposalCreated || [],
+                proposalCanceled: proposalCanceled || [],
+                ownershipTransferred: ownershipTransferred || [],
+                memberRegistered: memberRegistered || [],
+                memberApproved: memberApproved || [],
             };
 
             this.logger.log('Fetched transaction event data successfully', transactionsData);
@@ -178,14 +178,14 @@ export class ProposalUpdateRepository {
     transactionUpdateQuery(transactionHashes: string[]): any {
         const query = gql`
           query GetTransactionsByHashes($transactionHashes: [String!]!) {
-            proposalExecuteds(where: { transactionHash_in: $transactionHashes }) {
+            proposalExecuted(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               proposalId
               blockNumber
               blockTimestamp
             }
-            proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+            proposalAdded(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               proposalId
@@ -193,32 +193,32 @@ export class ProposalUpdateRepository {
               blockNumber
               blockTimestamp
             }
-            proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
+            proposalCanceled(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               proposalId
               blockNumber
               blockTimestamp
             }
-            proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+            proposalAdded(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               blockNumber
               blockTimestamp
             }
-            ownershipTransferreds(where: { transactionHash_in: $transactionHashes }) {
+            ownershipTransferred(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               blockNumber
               blockTimestamp
             }
-            memberRegistereds(where: { transactionHash_in: $transactionHashes }) {
+            memberRegistered(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               blockNumber
               blockTimestamp
             }
-            memberApproveds(where: { transactionHash_in: $transactionHashes }) {
+            memberApproved(where: { transactionHash_in: $transactionHashes }) {
               transactionHash
               id
               blockNumber

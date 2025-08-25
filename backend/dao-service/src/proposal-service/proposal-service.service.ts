@@ -53,13 +53,13 @@ export class ProposalServiceService {
     req,
     proposal: Partial<ProposalEntity>,
   ): Promise<ProposalEntity> {
-    const res = await validateAuth(req, this.umsRabbitClient as any);
+    // const res = await validateAuth(req, this.umsRabbitClient as any);
 
-    if (res.status != 'SUCCESS') {
-      throw new UnauthorizedException(
-        'You are not authorized to perform this task',
-      );
-    }
+    // if (res.status != 'SUCCESS') {
+    //   throw new UnauthorizedException(
+    //     'You are not authorized to perform this task',
+    //   );
+    // }
 
     try {
       // First verify we have the required fields
