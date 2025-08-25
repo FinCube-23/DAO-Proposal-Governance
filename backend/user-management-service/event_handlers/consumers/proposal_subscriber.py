@@ -4,7 +4,8 @@ import time
 from typing import Dict, Callable
 from django.conf import settings
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
-from event_handlers. utils.types import ResponseTransactionStatusDto, ProposalEventData
+from event_handlers.utils.types import ResponseTransactionStatusDto, ProposalEventData
+from organizations.services.onchain_verification_service import OnchainVerificationService
 
 class ProposalSubscriber:
     def __init__(self):
@@ -109,3 +110,19 @@ class ProposalSubscriber:
         data: ProposalEventData = event.get('data', {})
         print(f" [🅝🅔🅦] New proposal created: {data.get('id')}")
         print(f" [▀▄▀] Block: {event['blockNumber']} | TX: {event['transactionHash'][:10]}...")
+
+        # Prepare on-chain verification data (currently uses dummy data)
+        onchainVerificationData = {
+            "organization_id": event.get('organization_id', 3),  # Default to 1 if not provided
+            "trx_hash": event['transactionHash'],
+            "context": {
+                "block_number": event['blockNumber'],
+            },
+            "proposer_wallet": event.get('proposer_wallet', "0x1234567890123456789012345678901234567890"),
+        }
+
+        try:
+            verification = OnchainVerificationService.create_onchain_verification(onchainVerificationData)
+            print(f" [✔️] On-chain verification created: {verification.id}")
+        except Exception as e:
+            print(f" [✘] Failed to create on-chain verification: {str(e)}")
