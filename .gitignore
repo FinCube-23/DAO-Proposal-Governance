@@ -7,3 +7,5 @@ scripts/*/node_modules
 scripts/*/.env.local
 scripts/*/r*.json
 
+
+node_modules/*
