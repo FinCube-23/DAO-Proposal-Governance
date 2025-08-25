@@ -4,29 +4,30 @@ import { Repository } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ExchangeUser } from 'src/exchange_user/entities/exchange_user.entity';
-import { MfsBusiness } from 'src/mfs_business/entities/mfs_business.entity';
+import { Organization } from 'src/organization/entities/organization.entity';
 
 @Injectable()
 export class DatabaseSeederService {
   constructor(
     @InjectRepository(ExchangeUser)
     private exchangeUserRepository: Repository<ExchangeUser>,
-    @InjectRepository(MfsBusiness)
-    private mfsBusinessRepository: Repository<MfsBusiness>,
-  ) {}
+    // In the constructor injection (around lines 14–15)
+    @InjectRepository(Organization)
+    private organizationRepository: Repository<Organization>,
+  ) { }
 
   async seed(): Promise<void> {
     const exchangeUsers = await this.readSeedDataFromFile(
       'exchange_users.json',
     );
     const mfsBusinesses = await this.readSeedDataFromFile(
-      'mfs_businesses.json',
+      'organization.json',
     );
     const authentication = await this.readSeedDataFromFile(
       'authentication.json',
     );
 
-    await this.mfsBusinessRepository.save(mfsBusinesses);
+    await this.organizationRepository.save(mfsBusinesses);
     await this.exchangeUserRepository.save(exchangeUsers);
   }
 

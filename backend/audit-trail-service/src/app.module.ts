@@ -15,7 +15,7 @@ import { TransactionEntity } from './transactions/entities/transaction.entity';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env.local',
+      envFilePath: '.env',
     }),
     DatabaseModule,
     AuthzModule,

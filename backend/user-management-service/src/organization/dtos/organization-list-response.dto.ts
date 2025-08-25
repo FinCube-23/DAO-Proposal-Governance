@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OnChainProposalStatus } from '../entities/mfs_business.entity';
+import { OnChainProposalStatus } from '../entities/proposal.entity';
 
 export class OrganizationListItemDto {
   @ApiProperty()
