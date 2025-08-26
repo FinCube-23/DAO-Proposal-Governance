@@ -17,7 +17,7 @@ def start_jwt_consumer():
                 try:
                     print(f"\n [✉] Received raw message: {body.decode()[:200]}...")
                     response = process_authorization_request(body)
-                    print(f" [↻] Sending response: {json.dumps(response)[:200]}...")
+                    print(f" [↻] Sending response: {json.dumps(response)}...")
                     
                     if properties.reply_to:
                         ch.basic_publish(
