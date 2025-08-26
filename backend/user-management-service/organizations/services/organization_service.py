@@ -70,6 +70,18 @@ class OrganizationService:
         return organization
     
     @staticmethod
+    def get_organization_id_by_admin_wallet(wallet_address):
+        """
+        Get organization ID by admin wallet address.
+        Returns None if not found.
+        """
+        # Validate wallet address format
+        if not wallet_address or not wallet_address.startswith("0x") or len(wallet_address) != 42:
+            return None  # Invalid format returns None
+        
+        return OrganizationRepository.get_organization_id_by_admin_wallet(wallet_address)
+
+    @staticmethod
     def update_organization(org_id, update_data):
         """
         Update organization (only email and address allowed).
