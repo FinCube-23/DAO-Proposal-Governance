@@ -135,22 +135,6 @@ class ProposalSubscriber:
         data: ProposalEventData = event.get('data', {})
         print(f" [🅝🅔🅦] New proposal created: {data.get('id')}")
         print(f" [▀▄▀] Block: {event['blockNumber']} | TX: {event['transactionHash'][:10]}...")
-
-        organization_id = OrganizationService.get_organization_id_by_admin_wallet(event.get('proposer_wallet'))
-        print(f" [*] Associated organization ID: {organization_id}")
-
-        # Prepare on-chain verification data (currently uses dummy data)
-        onchainVerificationData = {
-            "organization_id": organization_id,  # Default to 3 if not provided
-            "trx_hash": event['transactionHash'],
-            "context": {
-                "block_number": event['blockNumber'],
-            },
-            "proposer_wallet": event.get('proposer_wallet', "0x1234567890123456789012345678901234567890"),  # Default to dummy wallet if not provided
-        }
-
-        try:
-            verification = OnchainVerificationService.create_onchain_verification(onchainVerificationData)
-            print(f" [✔️] On-chain verification created: {verification.id}")
-        except Exception as e:
-            print(f" [✘] Failed to create on-chain verification: {str(e)}")
+        trx_hash = event.get('transactionHash')
+        onchain_id = data.get('id')
+        OnchainVerificationService.handle_proposal_creation(trx_hash, onchain_id)

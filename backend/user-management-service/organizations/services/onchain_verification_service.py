@@ -1,6 +1,7 @@
 # organizations/services/onchain_verification_service.py
 from organizations.repositories.onchain_verification_repository import OnchainVerificationRepository
 from organizations.repositories.organization_repository import OrganizationRepository
+from django.db import transaction
 
 class OnchainVerificationService:
     
@@ -65,7 +66,7 @@ class OnchainVerificationService:
 
         # Define valid status transitions
         valid_transitions = {
-            'register': ['pending', 'approved', 'cancelled'],  # Can move to pending, approved, or cancel registration
+            'register': ['pending', 'cancelled'],  # Can move to pending or cancelled
             'pending': ['approved', 'cancelled'],  # Can be approved or cancelled while pending
             'approved': [],  # Final state - cannot change once approved
             'cancelled': [],  # Final state - cannot change once cancelled
@@ -99,3 +100,37 @@ class OnchainVerificationService:
             raise Exception("Failed to update verification status in database")
         
         return updated_verification
+    
+    @staticmethod
+    def update_verification_onchain_id_by_trx_hash(trx_hash, onchain_id):
+        # Validate trx_hash
+        if trx_hash.startswith("0x") and len(trx_hash) == 66:
+            pass
+        else:
+            raise Exception("Invalid transaction hash format")
+        
+        # Validate onchain_id
+        if onchain_id is None:
+            raise Exception("onchain_id is required")
+        
+        try:
+            return OnchainVerificationRepository.update_verification_onchain_id_by_trx_hash(trx_hash, onchain_id)
+        except Exception as e:
+            raise Exception(f"Failed to update onchain_id: {str(e)}")
+        
+    @staticmethod
+    def handle_proposal_creation(trx_hash, onchain_id):
+        """Handle new proposal creation"""
+        if not trx_hash:
+            print(" [!] Missing transaction hash")
+            return
+        if not onchain_id:
+            print(" [!] Missing on-chain ID")
+            return
+
+        try:
+            with transaction.atomic():
+                OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'pending')
+                OnchainVerificationService.update_verification_onchain_id_by_trx_hash(trx_hash, onchain_id)
+        except Exception as e:
+            print(f" [✘] Failed to create on-chain verification: {str(e)}")
