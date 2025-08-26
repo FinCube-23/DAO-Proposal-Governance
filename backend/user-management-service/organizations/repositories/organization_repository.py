@@ -73,3 +73,31 @@ class OrganizationRepository:
             return Organization.objects.get(email=email)
         except ObjectDoesNotExist:
             return None
+        
+    @classmethod
+    def get_organization_id_by_admin_wallet(cls, wallet_address):
+        """
+        Get organization ID by admin wallet address.
+        Uses a single efficient query that only fetches the ID.
+        """
+        try:
+            # Use values_list to get only the ID - more efficient
+            org_id = Organization.objects.filter(
+                organization_admin__wallet_address=wallet_address
+            ).values_list('id', flat=True).first()
+            
+            return org_id  # Returns None if not found, or the ID if found
+        except Exception:
+            return None
+    
+    @classmethod
+    def get_organization_by_admin_wallet(cls, wallet_address):
+        """
+        Get full organization object by admin wallet address.
+        """
+        try:
+            return Organization.objects.select_related('organization_admin').get(
+                organization_admin__wallet_address=wallet_address
+            )
+        except Organization.DoesNotExist:
+            return None
