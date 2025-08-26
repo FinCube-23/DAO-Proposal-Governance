@@ -53,3 +53,49 @@ class OnchainVerificationService:
         return OnchainVerificationRepository.get_verifications_by_organization(
             organization_id, page, limit
         )
+    
+    @staticmethod
+    def update_verification_status_by_trx_hash(trx_hash, status):
+
+        # Validate trx_hash
+        if trx_hash.startswith("0x") and len(trx_hash) == 66:
+            pass
+        else:
+            raise Exception("Invalid transaction hash format")
+
+        # Define valid status transitions
+        valid_transitions = {
+            'register': ['pending', 'approved', 'cancelled'],  # Can move to pending, approved, or cancel registration
+            'pending': ['approved', 'cancelled'],  # Can be approved or cancelled while pending
+            'approved': [],  # Final state - cannot change once approved
+            'cancelled': [],  # Final state - cannot change once cancelled
+        }
+         
+        # Get current verification
+        verification = OnchainVerificationRepository.get_verification_by_trx_hash(trx_hash)
+        if not verification:
+            raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
+        
+        current_status = verification.onchain_status
+        
+        # Allow idempotent updates (same status)
+        if current_status == status:
+            return verification
+        
+        # Validate status transition
+        allowed_statuses = valid_transitions.get(current_status, [])
+        if status not in allowed_statuses:
+            if current_status in ['approved', 'cancelled']:
+                raise Exception(f"Cannot update status from '{current_status}' as it is a final state")
+            else:
+                raise Exception(
+                    f"Invalid status transition from '{current_status}' to '{status}'. "
+                    f"Allowed transitions: {allowed_statuses}"
+                )
+
+        # Update verification status
+        updated_verification = OnchainVerificationRepository.update_verification_status_by_trx_hash(trx_hash, status)
+        if not updated_verification:
+            raise Exception("Failed to update verification status in database")
+        
+        return updated_verification

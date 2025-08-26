@@ -58,16 +58,18 @@ class OnchainVerificationRepository:
             return None
         
     @classmethod
-    def update_verification_status(cls, trx_hash, status):
+    def update_verification_status_by_trx_hash(cls, trx_hash, status):
         """
         Update the status of an on-chain verification.
         """
         try:
             verification = cls.get_verification_by_trx_hash(trx_hash)
-            if verification:
-                verification.onchain_status = status
-                verification.save()
-                return verification
+            if not verification:
+                raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
+                
+            verification.onchain_status = status
+            verification.save()
+            return verification
+            
         except Exception as e:
-            print(f" [✘] Failed to update on-chain verification status: {str(e)}")
-        return None
+            raise Exception(f"Failed to update on-chain verification status: {str(e)}")
