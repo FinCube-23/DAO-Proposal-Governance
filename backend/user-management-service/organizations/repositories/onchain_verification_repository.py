@@ -73,3 +73,20 @@ class OnchainVerificationRepository:
             
         except Exception as e:
             raise Exception(f"Failed to update on-chain verification status: {str(e)}")
+        
+    @classmethod
+    def update_verification_onchain_id_by_trx_hash(cls, trx_hash, onchain_id):
+        """
+        Update the status of an on-chain verification.
+        """
+        try:
+            verification = cls.get_verification_by_trx_hash(trx_hash)
+            if not verification:
+                raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
+                
+            verification.onchain_id = onchain_id
+            verification.save()
+            return verification
+            
+        except Exception as e:
+            raise Exception(f"Failed to update verification onchain_id: {str(e)}")
