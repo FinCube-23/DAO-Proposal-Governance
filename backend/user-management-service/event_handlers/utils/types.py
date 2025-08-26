@@ -32,7 +32,6 @@ class ResponseTransactionStatusDto(TypedDict):
     data: Optional[Dict[str, Any]]
     blockNumber: int
     transactionHash: str
-    proposer_wallet: str
 
 class ProposalEventData(TypedDict):
     __typename: str
