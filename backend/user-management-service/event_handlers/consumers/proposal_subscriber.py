@@ -102,8 +102,32 @@ class ProposalSubscriber:
     def handle_proposal_updated(self, event: ResponseTransactionStatusDto):
         """Handle proposal updates (Canceled/Executed)"""
         data: ProposalEventData = event.get('data', {})
-        print(f" [↻] Processing update for proposal {data.get('id')}")
-        print(f" [✉] Message: {event['message']}")
+        print(f" [*] Processing update for proposal {data.get('id')}")
+        print(f" [*] Message: {event.get('message', 'No message')}")
+
+        trx_hash = event.get('transactionHash')
+        event_type = data.get('__typename')
+        if not trx_hash:
+            print(" [!] Missing transaction hash in event")
+            return
+        if not event_type:
+            print(" [!] Missing event type in event data")
+            return
+
+        try:
+            if event_type == 'ProposalExecuted':
+                print(f" [*] Proposal executed: {data.get('id')}")
+                OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'approved')
+                print(f" [*] Status updated to approved for tx: {trx_hash[:10]}...")
+            elif event_type == 'ProposalCanceled':
+                print(f" [*] Proposal canceled: {data.get('id')}")
+                OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'cancelled')
+                print(f" [*] Status updated to cancelled for tx: {trx_hash[:10]}...")
+            else:
+                print(f" [!] Unknown proposal event type: {event_type}")
+                # OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'pending')
+        except Exception as e:
+            print(f" [✘] Failed to update verification status: {str(e)}")
 
     def handle_proposal_created(self, event: ResponseTransactionStatusDto):
         """Handle new proposal creation"""
