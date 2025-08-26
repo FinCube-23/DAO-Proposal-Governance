@@ -1,4 +1,4 @@
-import type { IOffchainProposalCard } from './interfaces';
+import type { IOffchainProposalCard } from "./interfaces";
 
 // interfaces
 interface Response {
@@ -42,10 +42,12 @@ export interface LoginResponse {
 }
 
 export interface RegisterPayload {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
+  contact_number: string;
   password: string;
-  role: string;
+  password_confirm: string;
 }
 
 export interface RegisterResponse {
@@ -107,4 +109,8 @@ export type RegisterMemberResponse = Response;
 
 export type ExecuteProposalResponse = Response;
 
-export interface GetStatusByEmailResponse { id: number; email: string; membership_onchain_status: string }
+export interface GetStatusByEmailResponse {
+  id: number;
+  email: string;
+  membership_onchain_status: string;
+}
