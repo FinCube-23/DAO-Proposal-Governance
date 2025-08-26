@@ -6,6 +6,7 @@ from django.conf import settings
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
 from event_handlers.utils.types import ResponseTransactionStatusDto, ProposalEventData
 from organizations.services.onchain_verification_service import OnchainVerificationService
+from organizations.services.organization_service import OrganizationService
 
 class ProposalSubscriber:
     def __init__(self):
@@ -135,9 +136,12 @@ class ProposalSubscriber:
         print(f" [🅝🅔🅦] New proposal created: {data.get('id')}")
         print(f" [▀▄▀] Block: {event['blockNumber']} | TX: {event['transactionHash'][:10]}...")
 
+        organization_id = OrganizationService.get_organization_id_by_admin_wallet(event.get('proposer_wallet'))
+        print(f" [*] Associated organization ID: {organization_id}")
+
         # Prepare on-chain verification data (currently uses dummy data)
         onchainVerificationData = {
-            "organization_id": event.get('organization_id', 3),  # Default to 3 if not provided
+            "organization_id": organization_id,  # Default to 3 if not provided
             "trx_hash": event['transactionHash'],
             "context": {
                 "block_number": event['blockNumber'],
