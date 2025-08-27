@@ -102,39 +102,39 @@ class ProposalSubscriber:
     # ===== HANDLER IMPLEMENTATIONS =====
     def handle_proposal_updated(self, event: ResponseTransactionStatusDto):
         """Handle proposal updates (Canceled/Executed)"""
-        data: ProposalEventData = event.get('data', {})
-        print(f" [*] Processing update for proposal {data.get('id')}")
-        print(f" [*] Message: {event.get('message', 'No message')}")
-
-        trx_hash = event.get('transactionHash')
+        data = event.get('data', {})
         event_type = data.get('__typename')
-        if not trx_hash:
-            print(" [!] Missing transaction hash in event")
-            return
+        onchain_id = data.get('proposalId')
         if not event_type:
             print(" [!] Missing event type in event data")
+            return
+        if not onchain_id:
+            print(" [!] Missing on-chain ID in event data")
             return
 
         try:
             if event_type == 'ProposalExecuted':
-                print(f" [*] Proposal executed: {data.get('id')}")
-                OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'approved')
-                print(f" [*] Status updated to approved for tx: {trx_hash[:10]}...")
+                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
+                OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'approved')
             elif event_type == 'ProposalCanceled':
-                print(f" [*] Proposal canceled: {data.get('id')}")
-                OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'cancelled')
-                print(f" [*] Status updated to cancelled for tx: {trx_hash[:10]}...")
+                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
+                OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'cancelled')
             else:
                 print(f" [!] Unknown proposal event type: {event_type}")
-                # OnchainVerificationService.update_verification_status_by_trx_hash(trx_hash, 'pending')
         except Exception as e:
             print(f" [✘] Failed to update verification status: {str(e)}")
 
     def handle_proposal_created(self, event: ResponseTransactionStatusDto):
         """Handle new proposal creation"""
-        data: ProposalEventData = event.get('data', {})
-        print(f" [🅝🅔🅦] New proposal created: {data.get('id')}")
-        print(f" [▀▄▀] Block: {event['blockNumber']} | TX: {event['transactionHash'][:10]}...")
+        data = event.get('data', {})
+        proposer_wallet = data.get('proposedWallet').lower()
         trx_hash = event.get('transactionHash')
-        onchain_id = data.get('id')
-        OnchainVerificationService.handle_proposal_creation(trx_hash, onchain_id)
+        onchain_id = data.get('proposalId')
+
+        print(f"Received a proposal transaction update in event pattern - hash: {trx_hash[:10]}...")
+        print(f"On-Chain Proposal ID: {onchain_id} | Proposer Wallet: {proposer_wallet}")
+        try:
+            # TODO: Get the verification by proposer_wallet not by trx_hash. If there are multiple verifications found, take the latest one.
+            OnchainVerificationService.handle_proposal_creation(proposer_wallet, onchain_id)
+        except Exception as e:
+            print(f"Invalid proposal object received: {str(e)}")

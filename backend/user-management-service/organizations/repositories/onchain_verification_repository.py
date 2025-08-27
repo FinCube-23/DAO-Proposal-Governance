@@ -90,3 +90,61 @@ class OnchainVerificationRepository:
             
         except Exception as e:
             raise Exception(f"Failed to update verification onchain_id: {str(e)}")
+        
+    @classmethod
+    def get_verification_by_onchain_id(cls, onchain_id):
+        """
+        Get on-chain verification by on-chain ID.
+        """
+        try:
+            return OnchainVerification.objects.get(onchain_id=onchain_id)
+        except OnchainVerification.DoesNotExist:
+            return None
+
+    @classmethod
+    def update_verification_status_by_onchain_id(cls, onchain_id, status):
+        """
+        Update the status of an on-chain verification.
+        """
+        try:
+            verification = cls.get_verification_by_onchain_id(onchain_id)
+            if not verification:
+                raise Exception(f"OnchainVerification with on-chain ID {onchain_id} not found")
+
+            verification.onchain_status = status
+            verification.save()
+            return verification
+
+        except Exception as e:
+            raise Exception(f"Failed to update on-chain verification status: {str(e)}")
+        
+    @classmethod
+    def get_registered_verification_by_proposer_wallet(cls, proposer_wallet):
+        """
+        Get the latest on-chain verification by proposer wallet address where onchain_status is "register".
+        Returns the most recent verification (by creation time) if multiple exist.
+        """
+        try:
+            return OnchainVerification.objects.filter(
+                proposer_wallet=proposer_wallet,
+                onchain_status="register"
+            ).order_by('-created_at').first()
+        except Exception:
+            return None
+    
+    @classmethod
+    def add_verification_onchain_id(cls, proposer_wallet, onchain_id):
+        """
+        Add an on-chain ID to the latest on-chain verification by proposer wallet address.
+        """
+        try:
+            verification = cls.get_registered_verification_by_proposer_wallet(proposer_wallet)
+            if not verification:
+                raise Exception(f"OnchainVerification with proposer wallet {proposer_wallet} not found")
+
+            verification.onchain_id = onchain_id
+            verification.save(update_fields=['onchain_id'])  # Also optimized save
+            return verification
+
+        except Exception as e:
+            raise Exception(f"Failed to add on-chain ID to verification: {str(e)}")
