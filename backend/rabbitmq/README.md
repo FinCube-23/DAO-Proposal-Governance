@@ -81,7 +81,7 @@ rabbitmqadmin publish \
 rabbitmqadmin publish \
   exchange=amq.default \
   routing_key=authorization \
-  payload='{"access_token":"testToken123","options":{}}'
+  payload='{"data":{"access_token":"testToken123","options":{}}}'
 ```
 
 ### Option 2: Docker Container Execution
@@ -111,7 +111,7 @@ rabbitmqadmin publish exchange=proposal-update-exchange routing_key="" payload='
 rabbitmqadmin publish exchange=proposal-update-exchange routing_key="" payload='{"web3Status": 0,"message": "Proposal cancelled","data": {"__typename": "ProposalCanceled","id": 42},"blockNumber": 123456,"transactionHash": "0xtrx_hash"}'
 
 # Test JWT Authorization
-rabbitmqadmin publish exchange=amq.default routing_key=authorization payload='{"access_token":"testToken123","options":{}}'
+rabbitmqadmin publish exchange=amq.default routing_key=authorization payload='{"data":{"access_token":"testToken123","options":{}}}'
 ```
 
 ### Option 3: Docker Compose Execution
@@ -123,7 +123,7 @@ If using docker-compose, you can execute commands directly:
 docker-compose exec rabbitmq rabbitmqadmin publish exchange=proposal-update-exchange routing_key="" payload='{"web3Status": 1,"message": "Proposal added","data": {"__typename": "ProposalAdded","id": 42, "proposedWallet": "0xWalletAddress"},"blockNumber": 123456,"transactionHash": "0xtrx_hash"}'
 
 # Test JWT Authorization
-docker-compose exec rabbitmq rabbitmqadmin publish exchange=amq.default routing_key=authorization payload='{"access_token":"testToken123","options":{}}'
+docker-compose exec rabbitmq rabbitmqadmin publish exchange=amq.default routing_key=authorization payload='{"data":{"access_token":"testToken123","options":{}}}'
 ```
 
 ## Expected Behavior
