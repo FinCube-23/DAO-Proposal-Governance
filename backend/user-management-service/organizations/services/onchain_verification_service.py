@@ -177,16 +177,6 @@ class OnchainVerificationService:
     
     @staticmethod
     def _validate_status_transition(current_status, new_status):
-        """
-        Validate onchain verification status transition.
-        
-        Args:
-            current_status (str): Current status of the verification
-            new_status (str): Desired new status
-            
-        Raises:
-            Exception: If transition is invalid
-        """
         # Define valid statuses
         valid_statuses = ['register', 'pending', 'approved', 'cancelled']
         
