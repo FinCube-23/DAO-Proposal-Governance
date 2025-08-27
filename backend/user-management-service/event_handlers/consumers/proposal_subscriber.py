@@ -4,7 +4,9 @@ import time
 from typing import Dict, Callable
 from django.conf import settings
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
-from event_handlers. utils.types import ResponseTransactionStatusDto, ProposalEventData
+from event_handlers.utils.types import ResponseTransactionStatusDto, ProposalEventData
+from organizations.services.onchain_verification_service import OnchainVerificationService
+from organizations.services.organization_service import OrganizationService
 
 class ProposalSubscriber:
     def __init__(self):
@@ -100,12 +102,39 @@ class ProposalSubscriber:
     # ===== HANDLER IMPLEMENTATIONS =====
     def handle_proposal_updated(self, event: ResponseTransactionStatusDto):
         """Handle proposal updates (Canceled/Executed)"""
-        data: ProposalEventData = event.get('data', {})
-        print(f" [↻] Processing update for proposal {data.get('id')}")
-        print(f" [✉] Message: {event['message']}")
+        data = event.get('data', {})
+        event_type = data.get('__typename')
+        onchain_id = data.get('proposalId')
+        if not event_type:
+            print(" [!] Missing event type in event data")
+            return
+        if not onchain_id:
+            print(" [!] Missing on-chain ID in event data")
+            return
+
+        print(f"Processed on-chain proposal ID: ${onchain_id}")
+        try:
+            if event_type == 'ProposalExecuted':
+                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
+                OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'approved')
+            elif event_type == 'ProposalCanceled':
+                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
+                OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'cancelled')
+            else:
+                print(f" [!] Unknown proposal event type: {event_type}")
+        except Exception as e:
+            print(f" [✘] Failed to update verification status: {str(e)}")
 
     def handle_proposal_created(self, event: ResponseTransactionStatusDto):
         """Handle new proposal creation"""
-        data: ProposalEventData = event.get('data', {})
-        print(f" [🅝🅔🅦] New proposal created: {data.get('id')}")
-        print(f" [▀▄▀] Block: {event['blockNumber']} | TX: {event['transactionHash'][:10]}...")
+        data = event.get('data', {})
+        proposer_wallet = data.get('proposedWallet').lower()
+        trx_hash = event.get('transactionHash')
+        onchain_id = data.get('proposalId')
+
+        print(f"Received a proposal transaction update in event pattern - hash: {trx_hash[:10]}...{trx_hash[-10:]}")
+        print(f"On-Chain Proposal ID: {onchain_id} | Proposer Wallet: {proposer_wallet}")
+        try:
+            OnchainVerificationService.handle_proposal_creation(proposer_wallet, onchain_id)
+        except Exception as e:
+            print(f"Invalid proposal object received: {str(e)}")
