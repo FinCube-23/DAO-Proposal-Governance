@@ -1,4 +1,5 @@
-import type { FetchMeResponse, Organization } from '@/core/services/org/types';
+import type { FetchMeResponse } from '@/core/api/types';
+import type { Organization } from '@/core/services/org/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -6,14 +7,25 @@ interface TokenPayload {
   access: string;
 }
 
-type ProfilePayload = FetchMeResponse;
+// Create a profile type that matches what we need for the UI
+interface UserProfile {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  contact_number: string;
+  is_active: boolean;
+  is_staff: boolean;
+  status: string;
+  organization: Organization | null;
+}
 
 interface AuthStoreState {
   access: string | null;
-  profile: ProfilePayload | null;
+  profile: UserProfile | null;
 
   setTokens: (payload: TokenPayload | null) => void;
-  setProfile: (payload: ProfilePayload | null) => void;
+  setProfile: (payload: FetchMeResponse | null) => void;
   setOrg: (org: Organization | null) => void;
   setOrgTrxHash: (hash: string | null) => void;
   clearAuthState: () => void;
@@ -28,8 +40,28 @@ const useAuthStore = create<AuthStoreState>()(
       setTokens: payload =>
         set({ access: payload?.access || null }),
 
-      setProfile: payload =>
-        set({ profile: payload }),
+      setProfile: (payload) => {
+        if (!payload) {
+          set({ profile: null });
+          return;
+        }
+
+        // Map API response to internal profile format
+        // If user has organizations, use the first one (assume they only have one for now)
+        const profile: UserProfile = {
+          id: payload.id,
+          email: payload.email,
+          first_name: payload.first_name,
+          last_name: payload.last_name,
+          contact_number: payload.contact_number,
+          is_active: payload.is_active,
+          is_staff: payload.is_staff,
+          status: payload.status,
+          organization: null, // Will be set when fetched or created
+        };
+
+        set({ profile });
+      },
 
       setOrg: (org) => {
         const profile = get().profile;

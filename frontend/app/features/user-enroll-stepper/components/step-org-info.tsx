@@ -16,7 +16,7 @@ export default function StepOrgInfo({
 
   return (
     <div className="flex flex-col items-start gap-1 my-5">
-      <div className="text-xl font-bold">Step 2: Enter Business Info</div>
+      <div className="text-xl font-bold">Step 3: Enter Business Info</div>
       <div className="text-center text-muted-foreground">
         Please provide your business information.
       </div>
