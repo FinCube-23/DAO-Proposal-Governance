@@ -34,7 +34,7 @@ def verify_token(token: str, options: dict) -> MessageResponse:
             'timestamp': datetime.utcnow().isoformat(),
             'data': {
                 'db_record_id': int(user.id),  # Ensure it's int
-                'current_status': 'AUTHENTICATED',
+                'current_status': 'VALIDATED',
             },
             'user': {
                 'id': int(user.id),  # Ensure it's int
