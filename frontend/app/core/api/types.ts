@@ -38,7 +38,11 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  access_token: string;
+  status: string;
+  tokens: {
+    refresh: string;
+    access: string;
+  };
 }
 
 export interface RegisterPayload {
@@ -54,6 +58,24 @@ export interface RegisterResponse {
   data: {
     message: string;
   };
+}
+
+export interface Organization {
+  id: number;
+  name: string;
+  is_admin: boolean;
+}
+
+export interface FetchMeResponse {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  contact_number: string;
+  is_active: boolean;
+  is_staff: boolean;
+  status: string;
+  organizations: Organization[];
 }
 
 // DAO

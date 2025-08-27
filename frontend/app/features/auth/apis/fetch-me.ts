@@ -1,7 +1,7 @@
-import type { FetchMeResponse } from '@/core/services/org/types';
-import { api } from '@/core/api/client';
-import { AUTH_ENDPOINTS } from '@/core/api/endpoints';
+import { api } from "@/core/api/client";
+import { USER_ENDPOINT } from "@/core/api/endpoints";
+import { FetchMeResponse } from "@/core/api/types";
 
 export function fetchMe() {
-  return api.get<FetchMeResponse>(`${AUTH_ENDPOINTS.BASE}/profile`);
+  return api.get<FetchMeResponse>(`${USER_ENDPOINT.BASE}/profile`);
 }

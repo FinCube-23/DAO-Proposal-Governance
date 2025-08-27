@@ -1,10 +1,10 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import { Button } from '@/shared/components/ui/button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "@/shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -12,11 +12,11 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/shared/components/ui/form';
-import { Input } from '@/shared/components/ui/input';
-import useAuthStore from '@/shared/stores/auth';
-import { fetchMe } from '../apis/fetch-me';
-import { login } from '../apis/login';
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
+import useAuthStore from "@/shared/stores/auth";
+import { fetchMe } from "../apis/fetch-me";
+import { login } from "../apis/login";
 
 const formSchema = z.object({
   email: z.email(),
@@ -25,41 +25,41 @@ const formSchema = z.object({
 
 export default function LoginForm() {
   const router = useRouter();
-  const authStore = useAuthStore(state => state);
+  const authStore = useAuthStore((state) => state);
 
   const fetchMeMutation = useMutation({
-    mutationKey: ['fetchMe'],
+    mutationKey: ["fetchMe"],
     mutationFn: fetchMe,
     onSuccess: (data) => {
       authStore.setProfile(data);
-      if (data?.role === 'mfs') {
-        router.push('/organization');
+      if (data?.is_active) {
+        router.push("/organization");
       }
     },
     onError: (error) => {
-      console.error('Fetch me failed', error);
-      toast.error('Failed to fetch user data');
+      console.error("Fetch me failed", error);
+      toast.error("Failed to fetch user data");
     },
   });
 
   const loginMutation = useMutation({
-    mutationKey: ['login'],
+    mutationKey: ["login"],
     mutationFn: login,
     onSuccess: (data) => {
-      authStore.setTokens({ access: data.access_token });
+      authStore.setTokens({ access: data.tokens.access });
       fetchMeMutation.mutate();
     },
     onError: (error) => {
-      console.error('Login failed', error);
-      toast.error('Login failed. Please check your credentials.');
+      console.error("Login failed", error);
+      toast.error("Login failed. Please check your credentials.");
     },
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
     },
   });
 
@@ -102,10 +102,10 @@ export default function LoginForm() {
           type="submit"
         >
           {loginMutation.isPending
-            ? 'Logging in...'
+            ? "Logging in..."
             : fetchMeMutation.isPending
-              ? 'Fetching user data...'
-              : 'Login'}
+              ? "Fetching user data..."
+              : "Login"}
         </Button>
       </form>
     </Form>
