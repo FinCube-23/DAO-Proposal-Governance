@@ -9,7 +9,7 @@ config({ path: join(__dirname, '../.env') });
 let connectionOptions: DataSourceOptions = {
   type: "postgres",
   host: "localhost",
-  port: parseInt(process.env.DB_PORT || '5432', 10),
+  port: 5433,
   username: process.env.POSTGRES_USER,       // Fixed: was using DB name
   password: process.env.POSTGRES_PASSWORD,   // Fixed: was using username
   database: process.env.POSTGRES_DB,        // Fixed: was using password

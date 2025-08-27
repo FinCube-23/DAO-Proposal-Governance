@@ -16,6 +16,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@custom/validate-auth": ["node_modules/@custom/validate-auth"]
+    }
+  },
+  "include": ["src/**/*.ts"]
 }
