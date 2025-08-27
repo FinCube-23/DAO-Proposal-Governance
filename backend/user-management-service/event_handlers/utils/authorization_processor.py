@@ -64,7 +64,8 @@ def verify_token(token: str, options: dict) -> MessageResponse:
 
 def process_authorization_request(body: bytes) -> MessageResponse:
     try:
-        data: ValidateAuthorizationDto = json.loads(body)
+        payload: ValidateAuthorizationDto = json.loads(body)
+        data = payload.get('data', {})
         return verify_token(data['access_token'], data.get('options', {}))
     except json.JSONDecodeError:
         return build_error_response('Invalid JSON payload')
