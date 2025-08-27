@@ -44,30 +44,26 @@ PROPOSAL {
 
 ### User Management Service
 
-_Note: By default, there will be some roles built into the system._
-_These are:_
-_1. Super Admin: All Powerful. Approves new Organization applications and the Organization Admin_
-_2. Organization Admin: Applies for an Organization. First member of its Organization. Manages rest of the members of its own Organization_
-_3. Organization User: A generic member of the Organization. Works as an interface for more concrete dynamic roles depending on the Organization_
-_4. End User (optional): Some projects may require end users who are not part of any organization and act as consumers in the system_
-
-_There will also be a PERMISSIONS table and a ROLE_PERMISSIONS junction table which will vary based on different project needs_
-
 ```mermaid
 erDiagram
 
 USERS {
     int id pk
-    string name
+    string first_name "django default"
+    string last_name "django default"
     string email uk
     boolean is_verified_email "default = false"
     string password
     string contact_number uk
     boolean is_verified_contact_number "default = false"
     string wallet_address uk "nullable"
-    enum status "['pending', 'approved', 'rejected', 'banned']"
-    int approved_by fk
-    timestamptz created_at
+    enum status "['pending', 'approved', 'rejected', 'banned']; Future work: Will be shifted to ORGANIZATIONS_USERS table"
+    int approved_by_id fk
+    boolean is_staff "django default; def: 'Allows this user to access the admin site.'"
+    boolean is_active "django default; def: 'When false, disables login and permissions for a user (in Django's default backends) without deleting their account, preventing foreign key issues.'"
+    boolean is_superuser "django default; def: 'Treats this user as having all permissions without assigning any permission to it in particular.'"
+    timestamptz last_login "django default; A datetime of the user’s last login."
+    timestamptz date_joined "django default; The date/time when the account was created. (same as created_at)"
     timestamptz updated_at
 }
 
@@ -93,7 +89,7 @@ ORGANIZATIONS_USERS {
 
 ONCHAIN_VERIFICATIONS {
     int id pk
-    string trx_hash "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
+    string trx_hash uk
     int onchain_id "nullable; default = null; Assign by AUDIT TRAIL SERVICE"
     enum onchain_status "['register', 'pending', 'approved', 'cancelled']; nullable; default = 'register'"
     json context
