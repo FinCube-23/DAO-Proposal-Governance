@@ -112,6 +112,7 @@ class ProposalSubscriber:
             print(" [!] Missing on-chain ID in event data")
             return
 
+        print(f"Processed on-chain proposal ID: ${onchain_id}")
         try:
             if event_type == 'ProposalExecuted':
                 print("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
@@ -131,10 +132,9 @@ class ProposalSubscriber:
         trx_hash = event.get('transactionHash')
         onchain_id = data.get('proposalId')
 
-        print(f"Received a proposal transaction update in event pattern - hash: {trx_hash[:10]}...")
+        print(f"Received a proposal transaction update in event pattern - hash: {trx_hash[:10]}...{trx_hash[-10:]}")
         print(f"On-Chain Proposal ID: {onchain_id} | Proposer Wallet: {proposer_wallet}")
         try:
-            # TODO: Get the verification by proposer_wallet not by trx_hash. If there are multiple verifications found, take the latest one.
             OnchainVerificationService.handle_proposal_creation(proposer_wallet, onchain_id)
         except Exception as e:
             print(f"Invalid proposal object received: {str(e)}")

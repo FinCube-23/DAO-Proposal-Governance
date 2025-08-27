@@ -118,9 +118,10 @@ class OnchainVerificationService:
         OnchainVerificationService._validate_status_transition(current_status, status)
 
         # Update verification status
-        updated_verification = OnchainVerificationRepository.update_verification_status_by_onchain_id(onchain_id, status)
-        if not updated_verification:
-            raise Exception("Failed to update verification status in database")
+        try:
+            updated_verification = OnchainVerificationRepository.update_verification_status_by_onchain_id(onchain_id, status)
+        except Exception as e:
+            print(f"Proposal on-chain ID issue found | Error: {str(e)}")
         
         print(f"Successfully updated proposal status into {status} of proposal id {onchain_id} (on-chain)")
 
@@ -153,7 +154,7 @@ class OnchainVerificationService:
         
         org_id = OrganizationRepository.get_organization_id_by_admin_wallet(proposer_wallet)
         if not org_id:
-            print("No business found with wallet address:", proposer_wallet)
+            print("No organization found with wallet address:", proposer_wallet)
             return
 
         try:
@@ -166,9 +167,11 @@ class OnchainVerificationService:
                 updated_verification = OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'pending')
                 print(f" [*] Updated verification status to 'pending' for onchain_id {onchain_id}")
 
+                print(f"Successfully updated proposal_onchain_id to ${onchain_id} for wallet address: ${proposer_wallet}")
+
                 return updated_verification
         except Exception as e:
-            print(f" [!] Failed to create on-chain verification: {str(e)}")
+            print('Proposal on-chain ID or Wallet address issue found | Error:', str(e))
 
     # ===== UTILITY FUNCTIONS =====
     
