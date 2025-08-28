@@ -78,3 +78,51 @@ ONCHAIN_VERIFICATIONS }|--|| ORGANIZATIONS: "proposes"
 USERS ||--|| USERS: "approves"
 
 ```
+
+## API Endpoints
+
+### User Management Service Endpoints
+
+| Method | Endpoint | Authentication | Description |
+|--------|----------|---------------|-------------|
+| **User Authentication & Management** | | | |
+| `POST` | `/api/users/login` | Public | User login with email and password |
+| `POST` | `/api/users/register` | Public | User registration |
+| `POST` | `/api/users/update-password` | Protected | Update user's password |
+| `GET` | `/api/users/profile` | Protected | Get current user's profile details |
+| `GET` | `/api/users/profile/{user_id}/` | Protected | Get specific user's profile by ID |
+| `PATCH` | `/api/users/profile/update` | Protected | Update current user's profile (email, contact number, wallet) |
+| `GET` | `/api/users/profile/status/{email}` | Protected | Get user status by email address |
+| `GET` | `/api/users/user-list` | Protected | Get paginated list of all users with filtering |
+| **Organization Management** | | | |
+| `GET` | `/api/organizations/` | Protected | Get paginated list of all organizations with filtering |
+| `POST` | `/api/organizations/` | Protected | Create new organization (auto-assigns current user as admin) |
+| `GET` | `/api/organizations/{org_id}/` | Protected | Get detailed organization information by ID |
+| `PATCH` | `/api/organizations/{org_id}/` | Protected | Update organization details (email, address only) |
+| `POST` | `/api/organizations/users/` | Protected | Add user to organization |
+| **On-Chain Verification Management** | | | |
+| `POST` | `/api/organizations/onchain-verifications/` | Protected | Create new on-chain verification record |
+| `GET` | `/api/organizations/{org_id}/onchain-verifications/` | Protected | Get paginated on-chain verifications for organization |
+| **API Documentation** | | | |
+| `GET` | `/api/docs/` | Public | Swagger UI documentation |
+| `GET` | `/api/redoc/` | Public | ReDoc API documentation |
+| `GET` | `/admin/` | Admin | Django admin interface |
+
+### Service Discovery Access Format
+
+To access endpoints through service discovery, use the format: `<service_name>/<endpoint_url>`
+
+**Example Service Discovery Endpoints:**
+
+| Method | Service Discovery URL | Direct URL | Description |
+|--------|----------------------|------------|-------------|
+| `POST` | `user-management-service/api/users/login` | `/api/users/login` | User login via service discovery |
+| `GET` | `user-management-service/api/users/profile` | `/api/users/profile` | Get user profile via service discovery |
+| `GET` | `user-management-service/api/organizations/` | `/api/organizations/` | Get organizations via service discovery |
+| `POST` | `user-management-service/api/organizations/` | `/api/organizations/` | Create organization via service discovery |
+| `GET` | `user-management-service/api/docs/` | `/api/docs/` | API documentation via service discovery |
+
+**Service Information:**
+
+- **Service Name**: `user-management-service`
+- **Base URL Pattern**: `user-management-service/*`
