@@ -5,9 +5,9 @@ import type {
   GetOrgResponse,
   UpdateOrgPayload,
   UpdateOrgResponse,
-} from '@/core/services/org/types';
-import { api } from '@/core/api/client';
-import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
+} from "@/core/services/org/types";
+import { api } from "@/core/api/client";
+import { ORGANIZATION_ENDPOINT } from "@/core/api/endpoints";
 
 export const orgApis = {
   getOrg: (orgId: string | number) =>
@@ -18,6 +18,12 @@ export const orgApis = {
     api.put<UpdateOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}/${id}`, form),
   deleteOrg: (orgId: string | number) =>
     api.delete(`${ORGANIZATION_ENDPOINT.BASE}/${orgId}`),
-  getAllOrgs: () =>
-    api.get<GetAllOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}`),
+  getAllOrgs: (queryParams?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    api.get<GetAllOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}`, {
+      queryParams,
+    }),
 };

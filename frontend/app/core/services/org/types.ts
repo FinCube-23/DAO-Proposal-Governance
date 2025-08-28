@@ -79,13 +79,15 @@ export interface GetOrgResponse {
 }
 
 export interface Org {
-  created_at: string;
-  updated_at: string;
   id: number;
   name: string;
+  email: string;
   type: string;
-  location: string;
-  membership_onchain_status: string;
+  address: string;
+  legal_entity_identifier: string;
+  status: string;
+  organization_admin_id: number;
+  organization_admin_name: string;
 }
 
 export interface OrganizationOption {
@@ -97,9 +99,10 @@ export interface OrganizationOption {
 }
 
 export interface GetAllOrgResponse {
-  data: Org[];
-  total: number;
-  page: string;
-  limit: string;
-  totalPages: number;
+  organizations: Org[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
 }

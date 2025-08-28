@@ -31,16 +31,16 @@ export default function StepOrgDropdown({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["organizations"],
-    queryFn: orgApis.getAllOrgs,
+    queryKey: ["organizations", "approved"],
+    queryFn: () => orgApis.getAllOrgs({ status: "approved" }),
   });
 
   const organizations: OrganizationOption[] =
-    orgResponse?.data.map((org: Org) => ({
+    orgResponse?.organizations?.map((org: Org) => ({
       id: org.id,
       name: org.name,
       type: org.type,
-      location: org.location,
+      location: org.address, // Using address as location
     })) || [];
 
   const handleValueChange = (value: string) => {
@@ -117,14 +117,7 @@ export default function StepOrgDropdown({
               ) : (
                 organizations.map((org) => (
                   <SelectItem key={org.id} value={org.id.toString()}>
-                    <div className="flex flex-col">
-                      <span className="font-medium">{org.name}</span>
-                      <span className="text-sm text-muted-foreground">
-                        {org.type && org.location
-                          ? `${org.type} • ${org.location}`
-                          : org.type || org.location || "Organization"}
-                      </span>
-                    </div>
+                    <span className="font-medium">{org.name}</span>
                   </SelectItem>
                 ))
               )}
