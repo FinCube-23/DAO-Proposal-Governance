@@ -20,15 +20,11 @@ import { Input } from '@/shared/components/ui/input';
 import useAuthStore from '@/shared/stores/auth';
 
 const formSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }),
-  email: z.string().email(),
-  context: z.string().min(1, { message: 'Context is required' }),
-  type: z.string().min(1, { message: 'Type is required' }),
-  location: z.string().min(1, { message: 'Location is required' }),
-  native_currency: z
-    .string()
-    .min(1, { message: 'Native currency is required' }),
-  certificate: z.string().min(1, { message: 'Certificate is required' }),
+  name: z.string().min(1, { message: 'Organization name is required' }),
+  email: z.string().email({ message: 'Valid email is required' }),
+  type: z.string().min(1, { message: 'Organization type is required' }),
+  address: z.string().min(1, { message: 'Address is required' }),
+  legal_entity_identifier: z.string().min(1, { message: 'Legal entity identifier is required' }),
 });
 
 interface Props {
@@ -44,11 +40,9 @@ export default function OrgInfoForm({ organization }: Props) {
     defaultValues: {
       name: organization?.name ?? '',
       email: organization?.email ?? '',
-      context: organization?.context ?? '',
       type: organization?.type ?? '',
-      location: organization?.location ?? '',
-      native_currency: organization?.native_currency ?? '',
-      certificate: organization?.certificate ?? '',
+      address: organization?.address ?? '',
+      legal_entity_identifier: organization?.legal_entity_identifier ?? '',
     },
   });
 
@@ -121,14 +115,14 @@ export default function OrgInfoForm({ organization }: Props) {
         <div className="grid grid-cols-2 gap-5">
           <FormField
             control={form.control}
-            name="context"
+            name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Context</FormLabel>
+                <FormLabel>Address</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="http://www.example.com"
-                    disabled={isFieldDisabled('context')}
+                    placeholder="123 Main St, City, Country"
+                    disabled={isFieldDisabled('address')}
                     {...field}
                   />
                 </FormControl>
@@ -154,34 +148,17 @@ export default function OrgInfoForm({ organization }: Props) {
             )}
           />
         </div>
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 gap-5">
           <FormField
             control={form.control}
-            name="location"
+            name="legal_entity_identifier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>Legal Entity Identifier</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="BGD | USA"
-                    disabled={isFieldDisabled('location')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="native_currency"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Native Currency</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="ETH | USDT"
-                    disabled={isFieldDisabled('native_currency')}
+                    placeholder="Enter legal entity identifier"
+                    disabled={isFieldDisabled('legal_entity_identifier')}
                     {...field}
                   />
                 </FormControl>
@@ -190,23 +167,6 @@ export default function OrgInfoForm({ organization }: Props) {
             )}
           />
         </div>
-        <FormField
-          control={form.control}
-          name="certificate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Certificate</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Certificate URL"
-                  disabled={isFieldDisabled('certificate')}
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="flex justify-center pt-4">
           {organization

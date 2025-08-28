@@ -1,12 +1,10 @@
 export interface CreateOrgPayload {
   name: string;
   email: string;
-  context: string;
   type: string;
-  location: string;
+  address: string;
+  legal_entity_identifier: string;
   wallet_address: string;
-  native_currency: string;
-  certificate: string;
 }
 
 export type CreateOrgResponse = CreateOrgPayload & {
@@ -20,12 +18,11 @@ export interface UpdateOrgPayload {
   id: number;
   name?: string;
   email?: string;
-  context?: string;
   type?: string;
-  location?: string;
+  address?: string;
+  legal_entity_identifier?: string;
   wallet_address?: string;
-  native_currency?: string;
-  certificate?: string;
+  organization_admin_id?: number;
   trx_hash?: string;
 }
 
@@ -35,13 +32,12 @@ export interface Organization {
   id: number;
   name: string;
   email: string;
-  context: string;
   type: string;
-  location: string;
+  address: string;
+  legal_entity_identifier: string;
   is_approved: boolean;
   wallet_address: string;
-  native_currency: string;
-  certificate: string;
+  organization_admin_id: number;
   trx_hash: string | null;
   membership_onchain_status: string;
 }
@@ -90,6 +86,14 @@ export interface Org {
   type: string;
   location: string;
   membership_onchain_status: string;
+}
+
+export interface OrganizationOption {
+  id: number;
+  name: string;
+  email?: string;
+  type?: string;
+  location?: string;
 }
 
 export interface GetAllOrgResponse {
