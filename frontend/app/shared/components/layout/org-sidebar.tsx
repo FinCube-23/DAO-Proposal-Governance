@@ -1,6 +1,6 @@
 'use client';
 
-import { GalleryVerticalEnd, Home, Landmark, Layers, LayoutDashboard, ScrollTextIcon } from 'lucide-react';
+import { GalleryVerticalEnd, Layers, LayoutDashboard, ScrollTextIcon } from 'lucide-react';
 import BrandCard from '@/shared/components/layout/brand-card';
 import SidebarNavMenu from '@/shared/components/layout/sidebar-nav-menu';
 import SidebarUser from '@/shared/components/layout/sidebar-user';
@@ -34,7 +34,7 @@ const menus = [
       },
       {
         name: 'Proposals',
-        url: '/organization/dao/proposals',
+        url: '/organization/dao/proposals/on-chain',
         icon: ScrollTextIcon,
       },
     ],
