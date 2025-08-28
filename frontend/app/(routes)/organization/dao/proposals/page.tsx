@@ -1,9 +1,12 @@
-import Proposals from '@/features/proposals';
+'use client';
 
-export default async function ProposalsPage() {
-  return (
-    <div>
-      <Proposals />
-    </div>
-  );
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+
+export default function Proposals() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.push('/organization/dao/proposals/on-chain');
+  }, [router]);
 }

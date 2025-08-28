@@ -8,7 +8,7 @@ import React from 'react';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
 import { Separator } from '../ui/separator';
 
-const blacklistedRoutesTitle = ['dao'];
+const blacklistedRoutesTitle = ['proposals'];
 
 export default function OrgHeader() {
   const pathnames = usePathname().split('/').filter(x => x);
