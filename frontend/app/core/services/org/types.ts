@@ -15,6 +15,12 @@ export type CreateOrgResponse = CreateOrgPayload & {
   membership_onchain_status: string;
 };
 
+export interface UserOrgs {
+  id: number;
+  name: string;
+  is_admin: boolean;
+}
+
 export interface UpdateOrgPayload {
   id: number;
   name?: string;
@@ -52,7 +58,7 @@ export interface FetchMeResponse {
   email: string;
   password: string;
   role: string;
-  organization: Organization | null;
+  organizations: UserOrgs | null;
   exchangeUser: null;
 }
 

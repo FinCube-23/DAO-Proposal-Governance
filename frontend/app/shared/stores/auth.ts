@@ -1,5 +1,5 @@
 import type { FetchMeResponse } from '@/core/api/types';
-import type { Organization } from '@/core/services/org/types';
+import type { Organization, UserOrgs } from '@/core/services/org/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -7,7 +7,6 @@ interface TokenPayload {
   access: string;
 }
 
-// Create a profile type that matches what we need for the UI
 interface UserProfile {
   id: number;
   email: string;
@@ -17,7 +16,7 @@ interface UserProfile {
   is_active: boolean;
   is_staff: boolean;
   status: string;
-  organization: Organization | null;
+  organizations: UserOrgs[] | null;
 }
 
 interface AuthStoreState {
@@ -57,7 +56,7 @@ const useAuthStore = create<AuthStoreState>()(
           is_active: payload.is_active,
           is_staff: payload.is_staff,
           status: payload.status,
-          organization: null, // Will be set when fetched or created
+          organizations: payload.organizations,
         };
 
         set({ profile });
@@ -65,29 +64,27 @@ const useAuthStore = create<AuthStoreState>()(
 
       setOrg: (org) => {
         const profile = get().profile;
-        if (profile) {
+        if (profile && org) {
+          const currentOrgs = profile.organizations || [];
+          const userOrg: UserOrgs = {
+            id: org.id,
+            name: org.name,
+            is_admin: org.organization_admin_id === profile.id,
+          };
+          const updatedOrgs = [...currentOrgs, userOrg];
           set({
             profile: {
               ...profile,
-              organization: org,
+              organizations: updatedOrgs,
             },
           });
         }
       },
 
       setOrgTrxHash: (hash) => {
-        const profile = get().profile;
-        if (profile?.organization) {
-          set({
-            profile: {
-              ...profile,
-              organization: {
-                ...profile.organization,
-                trx_hash: hash,
-              },
-            },
-          });
-        }
+        // Note: UserOrgs doesn't contain trx_hash field, so this is a no-op
+        // If needed, extend UserOrgs interface to include trx_hash
+        const _ = hash; // Prevent unused parameter warning
       },
 
       clearAuthState: () => set({ access: null, profile: null }),

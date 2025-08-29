@@ -72,7 +72,7 @@ export default function StepperProgress({ current }: Props) {
       <div className="col-span-1 relative">
         <div
           className={`rounded-full text-center border-4 w-8 h-8 flex items-center justify-center text-sm font-medium ${
-            authStore.profile?.organization != null || current > 3
+            (authStore.profile?.organizations && authStore.profile.organizations.length > 0) || current > 3
               ? 'border-green-500 bg-green-100 text-black'
               : current === 3
                 ? 'border-blue-500 bg-blue-100 text-black'

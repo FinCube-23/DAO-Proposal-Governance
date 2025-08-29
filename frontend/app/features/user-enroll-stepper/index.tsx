@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import useAuthStore from '@/shared/stores/auth';
 import Prompt from './components/prompt';
 import StepClosure from './components/step-closure';
@@ -13,9 +13,13 @@ export default function UserEnrollStepper() {
   const [selectedFlow, setSelectedFlow] = useState<'create' | 'select' | null>(null);
 
   // Determine if modal should be shown based on auth state
-  console.log(auth.profile);
 
-  const shouldShowModal = auth.profile && !auth.profile.organization;
+  const shouldShowModal = useMemo(() => {
+    if (auth.profile && Array.isArray(auth.profile.organizations)) {
+      return auth.profile && auth.profile.organizations?.length < 2;
+    }
+    return false;
+  }, [auth.profile]);
 
   const incrementStep = () => {
     if (current < 5) { // Increased max steps to accommodate new step

@@ -1,4 +1,5 @@
-import type { IOffchainProposalCard } from "./interfaces";
+import type { UserOrgs } from '../services/org/types';
+import type { IOffchainProposalCard } from './interfaces';
 
 // interfaces
 interface Response {
@@ -75,7 +76,7 @@ export interface FetchMeResponse {
   is_active: boolean;
   is_staff: boolean;
   status: string;
-  organizations: Organization[];
+  organizations: UserOrgs[];
 }
 
 // DAO

@@ -1,6 +1,4 @@
-import StepOrgDropdown from './step-org-dropdown';
 import StepOrgInfo from './step-org-info';
-import StepOrgSelection from './step-org-selection';
 import StepWalletConnect from './step-wallet-connect';
 
 interface Props {
@@ -17,10 +15,10 @@ export default function StepperBody({
   current,
   incrementStep,
   decrementStep,
-  onCreateNewOrg,
-  onSelectExistingOrg,
-  onOrganizationSelected,
-  selectedFlow,
+  onCreateNewOrg: _onCreateNewOrg,
+  onSelectExistingOrg: _onSelectExistingOrg,
+  onOrganizationSelected: _onOrganizationSelected,
+  selectedFlow: _selectedFlow,
 }: Props) {
   return (
     <>
@@ -30,24 +28,9 @@ export default function StepperBody({
         />
       )}
       {current === 2 && (
-        <StepOrgSelection
-          incrementStep={incrementStep}
-          decrementStep={decrementStep}
-          onCreateNew={onCreateNewOrg}
-          onSelectExisting={onSelectExistingOrg}
-        />
-      )}
-      {current === 3 && selectedFlow === 'create' && (
         <StepOrgInfo
           incrementStep={incrementStep}
           decrementStep={decrementStep}
-        />
-      )}
-      {current === 3 && selectedFlow === 'select' && (
-        <StepOrgDropdown
-          incrementStep={incrementStep}
-          decrementStep={decrementStep}
-          onSelectOrganization={onOrganizationSelected}
         />
       )}
     </>

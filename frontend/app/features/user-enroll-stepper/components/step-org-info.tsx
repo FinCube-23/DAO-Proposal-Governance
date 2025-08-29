@@ -22,7 +22,7 @@ export default function StepOrgInfo({
       </div>
       <div className="w-full my-5">
         <OrgInfoForm
-          organization={authStore.profile?.organization ?? null}
+          organization={null}
         />
       </div>
       <div className="flex justify-between w-full">
@@ -31,9 +31,9 @@ export default function StepOrgInfo({
           {' '}
           Prev
         </Button>
-        {authStore.profile?.organization != null && (
+        {authStore.profile?.organizations && authStore.profile.organizations.length > 0 && (
           <Button
-            disabled={authStore.profile?.organization == null}
+            disabled={!authStore.profile?.organizations || authStore.profile.organizations.length === 0}
             onClick={incrementStep}
           >
             Next
