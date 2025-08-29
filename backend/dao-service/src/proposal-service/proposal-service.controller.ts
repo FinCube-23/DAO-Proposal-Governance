@@ -138,12 +138,14 @@ export class ProposalServiceController {
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'filter', required: false, type:String })
   async findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('filter') filter: ProposalStatus,
     @Req() req,
   ): Promise<PaginatedProposalResponse> {
-    return this.proposalService.findAll(req, page, limit);
+    return this.proposalService.findAll(req, page, limit, filter);
   }
 
   @Get('filter/:status')

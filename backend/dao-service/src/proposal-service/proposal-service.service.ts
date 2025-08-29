@@ -231,6 +231,7 @@ export class ProposalServiceService {
     req,
     page: number = 1,
     limit: number = 10,
+    filter?: string,
   ): Promise<PaginatedProposalResponse> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
@@ -253,6 +254,9 @@ export class ProposalServiceService {
         'proposal.proposal_onchain_id',
         'proposal.metadata',
       ])
+      .where(filter ? 'LOWER(proposal.proposal_status) = LOWER(:filter)' : '1=1', {
+        filter: filter
+      })
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -299,13 +303,13 @@ export class ProposalServiceService {
                 model where a response is expected. But for larger infrastructure we will mostly rely on
                 Pub/Sub model where Fire and Forget will be implemented.
                 Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.   
-        */ 
+        */
       ),
     );
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -333,7 +337,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
