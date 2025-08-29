@@ -61,6 +61,7 @@ export default function OrgInfoForm({ organization }: Props) {
     createOrgMutation.mutate({
       ...values,
       wallet_address: account.address?.toLowerCase() || '',
+      organization_admin_id: authStore.profile?.id || 0,
     });
   }
 

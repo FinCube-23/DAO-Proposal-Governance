@@ -16,9 +16,9 @@ export default function StepOrgInfo({
 
   return (
     <div className="flex flex-col items-start gap-1 my-5">
-      <div className="text-xl font-bold">Step 3: Enter Business Info</div>
+      <div className="text-xl font-bold">Step 3: Enter Organization Info</div>
       <div className="text-center text-muted-foreground">
-        Please provide your business information.
+        Please provide your organization information.
       </div>
       <div className="w-full my-5">
         <OrgInfoForm
@@ -37,7 +37,6 @@ export default function StepOrgInfo({
             onClick={incrementStep}
           >
             Next
-            {' '}
             <CircleChevronRight />
           </Button>
         )}

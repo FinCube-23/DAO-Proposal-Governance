@@ -13,7 +13,9 @@ export default function UserEnrollStepper() {
   const [selectedFlow, setSelectedFlow] = useState<'create' | 'select' | null>(null);
 
   // Determine if modal should be shown based on auth state
-  const shouldShowModal = auth.profile && (!auth.profile.organization || auth.profile.organization.trx_hash == null);
+  console.log(auth.profile);
+
+  const shouldShowModal = auth.profile && !auth.profile.organization;
 
   const incrementStep = () => {
     if (current < 5) { // Increased max steps to accommodate new step

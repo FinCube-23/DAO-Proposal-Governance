@@ -5,6 +5,7 @@ export interface CreateOrgPayload {
   address: string;
   legal_entity_identifier: string;
   wallet_address: string;
+  organization_admin_id: number;
 }
 
 export type CreateOrgResponse = CreateOrgPayload & {

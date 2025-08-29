@@ -1,6 +1,6 @@
-import useAuthStore from "@/shared/stores/auth";
+import useAuthStore from '@/shared/stores/auth';
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 interface RequestOptions {
   payload?: unknown;
@@ -8,26 +8,27 @@ interface RequestOptions {
   customHeaders?: Record<string, string>;
 }
 
-function buildQueryString(queryParams?: RequestOptions["queryParams"]): string {
-  if (!queryParams) return "";
+function buildQueryString(queryParams?: RequestOptions['queryParams']): string {
+  if (!queryParams)
+    return '';
 
   const queryString = Object.entries(queryParams)
     .filter(
-      ([, value]) => value !== undefined && value !== null && value !== ""
+      ([, value]) => value !== undefined && value !== null && value !== '',
     )
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
     )
-    .join("&");
+    .join('&');
 
-  return queryString ? `?${queryString}` : "";
+  return queryString ? `?${queryString}` : '';
 }
 
 async function request<T>(
   url: string,
   method: HttpMethod,
-  { payload, queryParams, customHeaders }: RequestOptions = {}
+  { payload, queryParams, customHeaders }: RequestOptions = {},
 ): Promise<T> {
   const accessToken = useAuthStore.getState().access;
 
@@ -35,7 +36,7 @@ async function request<T>(
   const finalUrl = `${url}${buildQueryString(queryParams)}`;
 
   const headers: Record<string, string> = {
-    ...(method === "GET" ? {} : { "Content-Type": "application/json" }),
+    ...(method === 'GET' ? {} : { 'Content-Type': 'application/json' }),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(customHeaders || {}),
   };
@@ -43,16 +44,13 @@ async function request<T>(
   const options: RequestInit = {
     method,
     headers,
-    credentials: "include", // Include cookies and credentials for CORS
+    credentials: 'include', // Include cookies and credentials for CORS
   };
 
-  if (payload && method !== "GET") {
+  if (payload && method !== 'GET') {
     options.body = JSON.stringify(payload);
   }
 
-  console.log("====================================");
-  console.log(finalUrl);
-  console.log("====================================");
   const response = await fetch(finalUrl, options);
 
   if (!response.ok) {
@@ -64,23 +62,23 @@ async function request<T>(
 }
 
 export const api = {
-  get: <T>(url: string, options?: Omit<RequestOptions, "payload">) =>
-    request<T>(url, "GET", options),
+  get: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
+    request<T>(url, 'GET', options),
   post: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, "payload">
-  ) => request<T>(url, "POST", { ...options, payload }),
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'POST', { ...options, payload }),
   put: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, "payload">
-  ) => request<T>(url, "PUT", { ...options, payload }),
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'PUT', { ...options, payload }),
   patch: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, "payload">
-  ) => request<T>(url, "PATCH", { ...options, payload }),
-  delete: <T>(url: string, options?: Omit<RequestOptions, "payload">) =>
-    request<T>(url, "DELETE", options),
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'PATCH', { ...options, payload }),
+  delete: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
+    request<T>(url, 'DELETE', options),
 };
