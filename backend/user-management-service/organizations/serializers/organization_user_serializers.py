@@ -28,12 +28,22 @@ class OrganizationUserCreateSerializer(serializers.ModelSerializer):
     def validate_organization_id(self, value):
         try:
             organization = Organization.objects.get(id=value)
-            if not organization.is_active:
+            
+            # Allow if organization is active (regardless of member count)
+            if organization.is_active:
+                return value
+                
+            # For inactive organizations, only allow if it's the first member
+            member_count = OrganizationUser.objects.filter(organization=organization).count()
+            print(f"Member count for organization {organization.id}: {member_count}")
+            if member_count > 0:
                 raise serializers.ValidationError(
                     "Organization is inactive and cannot accept new members"
                 )
+                
         except Organization.DoesNotExist:
             raise serializers.ValidationError("Organization does not exist")
+        
         return value
 
     def validate(self, data):

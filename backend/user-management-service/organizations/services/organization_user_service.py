@@ -27,9 +27,7 @@ class OrganizationUserService:
         if not organization:
             raise Exception("Organization does not exist")
         
-        # Validate organization is active
-        if not organization.is_active:
-            raise Exception("Organization is inactive and cannot accept new members")
+        
         
         # Create organization user membership
         return OrganizationUserRepository.create_organization_user(user_id, organization_id)
