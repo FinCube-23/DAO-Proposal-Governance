@@ -13,8 +13,13 @@ function buildQueryString(queryParams?: RequestOptions['queryParams']): string {
     return '';
 
   const queryString = Object.entries(queryParams)
-    .filter(([, value]) => value !== undefined && value !== null && value !== '')
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+    .filter(
+      ([, value]) => value !== undefined && value !== null && value !== '',
+    )
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+    )
     .join('&');
 
   return queryString ? `?${queryString}` : '';
@@ -39,6 +44,7 @@ async function request<T>(
   const options: RequestInit = {
     method,
     headers,
+    credentials: 'include', // Include cookies and credentials for CORS
   };
 
   if (payload && method !== 'GET') {
@@ -58,12 +64,21 @@ async function request<T>(
 export const api = {
   get: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
     request<T>(url, 'GET', options),
-  post: <T>(url: string, payload?: unknown, options?: Omit<RequestOptions, 'payload'>) =>
-    request<T>(url, 'POST', { ...options, payload }),
-  put: <T>(url: string, payload?: unknown, options?: Omit<RequestOptions, 'payload'>) =>
-    request<T>(url, 'PUT', { ...options, payload }),
-  patch: <T>(url: string, payload?: unknown, options?: Omit<RequestOptions, 'payload'>) =>
-    request<T>(url, 'PATCH', { ...options, payload }),
+  post: <T>(
+    url: string,
+    payload?: unknown,
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'POST', { ...options, payload }),
+  put: <T>(
+    url: string,
+    payload?: unknown,
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'PUT', { ...options, payload }),
+  patch: <T>(
+    url: string,
+    payload?: unknown,
+    options?: Omit<RequestOptions, 'payload'>,
+  ) => request<T>(url, 'PATCH', { ...options, payload }),
   delete: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
     request<T>(url, 'DELETE', options),
 };

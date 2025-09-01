@@ -1,3 +1,4 @@
+import type { UserOrgs } from '../services/org/types';
 import type { IOffchainProposalCard } from './interfaces';
 
 // interfaces
@@ -38,20 +39,44 @@ export interface LoginPayload {
 }
 
 export interface LoginResponse {
-  access_token: string;
+  status: string;
+  tokens: {
+    refresh: string;
+    access: string;
+  };
 }
 
 export interface RegisterPayload {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
+  contact_number: string;
   password: string;
-  role: string;
+  password_confirm: string;
 }
 
 export interface RegisterResponse {
   data: {
     message: string;
   };
+}
+
+export interface Organization {
+  id: number;
+  name: string;
+  is_admin: boolean;
+}
+
+export interface FetchMeResponse {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  contact_number: string;
+  is_active: boolean;
+  is_staff: boolean;
+  status: string;
+  organizations: UserOrgs[];
 }
 
 // DAO
@@ -107,4 +132,8 @@ export type RegisterMemberResponse = Response;
 
 export type ExecuteProposalResponse = Response;
 
-export interface GetStatusByEmailResponse { id: number; email: string; membership_onchain_status: string }
+export interface GetStatusByEmailResponse {
+  id: number;
+  email: string;
+  membership_onchain_status: string;
+}
