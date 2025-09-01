@@ -46,11 +46,32 @@ export default function OrgInfoForm({ organization }: Props) {
     },
   });
 
+  const addUserToOrgMutation = useMutation({
+    mutationFn: orgApis.addUserToOrg,
+    onSuccess: (_data) => {
+      toast.success(`Organization created and you have been added successfully!`);
+    },
+    onError: (error) => {
+      toast.error(`Organization created but failed to add you as a member: ${error.message}`);
+    },
+  });
+
   const createOrgMutation = useMutation({
     mutationFn: orgApis.createOrg,
     onSuccess: (data) => {
+      // First, set the organization in the auth store
       authStore.setOrg(data);
-      toast.success('Organization created successfully');
+
+      // Then, add the current user to the newly created organization
+      if (authStore.profile?.id) {
+        addUserToOrgMutation.mutate({
+          user_id: authStore.profile.id,
+          organization_id: data.id,
+        });
+      }
+      else {
+        toast.success('Organization created successfully');
+      }
     },
     onError: (error) => {
       toast.error(`Failed to create organization: ${error.message}`);
@@ -182,7 +203,7 @@ export default function OrgInfoForm({ organization }: Props) {
                 </div>
               )
             : (
-                <Button type="submit" isLoading={createOrgMutation.isPending}>
+                <Button type="submit" isLoading={createOrgMutation.isPending || addUserToOrgMutation.isPending}>
                   Submit
                   {' '}
                   <CircleChevronUp />

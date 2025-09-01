@@ -1,13 +1,15 @@
 import type {
+  AddUserToOrgPayload,
+  AddUserToOrgResponse,
   CreateOrgPayload,
   CreateOrgResponse,
   GetAllOrgResponse,
   GetOrgResponse,
   UpdateOrgPayload,
   UpdateOrgResponse,
-} from "@/core/services/org/types";
-import { api } from "@/core/api/client";
-import { ORGANIZATION_ENDPOINT } from "@/core/api/endpoints";
+} from '@/core/services/org/types';
+import { api } from '@/core/api/client';
+import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
 
 export const orgApis = {
   getOrg: (orgId: string | number) =>
@@ -26,4 +28,6 @@ export const orgApis = {
     api.get<GetAllOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}`, {
       queryParams,
     }),
+  addUserToOrg: (payload: AddUserToOrgPayload) =>
+    api.post<AddUserToOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}/users`, payload),
 };

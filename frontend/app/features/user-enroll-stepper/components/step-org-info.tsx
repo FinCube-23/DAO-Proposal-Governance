@@ -28,7 +28,6 @@ export default function StepOrgInfo({
       <div className="flex justify-between w-full">
         <Button variant="secondary" onClick={decrementStep}>
           <CircleChevronLeft />
-          {' '}
           Prev
         </Button>
         {authStore.profile?.organizations && authStore.profile.organizations.length > 0 && (

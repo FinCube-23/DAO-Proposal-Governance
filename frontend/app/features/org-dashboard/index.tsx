@@ -19,7 +19,6 @@ export default function OrganizationDashboard() {
       <div>
         <h1 className="text-2xl font-bold my-1">
           Welcome back,
-          {' '}
           {authStore.profile?.last_name || 'User'}
         </h1>
         <p className="text-muted-foreground">Here's what's happening with your organization today.</p>

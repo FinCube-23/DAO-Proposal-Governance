@@ -113,3 +113,18 @@ export interface GetAllOrgResponse {
     total: number;
   };
 }
+
+export interface AddUserToOrgPayload {
+  user_id: number;
+  organization_id: number;
+}
+
+export interface AddUserToOrgResponse {
+  id: number;
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  organization_id: number;
+  organization_name: string;
+  created_at: string;
+}
