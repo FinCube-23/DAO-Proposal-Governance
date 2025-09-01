@@ -15,7 +15,7 @@ urlpatterns = [
         name="organization-list",
     ),
     path(
-        "<int:org_id>/",
+        "/<int:org_id>",
         ProtectedOrganizationController.as_view(
             {"get": "get_by_id", "patch": "update_organization_info"}
         ),
@@ -23,7 +23,7 @@ urlpatterns = [
     ),
     # Organization users - manual ViewSet action mapping
     path(
-        "users/",
+        "/users",
         ProtectedOrganizationUserController.as_view(
             {"post": "add_user_to_organization"}
         ),
@@ -31,12 +31,12 @@ urlpatterns = [
     ),
     # Onchain verifications - manual ViewSet action mappings
     path(
-        "onchain-verifications/",
+        "/onchain-verifications",
         ProtectedOnchainVerificationController.as_view({"post": "create"}),
         name="onchain-verifications-create",
     ),
     path(
-        "<int:org_id>/onchain-verifications/",
+        "/<int:org_id>/onchain-verifications",
         ProtectedOnchainVerificationController.as_view(
             {"get": "get_onchain_verifications_by_organization"}
         ),
