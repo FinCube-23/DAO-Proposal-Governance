@@ -7,7 +7,7 @@ import {
 import { DAOContract } from './entities/DAO-contract-entity';
 import { RPCProvider } from './entities/RPC-Provider-entity';
 import { ethers } from 'ethers';
-import { validateAuth } from '@fincube/validate-auth';
+import { validateAuth } from '@mskits/validate-auth';
 import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()

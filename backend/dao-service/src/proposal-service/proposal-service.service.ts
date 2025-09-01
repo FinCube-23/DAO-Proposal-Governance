@@ -21,7 +21,7 @@ import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-tra
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
-import { validateAuth } from '@fincube/validate-auth';
+import { validateAuth } from '@mskits/validate-auth';
 
 @Injectable()
 export class ProposalServiceService {
