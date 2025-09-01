@@ -1,5 +1,5 @@
 import type { FetchMeResponse } from '@/core/api/types';
-import type { Organization, UserOrgs } from '@/core/services/org/types';
+import type { UserOrgs } from '@/core/services/org/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -25,7 +25,7 @@ interface AuthStoreState {
 
   setTokens: (payload: TokenPayload | null) => void;
   setProfile: (payload: FetchMeResponse | null) => void;
-  setOrg: (org: Organization | null) => void;
+  setOrg: (org: UserOrgs | null) => void;
   setOrgTrxHash: (hash: string | null) => void;
   clearAuthState: () => void;
 }
@@ -69,7 +69,7 @@ const useAuthStore = create<AuthStoreState>()(
           const userOrg: UserOrgs = {
             id: org.id,
             name: org.name,
-            is_admin: org.organization_admin_id === profile.id,
+            is_admin: org.is_admin,
           };
           const updatedOrgs = [...currentOrgs, userOrg];
           set({

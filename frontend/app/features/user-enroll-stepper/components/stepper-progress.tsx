@@ -1,6 +1,5 @@
 import { ArrowDown } from 'lucide-react';
 import { useAccount } from 'wagmi';
-import useAuthStore from '@/shared/stores/auth';
 
 interface Props {
   current: number;
@@ -8,7 +7,6 @@ interface Props {
 
 export default function StepperProgress({ current }: Props) {
   const { isConnected } = useAccount();
-  const authStore = useAuthStore(state => state);
 
   return (
     <div className="grid grid-cols-17 items-center justify-center gap-2 my-3">
@@ -72,7 +70,7 @@ export default function StepperProgress({ current }: Props) {
       <div className="col-span-1 relative">
         <div
           className={`rounded-full text-center border-4 w-8 h-8 flex items-center justify-center text-sm font-medium ${
-            (authStore.profile?.organizations && authStore.profile.organizations.length > 0) || current > 3
+            current > 3
               ? 'border-green-500 bg-green-100 text-black'
               : current === 3
                 ? 'border-blue-500 bg-blue-100 text-black'

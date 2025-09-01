@@ -54,7 +54,7 @@ export default function StepOrgSelection({
               <div className="flex-1">
                 <h3 className="font-semibold">Create New Organization</h3>
                 <p className="text-sm text-muted-foreground">
-                  Set up a new organization with your business information
+                  Set up a new organization with your information
                 </p>
               </div>
               <div className="flex-shrink-0">

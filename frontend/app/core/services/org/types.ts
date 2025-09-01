@@ -4,16 +4,15 @@ export interface CreateOrgPayload {
   type: string;
   address: string;
   legal_entity_identifier: string;
-  wallet_address: string;
   organization_admin_id: number;
 }
 
-export type CreateOrgResponse = CreateOrgPayload & {
-  id: number;
-  is_approved: boolean;
-  trx_hash: string | null;
-  membership_onchain_status: string;
-};
+export interface CreateOrgResponse {
+  status: string;
+  data: CreateOrgPayload & {
+    id: number;
+  };
+}
 
 export interface UserOrgs {
   id: number;
@@ -42,11 +41,9 @@ export interface Organization {
   type: string;
   address: string;
   legal_entity_identifier: string;
-  is_approved: boolean;
-  wallet_address: string;
+  status: boolean;
   organization_admin_id: number;
-  trx_hash: string | null;
-  membership_onchain_status: string;
+  organization_admin_name: string;
 }
 
 // Auth

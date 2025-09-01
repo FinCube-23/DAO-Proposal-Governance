@@ -1,16 +1,16 @@
-import type { Org, OrganizationOption } from "@/core/services/org/types";
-import { useQuery } from "@tanstack/react-query";
-import { Building, CircleChevronLeft, CircleChevronRight } from "lucide-react";
-import { useState } from "react";
-import { orgApis } from "@/core/services/org";
-import { Button } from "@/shared/components/ui/button";
+import type { Org, OrganizationOption } from '@/core/services/org/types';
+import { useQuery } from '@tanstack/react-query';
+import { Building, CircleChevronLeft, CircleChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { orgApis } from '@/core/services/org';
+import { Button } from '@/shared/components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select";
+} from '@/shared/components/ui/select';
 
 interface Props {
   incrementStep: () => void;
@@ -23,7 +23,7 @@ export default function StepOrgDropdown({
   decrementStep,
   onSelectOrganization,
 }: Props) {
-  const [selectedOrgId, setSelectedOrgId] = useState<string>("");
+  const [selectedOrgId, setSelectedOrgId] = useState<string>('');
 
   // Fetch organizations from API
   const {
@@ -31,12 +31,12 @@ export default function StepOrgDropdown({
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["organizations", "approved"],
-    queryFn: () => orgApis.getAllOrgs({ status: "approved" }),
+    queryKey: ['organizations', 'approved'],
+    queryFn: () => orgApis.getAllOrgs({ status: 'approved' }),
   });
 
-  const organizations: OrganizationOption[] =
-    orgResponse?.organizations?.map((org: Org) => ({
+  const organizations: OrganizationOption[]
+    = orgResponse?.organizations?.map((org: Org) => ({
       id: org.id,
       name: org.name,
       type: org.type,
@@ -45,25 +45,25 @@ export default function StepOrgDropdown({
 
   const handleValueChange = (value: string) => {
     // Prevent selection of disabled items
-    if (!["loading", "error", "no-orgs"].includes(value)) {
+    if (!['loading', 'error', 'no-orgs'].includes(value)) {
       setSelectedOrgId(value);
     }
   };
 
   const handleNext = () => {
     if (
-      selectedOrgId &&
-      !["loading", "error", "no-orgs"].includes(selectedOrgId)
+      selectedOrgId
+      && !['loading', 'error', 'no-orgs'].includes(selectedOrgId)
     ) {
       onSelectOrganization(Number.parseInt(selectedOrgId, 10));
       incrementStep();
     }
   };
 
-  const canProceed =
-    selectedOrgId !== "" &&
-    !isLoading &&
-    !["loading", "error", "no-orgs"].includes(selectedOrgId);
+  const canProceed
+    = selectedOrgId !== ''
+      && !isLoading
+      && !['loading', 'error', 'no-orgs'].includes(selectedOrgId);
 
   return (
     <div className="flex flex-col items-start gap-4 my-5">
@@ -94,65 +94,73 @@ export default function StepOrgDropdown({
               <SelectValue
                 placeholder={
                   isLoading
-                    ? "Loading organizations..."
+                    ? 'Loading organizations...'
                     : error
-                      ? "Error loading organizations"
-                      : "Choose an organization..."
+                      ? 'Error loading organizations'
+                      : 'Choose an organization...'
                 }
               />
             </SelectTrigger>
             <SelectContent>
-              {isLoading ? (
-                <SelectItem value="loading" disabled>
-                  Loading organizations...
-                </SelectItem>
-              ) : error ? (
-                <SelectItem value="error" disabled>
-                  Error loading organizations
-                </SelectItem>
-              ) : organizations.length === 0 ? (
-                <SelectItem value="no-orgs" disabled>
-                  No organizations available
-                </SelectItem>
-              ) : (
-                organizations.map((org) => (
-                  <SelectItem key={org.id} value={org.id.toString()}>
-                    <span className="font-medium">{org.name}</span>
-                  </SelectItem>
-                ))
-              )}
+              {isLoading
+                ? (
+                    <SelectItem value="loading" disabled>
+                      Loading organizations...
+                    </SelectItem>
+                  )
+                : error
+                  ? (
+                      <SelectItem value="error" disabled>
+                        Error loading organizations
+                      </SelectItem>
+                    )
+                  : organizations.length === 0
+                    ? (
+                        <SelectItem value="no-orgs" disabled>
+                          No organizations available
+                        </SelectItem>
+                      )
+                    : (
+                        organizations.map(org => (
+                          <SelectItem key={org.id} value={org.id.toString()}>
+                            <span className="font-medium">{org.name}</span>
+                          </SelectItem>
+                        ))
+                      )}
             </SelectContent>
           </Select>
         </div>
 
-        {selectedOrgId &&
-          !["loading", "error", "no-orgs"].includes(selectedOrgId) && (
-            <div className="mt-4 p-4 border rounded-lg bg-accent/50">
-              <div className="flex items-center gap-2">
-                <Building className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">
-                  Selected Organization:
-                </span>
-              </div>
-              <div className="mt-2">
-                {(() => {
-                  const org = organizations.find(
-                    (o) => o.id.toString() === selectedOrgId
-                  );
-                  return org ? (
-                    <div>
-                      <p className="font-medium">{org.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {org.type && org.location
-                          ? `${org.type} • ${org.location}`
-                          : org.type || org.location || "Organization"}
-                      </p>
-                    </div>
-                  ) : null;
-                })()}
-              </div>
+        {selectedOrgId
+          && !['loading', 'error', 'no-orgs'].includes(selectedOrgId) && (
+          <div className="mt-4 p-4 border rounded-lg bg-accent/50">
+            <div className="flex items-center gap-2">
+              <Building className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium">
+                Selected Organization:
+              </span>
             </div>
-          )}
+            <div className="mt-2">
+              {(() => {
+                const org = organizations.find(
+                  o => o.id.toString() === selectedOrgId,
+                );
+                return org
+                  ? (
+                      <div>
+                        <p className="font-medium">{org.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {org.type && org.location
+                            ? `${org.type.toUpperCase()} • ${org.location}`
+                            : org.type || org.location || 'Organization'}
+                        </p>
+                      </div>
+                    )
+                  : null;
+              })()}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between w-full mt-6">

@@ -22,7 +22,7 @@ export default function UserEnrollStepper() {
   }, [auth.profile]);
 
   const incrementStep = () => {
-    if (current < 5) { // Increased max steps to accommodate new step
+    if (current < 4) { // Keep max steps at 4 (0: prompt, 1: wallet, 2: selection, 3: form/dropdown, 4: closure)
       setCurrent(current + 1);
     }
   };
@@ -48,9 +48,6 @@ export default function UserEnrollStepper() {
   };
 
   const handleOrganizationSelected = (_orgId: number) => {
-    // TODO: Implement logic to set the selected organization
-    // The _orgId will be used to fetch and set the organization
-    // Organization selection is completed, user can proceed to closure
   };
 
   return (

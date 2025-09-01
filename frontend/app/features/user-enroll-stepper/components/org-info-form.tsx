@@ -4,7 +4,6 @@ import { useMutation } from '@tanstack/react-query';
 import { CircleChevronUp } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { useAccount } from 'wagmi';
 import { z } from 'zod';
 import { orgApis } from '@/core/services/org';
 import { Button } from '@/shared/components/ui/button';
@@ -17,11 +16,18 @@ import {
   FormMessage,
 } from '@/shared/components/ui/form';
 import { Input } from '@/shared/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/shared/components/ui/select';
 import useAuthStore from '@/shared/stores/auth';
 
 const formSchema = z.object({
   name: z.string().min(1, { message: 'Organization name is required' }),
-  email: z.string().email({ message: 'Valid email is required' }),
+  email: z.email({ message: 'Valid email is required' }),
   type: z.string().min(1, { message: 'Organization type is required' }),
   address: z.string().min(1, { message: 'Address is required' }),
   legal_entity_identifier: z.string().min(1, { message: 'Legal entity identifier is required' }),
@@ -32,7 +38,6 @@ interface Props {
 }
 
 export default function OrgInfoForm({ organization }: Props) {
-  const account = useAccount();
   const authStore = useAuthStore(state => state);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -49,18 +54,25 @@ export default function OrgInfoForm({ organization }: Props) {
   const addUserToOrgMutation = useMutation({
     mutationFn: orgApis.addUserToOrg,
     onSuccess: (_data) => {
-      toast.success(`Organization created and you have been added successfully!`);
+      toast.success(`Organization created successfully!`);
     },
     onError: (error) => {
-      toast.error(`Organization created but failed to add you as a member: ${error.message}`);
+      toast.error(`Organization created but failed to add you as the admin: ${error.message}`);
     },
   });
 
   const createOrgMutation = useMutation({
     mutationFn: orgApis.createOrg,
-    onSuccess: (data) => {
+    onSuccess: (response) => {
+      // Extract the actual organization data from the response
+      const data = response.data;
+
       // First, set the organization in the auth store
-      authStore.setOrg(data);
+      authStore.setOrg({
+        id: data.id,
+        name: data.name,
+        is_admin: true, // User who creates the organization is automatically an admin
+      });
 
       // Then, add the current user to the newly created organization
       if (authStore.profile?.id) {
@@ -81,7 +93,6 @@ export default function OrgInfoForm({ organization }: Props) {
   function onSubmit(values: z.infer<typeof formSchema>) {
     createOrgMutation.mutate({
       ...values,
-      wallet_address: account.address?.toLowerCase() || '',
       organization_admin_id: authStore.profile?.id || 0,
     });
   }
@@ -159,11 +170,21 @@ export default function OrgInfoForm({ organization }: Props) {
               <FormItem>
                 <FormLabel>Type</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="DAO | Organization"
+                  <Select
                     disabled={isFieldDisabled('type')}
-                    {...field}
-                  />
+                    onValueChange={field.onChange}
+                    value={field.value}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select organization type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="plc">PLC</SelectItem>
+                      <SelectItem value="llc">LLC</SelectItem>
+                      <SelectItem value="inc">INC</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormControl>
                 <FormMessage />
               </FormItem>

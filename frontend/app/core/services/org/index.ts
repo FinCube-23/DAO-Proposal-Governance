@@ -29,5 +29,5 @@ export const orgApis = {
       queryParams,
     }),
   addUserToOrg: (payload: AddUserToOrgPayload) =>
-    api.post<AddUserToOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}/users`, payload),
+    api.post<AddUserToOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}users/`, payload),
 };
