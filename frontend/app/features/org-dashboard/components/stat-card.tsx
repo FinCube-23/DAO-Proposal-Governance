@@ -40,7 +40,14 @@ export default function StatCard({ title, value, icon: Icon, isFromOnChain, vari
             </div>
             <div>
               <h2 className="text-sm font-bold">{title}</h2>
-              <Badge variant="outline">{ isFromOnChain ? 'On-Chain' : 'Off-Chain' }</Badge>
+              <Badge
+                variant="outline"
+                className={isFromOnChain
+                  ? 'border-green-500 text-white'
+                  : 'border-orange-500 text-white'}
+              >
+                {isFromOnChain ? 'On-Chain' : 'Off-Chain'}
+              </Badge>
             </div>
           </div>
           <div className="flex justify-end w-full">
