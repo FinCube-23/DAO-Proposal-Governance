@@ -231,6 +231,7 @@ export class ProposalServiceService {
     req,
     page: number = 1,
     limit: number = 10,
+    filter?: string,
   ): Promise<PaginatedProposalResponse> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
@@ -243,7 +244,7 @@ export class ProposalServiceService {
     // Calculate records to skip: e.g., page 3 with limit 10 = skip 20 records (returns records 21-30)
     const skip = (page - 1) * limit;
 
-    const [proposals, total] = await this.proposalRepository
+    const query = await this.proposalRepository
       .createQueryBuilder('proposal')
       .select([
         'proposal.id',
@@ -253,6 +254,12 @@ export class ProposalServiceService {
         'proposal.proposal_onchain_id',
         'proposal.metadata',
       ])
+
+    if (filter) {
+      query.where('proposal.proposal_status = :filter', { filter: filter.toLowerCase() });
+    }
+
+    const [proposals, total] = await query
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -294,18 +301,18 @@ export class ProposalServiceService {
           throw new Error('AUDIT-TRAIL-SERVICE timeout or unreachable');
         }),
         /* Note:
-                As this project architecture is designed with low number of services 
+                As this project architecture is designed with low number of services
                 we are covering this type of cross service synchronization with Producer-Consumer
                 model where a response is expected. But for larger infrastructure we will mostly rely on
                 Pub/Sub model where Fire and Forget will be implemented.
-                Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.   
-        */ 
+                Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.
+        */
       ),
     );
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -333,7 +340,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
+        messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {

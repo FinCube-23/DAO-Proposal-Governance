@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --port 8080",
+    "dev": "next dev --turbopack --port 5173",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -25,6 +25,7 @@
     "@tsparticles/react": "^3.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "country-codes-list": "^2.0.0",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.536.0",
     "next": "15.4.6",

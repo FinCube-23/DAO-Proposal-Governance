@@ -1,31 +1,34 @@
 export interface CreateOrgPayload {
   name: string;
   email: string;
-  context: string;
   type: string;
-  location: string;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
+  address: string;
+  legal_entity_identifier: string;
+  organization_admin_id: number;
 }
 
-export type CreateOrgResponse = CreateOrgPayload & {
+export interface CreateOrgResponse {
+  status: string;
+  data: CreateOrgPayload & {
+    id: number;
+  };
+}
+
+export interface UserOrgs {
   id: number;
-  is_approved: boolean;
-  trx_hash: string | null;
-  membership_onchain_status: string;
-};
+  name: string;
+  is_admin: boolean;
+}
 
 export interface UpdateOrgPayload {
   id: number;
   name?: string;
   email?: string;
-  context?: string;
   type?: string;
-  location?: string;
+  address?: string;
+  legal_entity_identifier?: string;
   wallet_address?: string;
-  native_currency?: string;
-  certificate?: string;
+  organization_admin_id?: number;
   trx_hash?: string;
 }
 
@@ -35,15 +38,12 @@ export interface Organization {
   id: number;
   name: string;
   email: string;
-  context: string;
   type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  trx_hash: string | null;
-  membership_onchain_status: string;
+  address: string;
+  legal_entity_identifier: string;
+  status: boolean;
+  organization_admin_id: number;
+  organization_admin_name: string;
 }
 
 // Auth
@@ -55,7 +55,7 @@ export interface FetchMeResponse {
   email: string;
   password: string;
   role: string;
-  organization: Organization | null;
+  organizations: UserOrgs | null;
   exchangeUser: null;
 }
 
@@ -83,19 +83,45 @@ export interface GetOrgResponse {
 }
 
 export interface Org {
-  created_at: string;
-  updated_at: string;
   id: number;
   name: string;
+  email: string;
   type: string;
-  location: string;
-  membership_onchain_status: string;
+  address: string;
+  legal_entity_identifier: string;
+  status: string;
+  organization_admin_id: number;
+  organization_admin_name: string;
+}
+
+export interface OrganizationOption {
+  id: number;
+  name: string;
+  email?: string;
+  type?: string;
+  location?: string;
 }
 
 export interface GetAllOrgResponse {
-  data: Org[];
-  total: number;
-  page: string;
-  limit: string;
-  totalPages: number;
+  organizations: Org[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+export interface AddUserToOrgPayload {
+  user_id: number;
+  organization_id: number;
+}
+
+export interface AddUserToOrgResponse {
+  id: number;
+  user_id: number;
+  user_email: string;
+  user_name: string;
+  organization_id: number;
+  organization_name: string;
+  created_at: string;
 }

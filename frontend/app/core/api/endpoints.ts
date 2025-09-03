@@ -1,20 +1,24 @@
-import { env } from '@/core/env';
+import { env } from "@/core/env";
 
-const BASE_URL = env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-const BASE_USER_MANAGEMENT_SERVICE_URL = `${BASE_URL}/user-management-service`;
-const BASE_URL_AUTH = `${BASE_USER_MANAGEMENT_SERVICE_URL}/auth`;
-const BASE_URL_MFS = `${BASE_USER_MANAGEMENT_SERVICE_URL}/mfs-business`;
+const BASE_URL = env.NEXT_PUBLIC_BASE_URL || `http://localhost:3000`;
+const BASE_USER_MANAGEMENT_SERVICE_URL = `${BASE_URL}/user-management-service/api`;
+const BASE_URL_ORGANIZATION = `${BASE_USER_MANAGEMENT_SERVICE_URL}/organizations`;
+const BASE_URL_USER = `${BASE_USER_MANAGEMENT_SERVICE_URL}/users/`;
 const BASE_URL_DAO = `${BASE_URL}/dao-service/dao`;
 const BASE_URL_PROPOSAL = `${BASE_URL}/dao-service/proposal-service`;
 const BASE_URL_PROXY = `${BASE_URL}/web3-proxy-service/web3-dao-proxy`;
 const BASE_URL_AUDIT = `${BASE_URL}/audit-trail-service`;
 
 export const AUTH_ENDPOINTS = {
-  BASE: BASE_URL_AUTH,
+  BASE: BASE_USER_MANAGEMENT_SERVICE_URL,
 };
 
-export const MFS_ENDPOINT = {
-  BASE: BASE_URL_MFS,
+export const USER_ENDPOINT = {
+  BASE: BASE_URL_USER,
+};
+
+export const ORGANIZATION_ENDPOINT = {
+  BASE: BASE_URL_ORGANIZATION,
 };
 
 export const DAO_ENDPOINT = {
