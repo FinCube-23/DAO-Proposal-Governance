@@ -31,7 +31,6 @@ async function request<T>(
   { payload, queryParams, customHeaders }: RequestOptions = {},
 ): Promise<T> {
   const accessToken = useAuthStore.getState().access;
-
   // Append query params if provided
   const finalUrl = `${url}${buildQueryString(queryParams)}`;
 
@@ -44,7 +43,6 @@ async function request<T>(
   const options: RequestInit = {
     method,
     headers,
-    credentials: 'include', // Include cookies and credentials for CORS
   };
 
   if (payload && method !== 'GET') {

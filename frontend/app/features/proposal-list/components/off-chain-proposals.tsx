@@ -7,12 +7,13 @@ interface Props {
 }
 
 export default function OffChainProposals({ filter, search }: Props) {
+  const limit = 10;
+  const page = 1;
   const { data: proposals, isLoading: isProposalLoading } = useQuery({
-    queryKey: ['off-chain-proposals', { filter, search }],
-    queryFn: () => proposalApis.getAllProposals({ filter, search }),
+    queryKey: ['off-chain-proposals', { filter, search, limit, page }],
+    queryFn: () => proposalApis.getAllProposals({ limit, page, filter }),
   });
 
-  console.log(proposals, isProposalLoading);
   return (
     <div>off-chain-proposals</div>
   );
