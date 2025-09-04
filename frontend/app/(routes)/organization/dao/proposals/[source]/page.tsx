@@ -7,7 +7,8 @@ export function generateStaticParams() {
   ];
 }
 
-export default function Page({ params }: { params: { source: 'on-chain' | 'off-chain' } }) {
+export default async function Page(props: { params: Promise<{ source: 'on-chain' | 'off-chain' }> }) {
+  const params = await props.params;
   return (
     <ProposalList source={params.source} />
   );
