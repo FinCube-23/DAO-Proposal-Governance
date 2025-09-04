@@ -255,7 +255,7 @@ export class ProposalServiceService {
         'proposal.metadata',
       ])
 
-    if (filter) {
+    if (filter && filter !== 'all') {
       query.where('proposal.proposal_status = :filter', { filter: filter.toLowerCase() });
     }
 
