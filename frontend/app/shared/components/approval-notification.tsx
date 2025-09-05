@@ -37,7 +37,6 @@ export default function ApprovalNotification() {
           <div className="flex-shrink-0">
             {isApproved
               ? (
-                  // Check mark icon for approved
                   <svg
                     className={`h-5 w-5 ${iconColor}`}
                     viewBox="0 0 20 20"
