@@ -5,6 +5,8 @@ import type {
   CreateOrgResponse,
   GetAllOrgResponse,
   GetOrgResponse,
+  OnchainVerificationPayload,
+  OnchainVerificationResponse,
   UpdateOrgPayload,
   UpdateOrgResponse,
 } from '@/core/services/org/types';
@@ -31,6 +33,11 @@ export const orgApis = {
   addUserToOrg: (payload: AddUserToOrgPayload) =>
     api.post<AddUserToOrgResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/users`,
+      payload,
+    ),
+  submitOnchainVerification: (payload: OnchainVerificationPayload) =>
+    api.post<OnchainVerificationResponse>(
+      `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
       payload,
     ),
 };

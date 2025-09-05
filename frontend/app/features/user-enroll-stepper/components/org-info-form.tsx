@@ -4,8 +4,11 @@ import { useMutation } from '@tanstack/react-query';
 import { CircleChevronUp } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import { useAccount } from 'wagmi';
 import { z } from 'zod';
+
 import { orgApis } from '@/core/services/org';
+import { userApis } from '@/core/services/user';
 import { Button } from '@/shared/components/ui/button';
 import {
   Form,
@@ -39,6 +42,7 @@ interface Props {
 
 export default function OrgInfoForm({ organization }: Props) {
   const authStore = useAuthStore(state => state);
+  const { address } = useAccount();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,10 +55,26 @@ export default function OrgInfoForm({ organization }: Props) {
     },
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: userApis.updateProfile,
+    onSuccess: () => {
+      if (address) {
+        authStore.updateWalletAddress(address);
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to update wallet address:', error.message);
+    },
+  });
+
   const addUserToOrgMutation = useMutation({
     mutationFn: orgApis.addUserToOrg,
     onSuccess: (_data) => {
-      toast.success(`Organization created successfully!`);
+      if (address) {
+        updateProfileMutation.mutate({
+          wallet_address: address,
+        });
+      }
     },
     onError: (error) => {
       toast.error(`Organization created but failed to add you as the admin: ${error.message}`);
@@ -64,17 +84,14 @@ export default function OrgInfoForm({ organization }: Props) {
   const createOrgMutation = useMutation({
     mutationFn: orgApis.createOrg,
     onSuccess: (response) => {
-      // Extract the actual organization data from the response
       const data = response.data;
 
-      // First, set the organization in the auth store
       authStore.setOrg({
         id: data.id,
         name: data.name,
-        is_admin: true, // User who creates the organization is automatically an admin
+        is_admin: true,
       });
 
-      // Then, add the current user to the newly created organization
       if (authStore.profile?.id) {
         addUserToOrgMutation.mutate({
           user_id: authStore.profile.id,
