@@ -1,4 +1,4 @@
-import { env } from "@/core/env";
+import { env } from '@/core/env';
 
 const BASE_URL = env.NEXT_PUBLIC_BASE_URL || `http://localhost:3000`;
 const BASE_USER_MANAGEMENT_SERVICE_URL = `${BASE_URL}/user-management-service/api`;

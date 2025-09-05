@@ -91,7 +91,10 @@ export default function OrganizationSelector({ onSelect, value, disabled }: Prop
                           <div className="flex flex-col">
                             <span className="font-medium">{org.name}</span>
                             <span className="text-xs text-muted-foreground">
-                              {org.type} • {org.address}
+                              {org.type}
+                              {' '}
+                              •
+                              {org.address}
                             </span>
                           </div>
                         </SelectItem>

@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import type { GetStatusByEmailResponse } from "@/core/api/types";
-import { useMutation } from "@tanstack/react-query";
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useDisconnect } from "wagmi";
-import { api } from "@/core/api/client";
-import { ORGANIZATION_ENDPOINT } from "@/core/api/endpoints";
+import type { GetStatusByEmailResponse } from '@/core/api/types';
+import { useMutation } from '@tanstack/react-query';
+import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useDisconnect } from 'wagmi';
+import { api } from '@/core/api/client';
+import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "@/shared/components/ui/avatar";
-import { Button } from "@/shared/components/ui/button";
+} from '@/shared/components/ui/avatar';
+import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
-} from "@/shared/components/ui/dialog";
+} from '@/shared/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +26,14 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shared/components/ui/dropdown-menu";
+} from '@/shared/components/ui/dropdown-menu';
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/shared/components/ui/sidebar";
-import useAuthStore from "@/shared/stores/auth";
+} from '@/shared/components/ui/sidebar';
+import useAuthStore from '@/shared/stores/auth';
 
 interface Organization {
   name: string;
@@ -58,7 +58,7 @@ interface Props {
 
 function getStatusByEmail(payload: string) {
   return api.get<GetStatusByEmailResponse>(
-    `${ORGANIZATION_ENDPOINT.BASE}/status-by-email?email=${payload}`
+    `${ORGANIZATION_ENDPOINT.BASE}/status-by-email?email=${payload}`,
   );
 }
 
@@ -74,7 +74,7 @@ export default function SidebarUser({
   const { disconnect } = useDisconnect();
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  const authStore = useAuthStore((state) => state);
+  const authStore = useAuthStore(state => state);
 
   const getStatusMutation = useMutation({
     mutationFn: getStatusByEmail,
@@ -82,8 +82,8 @@ export default function SidebarUser({
       setStatus(data.membership_onchain_status);
     },
     onError: (error) => {
-      console.error("Failed to fetch membership status", error);
-      setStatus("Unknown");
+      console.error('Failed to fetch membership status', error);
+      setStatus('Unknown');
     },
   });
 
@@ -117,7 +117,7 @@ export default function SidebarUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             align="end"
             sideOffset={4}
           >
@@ -171,10 +171,10 @@ export default function SidebarUser({
                             {new Date(created_at).toLocaleDateString(
                               undefined,
                               {
-                                month: "long",
-                                day: "numeric",
-                                year: "numeric",
-                              }
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric',
+                              },
                             )}
                           </p>
                         </div>
@@ -231,10 +231,10 @@ export default function SidebarUser({
                             <p className="text-blue-400 break-words font-mono text-sm">
                               {organization?.wallet_address
                                 ? `${organization.wallet_address.slice(
-                                    0,
-                                    6
-                                  )}...${organization.wallet_address.slice(-6)}`
-                                : ""}
+                                  0,
+                                  6,
+                                )}...${organization.wallet_address.slice(-6)}`
+                                : ''}
                             </p>
                           </div>
                           <div>
@@ -255,13 +255,13 @@ export default function SidebarUser({
                             <span
                               className={`px-2 py-1 rounded ${
                                 organization?.is_approved
-                                  ? "bg-green-600"
-                                  : "bg-yellow-600"
+                                  ? 'bg-green-600'
+                                  : 'bg-yellow-600'
                               } text-xs`}
                             >
                               {organization?.is_approved
-                                ? "Approved"
-                                : "Pending"}
+                                ? 'Approved'
+                                : 'Pending'}
                             </span>
                           </div>
                           <div>
@@ -282,8 +282,8 @@ export default function SidebarUser({
                             rel="noopener noreferrer"
                             className="text-blue-400 hover:text-blue-300 underline break-words"
                           >
-                            {organization?.certificate ||
-                              "No certificate available"}
+                            {organization?.certificate
+                              || 'No certificate available'}
                           </a>
                         </div>
                       </div>

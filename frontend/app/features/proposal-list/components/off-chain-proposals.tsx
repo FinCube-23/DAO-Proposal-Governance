@@ -18,7 +18,7 @@ export default function OffChainProposals({ filter, search }: Props) {
   return (
     <div className="flex flex-col gap-4">
       {proposals?.data.map(proposal => (
-        <ProposalCard key={proposal.id} id={proposal.id} description={proposal.metadata} status={proposal.proposal_status} />
+        <ProposalCard key={proposal.id} id={proposal.id} description={proposal.metadata} status={proposal.proposal_status} address={proposal.proposer_address} />
       ))}
     </div>
   );

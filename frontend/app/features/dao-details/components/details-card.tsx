@@ -1,7 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
-import { BadgeDollarSign, Calendar, CheckCircle, Clock, ClockAlert, Code, Copy, ExternalLink, Link, Shield } from 'lucide-react';
+import { BadgeDollarSign, CheckCircle, Code, Copy, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
-import { sepolia } from 'viem/chains';
 import { env } from '@/core/env';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import InfoGridItem from './info-grid-item';
