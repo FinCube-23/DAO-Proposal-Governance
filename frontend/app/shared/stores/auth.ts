@@ -16,7 +16,7 @@ interface UserProfile {
   is_active: boolean;
   is_staff: boolean;
   status: string;
-  organizations: UserOrgs[] | null;
+  organizations: UserOrgs[];
 }
 
 interface AuthStoreState {
@@ -24,7 +24,7 @@ interface AuthStoreState {
   profile: UserProfile | null;
 
   setTokens: (payload: TokenPayload | null) => void;
-  setProfile: (payload: FetchMeResponse | null) => void;
+  setProfile: (payload: UserProfile | null) => void;
   setOrg: (org: UserOrgs | null) => void;
   setOrgTrxHash: (hash: string | null) => void;
   clearAuthState: () => void;
@@ -70,6 +70,7 @@ const useAuthStore = create<AuthStoreState>()(
             id: org.id,
             name: org.name,
             is_admin: org.is_admin,
+            status: org.status,
           };
           const updatedOrgs = [...currentOrgs, userOrg];
           set({

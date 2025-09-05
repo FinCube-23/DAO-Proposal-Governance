@@ -18,6 +18,7 @@ export interface UserOrgs {
   id: number;
   name: string;
   is_admin: boolean;
+  status: string;
 }
 
 export interface UpdateOrgPayload {
@@ -46,40 +47,26 @@ export interface Organization {
   organization_admin_name: string;
 }
 
-// Auth
-export interface FetchMeResponse {
-  created_at: string;
-  updated_at: string;
-  id: number;
-  name: string;
-  email: string;
-  password: string;
-  role: string;
-  organizations: UserOrgs | null;
-  exchangeUser: null;
-}
-
 export interface GetOrgResponse {
   id: number;
-  name: string;
   email: string;
-  context: string;
+  name: string;
   type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  trx_hash: string;
-  proposal_onchain_id: number;
-  membership_onchain_status: string;
+  is_active: boolean;
+  legal_entity_identifier: string;
+  onchain_verifications: [];
+  organization_admin: {
+    id: number;
+    full_name: string;
+    email: string;
+    phone_number: string;
+    status: string;
+    wallet_address: string;
+  };
+  status: string;
+  address: string;
   created_at: string;
   updated_at: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-  };
 }
 
 export interface Org {

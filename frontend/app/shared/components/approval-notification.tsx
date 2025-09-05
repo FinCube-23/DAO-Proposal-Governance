@@ -2,33 +2,44 @@
 
 import { X } from 'lucide-react';
 import { useState } from 'react';
+
+import { useUserOrg } from '@/features/dao-details/hooks/use-user-org';
 import { Button } from '@/shared/components/ui/button';
 import useAuthStore from '@/shared/stores/auth';
 
 export default function ApprovalNotification() {
   const [isVisible, setIsVisible] = useState(true);
   const profile = useAuthStore(state => state.profile);
+  const { data: orgData, isLoading, error } = useUserOrg();
 
-  // Don't show if user status is not pending/approved or notification is dismissed
-  if (!profile || !['pending', 'approved'].includes(profile.status) || !isVisible) {
+  // Don't show if organization data is loading, has error, or notification is dismissed
+  if (
+    isLoading
+    || error
+    || !orgData
+    || !profile
+    || !isVisible
+  ) {
     return null;
   }
 
-  const isApproved = profile.status === 'approved';
+  // Use organization's approval status instead of profile status
+  const isApproved = orgData.status === 'approved';
 
-  // Different styling based on status
+  // Different styling based on organization status
   const containerClasses = isApproved
-    ? 'bg-green-100 border-l-4 border-green-500 text-green-700 p-2 sticky top-16 z-40'
-    : 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 sticky top-16 z-40';
+    ? 'bg-green-100 border-l-4 border-green-500 text-green-700 p-2 sticky top-20 z-40'
+    : 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-2 sticky top-20 z-40';
 
   const iconColor = isApproved ? 'text-green-500' : 'text-yellow-500';
   const buttonClasses = isApproved
     ? 'text-green-700 hover:text-green-900 hover:bg-green-200'
     : 'text-yellow-700 hover:text-yellow-900 hover:bg-yellow-200';
 
+  // Update messages to reflect organization status
   const message = isApproved
-    ? 'Your account has been approved! You may now apply for membership.'
-    : 'Your account is waiting for approval. You may apply for membership once your account has been reviewed.';
+    ? `Your organization "${orgData.name}" has been approved! You can now participate in governance activities.`
+    : `Your organization "${orgData.name}" is pending approval. You will be able to participate in governance once approved.`;
 
   return (
     <div className={containerClasses}>
@@ -50,7 +61,7 @@ export default function ApprovalNotification() {
                   </svg>
                 )
               : (
-                  // Warning icon for pending
+                // Warning icon for pending
                   <svg
                     className={`h-5 w-5 ${iconColor}`}
                     viewBox="0 0 20 20"
@@ -65,9 +76,7 @@ export default function ApprovalNotification() {
                 )}
           </div>
           <div className="ml-3">
-            <p className="text-sm font-medium">
-              {message}
-            </p>
+            <p className="text-sm font-medium">{message}</p>
           </div>
         </div>
         <div className="flex-shrink-0">
