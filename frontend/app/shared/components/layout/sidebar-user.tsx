@@ -3,6 +3,7 @@
 import type { GetStatusByEmailResponse } from '@/core/api/types';
 import { useMutation } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDisconnect } from 'wagmi';
 import { api } from '@/core/api/client';
@@ -75,6 +76,7 @@ export default function SidebarUser({
   const [dialogueOpen, setDialogueOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const authStore = useAuthStore(state => state);
+  const router = useRouter();
 
   const getStatusMutation = useMutation({
     mutationFn: getStatusByEmail,
@@ -295,6 +297,7 @@ export default function SidebarUser({
                       onClick={() => {
                         disconnect();
                         authStore.clearAuthState();
+                        router.push('/');
                       }}
                     >
                       <LogOut />
@@ -319,6 +322,7 @@ export default function SidebarUser({
               onClick={() => {
                 disconnect();
                 authStore.clearAuthState();
+                router.push('/');
               }}
             >
               <LogOut />

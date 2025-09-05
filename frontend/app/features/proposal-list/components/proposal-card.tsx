@@ -65,7 +65,7 @@ export default function ProposalCard({ id, description, status, address, href }:
 
         <div className="text-muted-foreground text-sm flex items-center gap-2">
           Published by
-          <div className="font-mono text-emerald-400 hover:underline" onClick={handlePublisherClick}>
+          <div className="font-mono text-emerald-400 hover:underline cursor-pointer" onClick={handlePublisherClick}>
             {shortenAddress(address)}
           </div>
         </div>

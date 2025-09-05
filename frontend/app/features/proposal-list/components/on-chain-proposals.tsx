@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
+import CustomPagination from '@/shared/components/custom-pagination';
 import { getOnChainStatus } from '../utils';
 import ProposalCard from './proposal-card';
 
@@ -88,6 +89,15 @@ export default function OnChainProposals() {
       {loading && <div>Loading...</div>}
 
       {!loading && proposals.length === 0 && <div>No proposals found.</div>}
+
+      <CustomPagination
+        total={totalPages}
+        page={currentPage}
+        limit={5}
+        onPageChange={(newPage) => {
+          setCurrentPage(newPage);
+        }}
+      />
     </div>
   );
 }
