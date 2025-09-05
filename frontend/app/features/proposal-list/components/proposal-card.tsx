@@ -1,12 +1,16 @@
 import { AlertCircle, CheckCircle, Clock, XCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useMemo } from 'react';
+import { env } from '@/core/env';
 import { Card, CardContent } from '@/shared/components/ui/card';
+import { cn, shortenAddress } from '@/shared/utils';
 
 interface Props {
   id: number;
   description: string;
   status: string;
   address: string;
+  href?: string;
 }
 
 const statusConfig = {
@@ -16,15 +20,28 @@ const statusConfig = {
   pending: { icon: AlertCircle, color: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-500/20' },
 };
 
-export default function ProposalCard({ id, description, status, address }: Props) {
+export default function ProposalCard({ id, description, status, address, href }: Props) {
+  const router = useRouter();
   const config = useMemo(() => {
     if (Object.hasOwn(statusConfig, status)) {
       return statusConfig[status as keyof typeof statusConfig];
     }
     return statusConfig.pending;
   }, [status]);
+
+  function onClick() {
+    if (href) {
+      return router.push(href);
+    }
+  }
+
+  function handlePublisherClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    window.open(`${env.NEXT_PUBLIC_ADDRESS_EXPLORER}/${address}`, '_blank', 'noopener,noreferrer');
+  }
+
   return (
-    <Card>
+    <Card onClick={href ? onClick : undefined} className={cn(href && 'cursor-pointer  transition-all hpver:border hover:border-emerald-400 duration-300')}>
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -46,10 +63,11 @@ export default function ProposalCard({ id, description, status, address }: Props
 
         <p>{description}</p>
 
-        <div className="text-muted-foreground text-sm">
+        <div className="text-muted-foreground text-sm flex items-center gap-2">
           Published by
-          {' '}
-          <span className="font-mono text-emerald-400 hover:underline">{address}</span>
+          <div className="font-mono text-emerald-400 hover:underline" onClick={handlePublisherClick}>
+            {shortenAddress(address)}
+          </div>
         </div>
       </CardContent>
     </Card>

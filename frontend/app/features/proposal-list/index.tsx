@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import OffChainProposals from './components/off-chain-proposals';
 import OnChainProposals from './components/on-chain-proposals';
+import OngoingProposals from './components/on-going-proposals';
 import { filterOptions } from './utils';
 
 interface Props {
@@ -48,9 +49,9 @@ export default function ProposalList({ source }: Props) {
           </SelectContent>
         </Select>
       </div>
-      {source === 'on-chain'
-        ? <OnChainProposals filter={statusFilter} search={search} />
-        : <OffChainProposals filter={statusFilter} search={search} />}
+      {source === 'off-chain'
+        ? <OffChainProposals filter={statusFilter} search={search} />
+        : statusFilter === 'all' ? <OnChainProposals /> : <OngoingProposals />}
     </div>
   );
 }
