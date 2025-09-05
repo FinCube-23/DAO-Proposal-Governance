@@ -7,9 +7,9 @@ import type {
   GetOrgResponse,
   UpdateOrgPayload,
   UpdateOrgResponse,
-} from "@/core/services/org/types";
-import { api } from "@/core/api/client";
-import { ORGANIZATION_ENDPOINT } from "@/core/api/endpoints";
+} from '@/core/services/org/types';
+import { api } from '@/core/api/client';
+import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
 
 export const orgApis = {
   getOrg: (orgId: string | number) =>
@@ -31,6 +31,6 @@ export const orgApis = {
   addUserToOrg: (payload: AddUserToOrgPayload) =>
     api.post<AddUserToOrgResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/users`,
-      payload
+      payload,
     ),
 };

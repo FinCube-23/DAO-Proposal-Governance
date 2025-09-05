@@ -30,7 +30,7 @@ export default function StepperBody({
           incrementStep={incrementStep}
         />
       )}
-      
+
       {/* Step 2: Choose between creating new org or joining existing */}
       {current === 2 && (
         <StepOrgSelection
@@ -40,7 +40,7 @@ export default function StepperBody({
           onSelectExisting={onSelectExistingOrg}
         />
       )}
-      
+
       {/* Step 3: Show form if creating, dropdown if joining */}
       {current === 3 && selectedFlow === 'create' && (
         <StepOrgInfo
@@ -48,7 +48,7 @@ export default function StepperBody({
           decrementStep={decrementStep}
         />
       )}
-      
+
       {current === 3 && selectedFlow === 'select' && (
         <StepOrgDropdown
           incrementStep={incrementStep}
