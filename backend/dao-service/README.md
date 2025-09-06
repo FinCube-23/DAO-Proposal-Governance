@@ -71,3 +71,48 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](LICENSE).
+
+### **Database Migrations**
+
+The Audit Trail Service uses TypeORM for database management. Make sure the server is running in port 5434 (designated port for Audit Trail database server) The following commands are available for managing database migrations:
+
+#### **Generate Migration**
+
+To generate a new migration based on entity changes:
+
+```bash
+npm run typeorm:generate ./<path-to-migration>
+```
+The migration will be created in the path, make sure that it is created in db/migrations folder for proper execution. 
+
+#### **Run Migrations**
+
+To apply pending migrations to the database:
+
+```bash
+npm run typeorm:migrate
+```
+
+#### **Revert Migration**
+
+To revert the last applied migration:
+
+```bash
+npm run typeorm:revert
+```
+
+#### **Drop Database Schema**
+
+To drop the entire database schema (⚠️ **Use with caution in production**):
+
+```bash
+npm run typeorm:drop
+```
+
+#### **Migration Best Practices**
+
+- Always generate migrations when making changes to entity files
+- Review generated migration files before applying them
+- Test migrations in development environment first
+- Create backup of production database before running migrations
+- Use descriptive names for migrations (e.g., `AddAuditTimestamps`, `CreateTransactionTable`)
