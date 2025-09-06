@@ -74,7 +74,7 @@ Nest is [MIT licensed](LICENSE).
 
 ### **Database Migrations**
 
-The Audit Trail Service uses TypeORM for database management. Make sure the server is running in port 5434 (designated port for Audit Trail database server) The following commands are available for managing database migrations:
+The DAO Service uses TypeORM for database management. Make sure the server is running in port 5434 (designated port for DAO database server) The following commands are available for managing database migrations:
 
 #### **Generate Migration**
 

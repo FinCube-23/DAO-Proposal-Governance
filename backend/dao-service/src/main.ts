@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservices';
-import { WinstonLogger } from './shared/common/logger/winston-logger'
+import { WinstonLogger } from './shared/common/logger/winston-logger';
 
 
 async function bootstrap() {
