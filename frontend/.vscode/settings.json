@@ -47,5 +47,14 @@
     "scss",
     "pcss",
     "postcss"
+  ],
+  "cSpell.words": [
+    "novotes",
+    "Offchain",
+    "rainbowkit",
+    "viem",
+    "VITE",
+    "wagmi",
+    "yesvotes"
   ]
 }

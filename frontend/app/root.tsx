@@ -1,5 +1,6 @@
 import type { Route } from './+types/root';
-
+import { darkTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   isRouteErrorResponse,
   Links,
@@ -8,6 +9,10 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
+import { WagmiProvider } from 'wagmi';
+
+import { config } from '@/core/config';
+import Header from '@/shared/components/layout/header';
 import './app.css';
 
 export const links: Route.LinksFunction = () => [
@@ -23,9 +28,11 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+const queryClient = new QueryClient();
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark bg-background">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -33,7 +40,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <WagmiProvider config={config}>
+          <QueryClientProvider client={queryClient}>
+            <RainbowKitProvider
+              theme={darkTheme({
+                accentColor: '#7b3fe4',
+                accentColorForeground: 'white',
+                borderRadius: 'large',
+                fontStack: 'rounded',
+                overlayBlur: 'large',
+              })}
+            >
+              <Header />
+              {children}
+            </RainbowKitProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
