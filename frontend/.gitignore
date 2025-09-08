@@ -8,3 +8,6 @@
 # Old Next.js build directory
 .next/
 out/
+
+.env*
+!.env.example
