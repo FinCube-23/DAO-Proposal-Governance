@@ -1,4 +1,4 @@
-##  Development Setup — User Management Service.
+## Development Setup — User Management Service
 
 Before starting the service in development mode, be sure to initialize your database and create an administrative user:
 
@@ -10,11 +10,11 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
-## User Management Activity Diagram.
+## User Management Activity Diagram
+
 ![User Management Activity Diagram](Activity_diagram.png)
 
-
-## User Management Service ER Diagram.
+## User Management Service ER Diagram
 
 ```mermaid
 erDiagram
@@ -126,3 +126,67 @@ To access endpoints through service discovery, use the format: `<service_name>/<
 
 - **Service Name**: `user-management-service`
 - **Base URL Pattern**: `user-management-service/*`
+
+## Role-Based Access Control (RBAC) Model
+
+This project implements a **Role-Based Access Control (RBAC) model** using [OpenFGA](https://openfga.dev/). The model defines roles and their associated permissions at the **organization level**, ensuring fine-grained access control for different types of users.
+
+### Authorization Model
+
+```fga
+model
+  schema 1.1
+
+type user
+type organization
+  relations
+    define organization_admin: [user]
+    define organization_user: [user]
+    define can_approve_new_user: organization_admin
+    define can_create_proposal: organization_admin
+    define can_view_proposal: organization_admin or organization_user
+    define can_execute_proposal: organization_admin
+    define can_cancel_proposal: organization_admin
+    define can_vote: organization_admin or organization_user
+```
+
+### Explanation
+
+- **organization\_admin**: Has full administrative rights within the organization. Can manage users, proposals, and execute or cancel actions.
+- **organization\_user**: A standard member of the organization. Can view and vote on proposals.
+- **Permissions** are defined as relations:
+
+  - `can_approve_new_user` → Restricted to admins.
+  - `can_create_proposal` → Restricted to admins.
+  - `can_view_proposal` → Granted to both admins and users.
+  - `can_execute_proposal` → Restricted to admins.
+  - `can_cancel_proposal` → Restricted to admins.
+  - `can_vote` → Granted to both admins and users.
+
+### Visual Model
+
+The following diagrams illustrate the RBAC model:
+
+**Organization User Permissions**
+  ![Organization User Diagram](../UMS_RBAC_OrgUser_Permissions.png)
+
+**Organization Admin Permissions**
+  ![Organization Admin Diagram](../UMS_RBAC_OrgAdmin_Permissions.png)
+
+These diagrams provide a visual overview of which roles can perform which actions within an organization.
+
+### Visualizing in OpenFGA Playground
+
+You can also **interactively visualize this RBAC model** using the [OpenFGA Playground](https://play.fga.dev/):
+
+1. Copy the `fga` model code above.
+2. Open the Playground and paste the model into the editor.
+3. Use the **Graph View** to see relationships between roles and permissions.
+4. Add example users, organizations, and role assignments to test queries like:
+
+   - *Can user\:alice view\_proposal in org:1?*
+   - *Can user\:bob execute\_proposal in org:2?*
+
+This makes it easy to experiment with the access control logic and verify expected outcomes before applying changes to production.
+
+---
