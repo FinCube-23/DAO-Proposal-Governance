@@ -132,15 +132,12 @@ body {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-foreground;
+    @apply bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 text-foreground;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+html,
+body,
+#root {
+  background-color: oklch(0.13 0.028 261.692) !important;
 }
