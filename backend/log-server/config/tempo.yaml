@@ -32,6 +32,11 @@ metrics_generator:
   processor:
     service_graphs:
       wait: 10s
+    span_metrics:
+      enable_target_info: true
+    local_blocks:       
+      filter_server_spans: false
+      flush_to_storage: true
   registry:
     external_labels:
       source: tempo
@@ -40,6 +45,7 @@ metrics_generator:
     remote_write:
       - url: http://prometheus:9090/api/v1/write
         send_exemplars: true
+  
 
 storage:
   trace:
@@ -56,3 +62,4 @@ overrides:
   metrics_generator_processors:
     - service-graphs
     - span-metrics
+    - local-blocks 

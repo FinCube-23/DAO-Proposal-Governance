@@ -4,6 +4,8 @@ import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
 import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservices';
+import { WinstonLogger } from './shared/common/logger/winston-logger';
+
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -21,6 +23,8 @@ async function bootstrap() {
     },
   });
 
+  const winstonLogger = app.get(WinstonLogger);
+  app.useLogger(winstonLogger);
   const config = new DocumentBuilder()
     .setTitle('DAO service API')
     .setDescription(
