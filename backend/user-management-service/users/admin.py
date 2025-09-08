@@ -1,3 +1,112 @@
+# users/admin.py
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from .models import User
 
-# Register your models here.
+@admin.register(User)
+class UserAdmin(BaseUserAdmin):
+    list_display = [
+        'email',
+        'first_name', 
+        'last_name',
+        'status',
+        'is_active',
+        'is_staff',
+        'is_verified_email',
+        'date_joined'
+    ]
+    
+    list_filter = [
+        'status',
+        'is_active',
+        'is_staff',
+        'is_superuser',
+        'is_verified_email',
+        'is_verified_contact_number',
+        'date_joined'
+    ]
+    
+    search_fields = [
+        'email',
+        'first_name',
+        'last_name',
+        'contact_number'
+    ]
+    
+    ordering = ['-date_joined']
+    
+    # Customize the fieldsets for the user detail page
+    fieldsets = (
+        (None, {
+            'fields': ('email', 'password')
+        }),
+        ('Personal info', {
+            'fields': (
+                'first_name', 
+                'last_name', 
+                'contact_number',
+                'wallet_address'
+            )
+        }),
+        ('Permissions', {
+            'fields': (
+                'is_active',
+                'is_staff', 
+                'is_superuser'
+            )
+        }),
+        ('Verification Status', {
+            'fields': (
+                'is_verified_email',
+                'is_verified_contact_number'
+            )
+        }),
+        ('User Status', {
+            'fields': ('status', 'approved_by')
+        }),
+        ('Important dates', {
+            'fields': ('last_login', 'date_joined')
+        }),
+    )
+    
+    # Fields to show when creating a new user
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+                'email',
+                'first_name',
+                'last_name', 
+                'contact_number',
+                'password1',
+                'password2'
+            ),
+        }),
+    )
+    
+    # Actions for bulk operations
+    actions = ['approve_users', 'reject_users', 'ban_users']
+    
+    def approve_users(self, request, queryset):
+        updated = queryset.update(status='approved', is_active=True)
+        self.message_user(
+            request,
+            f'{updated} users were successfully approved.'
+        )
+    approve_users.short_description = "Approve selected users"
+    
+    def reject_users(self, request, queryset):
+        updated = queryset.update(status='rejected', is_active=False)
+        self.message_user(
+            request,
+            f'{updated} users were rejected.'
+        )
+    reject_users.short_description = "Reject selected users"
+    
+    def ban_users(self, request, queryset):
+        updated = queryset.update(status='banned', is_active=False)
+        self.message_user(
+            request,
+            f'{updated} users were banned.'
+        )
+    ban_users.short_description = "Ban selected users"
