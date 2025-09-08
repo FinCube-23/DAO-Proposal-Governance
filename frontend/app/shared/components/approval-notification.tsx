@@ -23,13 +23,7 @@ export default function ApprovalNotification() {
   const { data: orgData, isLoading, error } = useUserOrg();
   const { address, isConnected } = useAccount();
 
-  if (
-    isLoading
-    || error
-    || !orgData
-    || !profile
-    || !isVisible
-  ) {
+  if (isLoading || error || !orgData || !profile || !isVisible) {
     return null;
   }
 
@@ -64,16 +58,14 @@ export default function ApprovalNotification() {
     try {
       toast.info('Initiating membership registration...');
 
-      const contractAddress = env.NEXT_PUBLIC_SMART_CONTRACT_ADDRESS as `0x${string}`;
+      const contractAddress
+        = env.NEXT_PUBLIC_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
       const hash = await writeContract(config, {
         address: contractAddress,
         abi: contractABI,
         functionName: 'registerMember',
-        args: [
-          address,
-          orgData.legal_entity_identifier,
-        ],
+        args: [address, orgData.legal_entity_identifier],
       });
 
       toast.success('Your membership application is pending');
@@ -94,7 +86,8 @@ export default function ApprovalNotification() {
         organization_id: orgData.id,
       };
 
-      const response = await orgApis.submitOnchainVerification(verificationPayload);
+      const response
+        = await orgApis.submitOnchainVerification(verificationPayload);
 
       console.warn('API response:', response);
       toast.warning('Your on-chain membership application is pending.');
@@ -103,54 +96,6 @@ export default function ApprovalNotification() {
     }
     catch (error) {
       console.error('Error during membership application:', error);
-      
-      // Log the full error for debugging
-      if (error instanceof Error) {
-        console.warn('Full error message:', error.message);
-        console.warn('Error name:', error.name);
-        console.warn('Error stack:', error.stack);
-      }
-
-      // Handle specific smart contract errors
-      if (error instanceof Error) {
-        const errorMessage = error.message.toLowerCase();
-        
-        // Check for "Already a member" error from smart contract
-        if (errorMessage.includes('already a member') || 
-            errorMessage.includes('execution reverted: already a member') ||
-            errorMessage.includes('revert already a member') ||
-            errorMessage.includes('already member') ||
-            errorMessage.includes('member already exists') ||
-            errorMessage.includes('duplicate member') ||
-            (errorMessage.includes('vm execution error') && errorMessage.includes('already a member')) ||
-            (errorMessage.includes('fail with error') && errorMessage.includes('already a member'))) {
-          toast.warning('You are already a member of this organization!');
-          // Don't hide the notification for this case since user might want to try again later
-          return;
-        }
-        // Check for other common smart contract errors
-        else if (errorMessage.includes('user rejected') || 
-                 errorMessage.includes('user denied transaction') ||
-                 errorMessage.includes('user cancelled')) {
-          toast.error('Transaction was rejected by user');
-        }
-        else if (errorMessage.includes('insufficient funds') || 
-                 errorMessage.includes('insufficient balance') ||
-                 errorMessage.includes('insufficient gas')) {
-          toast.error('Insufficient funds for transaction');
-        }
-        else if (errorMessage.includes('network error') || 
-                 errorMessage.includes('connection error')) {
-          toast.error('Network error. Please check your connection and try again');
-        }
-        else {
-          // Generic error with the actual error message
-          toast.error(`Failed to apply for membership: ${error.message}`);
-        }
-      }
-      else {
-        toast.error('Failed to apply for membership. Please try again.');
-      }
     }
     finally {
       setIsSubmitting(false);
@@ -162,34 +107,32 @@ export default function ApprovalNotification() {
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="flex-shrink-0">
-            {isApproved
-              ? (
-                  <svg
-                    className={`h-5 w-5 ${iconColor}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )
-              : (
-                // Warning icon for pending
-                  <svg
-                    className={`h-5 w-5 ${iconColor}`}
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                )}
+            {isApproved ? (
+              <svg
+                className={`h-5 w-5 ${iconColor}`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            ) : (
+              // Warning icon for pending
+              <svg
+                className={`h-5 w-5 ${iconColor}`}
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
           </div>
           <div className="ml-3">
             <div className="text-sm font-medium">
