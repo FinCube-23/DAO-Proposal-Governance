@@ -1,11 +1,10 @@
 import { useParams } from 'react-router';
 import ProposalList from '@/features/proposal-list';
 
-export default function ProposalsPage() {
+export default function ProposalsOffChain() {
   const { source } = useParams();
+
   return (
-    <div>
-      <ProposalList source={source as 'on-chain' | 'off-chain'} />
-    </div>
+    <ProposalList source={source as 'off-chain' | 'on-chain'} />
   );
 }
