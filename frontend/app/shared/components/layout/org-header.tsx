@@ -8,12 +8,12 @@ import React from 'react';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
 import { Separator } from '../ui/separator';
 
-const blacklistedRoutesTitle = ['dao'];
+const blacklistedRoutesTitle = ['proposals'];
 
 export default function OrgHeader() {
   const pathnames = usePathname().split('/').filter(x => x);
   return (
-    <div className="flex fixed bg-sidebar backdrop-blur-xl top-0 w-full shrink-0 items-center gap-2 border-b px-2 py-4">
+    <div className="flex fixed bg-sidebar backdrop-blur-xl top-0 w-full shrink-0 items-center gap-2 border-b px-2 py-4 z-50">
       <div className="flex flex-1 items-center gap-2 px-3">
         <SidebarTrigger />
         <Separator
