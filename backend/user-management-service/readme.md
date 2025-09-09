@@ -129,7 +129,7 @@ To access endpoints through service discovery, use the format: `<service_name>/<
 
 ## Role-Based Access Control (RBAC) Model
 
-This project implements a **Role-Based Access Control (RBAC) model** using [OpenFGA](https://openfga.dev/). The model defines roles and their associated permissions at the **organization level**, ensuring fine-grained access control for different types of users.
+This project implements a **Role-Based Access Control (RBAC) model** using [OpenFGA](https://openfga.dev/) for modeling and visualizing roles and permissions at the **organization level**, enabling fine-grained access control planning for different types of users.
 
 ## Authorization Model
 
@@ -196,7 +196,5 @@ type organization
    | `Can user:alice view_proposal in org:1?` | ✅ (if alice is member) |
    | `Can user:bob execute_proposal in org:2?` | ✅ (only if bob is admin) |
    | `Can user:charlie can_vote in org:3?` | ✅ (if charlie is any member) |
-
-> 🔍 **Pro Tip**: Use the playground to validate access control logic before deploying to production environments.
 
 ---
