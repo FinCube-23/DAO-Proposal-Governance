@@ -88,14 +88,29 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 @admin.register(OrganizationUser)
 class OrganizationUserAdmin(admin.ModelAdmin):
-    list_display = ['user', 'organization', 'created_at']
-    list_filter = ['organization', 'created_at']
+    list_display = ['user', 'organization', 'list_groups', 'created_at']
+    list_filter = ['organization', 'created_at', 'groups', 'user_permissions']
     search_fields = [
         'user__email', 
         'user__first_name', 
         'user__last_name',
         'organization__name'
     ]
+
+    filter_horizontal = ['groups', 'user_permissions']
+
+    fieldsets = (
+        (None, {
+            'fields': ('user', 'organization')
+        }),
+        ('Permissions', {
+            'fields': ('groups', 'user_permissions'),
+        }),
+    )
+
+    def list_groups(self, obj):
+        return ", ".join([g.name for g in obj.groups.all()])
+    list_groups.short_description = "Groups"
 
 @admin.register(OnchainVerification)
 class OnchainVerificationAdmin(admin.ModelAdmin):
