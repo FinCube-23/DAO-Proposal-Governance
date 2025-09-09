@@ -10,9 +10,9 @@ import {
   ScrollRestoration,
 } from 'react-router';
 import { WagmiProvider } from 'wagmi';
-
 import { config } from '@/core/config';
 import Header from '@/shared/components/layout/header';
+import '@rainbow-me/rainbowkit/styles.css';
 import './app.css';
 
 export const links: Route.LinksFunction = () => [

@@ -47,6 +47,7 @@ export default function OngoingProposals() {
           description={proposal.proposalURI}
           status={getOnChainStatus(proposal.canceled, proposal.executed)}
           href={`/organization/dao/proposals/view?id=${proposal.proposalId}`}
+          vote={{ start: proposal.voteStart, duration: proposal.voteDuration, canceled: proposal.canceled }}
         />
       ))}
 

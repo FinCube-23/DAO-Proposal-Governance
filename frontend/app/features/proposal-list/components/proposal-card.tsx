@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import { env } from '@/core/env';
 import { Card, CardContent } from '@/shared/components/ui/card';
 import { cn, shortenAddress } from '@/shared/utils';
+import VotingBadge from './voting-badge';
 
 interface Props {
   id: number;
@@ -11,6 +12,11 @@ interface Props {
   status: string;
   address: string;
   href?: string;
+  vote?: {
+    start: number;
+    duration: number;
+    canceled: boolean;
+  };
 }
 
 const statusConfig = {
@@ -20,7 +26,7 @@ const statusConfig = {
   pending: { icon: AlertCircle, color: 'text-yellow-400', bg: 'bg-yellow-500/20', border: 'border-yellow-500/20' },
 };
 
-export default function ProposalCard({ id, description, status, address, href }: Props) {
+export default function ProposalCard({ id, description, status, address, href, vote }: Props) {
   const navigate = useNavigate();
   const config = useMemo(() => {
     if (Object.hasOwn(statusConfig, status)) {
@@ -60,8 +66,10 @@ export default function ProposalCard({ id, description, status, address, href }:
             </h3> */}
           </div>
         </div>
-
-        <p>{description}</p>
+        <div className="flex justify-between">
+          <p>{description}</p>
+          {vote && <VotingBadge voteStart={vote?.start} voteDuration={vote.duration} canceled={vote.canceled} />}
+        </div>
 
         <div className="text-muted-foreground text-sm flex items-center gap-2">
           Published by

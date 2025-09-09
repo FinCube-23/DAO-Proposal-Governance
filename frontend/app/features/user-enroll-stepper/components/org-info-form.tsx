@@ -175,7 +175,7 @@ export default function OrgInfoForm({ organization }: Props) {
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select organization type" />
                     </SelectTrigger>
                     <SelectContent>

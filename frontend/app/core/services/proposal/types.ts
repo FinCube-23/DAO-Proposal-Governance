@@ -12,3 +12,13 @@ export interface GetAllProposalResponse {
   page: number;
   total: number;
 }
+
+export interface ProposalExecutePayload {
+  proposalId: number;
+  transactionHash: string;
+}
+
+export interface ProposalCancelPayload {
+  proposalId: number;
+  transactionHash: string;
+}

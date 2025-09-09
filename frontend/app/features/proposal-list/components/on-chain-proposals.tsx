@@ -82,7 +82,8 @@ export default function OnChainProposals() {
           address={proposal.proposer}
           description={proposal.proposalURI}
           status={getOnChainStatus(proposal.canceled, proposal.executed)}
-          href={`/organization/dao/proposals/view?id=${proposal.proposalId}`}
+          href={`/organization/dao/proposals/on-chain/${proposal.proposalId}`}
+          vote={{ start: proposal.voteStart, duration: proposal.voteDuration, canceled: proposal.canceled }}
         />
       ))}
 
