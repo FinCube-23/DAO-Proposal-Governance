@@ -2,6 +2,7 @@ from django.db import models, transaction
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from phonenumber_field.modelfields import PhoneNumberField
+from organizations.models import Organization, OrganizationUser
 
 
 class UserManager(BaseUserManager):
@@ -134,6 +135,18 @@ class User(AbstractUser):
             # Link to default organization if new user
             if is_new:
                 self._link_to_default_organization()
+                
+    def has_perm(self, perm, obj = None):
+        if obj and isinstance(obj, Organization):
+            try:
+                org_user = OrganizationUser.objects.get(user=self, organization=obj)
+                if org_user.user_permissions.filter(codename=perm).exists():
+                    return True
+                if org_user.groups.filter(permissions__codename=perm).exists():
+                    return True
+            except OrganizationUser.DoesNotExist:
+                return False
+        return super().has_perm(perm, obj)
 
     def __str__(self):
         full_name = f"{self.first_name} {self.last_name}".strip()

@@ -1,7 +1,8 @@
 # organizations/models.py
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
-from users.models import User  # Import your custom User model
+from django.contrib.auth.models import Group, Permission
 
 class Organization(models.Model):
     ORGANIZATION_TYPES = [
@@ -34,7 +35,7 @@ class Organization(models.Model):
         default='pending'
     )
     organization_admin = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name='admin_of_organizations'
     )
@@ -50,7 +51,7 @@ class Organization(models.Model):
 
 class OrganizationUser(models.Model):
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name='organization_memberships'
     )
@@ -60,11 +61,27 @@ class OrganizationUser(models.Model):
         related_name='members'
     )
     created_at = models.DateTimeField(default=timezone.now, editable=False)
+    
+    groups = models.ManyToManyField(Group, blank=True)
+    user_permissions = models.ManyToManyField(Permission, blank=True)
 
     class Meta:
         db_table = 'organizations_users'
         unique_together = ('user', 'organization')
         ordering = ['-created_at']
+        
+        permissions = [
+            ("approve_organization", "Can approve organization"),
+            ("reject_organization", "Can reject organization"),
+            ("ban_organization", "Can ban organization"),
+            ("manage_organization_users", "Can manage organization users"),
+            ("view_organization_admin", "Can view as organization admin"),
+            ("create_proposal", "Can create proposals"),
+            ("approve_proposal", "Can approve proposals"),
+            ("vote_on_proposal", "Can vote on proposals"),
+            ("execute_proposal", "Can execute proposals"),
+            ("cancel_proposal", "Can cancel proposals"),
+        ]
 
     def __str__(self):
         return f"{self.user.email} in {self.organization.name}"
