@@ -281,7 +281,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate('/organization/dao/fincube')}
+              onClick={() => navigate('/organization/dao/proposals')}
             >
               Back to Dashboard
             </Button>
@@ -306,7 +306,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate('/organization/dao/fincube')}
+              onClick={() => navigate('/organization/dao/proposals')}
             >
               Back to Dashboard
             </Button>
@@ -331,7 +331,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate('/organization/dao/fincube')}
+              onClick={() => navigate('/organization/dao/proposals')}
             >
               Back to Dashboard
             </Button>

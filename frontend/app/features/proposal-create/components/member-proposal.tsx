@@ -1,0 +1,165 @@
+import type { ChangeEvent, FormEvent } from 'react';
+import { useMutation } from '@tanstack/react-query';
+import { simulateContract, writeContract } from '@wagmi/core';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { useAccount } from 'wagmi';
+import { config } from '@/core/config';
+import contractABI from '@/core/contract/contract-abi.json';
+import { proposalApis } from '@/core/services/proposal';
+import { Button } from '@/shared/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+} from '@/shared/components/ui/dialog';
+
+export default function MemberProposal() {
+  const [data, setData] = useState({
+    _newMember: '',
+    description: '',
+  });
+  const { address } = useAccount();
+  const [loadingStatus, setLoadingStatus] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [trxHash, setTrxHash] = useState('');
+  const navigate = useNavigate();
+
+  const createProposal = useMutation({
+    mutationFn: proposalApis.createProposal,
+    onSuccess: () => {
+      toast.warning('Approval is pending');
+      setDialogOpen(true);
+    },
+    onError: (error: any) => {
+      toast.error(`Error creating proposal: ${error.message}`);
+    },
+  });
+
+  const handleInput = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    const { name, value } = e.target;
+    setData(prevData => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  const approveMember = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setLoadingStatus(true);
+
+    try {
+      const { request } = await simulateContract(config, {
+        abi: contractABI,
+        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        functionName: 'newMemberApprovalProposal',
+        args: [data._newMember, data.description],
+      });
+
+      const hash = await writeContract(config, request);
+
+      const backendData = {
+        proposal_type: 'membership',
+        metadata: data.description,
+        proposer_address: `0x${address}`,
+        trx_hash: hash,
+      };
+
+      await createProposal.mutate(backendData);
+      setTrxHash(hash);
+    }
+    catch (e: any) {
+      let errorMessage = e.message;
+
+      if (errorMessage.includes('reverted with the following reason:')) {
+        const match = errorMessage.match(
+          /reverted with the following reason:\s*(.*)/,
+        );
+        if (match) {
+          errorMessage = match[1];
+        }
+      }
+      toast.error(errorMessage);
+    }
+    setLoadingStatus(false);
+  };
+
+  return (
+    <div className="container mt-20">
+      <div className="mt-10">
+        <h1 className="text-3xl font-bold text-white mb-8 text-center">
+          New Member Approval Proposal
+        </h1>
+        <form
+          onSubmit={approveMember}
+          className="w-1/3 mx-auto space-y-6 border border-gray-600 p-6 rounded-xl"
+        >
+          <p>New Member Address: </p>
+          <input
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600"
+            type="text"
+            name="_newMember"
+            onChange={handleInput}
+            placeholder="Enter address"
+            required
+          />
+          <p>Description: </p>
+          <textarea
+            className="w-full p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none"
+            name="description"
+            onChange={handleInput}
+            placeholder="Enter description"
+            rows={10}
+            required
+          >
+          </textarea>
+          <div className="flex justify-center">
+            <Button type="submit" isLoading={loadingStatus}>
+              Place Proposal
+            </Button>
+          </div>
+        </form>
+      </div>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open)
+            navigate('/organization/dao/fincube');
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <h2 className="text-lg font-bold text-green-400">
+              Proposal Submitted
+            </h2>
+          </DialogHeader>
+          <p className="text-yellow-400">
+            Your proposal has been successfully submitted and is under review.
+            To check the transaction status,
+            {' '}
+            <a
+              target="_"
+              href={`${import.meta.env.VITE_TRX_EXPLORER}${trxHash}`}
+              className="text-blue-400 underline"
+            >
+              click here
+            </a>
+          </p>
+          <DialogFooter>
+            <Button
+              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
+              onClick={() => navigate('/organization/dao/proposals')}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};

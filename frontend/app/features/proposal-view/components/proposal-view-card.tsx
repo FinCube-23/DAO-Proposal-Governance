@@ -79,7 +79,7 @@ export default function ProposalViewCard({ proposal }: any) {
         <div className="font-bold text-2xl">{proposal.proposalURI}</div>
         <a
           target="_"
-          href={`${env.VITE_ADDRESS_EXPLORER}${proposal.data}`}
+          href={`${env.VITE_ADDRESS_EXPLORER}/${proposal.data}`}
           className="text-muted-foreground hover:underline"
         >
           {proposal.data.slice(0, 42)}
@@ -90,7 +90,7 @@ export default function ProposalViewCard({ proposal }: any) {
           <div className="text-muted-foreground">Published by</div>
           <a
             target="_"
-            href={`${env.VITE_ADDRESS_EXPLORER}${
+            href={`${env.VITE_ADDRESS_EXPLORER}/${
               proposal.proposer
             }`}
             className="text-green-500 hover:underline cursor-pointer"

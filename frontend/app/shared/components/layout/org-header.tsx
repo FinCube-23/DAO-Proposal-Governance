@@ -5,7 +5,7 @@ import { Link, useLocation } from 'react-router';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
 import { Separator } from '../ui/separator';
 
-const blacklistedRoutesTitle = ['proposals'];
+const blacklistedRoutesTitle = [''];
 
 export default function OrgHeader() {
   const location = useLocation();

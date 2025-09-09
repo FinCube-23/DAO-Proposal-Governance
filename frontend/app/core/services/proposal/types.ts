@@ -22,3 +22,17 @@ export interface ProposalCancelPayload {
   proposalId: number;
   transactionHash: string;
 }
+
+export interface ProposalCreatePayload {
+  proposal_type: string;
+  metadata: string;
+  proposer_address: string;
+  trx_hash: string;
+}
+
+export interface GetOffchainProposalResponse {
+  data: IOffchainProposalCard[];
+  limit: number;
+  page: number;
+  total: number;
+}
