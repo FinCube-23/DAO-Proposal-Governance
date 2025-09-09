@@ -131,8 +131,41 @@ To access endpoints through service discovery, use the format: `<service_name>/<
 
 This project implements a **Role-Based Access Control (RBAC) model** using [OpenFGA](https://openfga.dev/). The model defines roles and their associated permissions at the **organization level**, ensuring fine-grained access control for different types of users.
 
-### Authorization Model
+## Authorization Model
 
+### 👥 Role Definitions
+
+| Role | Description | Access Level |
+|------|-------------|--------------|
+| **🔐 organization_admin** | Full administrative rights within the organization | Complete control over users, proposals, and organizational actions |
+| **👤 organization_user** | Standard member of the organization | Limited access to view and participate in governance |
+
+### 🔑 Permission Matrix
+
+| Permission | Admin | User | Description |
+|------------|-------|------|-------------|
+| `can_approve_new_user` | ✅ | ❌ | Approve new user registrations |
+| `can_create_proposal` | ✅ | ❌ | Create new governance proposals |
+| `can_view_proposal` | ✅ | ✅ | View existing proposals |
+| `can_execute_proposal` | ✅ | ❌ | Execute approved proposals |
+| `can_cancel_proposal` | ✅ | ❌ | Cancel pending proposals |
+| `can_vote` | ✅ | ✅ | Vote on active proposals |
+
+### 📊 Visual Model
+
+The following diagrams illustrate the RBAC model in action:
+
+| **Organization User Permissions** | **Organization Admin Permissions** |
+|:---------------------------------:|:----------------------------------:|
+| ![Organization User Diagram](../UMS_RBAC_OrgUser_Permissions.png) | ![Organization Admin Diagram](../UMS_RBAC_OrgAdmin_Permissions.png) |
+
+> 💡 **Note**: These diagrams provide a comprehensive visual overview of role-based access patterns within an organization.
+
+### 🎮 Interactive Visualization with OpenFGA Playground
+
+Experiment with the RBAC model using the [**OpenFGA Playground**](https://play.fga.dev/) for hands-on testing:
+
+#### 📋 Model Definition
 ```fga
 model
   schema 1.1
@@ -150,43 +183,20 @@ type organization
     define can_vote: organization_admin or organization_user
 ```
 
-### Explanation
+#### 🚀 Quick Start Guide
 
-- **organization\_admin**: Has full administrative rights within the organization. Can manage users, proposals, and execute or cancel actions.
-- **organization\_user**: A standard member of the organization. Can view and vote on proposals.
-- **Permissions** are defined as relations:
+1. **📋 Copy** the FGA model code above
+2. **🌐 Open** the [OpenFGA Playground](https://play.fga.dev/)
+3. **📝 Paste** the model into the editor
+4. **📊 Switch** to **Graph View** to visualize relationships
+5. **🧪 Test** with example scenarios:
 
-  - `can_approve_new_user` → Restricted to admins.
-  - `can_create_proposal` → Restricted to admins.
-  - `can_view_proposal` → Granted to both admins and users.
-  - `can_execute_proposal` → Restricted to admins.
-  - `can_cancel_proposal` → Restricted to admins.
-  - `can_vote` → Granted to both admins and users.
+   | Query Example | Expected Result |
+   |---------------|-----------------|
+   | `Can user:alice view_proposal in org:1?` | ✅ (if alice is member) |
+   | `Can user:bob execute_proposal in org:2?` | ✅ (only if bob is admin) |
+   | `Can user:charlie can_vote in org:3?` | ✅ (if charlie is any member) |
 
-### Visual Model
-
-The following diagrams illustrate the RBAC model:
-
-**Organization User Permissions**
-  ![Organization User Diagram](../UMS_RBAC_OrgUser_Permissions.png)
-
-**Organization Admin Permissions**
-  ![Organization Admin Diagram](../UMS_RBAC_OrgAdmin_Permissions.png)
-
-These diagrams provide a visual overview of which roles can perform which actions within an organization.
-
-### Visualizing in OpenFGA Playground
-
-You can also **interactively visualize this RBAC model** using the [OpenFGA Playground](https://play.fga.dev/):
-
-1. Copy the `fga` model code above.
-2. Open the Playground and paste the model into the editor.
-3. Use the **Graph View** to see relationships between roles and permissions.
-4. Add example users, organizations, and role assignments to test queries like:
-
-   - *Can user\:alice view\_proposal in org:1?*
-   - *Can user\:bob execute\_proposal in org:2?*
-
-This makes it easy to experiment with the access control logic and verify expected outcomes before applying changes to production.
+> 🔍 **Pro Tip**: Use the playground to validate access control logic before deploying to production environments.
 
 ---
