@@ -129,7 +129,7 @@ export default function MemberProposal() {
         onOpenChange={(open) => {
           setDialogOpen(open);
           if (!open)
-            navigate('/organization/dao/fincube');
+            navigate('/organization/dao/proposals');
         }}
       >
         <DialogContent>

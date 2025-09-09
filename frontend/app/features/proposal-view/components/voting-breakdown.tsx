@@ -268,7 +268,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         onOpenChange={(open) => {
           setVoteDialogOpen(open);
           if (!open)
-            navigate('/organization/dao/fincube');
+            navigate('/organization/dao/proposals');
         }}
       >
         <DialogContent>
@@ -293,7 +293,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         onOpenChange={(open) => {
           setExecuteDialogOpen(open);
           if (!open)
-            navigate('/organization/dao/fincube');
+            navigate('/organization/dao/proposals');
         }}
       >
         <DialogContent>
@@ -318,7 +318,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         onOpenChange={(open) => {
           setCancelDialogOpen(open);
           if (!open)
-            navigate('/organization/dao/fincube');
+            navigate('/organization/dao/proposals');
         }}
       >
         <DialogContent>

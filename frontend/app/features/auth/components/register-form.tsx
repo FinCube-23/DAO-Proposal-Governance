@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import countryCodes from 'country-codes-list';
+import * as countryCodes from 'country-codes-list';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -26,26 +27,6 @@ import {
 import { register } from '../apis/register';
 
 // Get country codes for the dropdown
-const uniqueCountryCodes = new Map();
-countryCodes
-  .all()
-  .filter(country => country.countryCallingCode)
-  .forEach((country) => {
-    const code = `+${country.countryCallingCode}`;
-    if (!uniqueCountryCodes.has(code)) {
-      uniqueCountryCodes.set(code, {
-        id: country.countryCode,
-        country: country.countryNameEn,
-        code,
-        value: code,
-        label: `${country.countryCode} (${code})`, // Show country code instead of full name
-      });
-    }
-  });
-
-const countryCodesArray = Array.from(uniqueCountryCodes.values()).sort((a, b) =>
-  a.country.localeCompare(b.country),
-);
 
 const formSchema = z
   .object({
@@ -77,7 +58,6 @@ const formSchema = z
 export default function RegisterForm() {
   const navigate = useNavigate();
   const registerMutation = useMutation({
-    mutationKey: ['register'],
     mutationFn: register,
     onSuccess: () => {
       toast.success('Registration successful');
@@ -88,6 +68,28 @@ export default function RegisterForm() {
       toast.error('Registration failed. Please try again.');
     },
   });
+
+  const countryCodesArray = useMemo(() => {
+    const uniqueCountryCodes = new Map();
+    countryCodes
+      .all()
+      .filter(country => country.countryCallingCode)
+      .forEach((country) => {
+        const code = `+${country.countryCallingCode}`;
+        if (!uniqueCountryCodes.has(code)) {
+          uniqueCountryCodes.set(code, {
+            id: country.countryCode,
+            country: country.countryNameEn,
+            code,
+            value: code,
+            label: `${country.countryCode} (${code})`, // Show country code instead of full name
+          });
+        }
+      });
+    return Array.from(uniqueCountryCodes.values()).sort((a, b) =>
+      a.country.localeCompare(b.country),
+    );
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -164,7 +166,7 @@ export default function RegisterForm() {
         />
 
         {/* Country Code and Contact Number side by side */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2">
           <FormField
             control={form.control}
             name="country_code"
@@ -176,7 +178,7 @@ export default function RegisterForm() {
                   defaultValue={field.value}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-fit">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                   </FormControl>
