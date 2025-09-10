@@ -36,18 +36,6 @@ import {
 } from '@/shared/components/ui/sidebar';
 import useAuthStore from '@/shared/stores/auth';
 
-interface _Organization {
-  name: string;
-  email: string;
-  type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  membership_onchain_status: string;
-}
-
 interface Props {
   name: string;
   email: string;
@@ -310,8 +298,16 @@ export default function SidebarUser({
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        authStore.clearAuthState();
-                        navigate('/');
+                        try {
+                          authStore.clearAuthState();
+                          disconnect();
+                        }
+                        catch (error) {
+                          console.warn('Disconnect failed:', error);
+                        }
+                        finally {
+                          navigate('/');
+                        }
                       }}
                     >
                       <LogOut />
@@ -334,8 +330,16 @@ export default function SidebarUser({
             <DropdownMenuItem
               className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer"
               onClick={() => {
-                authStore.clearAuthState();
-                navigate('/');
+                try {
+                  authStore.clearAuthState();
+                  disconnect();
+                }
+                catch (error) {
+                  console.warn('Disconnect failed:', error);
+                }
+                finally {
+                  navigate('/');
+                }
               }}
             >
               <LogOut />
