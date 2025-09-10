@@ -95,7 +95,7 @@ class UserAdmin(BaseUserAdmin):
     actions = ['approve_users', 'reject_users', 'ban_users']
     
     def approve_users(self, request, queryset):
-        updated = queryset.update(status='approved', is_active=True)
+        updated = queryset.update(status='approved', is_active=True, approved_by=request.user)
         user_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request,
