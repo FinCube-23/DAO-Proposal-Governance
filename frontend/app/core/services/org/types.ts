@@ -125,3 +125,29 @@ export interface AddUserToOrgResponse {
   organization_name: string;
   created_at: string;
 }
+
+export interface OnchainVerificationPayload {
+  trx_hash: string;
+  context: {
+    org_admin_name: string;
+    org_admin_email: string;
+    org: {
+      name: string;
+      type: string;
+      address: string;
+      legal_entity_identifier: string;
+    };
+  };
+  proposer_wallet: string;
+  organization_id: number;
+}
+
+export interface OnchainVerificationResponse {
+  id: number;
+  trx_hash: string;
+  context: any;
+  proposer_wallet: string;
+  organization_id: number;
+  created_at: string;
+  status: string;
+}
