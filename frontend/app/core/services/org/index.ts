@@ -24,6 +24,8 @@ export const orgApis = {
     status?: string;
     page?: number;
     limit?: number;
+    type?: string;
+    location?: string;
   }) =>
     api.get<GetAllOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}`, {
       queryParams,

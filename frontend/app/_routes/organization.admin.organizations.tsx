@@ -26,15 +26,6 @@ import {
   TableRow,
 } from '@/shared/components/ui/table';
 
-const locations = [
-  { label: 'Australia', value: 'AUS' },
-  { label: 'Bangladesh', value: 'BGD' },
-  { label: 'Canada', value: 'CAD' },
-  { label: 'China', value: 'CN' },
-  { label: 'Netherlands', value: 'NL' },
-  { label: 'United States', value: 'USA' },
-];
-
 const limit = 15;
 
 export default function OrgList() {
@@ -43,7 +34,6 @@ export default function OrgList() {
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string>('');
   const [type, setType] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
   const navigate = useNavigate();
 
   const getAllOrgs = useMutation({
@@ -64,7 +54,6 @@ export default function OrgList() {
       page,
       limit,
       status: status === 'all' ? undefined : status,
-      location,
       type: type === 'all' ? undefined : type,
     });
   }, [page, status, location, type]);
@@ -90,7 +79,7 @@ export default function OrgList() {
   return (
     <>
       <div className="flex justify-end space-x-4">
-        <div className="w-[200px] flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="text-xs">Filter by Status:</span>
           <Select value={status} onValueChange={value => setStatus(value)}>
             <SelectTrigger>
@@ -105,26 +94,7 @@ export default function OrgList() {
             </SelectContent>
           </Select>
         </div>
-        <div className="w-[200px] flex items-center gap-1">
-          <span className="text-xs">Filter by Location:</span>
-          <Select
-            value={location}
-            onValueChange={value => setLocation(value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {locations.map((loc, idx) => (
-                <SelectItem key={idx} value={loc.value}>
-                  {loc.value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="w-[200px] flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="text-xs">Filter by Type:</span>
           <Select value={type} onValueChange={value => setType(value)}>
             <SelectTrigger>
@@ -132,8 +102,10 @@ export default function OrgList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="DAO">DAO</SelectItem>
-              <SelectItem value="MFS">MFS</SelectItem>
+              <SelectItem value="plc">PLC</SelectItem>
+              <SelectItem value="llc">LLC</SelectItem>
+              <SelectItem value="inc">INC</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -161,7 +133,7 @@ export default function OrgList() {
             >
               <TableCell>{mfs.id}</TableCell>
               <TableCell>{mfs.name}</TableCell>
-              <TableCell>{mfs.type}</TableCell>
+              <TableCell className="uppercase">{mfs.type}</TableCell>
               <TableCell>{mfs.address}</TableCell>
               <TableCell className="capitalize">
                 {mfs.status}

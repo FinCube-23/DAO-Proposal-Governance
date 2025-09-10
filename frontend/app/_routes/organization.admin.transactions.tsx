@@ -118,7 +118,7 @@ function TrxList() {
           </div>
         </div>
         <div className="flex gap-5">
-          <div className="w-[200px] flex items-center">
+          <div className="flex items-center gap-2">
             <span className="text-xs">Filter by Source:</span>
             <Select value={source} onValueChange={value => setSource(value)}>
               <SelectTrigger>
@@ -133,7 +133,7 @@ function TrxList() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-[200px] flex items-center">
+          <div className="flex items-center gap-2">
             <span className="text-xs">Filter by Status:</span>
 
             <Select
