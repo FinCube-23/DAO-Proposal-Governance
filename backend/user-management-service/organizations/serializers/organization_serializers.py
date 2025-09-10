@@ -142,6 +142,8 @@ class OrganizationListSerializer(serializers.ModelSerializer):
             "status",
             "organization_admin_id",
             "organization_admin_name",
+            "created_at",
+            "updated_at",
         ]
         read_only_fields = fields
 

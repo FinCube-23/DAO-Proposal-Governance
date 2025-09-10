@@ -49,11 +49,11 @@ class OrganizationService:
         
         # Prepare filters
         filters = {}
-        if 'status' in query_params:
+        if 'status' in query_params and query_params['status'] != 'all':  
             filters['status'] = query_params['status']
         if 'is_active' in query_params:
             filters['is_active'] = query_params['is_active'].lower() == 'true'
-        if 'type' in query_params:
+        if 'type' in query_params and query_params['type'] != 'all':
             filters['type'] = query_params['type']
         
         # Delegate to repository
