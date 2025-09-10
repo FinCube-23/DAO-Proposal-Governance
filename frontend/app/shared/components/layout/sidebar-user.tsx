@@ -293,7 +293,6 @@ export default function SidebarUser({
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        disconnect();
                         authStore.clearAuthState();
                         navigate('/');
                       }}
@@ -318,7 +317,6 @@ export default function SidebarUser({
             <DropdownMenuItem
               className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer"
               onClick={() => {
-                disconnect();
                 authStore.clearAuthState();
                 navigate('/');
               }}

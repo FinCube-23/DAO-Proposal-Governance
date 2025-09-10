@@ -2,7 +2,7 @@ import type { UserOrgs } from '../services/org/types';
 import type { IOffchainProposalCard } from './interfaces';
 
 // interfaces
-interface Response {
+export interface Response {
   message: string;
   status: number;
 }
