@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+// import { useNavigate } from 'react-router';
 import { orgApis } from '@/core/services/org';
 import {
   Pagination,
@@ -35,25 +35,24 @@ const locations = [
   { label: 'United States', value: 'USA' },
 ];
 
+const limit = 15;
+
 function OrgList() {
   const [orgList, setOrgList] = useState<any>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string>('');
   const [type, setType] = useState<string>('');
   const [location, setLocation] = useState<string>('');
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const getAllOrgs = useMutation({
     mutationKey: ['getAllOrgs'],
     mutationFn: orgApis.getAllOrgs,
     onSuccess: (data) => {
       setOrgList(data.organizations);
-      setTotalPages(data.pagination.total);
-      setLimit(data.pagination.limit);
+      setTotalPages(Math.ceil(data.pagination.total / limit) || 1);
       setPage(data.pagination.page);
-      console.log('data', data);
     },
     onError: (error) => {
       console.error('Get all orgs failed', error);
@@ -64,9 +63,9 @@ function OrgList() {
     getAllOrgs.mutate({
       page,
       limit,
-      status,
+      status: status === 'all' ? undefined : status,
       location,
-      type,
+      type: type === 'all' ? undefined : type,
     });
   }, [page, status, location, type]);
 
@@ -154,8 +153,9 @@ function OrgList() {
         <TableBody>
           {orgList.map((mfs: any) => (
             <TableRow
-              onClick={() =>
-                navigate(`/admin/dashboard/organizations/${mfs.id}`)}
+              onClick={() => {
+                // navigate(`/admin/dashboard/organizations/${mfs.id}`);
+              }}
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={mfs.id}
             >

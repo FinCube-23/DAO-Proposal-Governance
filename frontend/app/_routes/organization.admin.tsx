@@ -1,4 +1,3 @@
-import { LayoutDashboard } from 'lucide-react';
 import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
@@ -42,7 +41,7 @@ export default function AdminLayout() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/organization/dao/proposals/off-chain')}
+          onClick={() => navigate('/organization/admin/trx-list')}
           className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === 'trx-list'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
