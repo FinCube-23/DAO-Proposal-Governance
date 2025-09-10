@@ -24,5 +24,13 @@ COPY . .
 # Expose Django's default port
 EXPOSE 8000
 
-# Command to run the application
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Command with conditional logic
+CMD if [ "$APP_ENV" = "DEVELOPMENT" ] || [ "$APP_ENV" = "DEV" ]; then \
+    echo "Development mode - Running migrations..."; \
+    python manage.py makemigrations; \
+    python manage.py migrate; \
+    echo "Migrations completed"; \
+    else \
+    echo "Production mode - Skipping migrations"; \
+    fi && \
+    python manage.py runserver 0.0.0.0:8000
