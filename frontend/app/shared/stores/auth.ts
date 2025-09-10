@@ -1,4 +1,3 @@
-import type { FetchMeResponse } from '@/core/api/types';
 import type { UserOrgs } from '@/core/services/org/types';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
@@ -13,10 +12,11 @@ interface UserProfile {
   first_name: string;
   last_name: string;
   contact_number: string;
+  wallet_address?: string;
   is_active: boolean;
   is_staff: boolean;
   status: string;
-  organizations: UserOrgs[] | null;
+  organizations: UserOrgs[];
 }
 
 interface AuthStoreState {
@@ -24,7 +24,8 @@ interface AuthStoreState {
   profile: UserProfile | null;
 
   setTokens: (payload: TokenPayload | null) => void;
-  setProfile: (payload: FetchMeResponse | null) => void;
+  setProfile: (payload: UserProfile | null) => void;
+  updateWalletAddress: (walletAddress: string) => void;
   setOrg: (org: UserOrgs | null) => void;
   setOrgTrxHash: (hash: string | null) => void;
   clearAuthState: () => void;
@@ -45,14 +46,13 @@ const useAuthStore = create<AuthStoreState>()(
           return;
         }
 
-        // Map API response to internal profile format
-        // If user has organizations, use the first one (assume they only have one for now)
         const profile: UserProfile = {
           id: payload.id,
           email: payload.email,
           first_name: payload.first_name,
           last_name: payload.last_name,
           contact_number: payload.contact_number,
+          wallet_address: payload.wallet_address,
           is_active: payload.is_active,
           is_staff: payload.is_staff,
           status: payload.status,
@@ -60,6 +60,18 @@ const useAuthStore = create<AuthStoreState>()(
         };
 
         set({ profile });
+      },
+
+      updateWalletAddress: (walletAddress: string) => {
+        const profile = get().profile;
+        if (profile) {
+          set({
+            profile: {
+              ...profile,
+              wallet_address: walletAddress,
+            },
+          });
+        }
       },
 
       setOrg: (org) => {

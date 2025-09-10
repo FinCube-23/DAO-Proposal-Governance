@@ -9,6 +9,7 @@ import {
   Scripts,
   ScrollRestoration,
 } from 'react-router';
+import { Toaster } from 'sonner';
 import { WagmiProvider } from 'wagmi';
 import { config } from '@/core/config';
 import Header from '@/shared/components/layout/header';
@@ -54,6 +55,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
             >
               <Header />
               {children}
+              <Toaster
+                theme="dark"
+                position="top-right"
+                richColors
+                closeButton
+              />
             </RainbowKitProvider>
           </QueryClientProvider>
         </WagmiProvider>

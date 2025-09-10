@@ -26,23 +26,14 @@ import {
   TableRow,
 } from '@/shared/components/ui/table';
 
-const locations = [
-  { label: 'Australia', value: 'AUS' },
-  { label: 'Bangladesh', value: 'BGD' },
-  { label: 'Canada', value: 'CAD' },
-  { label: 'China', value: 'CN' },
-  { label: 'Netherlands', value: 'NL' },
-  { label: 'United States', value: 'USA' },
-];
+const limit = 15;
 
-function OrgList() {
+export default function OrgList() {
   const [orgList, setOrgList] = useState<any>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(15);
   const [totalPages, setTotalPages] = useState(1);
   const [status, setStatus] = useState<string>('');
   const [type, setType] = useState<string>('');
-  const [location, setLocation] = useState<string>('');
   const navigate = useNavigate();
 
   const getAllOrgs = useMutation({
@@ -50,10 +41,8 @@ function OrgList() {
     mutationFn: orgApis.getAllOrgs,
     onSuccess: (data) => {
       setOrgList(data.organizations);
-      setTotalPages(data.pagination.total);
-      setLimit(data.pagination.limit);
+      setTotalPages(Math.ceil(data.pagination.total / limit) || 1);
       setPage(data.pagination.page);
-      console.log('data', data);
     },
     onError: (error) => {
       console.error('Get all orgs failed', error);
@@ -64,9 +53,8 @@ function OrgList() {
     getAllOrgs.mutate({
       page,
       limit,
-      status,
-      location,
-      type,
+      status: status === 'all' ? undefined : status,
+      type: type === 'all' ? undefined : type,
     });
   }, [page, status, location, type]);
 
@@ -91,7 +79,7 @@ function OrgList() {
   return (
     <>
       <div className="flex justify-end space-x-4">
-        <div className="w-[200px] flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="text-xs">Filter by Status:</span>
           <Select value={status} onValueChange={value => setStatus(value)}>
             <SelectTrigger>
@@ -106,26 +94,7 @@ function OrgList() {
             </SelectContent>
           </Select>
         </div>
-        <div className="w-[200px] flex items-center gap-1">
-          <span className="text-xs">Filter by Location:</span>
-          <Select
-            value={location}
-            onValueChange={value => setLocation(value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="All" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {locations.map((loc, idx) => (
-                <SelectItem key={idx} value={loc.value}>
-                  {loc.value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="w-[200px] flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <span className="text-xs">Filter by Type:</span>
           <Select value={type} onValueChange={value => setType(value)}>
             <SelectTrigger>
@@ -133,8 +102,10 @@ function OrgList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              <SelectItem value="DAO">DAO</SelectItem>
-              <SelectItem value="MFS">MFS</SelectItem>
+              <SelectItem value="plc">PLC</SelectItem>
+              <SelectItem value="llc">LLC</SelectItem>
+              <SelectItem value="inc">INC</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -154,17 +125,18 @@ function OrgList() {
         <TableBody>
           {orgList.map((mfs: any) => (
             <TableRow
-              onClick={() =>
-                navigate(`/admin/dashboard/organizations/${mfs.id}`)}
+              onClick={() => {
+                navigate(`/organization/admin/organizations/${mfs.id}`);
+              }}
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={mfs.id}
             >
               <TableCell>{mfs.id}</TableCell>
               <TableCell>{mfs.name}</TableCell>
-              <TableCell>{mfs.type}</TableCell>
-              <TableCell>{mfs.location}</TableCell>
+              <TableCell className="uppercase">{mfs.type}</TableCell>
+              <TableCell>{mfs.address}</TableCell>
               <TableCell className="capitalize">
-                {mfs.membership_onchain_status}
+                {mfs.status}
               </TableCell>
               <TableCell>{formatDate(mfs.created_at)}</TableCell>
               <TableCell>{formatDate(mfs.updated_at)}</TableCell>
@@ -224,5 +196,3 @@ function OrgList() {
     </>
   );
 }
-
-export default OrgList;

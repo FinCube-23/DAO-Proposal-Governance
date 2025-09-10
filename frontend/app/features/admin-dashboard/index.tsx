@@ -2,7 +2,6 @@ import type { IProposal } from '@/core/api/interfaces';
 import { useMutation } from '@tanstack/react-query';
 import { readContract } from '@wagmi/core';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router';
 import { formatEther } from 'viem';
 import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
@@ -17,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/shared/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { Overview } from './components/overview';
 import { RecentTransactions } from './components/recent-transactions';
 
@@ -27,7 +25,6 @@ export default function AdminDashboard() {
   const [ongoingProposals, setOngoingProposals] = useState<IProposal[]>();
   const [approvalStatus, setApprovalStatus] = useState<boolean>();
   const { address } = useAccount();
-  const navigate = useNavigate();
 
   // RTK Query
   const [proposalCount, setProposalCount] = useState<string>();
@@ -36,13 +33,42 @@ export default function AdminDashboard() {
     mutationKey: ['getBalance'],
     mutationFn: proxyApis.getBalance,
     onSuccess: (data) => {
-      const convertedValue = Number.parseFloat(
-        formatEther(BigInt(data.data)),
-      ).toFixed(2);
-      setBalance(convertedValue);
+      try {
+        // Handle different response structures
+        let balanceValue;
+
+        if (data && typeof data === 'object') {
+          // Try different possible response structures
+          balanceValue = data.data || data.balance || data.result || data;
+        }
+        else {
+          balanceValue = data;
+        }
+        if (balanceValue === undefined || balanceValue === null || balanceValue === '') {
+          setBalance('0.00');
+          return;
+        }
+
+        // Handle zero balance (which is valid)
+        if (balanceValue === '0' || balanceValue === 0) {
+          setBalance('0.00');
+          return;
+        }
+
+        // Convert to BigInt and format
+        const bigIntValue = typeof balanceValue === 'string' ? BigInt(balanceValue) : BigInt(balanceValue);
+        const convertedValue = Number.parseFloat(formatEther(bigIntValue)).toFixed(2);
+
+        setBalance(convertedValue);
+      }
+      catch (conversionError) {
+        setBalance('0.00');
+        console.error(conversionError);
+      }
     },
     onError: (error) => {
       console.error('Get balance failed', error);
+      setBalance('0.00'); // Set default value on error
     },
   });
 
@@ -89,11 +115,7 @@ export default function AdminDashboard() {
     const walletBalance = async () => {
       const data = { address: `${address}` };
       if (address) {
-        const response: any = await getBalance.mutate(data);
-        const convertedValue = Number.parseFloat(
-          formatEther(BigInt(response.data)),
-        ).toFixed(2);
-        setBalance(convertedValue);
+        getBalance.mutate(data);
       }
     };
 
@@ -110,7 +132,6 @@ export default function AdminDashboard() {
         });
         const result = response.toString();
 
-        // console.log('Proposal Count:', result);
         setProposalCount(result);
       }
       catch (e) {
@@ -128,8 +149,12 @@ export default function AdminDashboard() {
 
     getTotalOngoingProposals();
     getProposalCount();
-    checkIsMember();
-    walletBalance();
+
+    if (address) {
+      checkIsMember();
+      walletBalance();
+    }
+
     proposalThreshold();
     getTotalProposalThreshold();
   }, [
@@ -149,9 +174,21 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
-                {balance}
-                {' '}
-                ETH
+                {getBalance.isPending
+                  ? (
+                      <span className="text-muted-foreground">Loading...</span>
+                    )
+                  : balance
+                    ? (
+                        <>
+                          {balance}
+                          {' '}
+                          ETH
+                        </>
+                      )
+                    : (
+                        <span className="text-muted-foreground">--</span>
+                      )}
               </div>
               <p className="text-xs text-muted-foreground">
                 Your wallet balance

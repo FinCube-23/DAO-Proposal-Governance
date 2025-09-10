@@ -37,9 +37,16 @@ export default function Header() {
                         className="rounded-xl"
                         variant="destructive"
                         onClick={() => {
-                          disconnect();
-                          authStore.clearAuthState();
-                          navigate('/');
+                          try {
+                            authStore.clearAuthState();
+                            disconnect();
+                          }
+                          catch (error) {
+                            console.warn('Disconnect failed:', error);
+                          }
+                          finally {
+                            navigate('/');
+                          }
                         }}
                       >
                         <LogOut size={20} />

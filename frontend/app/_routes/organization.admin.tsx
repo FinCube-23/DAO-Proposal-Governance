@@ -1,4 +1,3 @@
-import { LayoutDashboard } from 'lucide-react';
 import { useMemo } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router';
 
@@ -7,10 +6,10 @@ export default function AdminLayout() {
   const location = useLocation();
 
   const activeTab = useMemo(() => {
-    if (location.pathname.includes('org-list'))
-      return 'org-list';
-    else if (location.pathname.includes('trx-list'))
-      return 'trx-list';
+    if (location.pathname.includes('organizations'))
+      return 'organizations';
+    else if (location.pathname.includes('transactions'))
+      return 'transactions';
     return 'dashboard';
   }, [location.pathname]);
 
@@ -31,9 +30,9 @@ export default function AdminLayout() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/organization/admin/org-list')}
+          onClick={() => navigate('/organization/admin/organizations')}
           className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'org-list'
+            activeTab === 'organizations'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
               : 'text-slate-400 hover:text-white'
           }`}
@@ -42,9 +41,9 @@ export default function AdminLayout() {
         </button>
         <button
           type="button"
-          onClick={() => navigate('/organization/dao/proposals/off-chain')}
+          onClick={() => navigate('/organization/admin/transactions')}
           className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'trx-list'
+            activeTab === 'transactions'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
               : 'text-slate-400 hover:text-white'
           }`}

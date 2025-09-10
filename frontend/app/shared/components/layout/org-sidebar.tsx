@@ -57,7 +57,7 @@ export default function OrgSidebar({
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <BrandCard
-          name={authStore.profile?.organization?.name || 'N/A'}
+          name={authStore.profile?.last_name || 'N/A'}
           logo={GalleryVerticalEnd}
           type="Org."
         />
@@ -69,11 +69,12 @@ export default function OrgSidebar({
       </SidebarContent>
       <SidebarFooter>
         <SidebarUser
-          name={authStore.profile?.name || 'N/A'}
+          name={`${authStore.profile?.first_name} ${authStore.profile?.last_name}` || 'N/A'}
           email={authStore.profile?.email || 'N/A'}
-          role={authStore.profile?.role || 'N/A'}
-          created_at={authStore.profile?.created_at || 'N/A'}
-          organization={authStore.profile?.organization || null}
+          organization={authStore.profile?.organizations?.[0].name || 'N/A'}
+          contactNumber={authStore.profile?.contact_number || 'N/A'}
+          isActive={authStore.profile?.is_active || false}
+          isStaff={authStore.profile?.is_staff || false}
         />
       </SidebarFooter>
       <SidebarRail />

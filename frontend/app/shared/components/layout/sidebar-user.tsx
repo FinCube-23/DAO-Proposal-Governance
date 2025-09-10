@@ -1,16 +1,18 @@
 import type { GetStatusByEmailResponse } from '@/core/api/types';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDisconnect } from 'wagmi';
 import { api } from '@/core/api/client';
 import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
+import { orgApis } from '@/core/services/org';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from '@/shared/components/ui/avatar';
+import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
@@ -34,25 +36,15 @@ import {
 } from '@/shared/components/ui/sidebar';
 import useAuthStore from '@/shared/stores/auth';
 
-interface Organization {
-  name: string;
-  email: string;
-  type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  membership_onchain_status: string;
-}
-
 interface Props {
   name: string;
   email: string;
-  role: string;
-  created_at: string;
-  organization: Organization | null;
+  organization: string;
+  contactNumber: string;
+  isActive: boolean;
+  isStaff: boolean;
   avatar?: string;
+  role?: string;
 }
 
 function getStatusByEmail(payload: string) {
@@ -64,17 +56,28 @@ function getStatusByEmail(payload: string) {
 export default function SidebarUser({
   name,
   email,
-  role,
-  created_at,
   organization,
+  contactNumber,
+  isActive,
+  isStaff,
   avatar,
 }: Props) {
   const { isMobile } = useSidebar();
   const { disconnect } = useDisconnect();
   const [dialogueOpen, setDialogueOpen] = useState(false);
-  const [status, setStatus] = useState<string | null>(null);
+  const [_status, setStatus] = useState<string | null>(null);
   const authStore = useAuthStore(state => state);
   const navigate = useNavigate();
+
+  // Get organization ID from user's organizations
+  const orgId = authStore.profile?.organizations?.[0]?.id;
+
+  // Fetch organization details
+  const { data: organizationData, isLoading: _isLoadingOrg } = useQuery({
+    queryKey: ['organization', orgId],
+    queryFn: () => orgApis.getOrg(orgId!),
+    enabled: !!orgId,
+  });
 
   const getStatusMutation = useMutation({
     mutationFn: getStatusByEmail,
@@ -88,8 +91,8 @@ export default function SidebarUser({
   });
 
   useEffect(() => {
-    if (organization?.email) {
-      getStatusMutation.mutate(organization.email);
+    if (authStore.profile?.organizations?.[0]?.name) {
+      getStatusMutation.mutate(authStore.profile.organizations[0].name);
     }
   }, [organization]);
 
@@ -142,7 +145,6 @@ export default function SidebarUser({
                     </h2>
                   </DialogHeader>
                   <div className="space-y-6">
-                    {/* User Information Section */}
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
@@ -159,24 +161,25 @@ export default function SidebarUser({
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-400">
-                            User Role
+                            Contact Number
                           </p>
-                          <p className="text-purple-300 capitalize">{role}</p>
+                          <p className="text-blue-300 break-all">{contactNumber}</p>
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-400">
-                            Member Since
+                            Active Status
                           </p>
-                          <p className="text-amber-300">
-                            {new Date(created_at).toLocaleDateString(
-                              undefined,
-                              {
-                                month: 'long',
-                                day: 'numeric',
-                                year: 'numeric',
-                              },
-                            )}
+                          <Badge variant={isActive ? 'default' : 'secondary'} className={isActive ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}>
+                            {isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-400">
+                            Staff Status
                           </p>
+                          <Badge variant={isStaff ? 'default' : 'secondary'} className={isStaff ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'}>
+                            {isStaff ? 'Staff' : 'Not Staff'}
+                          </Badge>
                         </div>
                       </div>
                     </div>
@@ -194,7 +197,7 @@ export default function SidebarUser({
                               Organization Name
                             </p>
                             <p className="text-white font-semibold">
-                              {organization?.name}
+                              {organizationData?.name || authStore.profile?.organizations?.[0]?.name || 'N/A'}
                             </p>
                           </div>
                           <div>
@@ -202,7 +205,7 @@ export default function SidebarUser({
                               Organization Email
                             </p>
                             <p className="text-blue-300">
-                              {organization?.email}
+                              {organizationData?.email || 'N/A'}
                             </p>
                           </div>
                           <div>
@@ -210,7 +213,7 @@ export default function SidebarUser({
                               Organization Type
                             </p>
                             <p className="text-purple-300">
-                              {organization?.type}
+                              {organizationData?.type.toLocaleUpperCase() || 'N/A'}
                             </p>
                           </div>
                           <div>
@@ -218,7 +221,7 @@ export default function SidebarUser({
                               Location
                             </p>
                             <p className="text-amber-300">
-                              {organization?.location}
+                              {(organizationData as any)?.address || 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -226,23 +229,23 @@ export default function SidebarUser({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Wallet Address
+                              Admin Wallet Address
                             </p>
                             <p className="text-blue-400 break-words font-mono text-sm">
-                              {organization?.wallet_address
-                                ? `${organization.wallet_address.slice(
+                              {(organizationData as any)?.organization_admin?.wallet_address
+                                ? `${(organizationData as any).organization_admin.wallet_address.slice(
                                   0,
                                   6,
-                                )}...${organization.wallet_address.slice(-6)}`
-                                : ''}
+                                )}...${(organizationData as any).organization_admin.wallet_address.slice(-6)}`
+                                : 'N/A'}
                             </p>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Native Currency
+                              Legal Entity ID
                             </p>
                             <p className="text-emerald-400">
-                              {organization?.native_currency}
+                              {(organizationData as any)?.legal_entity_identifier || 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -250,41 +253,84 @@ export default function SidebarUser({
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Membership Status
+                              Organization Status
                             </p>
                             <span
                               className={`px-2 py-1 rounded ${
-                                organization?.is_approved
+                                (organizationData as any)?.status === 'approved'
                                   ? 'bg-green-600'
                                   : 'bg-yellow-600'
-                              } text-xs`}
+                              } text-xs capitalize`}
                             >
-                              {organization?.is_approved
-                                ? 'Approved'
-                                : 'Pending'}
+                              {(organizationData as any)?.status || 'Pending'}
                             </span>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-400">
-                              Proposal Status
+                              Admin Status
                             </p>
-                            <p className="text-cyan-400 capitalize">{status}</p>
+                            <span
+                              className={`px-2 py-1 rounded ${
+                                (organizationData as any)?.organization_admin?.status === 'approved'
+                                  ? 'bg-blue-600'
+                                  : 'bg-gray-600'
+                              } text-xs capitalize`}
+                            >
+                              {(organizationData as any)?.organization_admin?.status || 'N/A'}
+                            </span>
                           </div>
                         </div>
-
                         <div>
                           <p className="text-sm font-medium text-gray-400">
-                            Certificate
+                            Organization Admin
                           </p>
-                          <a
-                            href={organization?.certificate}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-400 hover:text-blue-300 underline break-words"
-                          >
-                            {organization?.certificate
-                              || 'No certificate available'}
-                          </a>
+                          <p className="text-green-300">
+                            {(organizationData as any)?.organization_admin?.full_name || 'N/A'}
+                          </p>
+                          <p className="text-sm text-blue-300">
+                            {(organizationData as any)?.organization_admin?.email || ''}
+                          </p>
+                        </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-400">
+                              Created At
+                            </p>
+                            <p className="text-cyan-300 text-sm">
+                              {(organizationData as any)?.created_at
+                                ? new Date((organizationData as any).created_at).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    },
+                                  )
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-400">
+                              Updated At
+                            </p>
+                            <p className="text-orange-300 text-sm">
+                              {(organizationData as any)?.updated_at
+                                ? new Date((organizationData as any).updated_at).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    },
+                                  )
+                                : 'N/A'}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -293,8 +339,16 @@ export default function SidebarUser({
                     <Button
                       variant="secondary"
                       onClick={() => {
-                        authStore.clearAuthState();
-                        navigate('/');
+                        try {
+                          authStore.clearAuthState();
+                          disconnect();
+                        }
+                        catch (error) {
+                          console.warn('Disconnect failed:', error);
+                        }
+                        finally {
+                          navigate('/');
+                        }
                       }}
                     >
                       <LogOut />
@@ -317,8 +371,16 @@ export default function SidebarUser({
             <DropdownMenuItem
               className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer"
               onClick={() => {
-                authStore.clearAuthState();
-                navigate('/');
+                try {
+                  authStore.clearAuthState();
+                  disconnect();
+                }
+                catch (error) {
+                  console.warn('Disconnect failed:', error);
+                }
+                finally {
+                  navigate('/');
+                }
               }}
             >
               <LogOut />
