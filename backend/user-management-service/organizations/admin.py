@@ -5,6 +5,7 @@ from .models import Organization, OrganizationUser, OnchainVerification
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = [
+        'id',
         'name', 
         'email', 
         'type', 
@@ -22,6 +23,7 @@ class OrganizationAdmin(admin.ModelAdmin):
     ]
     
     search_fields = [
+        'id',
         'name', 
         'email', 
         'organization_admin__email',
@@ -40,41 +42,44 @@ class OrganizationAdmin(admin.ModelAdmin):
         'organization_admin'
     ]
     
-    # Make some fields read-only if needed
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['id', 'created_at', 'updated_at']
     
     # Add actions for bulk status changes
     actions = ['approve_organizations', 'cancel_organizations', 'ban_organizations', 'set_pending_status']
     
     def approve_organizations(self, request, queryset):
         updated = queryset.update(status='approved', is_active=True)
+        org_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request, 
-            f'{updated} organizations were successfully approved and activated.'
+            f'{updated} organizations approved and activated (IDs: {org_ids[:5]}{"..." if len(org_ids) > 5 else ""})'
         )
     approve_organizations.short_description = "Approve selected organizations"
     
     def cancel_organizations(self, request, queryset):
         updated = queryset.update(status='cancelled', is_active=False)
+        org_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request, 
-            f'{updated} organizations were cancelled and deactivated.'
+            f'{updated} organizations cancelled and deactivated (IDs: {org_ids[:5]}{"..." if len(org_ids) > 5 else ""})'
         )
     cancel_organizations.short_description = "Cancel selected organizations"
     
     def ban_organizations(self, request, queryset):
         updated = queryset.update(status='banned', is_active=False)
+        org_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request, 
-            f'{updated} organizations were banned and deactivated.'
+            f'{updated} organizations banned and deactivated (IDs: {org_ids[:5]}{"..." if len(org_ids) > 5 else ""})'
         )
     ban_organizations.short_description = "Ban selected organizations"
     
     def set_pending_status(self, request, queryset):
         updated = queryset.update(status='pending', is_active=False)
+        org_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request, 
-            f'{updated} organizations were set to pending and deactivated.'
+            f'{updated} organizations set to pending and deactivated (IDs: {org_ids[:5]}{"..." if len(org_ids) > 5 else ""})'
         )
     set_pending_status.short_description = "Set selected organizations to pending"
     

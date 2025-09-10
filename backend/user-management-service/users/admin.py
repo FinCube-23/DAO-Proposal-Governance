@@ -6,6 +6,7 @@ from .models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = [
+        'id',
         'email',
         'first_name', 
         'last_name',
@@ -27,6 +28,7 @@ class UserAdmin(BaseUserAdmin):
     ]
     
     search_fields = [
+        'id',
         'email',
         'first_name',
         'last_name',
@@ -37,6 +39,10 @@ class UserAdmin(BaseUserAdmin):
     
     # Customize the fieldsets for the user detail page
     fieldsets = (
+        ('User ID', {
+            'fields': ('id',),
+            'classes': ('collapse',)
+        }),
         (None, {
             'fields': ('email', 'password')
         }),
@@ -68,6 +74,7 @@ class UserAdmin(BaseUserAdmin):
             'fields': ('last_login', 'date_joined')
         }),
     )
+    readonly_fields = ['id', 'last_login', 'date_joined']
     
     # Fields to show when creating a new user
     add_fieldsets = (
@@ -89,24 +96,27 @@ class UserAdmin(BaseUserAdmin):
     
     def approve_users(self, request, queryset):
         updated = queryset.update(status='approved', is_active=True)
+        user_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request,
-            f'{updated} users were successfully approved.'
+            f'{updated} users approved (IDs: {user_ids[:5]}{"..." if len(user_ids) > 5 else ""})'
         )
     approve_users.short_description = "Approve selected users"
     
     def reject_users(self, request, queryset):
         updated = queryset.update(status='rejected', is_active=False)
+        user_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request,
-            f'{updated} users were rejected.'
+            f'{updated} users rejected (IDs: {user_ids[:5]}{"..." if len(user_ids) > 5 else ""})'
         )
     reject_users.short_description = "Reject selected users"
     
     def ban_users(self, request, queryset):
         updated = queryset.update(status='banned', is_active=False)
+        user_ids = list(queryset.values_list('id', flat=True))
         self.message_user(
             request,
-            f'{updated} users were banned.'
+            f'{updated} users banned (IDs: {user_ids[:5]}{"..." if len(user_ids) > 5 else ""})'
         )
     ban_users.short_description = "Ban selected users"
