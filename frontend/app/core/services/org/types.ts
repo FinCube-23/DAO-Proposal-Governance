@@ -63,23 +63,22 @@ export interface GetOrgResponse {
   id: number;
   name: string;
   email: string;
-  context: string;
   type: string;
-  location: string;
-  is_approved: boolean;
-  wallet_address: string;
-  native_currency: string;
-  certificate: string;
-  trx_hash: string;
-  proposal_onchain_id: number;
-  membership_onchain_status: string;
+  address: string;
+  legal_entity_identifier: string;
+  status: string;
+  is_active: boolean;
+  organization_admin: {
+    id: number;
+    email: string;
+    full_name: string;
+    status: string;
+    phone_number: string;
+    wallet_address: string;
+  };
+  onchain_verifications: any[];
   created_at: string;
   updated_at: string;
-  user: {
-    id: number;
-    name: string;
-    email: string;
-  };
 }
 
 export interface Org {
