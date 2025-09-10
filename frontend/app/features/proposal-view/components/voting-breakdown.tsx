@@ -72,7 +72,8 @@ export default function VotingBreakdown({ proposalId }: any) {
       );
     }
     catch (e: any) {
-      let errorMessage = e.message;
+      console.error('Vote casting error:', e);
+      let errorMessage = e?.message || e?.reason || e?.toString() || 'An error occurred while casting vote';
 
       if (errorMessage.includes('reverted with the following reason:')) {
         const match = errorMessage.match(
@@ -83,6 +84,7 @@ export default function VotingBreakdown({ proposalId }: any) {
         }
       }
 
+      console.warn('Showing toast error:', errorMessage);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -105,7 +107,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       await waitForTransactionReceipt(config, { hash });
     }
     catch (e: any) {
-      let errorMessage = e.message;
+      let errorMessage = e?.message || e?.reason || e?.toString() || 'An error occurred while executing proposal';
 
       if (errorMessage.includes('reverted with the following reason:')) {
         const match = errorMessage.match(
@@ -138,7 +140,8 @@ export default function VotingBreakdown({ proposalId }: any) {
       await waitForTransactionReceipt(config, { hash });
     }
     catch (e: any) {
-      let errorMessage = e.message;
+      console.error('Proposal cancellation error:', e);
+      let errorMessage = e?.message || e?.reason || e?.toString() || 'An error occurred while cancelling proposal';
 
       if (errorMessage.includes('reverted with the following reason:')) {
         const match = errorMessage.match(
@@ -148,6 +151,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           errorMessage = match[1];
         }
       }
+      console.warn('Showing toast error:', errorMessage);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);

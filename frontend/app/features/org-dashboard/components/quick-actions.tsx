@@ -32,6 +32,66 @@ export default function QuickActions() {
     }
   };
 
+  const addSepoliaTestnet = async () => {
+    try {
+      // First try to switch to Sepolia if it already exists
+      try {
+        await client?.switchChain({ id: 11155111 });
+        toast.success('Switched to Sepolia Testnet');
+        return;
+      }
+      catch (switchError) {
+        // If switching fails, continue with adding the network
+        console.warn('Network not found, attempting to add:', switchError);
+      }
+
+      // Add the network if it doesn't exist
+      const success = await client?.addChain({
+        chain: {
+          id: 11155111,
+          name: 'Sepolia',
+          nativeCurrency: {
+            name: 'Sepolia Ether',
+            symbol: 'ETH',
+            decimals: 18,
+          },
+          rpcUrls: {
+            default: {
+              http: ['https://ethereum-sepolia-rpc.publicnode.com'],
+            },
+            public: {
+              http: ['https://ethereum-sepolia-rpc.publicnode.com'],
+            },
+          },
+          blockExplorers: {
+            default: {
+              name: 'Etherscan',
+              url: 'https://sepolia.etherscan.io',
+            },
+          },
+        },
+      });
+
+      if (success) {
+        toast.success('Sepolia Testnet added successfully');
+      }
+    }
+    catch (e: any) {
+      console.error('Failed to add Sepolia testnet:', e);
+
+      // Handle specific error cases
+      if (e.message?.includes('already has added with the same chainId')) {
+        toast.warning('Sepolia Testnet is already added to your wallet');
+      }
+      else if (e.message?.includes('User rejected')) {
+        toast.warning('Network addition was cancelled');
+      }
+      else {
+        toast.error('Failed to add Sepolia testnet');
+      }
+    }
+  };
+
   // Utility to handle dynamic classNames for disabled state
   const getButtonClass = (disabled: boolean) =>
     [
@@ -55,21 +115,21 @@ export default function QuickActions() {
               <div className="p-2 bg-blue-500 rounded-lg">
                 <BookmarkPlus className="w-4 h-4 text-white" />
               </div>
-              <span className="font-medium text-white">Add USDC Token</span>
+              <span className="font-medium text-white">Import USDC Token</span>
             </div>
             <ArrowUpRight className="w-4 h-4 text-gray-500" />
           </button>
 
           <button
             type="button"
-            className={getButtonClass(true)}
-            disabled
+            className={getButtonClass(false)}
+            onClick={addSepoliaTestnet}
           >
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-purple-500 rounded-lg">
                 <Plus className="w-4 h-4 text-white" />
               </div>
-              <span className="font-medium text-white">Add Fund</span>
+              <span className="font-medium text-white">Add Sepolia Testnet</span>
             </div>
             <ArrowUpRight className="w-4 h-4 text-gray-500" />
           </button>

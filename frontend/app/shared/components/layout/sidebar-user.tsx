@@ -291,6 +291,47 @@ export default function SidebarUser({
                             {(organizationData as any)?.organization_admin?.email || ''}
                           </p>
                         </div>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-400">
+                              Created At
+                            </p>
+                            <p className="text-cyan-300 text-sm">
+                              {(organizationData as any)?.created_at
+                                ? new Date((organizationData as any).created_at).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    },
+                                  )
+                                : 'N/A'}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-400">
+                              Updated At
+                            </p>
+                            <p className="text-orange-300 text-sm">
+                              {(organizationData as any)?.updated_at
+                                ? new Date((organizationData as any).updated_at).toLocaleDateString(
+                                    undefined,
+                                    {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    },
+                                  )
+                                : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
