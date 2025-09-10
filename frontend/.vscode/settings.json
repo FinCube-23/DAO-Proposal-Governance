@@ -57,5 +57,6 @@
     "VITE",
     "wagmi",
     "yesvotes"
-  ]
+  ],
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
