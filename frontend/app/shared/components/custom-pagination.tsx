@@ -29,7 +29,7 @@ export default function CustomPagination({ total, page, limit, onPageChange }: P
 
   // Helper to render page numbers
   const renderPageNumbers = () => {
-    if (totalPages < 8) {
+    if (totalPages <= 7) {
       // Render all page numbers directly
       return Array.from({ length: totalPages }, (_, idx) => {
         const pageNum = idx + 1;
@@ -46,37 +46,72 @@ export default function CustomPagination({ total, page, limit, onPageChange }: P
       });
     }
     else {
-      // Always show 1 2 3 ... n-2 n-1 n
       const items = [];
+      // Always show first page
       items.push(
         <PaginationItem key={1}>
           <PaginationLink isActive={page === 1} onClick={() => handlePageChange(1)}>1</PaginationLink>
         </PaginationItem>,
       );
-      items.push(
-        <PaginationItem key={2}>
-          <PaginationLink isActive={page === 2} onClick={() => handlePageChange(2)}>2</PaginationLink>
-        </PaginationItem>,
-      );
-      items.push(
-        <PaginationItem key={3}>
-          <PaginationLink isActive={page === 3} onClick={() => handlePageChange(3)}>3</PaginationLink>
-        </PaginationItem>,
-      );
-      // Ellipsis
-      items.push(
-        <PaginationItem key="start-ellipsis">
-          <PaginationEllipsis />
-        </PaginationItem>,
-      );
-      // Show n-2, n-1, n
-      for (let p = totalPages - 2; p <= totalPages; p++) {
+
+      // Show left ellipsis if needed
+      if (page > 4) {
+        items.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>,
+        );
+      }
+
+      // Show window of pages around current
+      const windowPages = [];
+      if (page <= 4) {
+        // Show pages 2, 3, 4, 5 if near the start
+        for (let p = 2; p <= 5; p++) {
+          if (p < totalPages) {
+            windowPages.push(p);
+          }
+        }
+      }
+      else if (page >= totalPages - 3) {
+        // Show pages n-4, n-3, n-2, n-1 if near the end
+        for (let p = totalPages - 4; p < totalPages; p++) {
+          if (p > 1) {
+            windowPages.push(p);
+          }
+        }
+      }
+      else {
+        // Show current -1, current, current +1
+        for (let p = page - 1; p <= page + 1; p++) {
+          if (p > 1 && p < totalPages) {
+            windowPages.push(p);
+          }
+        }
+      }
+      windowPages.forEach((p) => {
         items.push(
           <PaginationItem key={p}>
             <PaginationLink isActive={p === page} onClick={() => handlePageChange(p)}>{p}</PaginationLink>
           </PaginationItem>,
         );
+      });
+
+      // Show right ellipsis if needed
+      if (page < totalPages - 3) {
+        items.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>,
+        );
       }
+
+      // Always show last page
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink isActive={page === totalPages} onClick={() => handlePageChange(totalPages)}>{totalPages}</PaginationLink>
+        </PaginationItem>,
+      );
       return items;
     }
   };
