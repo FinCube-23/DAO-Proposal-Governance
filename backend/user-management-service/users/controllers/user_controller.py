@@ -14,6 +14,7 @@ from users.serializers import (
     UserSelfUpdateSerializer,
     UserResponseSerializer,
     UserStatusResponseSerializer,
+    UserStatusUpdateSerializer,
 )
 from users.utils.exceptions import EmailAlreadyExistsError
 from drf_spectacular.utils import (
@@ -101,6 +102,38 @@ class ProtectedUserController(ViewSet):
             return Response(UserSelfUpdateSerializer(user).data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    """
+    Update user status. For now we are just checking if the JWT token is valid or not as role structure is not final yet.
+    """
+
+    @extend_schema(
+        request=UserStatusUpdateSerializer,
+        responses={
+            200: UserStatusUpdateSerializer,
+            400: {"type": "object", "properties": {"error": {"type": "string"}}},
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="Update user status by user_id",
+        description="Allows an authenticated user to update the status of any user by user_id.",
+    )
+    def update_user_status(self, request, user_id):
+        serializer = UserStatusUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            updated_user = UserService.update_status(
+                user_id, serializer.validated_data["status"]
+            )
+
+            response_serializer = UserStatusUpdateSerializer(updated_user)
+            return Response({"status": "success", "data": response_serializer.data})
+        except Exception as e:
+            error_status = (
+                status.HTTP_404_NOT_FOUND
+                if "not found" in str(e).lower()
+                else status.HTTP_400_BAD_REQUEST
+            )
+            return Response({"status": "error", "message": str(e)}, status=error_status)
 
     """
     This will allow the user to check their status by email.

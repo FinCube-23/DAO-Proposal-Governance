@@ -4,6 +4,7 @@ from users.controllers import (
     PublicAuthController,
     ProtectedUserController,
     PublicUserController,
+    
 )
 
 
@@ -45,6 +46,11 @@ urlpatterns = [
         "/profile/update",
         ProtectedUserController.as_view({"patch": "update_user"}),
         name="user-profile-update",
+    ),
+    path(
+        "/profile/update-status/<int:user_id>",
+        ProtectedUserController.as_view({"patch": "update_user_status"}),
+        name="update_user_status",
     ),
     path(
         "/profile/status/<str:email>",

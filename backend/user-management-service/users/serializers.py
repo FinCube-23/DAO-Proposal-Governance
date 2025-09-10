@@ -206,3 +206,17 @@ class UserStatusResponseSerializer(serializers.ModelSerializer):
             "is_verified_contact_number",
         ]
         read_only_fields = fields
+
+
+
+class UserStatusUpdateSerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(choices=[choice[0] for choice in User.STATUS_CHOICES])
+
+    class Meta:
+        model = User
+        fields = ["status"]
+
+    def validate(self, data):
+        if set(data.keys()) != {"status"}:
+            raise serializers.ValidationError("Only status can be updated.")
+        return data

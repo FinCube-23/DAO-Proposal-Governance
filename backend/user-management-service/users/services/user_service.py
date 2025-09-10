@@ -91,3 +91,25 @@ class UserService:
         if not user:
             raise Exception("User not found")
         return user
+
+
+    @staticmethod
+    def update_status(user_id: int, new_status: str):
+        user = UserRepository.get_user_by_id(user_id)
+        if not user:
+            raise Exception("User not found")
+
+        valid_statuses = [choice[0] for choice in User.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            raise Exception(
+                f"Invalid status: {new_status}. Must be one of {valid_statuses}"
+            )
+
+        user.status = new_status
+        # Optionally, update is_active based on status
+        if new_status == "approved":
+            user.is_active = True
+        elif new_status in ("rejected", "banned"):
+            user.is_active = False
+        user.save(update_fields=["status", "is_active"])
+        return user
