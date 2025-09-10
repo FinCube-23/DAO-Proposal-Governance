@@ -110,7 +110,6 @@ export default function AdminDashboard() {
         });
         const result = response.toString();
 
-        // console.log('Proposal Count:', result);
         setProposalCount(result);
       }
       catch (e) {

@@ -45,7 +45,6 @@ function TrxList() {
     mutationKey: ['getTransactions'],
     mutationFn: auditTrailApis.getTransactions,
     onSuccess: (data) => {
-      console.log('data:', data);
       setTrxList(data.data);
       setTotalPages(Math.ceil(data.total / limit));
     },
@@ -119,7 +118,7 @@ function TrxList() {
           </div>
         </div>
         <div className="flex gap-5">
-          <div className="w-[200px] flex">
+          <div className="w-[200px] flex items-center">
             <span className="text-xs">Filter by Source:</span>
             <Select value={source} onValueChange={value => setSource(value)}>
               <SelectTrigger>
@@ -134,7 +133,7 @@ function TrxList() {
               </SelectContent>
             </Select>
           </div>
-          <div className="w-[200px] flex">
+          <div className="w-[200px] flex items-center">
             <span className="text-xs">Filter by Status:</span>
 
             <Select

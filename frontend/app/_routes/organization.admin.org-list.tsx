@@ -37,7 +37,7 @@ const locations = [
 
 const limit = 15;
 
-function OrgList() {
+export default function OrgList() {
   const [orgList, setOrgList] = useState<any>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -162,9 +162,9 @@ function OrgList() {
               <TableCell>{mfs.id}</TableCell>
               <TableCell>{mfs.name}</TableCell>
               <TableCell>{mfs.type}</TableCell>
-              <TableCell>{mfs.location}</TableCell>
+              <TableCell>{mfs.address}</TableCell>
               <TableCell className="capitalize">
-                {mfs.membership_onchain_status}
+                {mfs.status}
               </TableCell>
               <TableCell>{formatDate(mfs.created_at)}</TableCell>
               <TableCell>{formatDate(mfs.updated_at)}</TableCell>
@@ -224,5 +224,3 @@ function OrgList() {
     </>
   );
 }
-
-export default OrgList;
