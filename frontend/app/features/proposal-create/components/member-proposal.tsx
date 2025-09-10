@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
+import { env } from '@/core/env';
 import { proposalApis } from '@/core/services/proposal';
 import { Button } from '@/shared/components/ui/button';
 import {
@@ -34,6 +35,7 @@ export default function MemberProposal() {
       setDialogOpen(true);
     },
     onError: (error: any) => {
+      console.error(error);
       toast.error(`Error creating proposal: ${error.message}`);
     },
   });
@@ -55,7 +57,7 @@ export default function MemberProposal() {
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'newMemberApprovalProposal',
         args: [data._newMember, data.description],
       });
@@ -83,6 +85,7 @@ export default function MemberProposal() {
           errorMessage = match[1];
         }
       }
+      console.error('approveMember error:', e);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -144,7 +147,7 @@ export default function MemberProposal() {
             {' '}
             <a
               target="_"
-              href={`${import.meta.env.VITE_TRX_EXPLORER}${trxHash}`}
+              href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
               className="text-blue-400 underline"
             >
               click here

@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
+import { env } from '@/core/env';
 import { proposalApis } from '@/core/services/proposal';
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
@@ -36,6 +37,7 @@ export default function GeneralProposal() {
       setDialogOpen(true);
     },
     onError: (error: any) => {
+      console.error(error);
       toast.error(`Error creating proposal: ${error.message}`);
     },
   });
@@ -77,7 +79,7 @@ export default function GeneralProposal() {
     try {
       const { request } = await simulateContract(config, {
         abi: contractABI,
-        address: import.meta.env.VITE_SMART_CONTRACT_ADDRESS,
+        address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
         functionName: 'propose',
         args: [data.targets, data.values, data.calldatas, data.description],
       });
@@ -105,6 +107,7 @@ export default function GeneralProposal() {
           errorMessage = match[1];
         }
       }
+      console.error(e);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -199,7 +202,7 @@ export default function GeneralProposal() {
                 {' '}
                 <a
                   target="_"
-                  href={`${import.meta.env.VITE_TRX_EXPLORER}${trxHash}`}
+                  href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
                   className="text-blue-400 underline"
                 >
                   click here

@@ -12,6 +12,7 @@ import {
 import { WagmiProvider } from 'wagmi';
 import { config } from '@/core/config';
 import Header from '@/shared/components/layout/header';
+import { env } from './core/env';
 import '@rainbow-me/rainbowkit/styles.css';
 import './app.css';
 
@@ -79,7 +80,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
         ? 'The requested page could not be found.'
         : error.statusText || details;
   }
-  else if (import.meta.env.DEV && error && error instanceof Error) {
+  else if (env.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }
