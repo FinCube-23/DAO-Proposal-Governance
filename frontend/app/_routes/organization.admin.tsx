@@ -43,7 +43,7 @@ export default function AdminLayout() {
           type="button"
           onClick={() => navigate('/organization/admin/transactions')}
           className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
-            activeTab === 'trasactions'
+            activeTab === 'transactions'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
               : 'text-slate-400 hover:text-white'
           }`}
