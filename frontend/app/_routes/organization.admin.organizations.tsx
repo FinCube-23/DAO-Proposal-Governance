@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { orgApis } from '@/core/services/org';
 import {
   Pagination,
@@ -44,7 +44,7 @@ export default function OrgList() {
   const [status, setStatus] = useState<string>('');
   const [type, setType] = useState<string>('');
   const [location, setLocation] = useState<string>('');
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const getAllOrgs = useMutation({
     mutationKey: ['getAllOrgs'],
@@ -154,7 +154,7 @@ export default function OrgList() {
           {orgList.map((mfs: any) => (
             <TableRow
               onClick={() => {
-                // navigate(`/admin/dashboard/organizations/${mfs.id}`);
+                navigate(`/organization/admin/organizations/${mfs.id}`);
               }}
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={mfs.id}

@@ -166,7 +166,7 @@ function TrxList() {
           {trxList.map(trx => (
             <TableRow
               onClick={() => {
-                // navigate(`/admin/dashboard/transactions/${trx.id}`);
+                navigate(`/organization/admin/transactions/${trx.id}`);
               }}
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={trx.id}
