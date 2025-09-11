@@ -77,6 +77,10 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
         });
       }
 
+      // Sort organizations to keep Brain Station 23 at index 1
+      authStore.sortOrganizations();
+      console.warn('Organizations sorted after adding user to org');
+
       // Call onSuccess callback to proceed to next step
       if (onSuccess) {
         toast.success('Organization created! Proceeding to next step...');
@@ -114,6 +118,11 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
       }
       else {
         toast.success('Organization created successfully');
+        
+        // Sort organizations to keep Brain Station 23 at index 1
+        authStore.sortOrganizations();
+        console.warn('Organizations sorted after creating org (no profile ID case)');
+        
         // Call onSuccess callback to proceed to next step
         if (onSuccess) {
           toast.success('User added to organization! Proceeding to next step...');

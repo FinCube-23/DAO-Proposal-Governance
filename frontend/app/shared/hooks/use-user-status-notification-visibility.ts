@@ -19,7 +19,8 @@ export function useUserStatusNotificationVisibility() {
 
   // Calculate visibility (forceUpdate ensures this re-runs when localStorage changes)
   const isVisible = (() => {
-    if (!profile) return false;
+    if (!profile)
+      return false;
 
     // For pending users, notification is always visible
     if (profile.status === 'pending') {
