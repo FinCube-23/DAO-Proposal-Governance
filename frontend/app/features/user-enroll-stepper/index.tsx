@@ -9,19 +9,30 @@ export default function UserEnrollStepper() {
   const auth = useAuthStore(state => state);
   const [current, setCurrent] = useState(0);
   const [selectedFlow, setSelectedFlow] = useState<'create' | 'select' | null>(null);
+  const [isFromOrgCreation, setIsFromOrgCreation] = useState(false);
 
   // Determine if modal should be shown based on auth state
 
   const shouldShowModal = useMemo(() => {
+    // Keep modal open if we're in the middle of the stepper flow (current > 0)
+    if (current > 0) {
+      return true;
+    }
+
     if (auth.profile && Array.isArray(auth.profile.organizations)) {
       return auth.profile && auth.profile.organizations?.length < 2;
     }
     return false;
-  }, [auth.profile]);
+  }, [auth.profile, current]);
 
   const incrementStep = () => {
     if (current < 4) { // Keep max steps at 4 (0: prompt, 1: wallet, 2: selection, 3: form/dropdown, 4: closure)
-      setCurrent(current + 1);
+      const newStep = current + 1;
+      console.warn(`Incrementing step from ${current} to ${newStep}`);
+      setCurrent(newStep);
+    }
+    else {
+      console.warn(`Cannot increment step beyond 4, current is ${current}`);
     }
   };
 
@@ -35,10 +46,12 @@ export default function UserEnrollStepper() {
     // Reset current step when modal is closed
     setCurrent(0);
     setSelectedFlow(null);
+    setIsFromOrgCreation(false);
   };
 
   const handleCreateNewOrg = () => {
     setSelectedFlow('create');
+    setIsFromOrgCreation(true);
   };
 
   const handleSelectExistingOrg = () => {
@@ -59,6 +72,7 @@ export default function UserEnrollStepper() {
 
             {current > 0 && current < 4 && (
               <>
+                {console.warn('Rendering StepperBody, current =', current, 'selectedFlow =', selectedFlow)}
                 <StepperProgress current={current} />
                 <StepperBody
                   current={current}
@@ -73,7 +87,13 @@ export default function UserEnrollStepper() {
             )}
 
             {current === 4 && (
-              <StepClosure closeModal={closeModal} />
+              <>
+                {console.warn('Rendering StepClosure, current =', current, 'isFromOrgCreation =', isFromOrgCreation)}
+                <StepClosure
+                  closeModal={closeModal}
+                  isFromOrgCreation={isFromOrgCreation}
+                />
+              </>
             )}
           </div>
         </div>

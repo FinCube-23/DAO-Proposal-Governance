@@ -3,19 +3,21 @@ import { useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent } from '@/shared/components/ui/card';
 
-interface Props {
+interface StepOrgSelectionProps {
+  selectedOption?: string;
+  onOptionChange?: (option: string) => void;
+  onCreateNew: () => void;
+  onSelectExisting?: () => void; // Optional since it's disabled
   incrementStep: () => void;
   decrementStep: () => void;
-  onCreateNew: () => void;
-  onSelectExisting: () => void;
 }
 
 export default function StepOrgSelection({
   incrementStep,
   decrementStep,
   onCreateNew,
-  onSelectExisting,
-}: Props) {
+  onSelectExisting: _onSelectExisting,
+}: StepOrgSelectionProps) {
   const [selectedOption, setSelectedOption] = useState<'create' | 'select' | null>(null);
 
   const handleNext = () => {
@@ -23,10 +25,7 @@ export default function StepOrgSelection({
       onCreateNew();
       incrementStep();
     }
-    else if (selectedOption === 'select') {
-      onSelectExisting();
-      incrementStep();
-    }
+    // Note: 'select' option is disabled
   };
 
   const canProceed = selectedOption !== null;
@@ -69,29 +68,26 @@ export default function StepOrgSelection({
           </CardContent>
         </Card>
 
-        {/* Select Existing Organization Option */}
+        {/* Select Existing Organization Option - Disabled */}
         <Card
-          className={`cursor-pointer transition-all ${
-            selectedOption === 'select' ? 'ring-2 ring-primary' : 'hover:bg-accent'
-          }`}
-          onClick={() => setSelectedOption('select')}
+          className="cursor-not-allowed transition-all opacity-50 bg-gray-100"
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
-                <Building className="h-6 w-6 text-primary" />
+                <Building className="h-6 w-6 text-gray-400" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold">Select Existing Organization</h3>
-                <p className="text-sm text-muted-foreground">
-                  Join an existing organization that you have access to
+                <h3 className="font-semibold text-gray-500">Select Existing Organization</h3>
+                <p className="text-sm text-gray-400">
+                  This option is temporarily disabled. Please create a new organization.
                 </p>
               </div>
               <div className="flex-shrink-0">
                 <input
                   type="radio"
-                  checked={selectedOption === 'select'}
-                  onChange={() => setSelectedOption('select')}
+                  checked={false}
+                  disabled={true}
                   className="h-4 w-4"
                 />
               </div>

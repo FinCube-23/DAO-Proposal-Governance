@@ -38,9 +38,10 @@ const formSchema = z.object({
 
 interface Props {
   organization: Organization | null;
+  onSuccess?: () => void;
 }
 
-export default function OrgInfoForm({ organization }: Props) {
+export default function OrgInfoForm({ organization, onSuccess }: Props) {
   const authStore = useAuthStore(state => state);
   const { address } = useAccount();
 
@@ -75,6 +76,19 @@ export default function OrgInfoForm({ organization }: Props) {
           wallet_address: address,
         });
       }
+
+      // Call onSuccess callback to proceed to next step
+      if (onSuccess) {
+        toast.success('Organization created! Proceeding to next step...');
+        setTimeout(() => {
+          console.warn('About to call onSuccess callback');
+          onSuccess();
+          console.warn('Called onSuccess callback');
+        }, 1000); // Small delay to allow UI updates
+      }
+      else {
+        console.warn('No onSuccess callback provided');
+      }
     },
     onError: (error) => {
       toast.error(`Organization created but failed to add you as the admin: ${error.message}`);
@@ -100,6 +114,18 @@ export default function OrgInfoForm({ organization }: Props) {
       }
       else {
         toast.success('Organization created successfully');
+        // Call onSuccess callback to proceed to next step
+        if (onSuccess) {
+          toast.success('User added to organization! Proceeding to next step...');
+          setTimeout(() => {
+            console.warn('About to call onSuccess callback from addUserToOrg');
+            onSuccess();
+            console.warn('Called onSuccess callback from addUserToOrg');
+          }, 1000); // Small delay to allow UI updates
+        }
+        else {
+          console.warn('No onSuccess callback provided in addUserToOrg');
+        }
       }
     },
     onError: (error) => {

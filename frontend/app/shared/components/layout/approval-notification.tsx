@@ -25,10 +25,11 @@ export default function ApprovalNotification() {
   const { address, isConnected } = useAccount();
 
   // Check if membership approval notification has been shown for this user
-  const getMembershipApprovalKey = () => 
+  const getMembershipApprovalKey = () =>
     profile?.id && orgData?.id ? `membership-approved-notification-shown-${profile.id}-${orgData.id}` : '';
-  const hasShownMembershipApproval = profile?.id && orgData?.id ? 
-    localStorage.getItem(getMembershipApprovalKey()) === 'true' : false;
+  const hasShownMembershipApproval = profile?.id && orgData?.id
+    ? localStorage.getItem(getMembershipApprovalKey()) === 'true'
+    : false;
 
   // Check membership approval status when organization is approved and wallet is connected
   useEffect(() => {

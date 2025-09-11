@@ -34,9 +34,9 @@ export default function UserStatusNotification() {
   };
 
   // Only show if user profile exists and status is pending or (approved and not yet shown)
-  if (!profile || !isVisible || 
-      (profile.status !== 'pending' && 
-       !(profile.status === 'approved' && !hasShownApprovedNotification))) {
+  if (!profile || !isVisible
+    || (profile.status !== 'pending'
+      && !(profile.status === 'approved' && !hasShownApprovedNotification))) {
     return null;
   }
 
