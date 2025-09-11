@@ -1,6 +1,7 @@
 import type { Route } from './+types/root';
 import { darkTheme, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import {
   isRouteErrorResponse,
   Links,
@@ -8,6 +9,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigate,
 } from 'react-router';
 import { Toaster } from 'sonner';
 import { WagmiProvider } from 'wagmi';
@@ -31,6 +33,25 @@ export const links: Route.LinksFunction = () => [
 ];
 
 const queryClient = new QueryClient();
+
+// Auth Error Handler Component
+function AuthErrorHandler() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleAuthError = () => {
+      navigate('/error/401');
+    };
+
+    window.addEventListener('auth-error', handleAuthError);
+
+    return () => {
+      window.removeEventListener('auth-error', handleAuthError);
+    };
+  }, [navigate]);
+
+  return null;
+}
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -72,7 +93,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <AuthErrorHandler />
+      <Outlet />
+    </>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {

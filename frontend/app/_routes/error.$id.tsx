@@ -145,7 +145,7 @@ export default function ErrorPage() {
             </div>
 
             {/* Error Code */}
-            <div className="pt-4 border-t border-slate-200 dark:border-slate-600">
+            <div className="pt-4 mt-3 border-t border-slate-200 dark:border-slate-600">
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 Error Code:
                 {' '}
