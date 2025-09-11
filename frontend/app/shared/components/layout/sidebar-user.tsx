@@ -92,6 +92,9 @@ export default function SidebarUser({
 
   useEffect(() => {
     if (authStore.profile?.organizations?.[0]?.name) {
+      console.log('====================================');
+      console.log(authStore.profile);
+      console.log('====================================');
       getStatusMutation.mutate(authStore.profile.organizations[0].name);
     }
   }, [organization]);

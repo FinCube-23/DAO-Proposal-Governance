@@ -33,6 +33,7 @@ export default function LoginForm() {
     onSuccess: (data) => {
       authStore.setProfile(data);
       if (data?.is_active) {
+        toast.success('Successfully logged in!');
         navigate('/organization');
       }
     },

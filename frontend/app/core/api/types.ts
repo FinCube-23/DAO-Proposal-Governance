@@ -79,6 +79,13 @@ export interface FetchMeResponse {
   organizations: UserOrgs[];
 }
 
+// Membership approval check
+export interface IsMemberApprovedPayload {
+  address: string;
+}
+
+export type IsMemberApprovedResponse = boolean;
+
 // DAO
 export interface CreateDAOPayload {
   id: number;
