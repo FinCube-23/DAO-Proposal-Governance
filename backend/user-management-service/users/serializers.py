@@ -1,12 +1,8 @@
-# users/serializers/registration.py
 from rest_framework import serializers
-from organizations.models import Organization
 from users.models import User
 from typing import Optional
-from drf_spectacular.utils import extend_schema_field, OpenApiExample
-from phonenumber_field.serializerfields import PhoneNumberField
-from users.utils import get_tokens_for_user
-from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+from drf_spectacular.utils import extend_schema_field
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -208,9 +204,10 @@ class UserStatusResponseSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-
 class UserStatusUpdateSerializer(serializers.ModelSerializer):
-    status = serializers.ChoiceField(choices=[choice[0] for choice in User.STATUS_CHOICES])
+    status = serializers.ChoiceField(
+        choices=[choice[0] for choice in User.STATUS_CHOICES]
+    )
 
     class Meta:
         model = User
@@ -220,3 +217,25 @@ class UserStatusUpdateSerializer(serializers.ModelSerializer):
         if set(data.keys()) != {"status"}:
             raise serializers.ValidationError("Only status can be updated.")
         return data
+
+
+class RefreshTokenRequestSerializer(serializers.Serializer):
+    refresh = serializers.CharField(write_only=True, required=True)
+
+    access = serializers.CharField(read_only=True)
+
+    def validate(self, attrs):
+        refresh_token_str = attrs.get("refresh")
+        if not refresh_token_str:
+            raise serializers.ValidationError({"refresh": "This field is required."})
+
+        try:
+            token = RefreshToken(refresh_token_str)
+            data = {"access": str(token.access_token)}
+            return data
+        except TokenError:
+            raise serializers.ValidationError({"refresh": "Invalid refresh token."})
+
+
+class RefreshTokenResponseSerializer(serializers.Serializer):
+    access = serializers.CharField()

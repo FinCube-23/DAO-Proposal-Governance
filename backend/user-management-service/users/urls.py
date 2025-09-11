@@ -4,7 +4,6 @@ from users.controllers import (
     PublicAuthController,
     ProtectedUserController,
     PublicUserController,
-    
 )
 
 
@@ -21,6 +20,11 @@ urlpatterns = [
         "/login",
         PublicAuthController.as_view({"post": "login"}),
         name="user-login",
+    ),
+    path(
+        "/get-new-access-token",
+        ProtectedAuthController.as_view({"post": "get_new_access_token"}),
+        name="get-new-access-token",
     ),
     path(
         "/register",

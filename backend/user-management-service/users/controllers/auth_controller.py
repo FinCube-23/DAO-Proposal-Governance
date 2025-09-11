@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from rest_framework_simplejwt.tokens import RefreshToken, TokenError
 from django.contrib.auth import authenticate
 
 
@@ -13,6 +13,8 @@ from users.serializers import (
     UserLoginSerializer,
     PasswordUpdateResponseSerializer,
     LoginResponseSerializer,
+    RefreshTokenRequestSerializer,
+    RefreshTokenResponseSerializer,
 )
 from users.services import UserService
 from users.utils import get_tokens_for_user
@@ -89,5 +91,28 @@ class ProtectedAuthController(ViewSet):
                 serializer.validated_data["new_password"],
             )
             return Response({"status": "Password updated successfully"})
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
+
+    @extend_schema(
+        request=RefreshTokenRequestSerializer,
+        responses={
+            200: RefreshTokenResponseSerializer,
+            400: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+    )
+    def get_new_access_token(self, request):
+        try:
+            serializer = RefreshTokenRequestSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            validated = serializer.validated_data
+
+            response_serializer = RefreshTokenResponseSerializer(validated)
+
+            return Response(
+                {"status": "success", "tokens": response_serializer.data},
+                status=status.HTTP_200_OK,
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=400)
