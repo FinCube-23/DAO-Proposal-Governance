@@ -1,5 +1,5 @@
 import { readContract } from '@wagmi/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
@@ -7,7 +7,11 @@ import CustomPagination from '@/shared/components/custom-pagination';
 import { getOnChainStatus } from '../utils';
 import ProposalCard from './proposal-card';
 
-export default function OnChainProposals() {
+interface Props {
+  search?: string;
+}
+
+export default function OnChainProposals({ search }: Props) {
   // State for total proposals and pagination
   const [totalProposals, setTotalProposals] = useState(0);
   const [currentPage, setCurrentPage] = useState(0);
@@ -65,6 +69,14 @@ export default function OnChainProposals() {
     }
   };
 
+  const filteredProposals = useMemo(() => {
+    if (!search)
+      return proposals;
+    return proposals.filter(proposal =>
+      proposal.proposalURI.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [search, proposals]);
+
   useEffect(() => {
     fetchTotalProposals();
   }, []);
@@ -75,7 +87,7 @@ export default function OnChainProposals() {
 
   return (
     <div className="flex flex-col gap-4">
-      {!loading && proposals.length > 0 && proposals.map(proposal => (
+      {!loading && filteredProposals.length > 0 && filteredProposals.map(proposal => (
         <ProposalCard
           key={proposal.proposalId}
           id={proposal.proposalId}
@@ -96,7 +108,7 @@ export default function OnChainProposals() {
         page={currentPage + 1}
         limit={5}
         onPageChange={(newPage) => {
-          setCurrentPage(newPage);
+          setCurrentPage(newPage - 1);
         }}
       />
     </div>

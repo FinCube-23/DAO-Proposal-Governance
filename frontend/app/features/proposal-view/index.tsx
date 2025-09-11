@@ -1,61 +1,49 @@
-import type { IProposal } from '@/core/api/interfaces';
-import { readContract } from '@wagmi/core';
+import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { config } from '@/core/config';
-import contractABI from '@/core/contract/contract-abi.json';
-import { env } from '@/core/env';
-import { ProposalStatCard } from './components/proposal-stat-card';
-import ProposalViewCard from './components/proposal-view-card';
+import { proposalApis } from '@/core/services/proposal';
+import ProposalBody from './components/proposal-body';
 
 interface Props {
-  source?: string;
   pid?: string;
+  source?: string;
 }
 
-export default function ProposalView({ source, pid }: Props) {
-  const [proposal, setProposal] = useState<IProposal>();
-  const [loading, setLoading] = useState(false);
+export default function ProposalView({ pid, source }: Props) {
+  const [onChainId, setOnChainId] = useState<number | string | undefined>(undefined);
+
+  const getProposal = useMutation({
+    mutationKey: ['get-proposal-by-id', pid],
+    mutationFn: proposalApis.getProposalById,
+    onSuccess: (data) => {
+      if (data) {
+        setOnChainId(data.proposal_onchain_id);
+      }
+      else {
+        toast.error('Proposal not found');
+      }
+    },
+    onError: (error) => {
+      console.error('Failed to fetch proposal information:', error);
+      toast.error('Failed to fetch proposal information');
+    },
+  });
 
   useEffect(() => {
-    const getProposalsById = async () => {
-      setLoading(true);
-      try {
-        const response: any = await readContract(config, {
-          abi: contractABI,
-          address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
-          functionName: 'getProposalsById',
-          args: [pid],
-        });
-
-        setProposal(response);
-      }
-      catch (e) {
-        toast.error('Failed to fetch proposal information');
-        console.error('Failed to fetch proposal information:', e);
-      }
-      finally {
-        setLoading(false);
-      }
-    };
-
-    getProposalsById();
+    if (source === 'off-chain' && pid) {
+      getProposal.mutate(+pid);
+    }
+    else {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setOnChainId(pid);
+    }
   }, [pid, source]);
+
+  if (!onChainId) {
+    return <div>Loading...</div>;
+  }
+
   return (
-    <div className="flex flex-col gap-6">
-      {!loading && proposal
-        ? (
-            <>
-              <ProposalViewCard proposal={proposal} proposalId={pid} />
-              <div className="flex flex-col-reverse md:grid md:grid-cols-12">
-                <div className="md:col-span-7">
-                  <ProposalStatCard proposal={proposal} proposalId={pid} />
-                </div>
-                <div className="md:col-span-4"></div>
-              </div>
-            </>
-          )
-        : 'Loading...'}
-    </div>
+    <ProposalBody onChainId={onChainId} />
   );
 }

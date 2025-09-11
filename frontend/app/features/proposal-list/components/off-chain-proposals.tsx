@@ -14,13 +14,20 @@ export default function OffChainProposals({ filter, search }: Props) {
   const [page, setPage] = useState(1);
   const { data: proposals } = useQuery({
     queryKey: ['off-chain-proposals', { filter, search, limit, page }],
-    queryFn: () => proposalApis.getAllProposals({ limit, page, filter }),
+    queryFn: () => proposalApis.getAllProposals({ limit, page, filter, search }),
   });
 
   return (
     <div className="flex flex-col gap-4">
       {proposals?.data.map(proposal => (
-        <ProposalCard key={proposal.id} id={proposal.id} description={proposal.metadata} status={proposal.proposal_status} address={proposal.proposer_address} />
+        <ProposalCard
+          key={proposal.id}
+          id={proposal.id}
+          description={proposal.metadata}
+          status={proposal.proposal_status}
+          address={proposal.proposer_address}
+          href={`/organization/dao/proposals/off-chain/${proposal.id}`}
+        />
       ))}
       {proposals?.data.length === 0 && <div>No proposals found.</div>}
       <CustomPagination

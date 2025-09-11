@@ -1,13 +1,17 @@
 import type { IProposal } from '@/core/api/interfaces';
 import { readContract } from '@wagmi/core';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
 import { getOnChainStatus } from '../utils';
 import ProposalCard from './proposal-card';
 
-export default function OngoingProposals() {
+interface Props {
+  search?: string;
+}
+
+export default function OngoingProposals({ search }: Props) {
   const [proposals, setProposals] = useState<IProposal[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -34,12 +38,21 @@ export default function OngoingProposals() {
     }
   };
 
+  const filteredProposals = useMemo(() => {
+    if (!search)
+      return proposals;
+    return proposals.filter(proposal =>
+      proposal.proposalURI.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [search, proposals]);
+
   useEffect(() => {
     getOngoingProposals();
   }, []);
+
   return (
     <div className="flex flex-col gap-4">
-      {!loading && proposals.length > 0 && proposals.map(proposal => (
+      {!loading && filteredProposals.length > 0 && filteredProposals.map(proposal => (
         <ProposalCard
           key={proposal.proposalId}
           id={proposal.proposalId}
@@ -55,6 +68,5 @@ export default function OngoingProposals() {
 
       {!loading && proposals.length === 0 && <div>No proposals found.</div>}
     </div>
-
   );
 }

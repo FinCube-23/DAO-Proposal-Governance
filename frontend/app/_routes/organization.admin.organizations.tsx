@@ -2,14 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { orgApis } from '@/core/services/org';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/shared/components/ui/pagination';
+import CustomPagination from '@/shared/components/custom-pagination';
 import {
   Select,
   SelectContent,
@@ -31,7 +24,7 @@ const limit = 15;
 export default function OrgList() {
   const [orgList, setOrgList] = useState<any>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState<number>(0);
   const [status, setStatus] = useState<string>('');
   const [type, setType] = useState<string>('');
   const navigate = useNavigate();
@@ -41,8 +34,8 @@ export default function OrgList() {
     mutationFn: orgApis.getAllOrgs,
     onSuccess: (data) => {
       setOrgList(data.organizations);
-      setTotalPages(Math.ceil(data.pagination.total / limit) || 1);
       setPage(data.pagination.page);
+      setTotal(data.pagination.total);
     },
     onError: (error) => {
       console.error('Get all orgs failed', error);
@@ -150,48 +143,7 @@ export default function OrgList() {
       )}
 
       {orgList.length > 0 && (
-        <Pagination className="my-5">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                className={`${
-                  page === 1 && 'pointer-events-none opacity-50'
-                } cursor-pointer`}
-                onClick={() => {
-                  setPage(prev => Math.max(1, prev - 1));
-                }}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              pageNum => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    className={`cursor-pointer ${
-                      page === pageNum ? 'border-2 border-green-400' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(pageNum);
-                    }}
-                    isActive={page === pageNum}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              ),
-            )}
-            <PaginationItem>
-              <PaginationNext
-                className={`${
-                  page === totalPages && 'pointer-events-none opacity-50'
-                } cursor-pointer`}
-                onClick={() => {
-                  setPage(prev => Math.min(totalPages, prev + 1));
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <CustomPagination limit={limit} total={total} page={page} onPageChange={setPage} />
       )}
     </>
   );

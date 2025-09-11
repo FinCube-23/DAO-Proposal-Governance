@@ -23,7 +23,7 @@ export default function CustomPagination({ total, page, limit, onPageChange }: P
   };
   const totalPages = Math.ceil(total / limit);
 
-  if (totalPages <= 1) {
+  if (totalPages < 1) {
     return null;
   }
 
@@ -121,11 +121,17 @@ export default function CustomPagination({ total, page, limit, onPageChange }: P
       <Pagination>
         <PaginationContent>
           <PaginationItem>
-            <PaginationPrevious onClick={() => handlePageChange(Math.max(1, page - 1))} />
+            <PaginationPrevious
+              onClick={page === 1 ? undefined : () => handlePageChange(Math.max(1, page - 1))}
+              className={page === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+            />
           </PaginationItem>
           {renderPageNumbers()}
           <PaginationItem>
-            <PaginationNext onClick={() => handlePageChange(Math.min(totalPages, page + 1))} />
+            <PaginationNext
+              onClick={page === totalPages ? undefined : () => handlePageChange(Math.min(totalPages, page + 1))}
+              className={page === totalPages ? 'opacity-50 cursor-not-allowed' : ''}
+            />
           </PaginationItem>
         </PaginationContent>
       </Pagination>

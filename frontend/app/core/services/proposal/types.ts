@@ -36,3 +36,16 @@ export interface GetOffchainProposalResponse {
   page: number;
   total: number;
 }
+
+export interface IOffchainProposal {
+  id: number;
+  proposal_onchain_id: number;
+  proposal_type: string;
+  metadata: string;
+  proposer_address: string;
+  processed_by: string;
+  proposal_status: string;
+  trx_hash: string;
+  audit_id: number;
+  trx_status: number;
+}

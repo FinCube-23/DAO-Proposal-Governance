@@ -5,6 +5,6 @@ export default function ProposalsPage() {
   const { source } = useParams();
 
   return (
-    <ProposalList source={source as 'off-chain' | 'on-chain'} />
+    <ProposalList source={source as 'off-chain' | 'on-chain' | 'ongoing'} />
   );
 }

@@ -111,7 +111,7 @@ export default function ApprovalNotification() {
   let messageText = '';
   let showApplyButton = false;
 
-  console.warn('Debug values:', {
+  /* console.warn('Debug values:', {
     isApproved,
     isMemberApproved,
     isCheckingMembership,
@@ -119,7 +119,7 @@ export default function ApprovalNotification() {
     hasAddress: !!address,
     isConnected,
     membershipCheckStatus: isMemberApproved === null ? 'not_checked' : isMemberApproved === false ? 'not_approved' : 'approved',
-  });
+  }); */
 
   if (!isApproved && isMemberApproved === true) {
     // User is already a member but organization is not approved

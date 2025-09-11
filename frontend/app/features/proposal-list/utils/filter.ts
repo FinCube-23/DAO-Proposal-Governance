@@ -1,4 +1,5 @@
 export const filterOptions = {
-  'on-chain': ['all', 'ongoing'],
+  'on-chain': [],
+  'ongoing': [],
   'off-chain': ['all', 'pending', 'cancel', 'executed', 'approved'],
 };

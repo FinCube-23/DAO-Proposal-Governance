@@ -71,7 +71,6 @@ export default function OrgSidebar({
         <SidebarUser
           name={`${authStore.profile?.first_name} ${authStore.profile?.last_name}` || 'N/A'}
           email={authStore.profile?.email || 'N/A'}
-          organization={authStore.profile?.organizations?.[0].name || 'N/A'}
           contactNumber={authStore.profile?.contact_number || 'N/A'}
           isActive={authStore.profile?.is_active || false}
           isStaff={authStore.profile?.is_staff || false}

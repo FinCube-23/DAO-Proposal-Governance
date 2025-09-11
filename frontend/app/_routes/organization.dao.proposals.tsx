@@ -1,11 +1,10 @@
-import { Blocks, Database, Plus, ScrollText, User } from 'lucide-react';
+import { Blocks, Database, Plus, RotateCcw, ScrollText, User } from 'lucide-react';
 import { useState } from 'react';
 import { Link, Outlet, useNavigate, useParams } from 'react-router';
 import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from '@/shared/components/ui/dialog';
@@ -23,7 +22,6 @@ export default function ProposalsLayout() {
           <h1 className="text-3xl font-bold text-white mb-2">Proposals</h1>
           <p className="text-slate-400">Participate in DAO governance and decision making</p>
         </div>
-
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogContent>
             <DialogHeader>
@@ -52,7 +50,7 @@ export default function ProposalsLayout() {
         <button
           type="button"
           onClick={() => navigate('/organization/dao/proposals/on-chain')}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`flex cursor-pointer items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
             activeTab === 'on-chain'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
               : 'text-slate-400 hover:text-white'
@@ -63,8 +61,20 @@ export default function ProposalsLayout() {
         </button>
         <button
           type="button"
+          onClick={() => navigate('/organization/dao/proposals/ongoing')}
+          className={`flex cursor-pointer items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+            activeTab === 'ongoing'
+              ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          <RotateCcw className="w-4 h-4" />
+          Ongoing
+        </button>
+        <button
+          type="button"
           onClick={() => navigate('/organization/dao/proposals/off-chain')}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+          className={`flex cursor-pointer items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
             activeTab === 'off-chain'
               ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
               : 'text-slate-400 hover:text-white'

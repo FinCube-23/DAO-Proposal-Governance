@@ -4,17 +4,10 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { auditTrailApis } from '@/core/services/audit';
+import CustomPagination from '@/shared/components/custom-pagination';
 import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/shared/components/ui/pagination';
 import {
   SelectContent,
   SelectItem,
@@ -35,7 +28,7 @@ const limit = 10;
 function TrxList() {
   const [trxList, setTrxList] = useState<Transaction[]>([]);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [status, setStatus] = useState<string>('');
   const [source, setSource] = useState<string>('');
   const navigate = useNavigate();
@@ -46,7 +39,7 @@ function TrxList() {
     mutationFn: auditTrailApis.getTransactions,
     onSuccess: (data) => {
       setTrxList(data.data);
-      setTotalPages(Math.ceil(data.total / limit));
+      setTotal(data.total);
     },
     onError: (error) => {
       console.error('Get transactions failed', error);
@@ -60,6 +53,7 @@ function TrxList() {
         limit,
         status: status === 'all' ? undefined : status,
         source: source === 'all' ? undefined : source,
+        hash: searchTerm === '' ? undefined : searchTerm,
       });
     };
 
@@ -99,12 +93,12 @@ function TrxList() {
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
-            {searchTerm !== ''
+            {/* {searchTerm !== ''
               ? (
                   <Button
                     variant="secondary"
                     onClick={() => {
-                      // navigate(`/admin/dashboard/trx-details/${searchTerm}`);
+                      navigate(`/admin/dashboard/trx-details/${searchTerm}`);
                     }}
                   >
                     Search
@@ -114,7 +108,7 @@ function TrxList() {
                   <Button variant="secondary" disabled>
                     Search
                   </Button>
-                )}
+                )} */}
           </div>
         </div>
         <div className="flex gap-5">
@@ -227,48 +221,7 @@ function TrxList() {
         <p className="text-center font-bold">No data found</p>
       )}
       {trxList.length > 0 && (
-        <Pagination className="my-5">
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious
-                className={`${
-                  page === 1 && 'pointer-events-none opacity-50'
-                } cursor-pointer`}
-                onClick={() => {
-                  setPage(prev => Math.max(1, prev - 1));
-                }}
-              />
-            </PaginationItem>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              pageNum => (
-                <PaginationItem key={pageNum}>
-                  <PaginationLink
-                    className={`cursor-pointer ${
-                      page === pageNum ? 'border-2 border-green-400' : ''
-                    }`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setPage(pageNum);
-                    }}
-                    isActive={page === pageNum}
-                  >
-                    {pageNum}
-                  </PaginationLink>
-                </PaginationItem>
-              ),
-            )}
-            <PaginationItem>
-              <PaginationNext
-                className={`${
-                  page === totalPages && 'pointer-events-none opacity-50'
-                } cursor-pointer`}
-                onClick={() => {
-                  setPage(prev => Math.min(totalPages, prev + 1));
-                }}
-              />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
+        <CustomPagination limit={limit} total={total} page={page} onPageChange={setPage} />
       )}
     </>
   );

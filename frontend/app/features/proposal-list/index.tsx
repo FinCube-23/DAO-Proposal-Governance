@@ -1,18 +1,22 @@
 import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
+import { useDebounce } from '@/shared/hooks/use-debounce';
 import OffChainProposals from './components/off-chain-proposals';
 import OnChainProposals from './components/on-chain-proposals';
 import OngoingProposals from './components/on-going-proposals';
 import { filterOptions } from './utils';
 
 interface Props {
-  source: 'on-chain' | 'off-chain';
+  source: 'on-chain' | 'off-chain' | 'ongoing';
 }
 
 export default function ProposalList({ source }: Props) {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Debounce the search value with a 300ms delay
+  const debouncedSearch = useDebounce(search, 300);
 
   return (
     <div className="flex flex-col gap-6">
@@ -29,27 +33,29 @@ export default function ProposalList({ source }: Props) {
             />
           </div>
         </div>
+        {filterOptions[source].length > 0 && (
+          <Select onValueChange={value => setStatusFilter(value)} value={statusFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select a fruit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {filterOptions[source].map((option: string) => (
+                  <SelectItem key={option} value={option}>
+                    <span className="capitalize">
+                      {option}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        )}
 
-        <Select onValueChange={value => setStatusFilter(value)} value={statusFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Select a fruit" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {filterOptions[source].map(option => (
-                <SelectItem key={option} value={option}>
-                  <span className="capitalize">
-                    {option}
-                  </span>
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
       </div>
-      {source === 'off-chain'
-        ? <OffChainProposals filter={statusFilter} search={search} />
-        : statusFilter === 'all' ? <OnChainProposals /> : <OngoingProposals />}
+      {source === 'ongoing' && <OngoingProposals />}
+      {source === 'on-chain' && <OnChainProposals search={debouncedSearch} />}
+      {source === 'off-chain' && <OffChainProposals search={debouncedSearch} filter={statusFilter} />}
     </div>
   );
 }

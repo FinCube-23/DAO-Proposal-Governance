@@ -1,7 +1,7 @@
 import type { GetStatusByEmailResponse } from '@/core/api/types';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDisconnect } from 'wagmi';
 import { api } from '@/core/api/client';
@@ -39,7 +39,7 @@ import useAuthStore from '@/shared/stores/auth';
 interface Props {
   name: string;
   email: string;
-  organization: string;
+  organization?: string;
   contactNumber: string;
   isActive: boolean;
   isStaff: boolean;
@@ -47,16 +47,9 @@ interface Props {
   role?: string;
 }
 
-function getStatusByEmail(payload: string) {
-  return api.get<GetStatusByEmailResponse>(
-    `${ORGANIZATION_ENDPOINT.BASE}/status-by-email?email=${payload}`,
-  );
-}
-
 export default function SidebarUser({
   name,
   email,
-  organization,
   contactNumber,
   isActive,
   isStaff,
@@ -65,7 +58,6 @@ export default function SidebarUser({
   const { isMobile } = useSidebar();
   const { disconnect } = useDisconnect();
   const [dialogueOpen, setDialogueOpen] = useState(false);
-  const [_status, setStatus] = useState<string | null>(null);
   const authStore = useAuthStore(state => state);
   const navigate = useNavigate();
 
@@ -78,26 +70,6 @@ export default function SidebarUser({
     queryFn: () => orgApis.getOrg(orgId!),
     enabled: !!orgId,
   });
-
-  const getStatusMutation = useMutation({
-    mutationFn: getStatusByEmail,
-    onSuccess: (data) => {
-      setStatus(data.membership_onchain_status);
-    },
-    onError: (error) => {
-      console.error('Failed to fetch membership status', error);
-      setStatus('Unknown');
-    },
-  });
-
-  useEffect(() => {
-    if (authStore.profile?.organizations?.[0]?.name) {
-      console.log('====================================');
-      console.log(authStore.profile);
-      console.log('====================================');
-      getStatusMutation.mutate(authStore.profile.organizations[0].name);
-    }
-  }, [organization]);
 
   return (
     <SidebarMenu>
