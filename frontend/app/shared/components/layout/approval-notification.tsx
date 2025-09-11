@@ -13,6 +13,7 @@ import { membershipApis } from '@/core/services/membership';
 import { orgApis } from '@/core/services/org';
 import { useUserOrg } from '@/features/dao-details/hooks/use-user-org';
 import { Button } from '@/shared/components/ui/button';
+import { useUserStatusNotificationVisibility } from '@/shared/hooks/use-user-status-notification-visibility';
 import useAuthStore from '@/shared/stores/auth';
 
 export default function ApprovalNotification() {
@@ -23,6 +24,7 @@ export default function ApprovalNotification() {
   const profile = useAuthStore(state => state.profile);
   const { data: orgData, isLoading, error } = useUserOrg();
   const { address, isConnected } = useAccount();
+  const isUserNotificationVisible = useUserStatusNotificationVisibility();
 
   // Check if membership approval notification has been shown for this user
   const getMembershipApprovalKey = () =>
@@ -102,9 +104,8 @@ export default function ApprovalNotification() {
 
   const isApproved = orgData.status === 'approved';
 
-  // Calculate top position based on whether user status notification is shown
-  const hasUserStatusNotification = profile.status === 'pending' || profile.status === 'approved';
-  const topPosition = hasUserStatusNotification ? 'top-[120px]' : 'top-20';
+  // Calculate top position based on whether user status notification is actually visible
+  const topPosition = isUserNotificationVisible ? 'top-[120px]' : 'top-20';
 
   // Determine the message based on organization and membership status
   let messageText = '';

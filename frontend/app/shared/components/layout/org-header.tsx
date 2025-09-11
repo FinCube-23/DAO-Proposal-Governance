@@ -3,19 +3,18 @@ import { ChevronRightIcon } from 'lucide-react';
 import React from 'react';
 import { Link, useLocation } from 'react-router';
 import { SidebarTrigger } from '@/shared/components/ui/sidebar';
-import useAuthStore from '@/shared/stores/auth';
+import { useUserStatusNotificationVisibility } from '@/shared/hooks/use-user-status-notification-visibility';
 import { Separator } from '../ui/separator';
 
 const blacklistedRoutesTitle = [''];
 
 export default function OrgHeader() {
   const location = useLocation();
-  const profile = useAuthStore(state => state.profile);
   const pathnames = location.pathname.split('/').filter(x => x);
+  const isUserNotificationVisible = useUserStatusNotificationVisibility();
 
-  // Calculate top position based on whether user status notification is shown
-  const hasUserStatusNotification = profile?.status === 'pending' || profile?.status === 'approved';
-  const topPosition = hasUserStatusNotification ? 'top-[52px]' : 'top-0';
+  // Calculate top position based on whether user status notification is actually visible
+  const topPosition = isUserNotificationVisible ? 'top-[52px]' : 'top-0';
 
   return (
     <div className={`flex fixed bg-sidebar backdrop-blur-xl ${topPosition} w-full shrink-0 items-center gap-2 border-b px-2 py-4 z-50`}>

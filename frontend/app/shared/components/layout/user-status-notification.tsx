@@ -2,12 +2,14 @@ import { AlertCircle, CheckCircle, RefreshCw, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Button } from '@/shared/components/ui/button';
 import { useRefreshProfile } from '@/shared/hooks/use-refresh-profile';
+import { useUserStatusNotificationVisibility } from '@/shared/hooks/use-user-status-notification-visibility';
 import useAuthStore from '@/shared/stores/auth';
 
 export default function UserStatusNotification() {
   const [isVisible, setIsVisible] = useState(true);
   const profile = useAuthStore(state => state.profile);
   const refreshProfile = useRefreshProfile();
+  const shouldShowNotification = useUserStatusNotificationVisibility();
 
   // Check if approval notification has been shown for this user
   const getApprovalNotificationKey = () => profile?.id ? `user-approved-notification-shown-${profile.id}` : '';
@@ -20,6 +22,8 @@ export default function UserStatusNotification() {
       const timer = setTimeout(() => {
         localStorage.setItem(getApprovalNotificationKey(), 'true');
         setIsVisible(false);
+        // Dispatch a custom event to notify other components
+        window.dispatchEvent(new CustomEvent('userStatusNotificationDismissed'));
       }, 5000);
 
       return () => clearTimeout(timer);
@@ -29,14 +33,14 @@ export default function UserStatusNotification() {
   const handleDismiss = () => {
     if (profile?.id && profile.status === 'approved') {
       localStorage.setItem(getApprovalNotificationKey(), 'true');
+      // Dispatch a custom event to notify other components
+      window.dispatchEvent(new CustomEvent('userStatusNotificationDismissed'));
     }
     setIsVisible(false);
   };
 
-  // Only show if user profile exists and status is pending or (approved and not yet shown)
-  if (!profile || !isVisible
-    || (profile.status !== 'pending'
-      && !(profile.status === 'approved' && !hasShownApprovedNotification))) {
+  // Only show if user profile exists and the hook indicates it should be visible
+  if (!profile || !isVisible || !shouldShowNotification) {
     return null;
   }
 
