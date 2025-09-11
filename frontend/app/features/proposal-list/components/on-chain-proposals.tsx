@@ -10,7 +10,7 @@ import ProposalCard from './proposal-card';
 export default function OnChainProposals() {
   // State for total proposals and pagination
   const [totalProposals, setTotalProposals] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [proposals, setProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,7 +93,7 @@ export default function OnChainProposals() {
 
       <CustomPagination
         total={totalPages}
-        page={currentPage}
+        page={currentPage + 1}
         limit={5}
         onPageChange={(newPage) => {
           setCurrentPage(newPage);

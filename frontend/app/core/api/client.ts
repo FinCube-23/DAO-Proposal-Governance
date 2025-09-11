@@ -2,6 +2,16 @@ import useAuthStore from '@/shared/stores/auth';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
+interface TokenErrorResponse {
+  detail: string;
+  code: string;
+  messages: Array<{
+    token_class: string;
+    token_type: string;
+    message: string;
+  }>;
+}
+
 interface RequestOptions {
   payload?: unknown;
   queryParams?: Record<string, string | number | boolean | undefined | null>;
@@ -52,7 +62,33 @@ async function request<T>(
   const response = await fetch(finalUrl, options);
 
   if (!response.ok) {
-    // You could expand this with a response.json() for error details
+    // Handle 401 token expiration
+    if (response.status === 401) {
+      try {
+        const errorData: TokenErrorResponse = await response.json();
+
+        // Check if it's a token expiration error
+        if (
+          errorData.code === 'token_not_valid'
+          && errorData.detail === 'Given token not valid for any token type'
+        ) {
+          // Clear auth state
+          useAuthStore.getState().clearAuthState();
+
+          // Redirect to login page
+          window.location.href = '/error/401';
+
+          // Throw a specific error
+          throw new Error('Session expired. Please login again.');
+        }
+      }
+      catch (jsonError) {
+        // If JSON parsing fails, fall through to generic error
+        console.error('Failed to parse 401 error response:', jsonError);
+      }
+    }
+
+    // For other errors, you could expand this with response.json() for error details
     throw new Error(`API request failed with status ${response.status}`);
   }
 
