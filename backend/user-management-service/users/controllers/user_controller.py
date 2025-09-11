@@ -122,7 +122,9 @@ class ProtectedUserController(ViewSet):
         serializer.is_valid(raise_exception=True)
         try:
             updated_user = UserService.update_status(
-                user_id, serializer.validated_data["status"]
+                user_id=user_id,
+                approved_by=request.user.id,
+                new_status=serializer.validated_data["status"],
             )
 
             response_serializer = UserStatusUpdateSerializer(updated_user)

@@ -92,9 +92,8 @@ class UserService:
             raise Exception("User not found")
         return user
 
-
     @staticmethod
-    def update_status(user_id: int, new_status: str):
+    def update_status(user_id: int, approved_by: int, new_status: str):
         user = UserRepository.get_user_by_id(user_id)
         if not user:
             raise Exception("User not found")
@@ -106,10 +105,11 @@ class UserService:
             )
 
         user.status = new_status
-        # Optionally, update is_active based on status
+        user.approved_by_id = approved_by  # We are getting this from JWT token.
+        # update is_active based on status(rejected,banned)
         if new_status == "approved":
             user.is_active = True
         elif new_status in ("rejected", "banned"):
             user.is_active = False
-        user.save(update_fields=["status", "is_active"])
+        user.save(update_fields=["status", "is_active", "approved_by_id"])
         return user
