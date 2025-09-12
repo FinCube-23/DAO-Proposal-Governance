@@ -1,16 +1,15 @@
 name: Remote SSH
-
 on:
   push:
     branches:
-      - main
-
+      - dev
 jobs:
   deploy:
     runs-on: self-hosted
-
+ 
     steps:
       - name: Deploy via SSH
+        id: deploy
         uses: appleboy/ssh-action@v1.2.2
         with:
           host: ${{ secrets.VM_IP }}
@@ -19,11 +18,132 @@ jobs:
           port: ${{ secrets.VM_PORT }}
           script: |
             echo "=== Navigating to project directory ==="
-            cd /mnt/ext/projects/DAO-Proposal-Governance
+            cd /mnt/ext/projects/web3-governance-kit
             echo "Pulling latest changes from repository"
-            git pull origin main
-            echo "Stopping docker services"
+            git pull origin dev
+            echo "Stopping Docker services"
             ./run.sh down
-            echo "Starting docker services"
+            echo "Starting Docker services"
             ./run.sh up-be
+            echo "=== Navigating to frontend directory ==="
+            cd /mnt/ext/projects/web3-governance-kit/frontend
+            echo "Stopping frontend services"
+            pm2 delete 0
+            echo "Starting frontend services"
+            pm2 start "serve -s build/client -l 8080" --name fincube-frontend
             echo "Script executed successfully"
+      - name: Notify Teams on Success
+        if: success()
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{
+              "type": "message",
+              "attachments": [
+                {
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "content": {
+                    "type": "AdaptiveCard",
+                    "version": "1.0",
+                    "body": [
+                      {
+                        "type": "TextBlock",
+                        "text": "✅ Fincube Deployment Successful",
+                        "size": "Large",
+                        "weight": "Bolder",
+                        "color": "Good"
+                      },
+                      {
+                        "type": "FactSet",
+                        "facts": [
+                          {
+                            "title": "Repository:",
+                            "value": "${{ github.repository }}"
+                          },
+                          {
+                            "title": "Branch:",
+                            "value": "${{ github.ref_name }}"
+                          },
+                          {
+                            "title": "Commit:",
+                            "value": "${{ github.sha }}"
+                          },
+                          {
+                            "title": "Triggered by:",
+                            "value": "${{ github.actor }}"
+                          },
+                          {
+                            "title": "Workflow:",
+                            "value": "${{ github.workflow }}"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                }
+              ]
+            }' \
+            "${{ secrets.VM_WEBHOOK_URL }}"
+      - name: Notify Teams on Failure
+        if: failure()
+        run: |
+          curl -X POST \
+            -H "Content-Type: application/json" \
+            -d '{
+              "type": "message",
+              "attachments": [
+                {
+                  "contentType": "application/vnd.microsoft.card.adaptive",
+                  "content": {
+                    "type": "AdaptiveCard",
+                    "version": "1.0",
+                    "body": [
+                      {
+                        "type": "TextBlock",
+                        "text": "❌ Fincube Deployment Failed",
+                        "size": "Large",
+                        "weight": "Bolder",
+                        "color": "Attention"
+                      },
+                      {
+                        "type": "FactSet",
+                        "facts": [
+                          {
+                            "title": "Repository:",
+                            "value": "${{ github.repository }}"
+                          },
+                          {
+                            "title": "Branch:",
+                            "value": "${{ github.ref_name }}"
+                          },
+                          {
+                            "title": "Commit:",
+                            "value": "${{ github.sha }}"
+                          },
+                          {
+                            "title": "Triggered by:",
+                            "value": "${{ github.actor }}"
+                          },
+                          {
+                            "title": "Workflow:",
+                            "value": "${{ github.workflow }}"
+                          },
+                          {
+                            "title": "Action:",
+                            "value": "Please check the workflow logs for details"
+                          }
+                        ]
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "type": "Action.OpenUrl",
+                        "title": "View Workflow",
+                        "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }' \
+            "${{ secrets.VM_WEBHOOK_URL }}"
