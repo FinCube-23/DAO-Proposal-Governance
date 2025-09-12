@@ -29,6 +29,8 @@ jobs:
             cd /mnt/ext/projects/web3-governance-kit/frontend
             echo "Stopping frontend services"
             pm2 delete 0
+            echo "Building Frontend"
+            npm run build
             echo "Starting frontend services"
             pm2 start "serve -s build/client -l 8080" --name fincube-frontend
             echo "Script executed successfully"
