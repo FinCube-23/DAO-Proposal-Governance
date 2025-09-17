@@ -1,0 +1,28 @@
+# Node.js dependencies
+node_modules/
+
+# Build artifacts
+/dist/
+/target/
+/out/
+
+# Barretenberg build artifacts
+/build/
+/bb/
+
+# Proving and verification files
+*.gz
+*.json
+*.sol
+
+# Log files
+*.log
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
