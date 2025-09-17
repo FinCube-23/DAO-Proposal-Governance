@@ -1,0 +1,6 @@
+[package]
+name = "b2b_membership"
+type = "bin"
+authors = [""]
+
+[dependencies]
