@@ -1,6 +1,6 @@
 use dep::poseidon::poseidon2;
 
-global MAX_POLY_DEGREE: u32 = 2047;
+global MAX_POLY_DEGREE: u32 = 2048;
 
 fn main(
     polynomial_hash: pub Field,
