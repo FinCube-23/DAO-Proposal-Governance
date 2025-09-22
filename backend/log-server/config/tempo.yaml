@@ -18,7 +18,7 @@ ingester:
 
 compactor:
   compaction:
-    block_retention: 24h
+    block_retention: 0s
 
 querier:
   frontend_worker:
@@ -34,7 +34,7 @@ metrics_generator:
       wait: 10s
     span_metrics:
       enable_target_info: true
-    local_blocks:       
+    local_blocks:
       filter_server_spans: false
       flush_to_storage: true
   registry:
@@ -45,7 +45,6 @@ metrics_generator:
     remote_write:
       - url: http://prometheus:9090/api/v1/write
         send_exemplars: true
-  
 
 storage:
   trace:
@@ -62,4 +61,4 @@ overrides:
   metrics_generator_processors:
     - service-graphs
     - span-metrics
-    - local-blocks 
+    - local-blocks
