@@ -57,21 +57,36 @@ class UserService:
     @staticmethod
     def partial_update(user_id, update_data):
         user = UserRepository.get_user_by_id(user_id)
-
-        if "email" in update_data and update_data["email"] != user.email:
-            user.is_verified_email = False
-        if (
-            "contact_number" in update_data
-            and update_data["contact_number"] != user.contact_number
-        ):
-            user.is_verified_contact_number = False
-
-        allowed_fields = {"email", "contact_number", "wallet_address"}
-        for field in allowed_fields:
-            if field in update_data:
-                setattr(user, field, update_data[field])
-
-        user.save()
+        
+        updated_fields = []
+        
+        # Check email changes
+        if "email" in update_data:
+            if update_data["email"] != user.email:
+                user.email = update_data["email"]
+                user.is_verified_email = False
+                updated_fields.extend(["email", "is_verified_email"])
+            # If email is the same, don't update it
+        
+        # Check contact number changes
+        if "contact_number" in update_data:
+            if str(update_data["contact_number"]) != str(user.contact_number):
+                user.contact_number = update_data["contact_number"]
+                user.is_verified_contact_number = False
+                updated_fields.extend(["contact_number", "is_verified_contact_number"])
+            # If contact number is the same, don't update it
+        
+        # Check wallet address changes
+        if "wallet_address" in update_data:
+            if update_data["wallet_address"] != user.wallet_address:
+                user.wallet_address = update_data["wallet_address"]
+                updated_fields.append("wallet_address")
+            # If wallet address is the same, don't update it
+        
+        # Only save if there are actual changes
+        if updated_fields:
+            user.save(update_fields=updated_fields)
+        
         return user
 
     @staticmethod

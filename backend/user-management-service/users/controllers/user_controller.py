@@ -93,13 +93,17 @@ class ProtectedUserController(ViewSet):
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
     def update_user(self, request):
         """User self profile update (email/contact/wallet)"""
-        user_id = request.user.id
-        serializer = UserSelfUpdateSerializer(data=request.data)
+        user = request.user
+
+        # IMPORTANT: Pass the instance parameter
+        serializer = UserSelfUpdateSerializer(
+            instance=user, data=request.data, partial=True
+        )
         serializer.is_valid(raise_exception=True)
 
         try:
-            user = UserService.partial_update(user_id, serializer.validated_data)
-            return Response(UserSelfUpdateSerializer(user).data)
+            updated_user = UserService.partial_update(user.id, serializer.validated_data)
+            return Response(UserSelfUpdateSerializer(updated_user).data)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

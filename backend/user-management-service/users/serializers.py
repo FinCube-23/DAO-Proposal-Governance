@@ -138,8 +138,52 @@ class UserSelfUpdateSerializer(serializers.ModelSerializer):
             "wallet_address": {"required": False},
         }
 
+    def validate_email(self, value):
+        """Custom email validation that excludes current user"""
+        # If email hasn't changed, allow it
+        if self.instance and value == self.instance.email:
+            return value
+
+        # Check for uniqueness excluding current user
+        if User.objects.filter(email=value).exclude(
+            pk=self.instance.pk if self.instance else None
+        ).exists():
+            raise serializers.ValidationError("User with this email address already exists.")
+        return value
+
+    def validate_contact_number(self, value):
+        """Custom contact number validation that excludes current user"""
+        # If contact number hasn't changed, allow it
+        if self.instance and str(value) == str(self.instance.contact_number):
+            return value
+
+        # Check for uniqueness excluding current user
+        if User.objects.filter(contact_number=value).exclude(
+            pk=self.instance.pk if self.instance else None
+        ).exists():
+            raise serializers.ValidationError("User with this contact number already exists.")
+        return value
+
+    def validate_wallet_address(self, value):
+        """Custom wallet address validation that excludes current user"""
+        # Allow None/empty values
+        if not value:
+            return value
+
+        # If wallet address hasn't changed, allow it
+        if self.instance and value == self.instance.wallet_address:
+            return value
+
+        # Check for uniqueness excluding current user
+        if User.objects.filter(wallet_address=value).exclude(
+            pk=self.instance.pk if self.instance else None
+        ).exists():
+            raise serializers.ValidationError("User with this wallet address already exists.")
+        return value
+
     def validate(self, data):
-        # Block restricted fields even if somehow passed
+        """Overall validation and security check"""
+        # Block restricted fields
         restricted_fields = {
             "first_name",
             "last_name",
@@ -150,6 +194,7 @@ class UserSelfUpdateSerializer(serializers.ModelSerializer):
             "is_verified_contact_number",
             "password",
             "status",
+            "approved_by",
         }
         if restricted_fields.intersection(data.keys()):
             raise serializers.ValidationError("Attempted to modify restricted fields")
