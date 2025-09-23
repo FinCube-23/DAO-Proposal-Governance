@@ -24,6 +24,10 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
+# Customize admin site titles
+admin.site.site_header = "FinCube DAO Administration"
+admin.site.site_title = "FinCube Admin"
+admin.site.index_title = "Welcome to FinCube DAO Portal"
 
 def welcome_view(request):
     return HttpResponse(
