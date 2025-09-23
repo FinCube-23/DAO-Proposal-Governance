@@ -6,8 +6,8 @@ from .models import User
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     list_display = [
-        'id',
         'email',
+        'id',
         'first_name', 
         'last_name',
         'status',
