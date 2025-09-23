@@ -15,6 +15,8 @@ class OrganizationAdmin(admin.ModelAdmin):
         'created_at'
     ]
     
+    list_select_related = ['organization_admin']
+    
     list_filter = [
         'status',
         'type', 
@@ -94,6 +96,13 @@ class OrganizationAdmin(admin.ModelAdmin):
 @admin.register(OrganizationUser)
 class OrganizationUserAdmin(admin.ModelAdmin):
     list_display = ['user', 'organization', 'list_groups', 'created_at']
+    
+    # Optimize ForeignKey relationships to avoid the N+1 query problem
+    list_select_related = ['user', 'organization']
+    
+    # Optimize ManyToMany relationships
+    list_prefetch_related = ['groups', 'user_permissions']
+    
     list_filter = ['organization', 'created_at', 'groups', 'user_permissions']
     search_fields = [
         'user__email', 
@@ -114,9 +123,11 @@ class OrganizationUserAdmin(admin.ModelAdmin):
     )
 
     def list_groups(self, obj):
-        return ", ".join([g.name for g in obj.groups.all()])
+        """Display groups as comma-separated list"""
+        return ", ".join([g.name for g in obj.groups.all()]) or "No groups"
     list_groups.short_description = "Groups"
-
+    
+    
 @admin.register(OnchainVerification)
 class OnchainVerificationAdmin(admin.ModelAdmin):
     list_display = [
@@ -128,6 +139,7 @@ class OnchainVerificationAdmin(admin.ModelAdmin):
         'created_at'
     ]
     list_filter = ['onchain_status', 'created_at']
+    list_select_related = ['organization']
     search_fields = [
         'organization__name',
         'trx_hash',
