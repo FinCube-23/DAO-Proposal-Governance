@@ -5,8 +5,8 @@ from .models import Organization, OrganizationUser, OnchainVerification
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = [
-        'id',
-        'name', 
+        'name',
+        'id', 
         'email', 
         'type', 
         'status', 
@@ -120,8 +120,8 @@ class OrganizationUserAdmin(admin.ModelAdmin):
 @admin.register(OnchainVerification)
 class OnchainVerificationAdmin(admin.ModelAdmin):
     list_display = [
-        'id',
         'organization',
+        'id',
         'onchain_status',
         'trx_hash',
         'onchain_id',
