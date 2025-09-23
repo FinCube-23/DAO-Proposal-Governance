@@ -87,14 +87,15 @@ export default function StepWalletConnect({ incrementStep }: Props) {
         toast.error(walletError);
       }
       // Check if the error is related to wallet existence (fallback)
+      // Check for wallet existence error using structured error code or property
       else if (
-        error.message?.includes("wallet") ||
-        error.message?.includes("exists")
+        error.code === "WALLET_EXISTS" ||
+        error.data?.code === "WALLET_EXISTS"
       ) {
         disconnect();
         toast.error("Wallet already exists, please use another wallet");
       } else {
-        toast.error("Wallet already exists, please use another wallet");
+        toast.error("An unexpected error occurred. Please try again.");
       }
     } finally {
       setIsValidating(false);
