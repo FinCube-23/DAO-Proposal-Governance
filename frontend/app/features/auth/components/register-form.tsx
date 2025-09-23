@@ -1,12 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
-import * as countryCodes from 'country-codes-list';
-import { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
-import { toast } from 'sonner';
-import { z } from 'zod';
-import { Button } from '@/shared/components/ui/button';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import * as countryCodes from "country-codes-list";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { z } from "zod";
+import { Button } from "@/shared/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,17 +14,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/shared/components/ui/form';
-import { Input } from '@/shared/components/ui/input';
+} from "@/shared/components/ui/form";
+import { Input } from "@/shared/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/shared/components/ui/select';
+} from "@/shared/components/ui/select";
 
-import { register } from '../apis/register';
+import { register } from "../apis/register";
 
 // Get country codes for the dropdown
 
@@ -32,27 +32,27 @@ const formSchema = z
   .object({
     first_name: z
       .string()
-      .min(2, { message: 'First name must be at least 2 characters' }),
+      .min(2, { message: "First name must be at least 2 characters" }),
     last_name: z
       .string()
-      .min(2, { message: 'Last name must be at least 2 characters' }),
-    email: z.string().email({ message: 'Please enter a valid email address' }),
+      .min(2, { message: "Last name must be at least 2 characters" }),
+    email: z.string().email({ message: "Please enter a valid email address" }),
     country_code: z
       .string()
-      .min(1, { message: 'Please select a country code' }),
+      .min(1, { message: "Please select a country code" }),
     contact_number: z
       .string()
-      .min(7, { message: 'Phone number must be at least 7 digits' }),
+      .min(7, { message: "Phone number must be at least 7 digits" }),
     password: z
       .string()
-      .min(8, { message: 'Password must be at least 8 characters' }),
+      .min(8, { message: "Password must be at least 8 characters" }),
     password_confirm: z.string().min(8, {
-      message: 'Password confirmation must be at least 8 characters',
+      message: "Password confirmation must be at least 8 characters",
     }),
   })
-  .refine(data => data.password === data.password_confirm, {
-    message: 'Passwords don\'t match',
-    path: ['password_confirm'],
+  .refine((data) => data.password === data.password_confirm, {
+    message: "Passwords don't match",
+    path: ["password_confirm"],
   });
 
 export default function RegisterForm() {
@@ -60,12 +60,54 @@ export default function RegisterForm() {
   const registerMutation = useMutation({
     mutationFn: register,
     onSuccess: () => {
-      toast.success('Registration successful');
-      navigate('/login');
+      toast.success("Registration successful");
+      navigate("/login");
     },
-    onError: (error) => {
-      console.error('Register failed', error);
-      toast.error('Registration failed. Please try again.');
+    onError: (error: any) => {
+      console.error("Register failed - Full error object:", error);
+      console.error("Error status:", error.status);
+      console.error("Error data:", error.data);
+      console.error("Error response:", error.response);
+
+      // Check different possible error structures
+      let errorData = null;
+
+      // Try different ways the error data might be structured
+      if (error.response?.data) {
+        errorData = error.response.data;
+      } else if (error.data) {
+        errorData = error.data;
+      } else if (error.response?.body) {
+        errorData = error.response.body;
+      } else if (error.body) {
+        errorData = error.body;
+      }
+
+      console.error("Extracted error data:", errorData);
+
+      // Check if we have field validation errors
+      if (errorData && typeof errorData === "object") {
+        const errorMessages: string[] = [];
+
+        // Extract error messages from each field
+        Object.keys(errorData).forEach((field) => {
+          const fieldError = errorData[field];
+          if (Array.isArray(fieldError)) {
+            errorMessages.push(fieldError[0]);
+          } else if (typeof fieldError === "string") {
+            errorMessages.push(fieldError);
+          }
+        });
+
+        if (errorMessages.length > 0) {
+          // Show the first error message
+          toast.error(errorMessages[0]);
+          return;
+        }
+      }
+
+      // Fallback error message
+      toast.error(error.message || "Registration failed. Please try again.");
     },
   });
 
@@ -73,7 +115,7 @@ export default function RegisterForm() {
     const uniqueCountryCodes = new Map();
     countryCodes
       .all()
-      .filter(country => country.countryCallingCode)
+      .filter((country) => country.countryCallingCode)
       .forEach((country) => {
         const code = `+${country.countryCallingCode}`;
         if (!uniqueCountryCodes.has(code)) {
@@ -87,20 +129,20 @@ export default function RegisterForm() {
         }
       });
     return Array.from(uniqueCountryCodes.values()).sort((a, b) =>
-      a.country.localeCompare(b.country),
+      a.country.localeCompare(b.country)
     );
   }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: '',
-      last_name: '',
-      email: '',
-      country_code: '+1',
-      contact_number: '',
-      password: '',
-      password_confirm: '',
+      first_name: "",
+      last_name: "",
+      email: "",
+      country_code: "+1",
+      contact_number: "",
+      password: "",
+      password_confirm: "",
     },
   });
 
@@ -183,7 +225,7 @@ export default function RegisterForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {countryCodesArray.map(item => (
+                    {countryCodesArray.map((item) => (
                       <SelectItem key={item.id} value={item.value}>
                         {item.label}
                       </SelectItem>

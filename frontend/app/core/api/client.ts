@@ -1,6 +1,6 @@
-import useAuthStore from '@/shared/stores/auth';
+import useAuthStore from "@/shared/stores/auth";
 
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 interface RequestOptions {
   payload?: unknown;
@@ -8,27 +8,26 @@ interface RequestOptions {
   customHeaders?: Record<string, string>;
 }
 
-function buildQueryString(queryParams?: RequestOptions['queryParams']): string {
-  if (!queryParams)
-    return '';
+function buildQueryString(queryParams?: RequestOptions["queryParams"]): string {
+  if (!queryParams) return "";
 
   const queryString = Object.entries(queryParams)
     .filter(
-      ([, value]) => value !== undefined && value !== null && value !== '',
+      ([, value]) => value !== undefined && value !== null && value !== ""
     )
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+        `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`
     )
-    .join('&');
+    .join("&");
 
-  return queryString ? `?${queryString}` : '';
+  return queryString ? `?${queryString}` : "";
 }
 
 // Create a custom event for auth errors
 function dispatchAuthError() {
-  const event = new CustomEvent('auth-error', {
-    detail: { type: 'token_expired' },
+  const event = new CustomEvent("auth-error", {
+    detail: { type: "token_expired" },
   });
   window.dispatchEvent(event);
 }
@@ -36,14 +35,14 @@ function dispatchAuthError() {
 async function request<T>(
   url: string,
   method: HttpMethod,
-  { payload, queryParams, customHeaders }: RequestOptions = {},
+  { payload, queryParams, customHeaders }: RequestOptions = {}
 ): Promise<T> {
   const accessToken = useAuthStore.getState().access;
   // Append query params if provided
   const finalUrl = `${url}${buildQueryString(queryParams)}`;
 
   const headers: Record<string, string> = {
-    ...(method === 'GET' ? {} : { 'Content-Type': 'application/json' }),
+    ...(method === "GET" ? {} : { "Content-Type": "application/json" }),
     ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
     ...(customHeaders || {}),
   };
@@ -53,7 +52,7 @@ async function request<T>(
     headers,
   };
 
-  if (payload && method !== 'GET') {
+  if (payload && method !== "GET") {
     options.body = JSON.stringify(payload);
   }
 
@@ -63,32 +62,51 @@ async function request<T>(
     if (response.status === 401) {
       useAuthStore.getState().clearAuthState();
       dispatchAuthError();
+      throw new Error(`API request failed with status ${response.status}`);
+    } else {
+      // For other errors, get the response data and throw a proper error
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = {
+          message: `API request failed with status ${response.status}`,
+        };
+      }
+
+      const error = new Error(
+        `API request failed with status ${response.status}`
+      );
+      (error as any).status = response.status;
+      (error as any).data = errorData;
+      (error as any).response = { data: errorData, status: response.status };
+
+      console.error("API Error Response:", errorData);
+      throw error;
     }
-    // For other errors, you could expand this with response.json() for error details
-    throw new Error(`API request failed with status ${response.status}`);
   }
 
   return response.json();
 }
 
 export const api = {
-  get: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
-    request<T>(url, 'GET', options),
+  get: <T>(url: string, options?: Omit<RequestOptions, "payload">) =>
+    request<T>(url, "GET", options),
   post: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, 'payload'>,
-  ) => request<T>(url, 'POST', { ...options, payload }),
+    options?: Omit<RequestOptions, "payload">
+  ) => request<T>(url, "POST", { ...options, payload }),
   put: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, 'payload'>,
-  ) => request<T>(url, 'PUT', { ...options, payload }),
+    options?: Omit<RequestOptions, "payload">
+  ) => request<T>(url, "PUT", { ...options, payload }),
   patch: <T>(
     url: string,
     payload?: unknown,
-    options?: Omit<RequestOptions, 'payload'>,
-  ) => request<T>(url, 'PATCH', { ...options, payload }),
-  delete: <T>(url: string, options?: Omit<RequestOptions, 'payload'>) =>
-    request<T>(url, 'DELETE', options),
+    options?: Omit<RequestOptions, "payload">
+  ) => request<T>(url, "PATCH", { ...options, payload }),
+  delete: <T>(url: string, options?: Omit<RequestOptions, "payload">) =>
+    request<T>(url, "DELETE", options),
 };

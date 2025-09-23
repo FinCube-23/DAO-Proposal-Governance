@@ -1,50 +1,47 @@
-import type { ChangeEvent, FormEvent } from 'react';
-import { useMutation } from '@tanstack/react-query';
-import { simulateContract, writeContract } from '@wagmi/core';
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { toast } from 'sonner';
-import { useAccount } from 'wagmi';
-import { config } from '@/core/config';
-import contractABI from '@/core/contract/contract-abi.json';
-import { env } from '@/core/env';
-import { proposalApis } from '@/core/services/proposal';
-import { Button } from '@/shared/components/ui/button';
+import type { ChangeEvent, FormEvent } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { simulateContract, writeContract } from "@wagmi/core";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
+import { useAccount } from "wagmi";
+import { config } from "@/core/config";
+import contractABI from "@/core/contract/contract-abi.json";
+import { env } from "@/core/env";
+import type { ProposalOnchainVerificationPayload } from "@/core/services/proposal/types";
+import { proposalApis } from "@/core/services/proposal";
+import { Button } from "@/shared/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
-} from '@/shared/components/ui/dialog';
+} from "@/shared/components/ui/dialog";
 
 export default function MemberProposal() {
   const [data, setData] = useState({
-    _newMember: '',
-    description: '',
+    _newMember: "",
+    description: "",
   });
   const { address } = useAccount();
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [trxHash, setTrxHash] = useState('');
+  const [trxHash, setTrxHash] = useState("");
   const navigate = useNavigate();
 
   const createProposal = useMutation({
     mutationFn: proposalApis.createProposal,
-    onSuccess: () => {
-      toast.warning('Approval is pending');
-      setDialogOpen(true);
-    },
-    onError: (error: any) => {
-      console.error(error);
-      toast.error(`Error creating proposal: ${error.message}`);
-    },
+  });
+
+  const createOnchainVerification = useMutation({
+    mutationFn: proposalApis.createOnchainVerification,
   });
 
   const handleInput = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setData(prevData => ({
+    setData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
@@ -58,34 +55,61 @@ export default function MemberProposal() {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
-        functionName: 'newMemberApprovalProposal',
+        functionName: "newMemberApprovalProposal",
         args: [data._newMember, data.description],
       });
 
       const hash = await writeContract(config, request);
 
       const backendData = {
-        proposal_type: 'membership',
+        proposal_type: "membership",
         metadata: data.description,
         proposer_address: `0x${address}`,
         trx_hash: hash,
       };
 
-      await createProposal.mutate(backendData);
-      setTrxHash(hash);
-    }
-    catch (e: any) {
+      const userData: ProposalOnchainVerificationPayload = {
+        trx_hash: hash,
+        context: "Membership Proposal",
+        proposer_wallet: `0x${address}`,
+        organization_id: null,
+      };
+
+      try {
+        // First create the proposal
+        await createProposal.mutateAsync(backendData);
+
+        // Then create onchain verification - if this fails, log the error but don't fail silently
+        try {
+          await createOnchainVerification.mutateAsync(userData);
+          toast.warning("Proposal submitted and verified onchain successfully");
+          setDialogOpen(true);
+          setTrxHash(hash);
+        } catch (verificationError: any) {
+          console.error("Onchain verification failed:", verificationError);
+          toast.error(
+            `Proposal created but onchain verification failed: ${verificationError.message}`
+          );
+          // Still show dialog since proposal was created successfully
+          setDialogOpen(true);
+          setTrxHash(hash);
+        }
+      } catch (proposalError: any) {
+        console.error("Proposal creation failed:", proposalError);
+        toast.error(`Failed to create proposal: ${proposalError.message}`);
+      }
+    } catch (e: any) {
       let errorMessage = e.message;
 
-      if (errorMessage.includes('reverted with the following reason:')) {
+      if (errorMessage.includes("reverted with the following reason:")) {
         const match = errorMessage.match(
-          /reverted with the following reason:\s*(.*)/,
+          /reverted with the following reason:\s*(.*)/
         );
         if (match) {
           errorMessage = match[1];
         }
       }
-      console.error('approveMember error:', e);
+      console.error("Smart contract error:", e);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -118,8 +142,7 @@ export default function MemberProposal() {
             placeholder="Enter description"
             rows={10}
             required
-          >
-          </textarea>
+          ></textarea>
           <div className="flex justify-center">
             <Button type="submit" isLoading={loadingStatus}>
               Place Proposal
@@ -131,8 +154,7 @@ export default function MemberProposal() {
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open)
-            navigate('/organization/dao/proposals');
+          if (!open) navigate("/organization/dao/proposals");
         }}
       >
         <DialogContent>
@@ -143,8 +165,7 @@ export default function MemberProposal() {
           </DialogHeader>
           <p className="text-yellow-400">
             Your proposal has been successfully submitted and is under review.
-            To check the transaction status,
-            {' '}
+            To check the transaction status,{" "}
             <a
               target="_"
               href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
@@ -156,7 +177,7 @@ export default function MemberProposal() {
           <DialogFooter>
             <Button
               className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
-              onClick={() => navigate('/organization/dao/proposals')}
+              onClick={() => navigate("/organization/dao/proposals")}
             >
               Back to Dashboard
             </Button>
@@ -165,4 +186,4 @@ export default function MemberProposal() {
       </Dialog>
     </div>
   );
-};
+}
