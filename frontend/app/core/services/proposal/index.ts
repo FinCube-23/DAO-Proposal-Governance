@@ -1,11 +1,31 @@
-import type { GetAllProposalResponse, IOffchainProposal, ProposalCancelPayload, ProposalCreatePayload, ProposalExecutePayload } from './types';
-import { api } from '@/core/api/client';
-import { PROPOSAL_ENDPOINT } from '@/core/api/endpoints';
+import type {
+  GetAllProposalResponse,
+  IOffchainProposal,
+  ProposalCancelPayload,
+  ProposalCreatePayload,
+  ProposalExecutePayload,
+  ProposalOnchainVerificationPayload,
+  ProposalOnchainVerificationResponse,
+} from "./types";
+import { api } from "@/core/api/client";
+import { ORGANIZATION_ENDPOINT, PROPOSAL_ENDPOINT } from "@/core/api/endpoints";
 
 export const proposalApis = {
-  getAllProposals: (queryParams: any) => api.get<GetAllProposalResponse>(`${PROPOSAL_ENDPOINT.BASE}`, { queryParams }),
-  executeProposal: (payload: ProposalExecutePayload) => api.post(`${PROPOSAL_ENDPOINT.BASE}/execute`, payload),
-  cancelProposal: (payload: ProposalCancelPayload) => api.post(`${PROPOSAL_ENDPOINT.BASE}/cancel`, payload),
-  createProposal: (payload: ProposalCreatePayload) => api.post(`${PROPOSAL_ENDPOINT.BASE}`, payload),
-  getProposalById: (id: number) => api.get<IOffchainProposal>(`${PROPOSAL_ENDPOINT.BASE}/${id}`),
+  getAllProposals: (queryParams: any) =>
+    api.get<GetAllProposalResponse>(`${PROPOSAL_ENDPOINT.BASE}`, {
+      queryParams,
+    }),
+  executeProposal: (payload: ProposalExecutePayload) =>
+    api.post(`${PROPOSAL_ENDPOINT.BASE}/execute`, payload),
+  cancelProposal: (payload: ProposalCancelPayload) =>
+    api.post(`${PROPOSAL_ENDPOINT.BASE}/cancel`, payload),
+  createProposal: (payload: ProposalCreatePayload) =>
+    api.post(`${PROPOSAL_ENDPOINT.BASE}`, payload),
+  getProposalById: (id: number) =>
+    api.get<IOffchainProposal>(`${PROPOSAL_ENDPOINT.BASE}/${id}`),
+  createOnchainVerification: (payload: ProposalOnchainVerificationPayload) =>
+    api.post<ProposalOnchainVerificationResponse>(
+      `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
+      payload
+    ),
 };
