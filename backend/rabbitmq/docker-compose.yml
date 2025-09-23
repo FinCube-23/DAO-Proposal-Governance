@@ -11,6 +11,16 @@ services:
     networks:
       - fincube23_network
 
+    environment:
+      RABBITMQ_DEFAULT_VHOST: /
+      RABBITMQ_MANAGEMENT_CORS_ALLOW_ORIGINS: "*"
+      RABBITMQ_MANAGEMENT_CORS_MAX_AGE: 3600
+      RABBITMQ_LOGS: "-"
+      RABBITMQ_SASL_LOGS: "-"
+
+
 networks:
   fincube23_network:
     external: true
+
+
