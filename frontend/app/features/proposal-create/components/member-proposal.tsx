@@ -82,7 +82,7 @@ export default function MemberProposal() {
         // Then create onchain verification - if this fails, log the error but don't fail silently
         try {
           await createOnchainVerification.mutateAsync(userData);
-          toast.warning("Proposal submitted and verified onchain successfully");
+          toast.success("Proposal submitted and verified onchain successfully");
           setDialogOpen(true);
           setTrxHash(hash);
         } catch (verificationError: any) {
