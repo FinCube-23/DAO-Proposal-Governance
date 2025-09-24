@@ -32,7 +32,6 @@ export class TransactionEntity {
     @Column({
         type: 'enum',
         enum: TransactionConfirmationSource,
-        default: TransactionConfirmationSource.ALCHEMY,
         nullable: true,
     })
     confirmation_source: TransactionConfirmationSource;
