@@ -111,16 +111,6 @@ export default function ApprovalNotification() {
   let messageText = '';
   let showApplyButton = false;
 
-  /* console.warn('Debug values:', {
-    isApproved,
-    isMemberApproved,
-    isCheckingMembership,
-    orgStatus: orgData.status,
-    hasAddress: !!address,
-    isConnected,
-    membershipCheckStatus: isMemberApproved === null ? 'not_checked' : isMemberApproved === false ? 'not_approved' : 'approved',
-  }); */
-
   if (!isApproved && isMemberApproved === true) {
     // User is already a member but organization is not approved
     messageText = `You are already a member, but wait for your organization "${orgData.name}" approval.`;

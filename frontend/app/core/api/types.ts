@@ -1,6 +1,15 @@
 import type { UserOrgs } from '../services/org/types';
 import type { IOffchainProposalCard } from './interfaces';
 
+// enums
+export enum TransactionConfirmationSource {
+  ALCHEMY = 'alchemy',
+  INFURA = 'infura',
+  THE_GRAPH = 'graph',
+  MANUAL = 'manual',
+  PENDING_SOURCE = 'pending_source',
+}
+
 // interfaces
 export interface Response {
   message: string;
@@ -11,7 +20,7 @@ export interface Transaction {
   id: number;
   trx_hash: string;
   trx_status: boolean;
-  confirmation_source: string;
+  confirmation_source: TransactionConfirmationSource;
   updated_at: string;
 }
 

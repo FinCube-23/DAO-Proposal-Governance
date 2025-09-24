@@ -1,11 +1,8 @@
-import type { GetStatusByEmailResponse } from '@/core/api/types';
 import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDisconnect } from 'wagmi';
-import { api } from '@/core/api/client';
-import { ORGANIZATION_ENDPOINT } from '@/core/api/endpoints';
 import { orgApis } from '@/core/services/org';
 import {
   Avatar,
