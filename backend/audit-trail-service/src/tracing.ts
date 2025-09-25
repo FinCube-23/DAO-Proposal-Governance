@@ -29,7 +29,7 @@ const traceExporter = new OTLPTraceExporter(collectorOptions);
 export const otelSDK = new NodeSDK({
   resource: resourceFromAttributes({
     [SEMRESATTRS_SERVICE_NAME]: 'audit-trail-service',
-    [SEMRESATTRS_SERVICE_NAMESPACE]: 'audit-trail-service-api',
+    [SEMRESATTRS_SERVICE_NAMESPACE]: 'audit-service-api',
     [SEMRESATTRS_SERVICE_VERSION]: '1.0',
     [SEMRESATTRS_SERVICE_INSTANCE_ID]: '1',
   }),

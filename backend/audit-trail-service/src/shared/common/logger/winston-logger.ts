@@ -86,7 +86,7 @@ export class WinstonLogger implements LoggerService {
           host: process.env.LOG_SERVER,
           labels: {
             service_name: 'audit-trail-service',
-            service_namespace: 'audit-trail-service-api',
+            service_namespace: 'audit-service-api',
           },
           // Keep trace_id as a top-level field for queryability
           format: winston.format.json(),

@@ -6,13 +6,16 @@ import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client';
 import { ProposalUpdateRepository } from './proposal-update.repository';
 import { TransactionsModule } from 'src/transactions/transactions.module';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 require('dotenv').config();
 
 @Module({
   controllers: [ProposalUpdateController],
   providers: [
-    ProposalUpdateService, ProposalUpdateRepository,
+    ProposalUpdateService,
+    ProposalUpdateRepository,
+    WinstonLogger,
     {
       provide: 'APOLLO_CLIENT1',
       useFactory: () => {
@@ -27,7 +30,8 @@ require('dotenv').config();
     },
   ],
   imports: [
-    TransactionsModule, ClientsModule.register([
+    TransactionsModule,
+    ClientsModule.register([
       {
         name: 'PROPOSAL_UPDATE_SERVICE', // Injectable
         transport: Transport.RMQ,
@@ -43,13 +47,14 @@ require('dotenv').config();
         {
           name: 'proposal-update-exchange',
           type: 'fanout',
-        }
+        },
       ],
       connectionInitOptions: {
         wait: true,
         timeout: 30000, // Increase RabbitMQ connection timeout to 30 seconds
       },
-    })],
+    }),
+  ],
   exports: ['APOLLO_CLIENT1', ProposalUpdateService],
 })
-export class ProposalUpdateModule { }
+export class ProposalUpdateModule {}
