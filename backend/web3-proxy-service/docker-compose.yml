@@ -14,6 +14,7 @@ services:
       - ./package-lock.json:/app/package-lock.json
       - ./nest-cli.json:/app/nest-cli.json
       - ./tsconfig.json:/app/tsconfig.json
+      - ./logs:/app/logs
       
     env_file:
       - .env

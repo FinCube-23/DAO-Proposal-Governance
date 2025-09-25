@@ -1,11 +1,11 @@
 import * as morgan from 'morgan';
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
-import { WinstonLogger } from './winston-logger';  // Import your custom logger
+import { WinstonLogger } from './winston-logger'; // Import your custom logger
 
 @Injectable()
 export class MorganMiddleware implements NestMiddleware {
-  constructor(private readonly logger: WinstonLogger) { }
+  constructor(private readonly logger: WinstonLogger) {}
 
   use(req: Request, res: Response, next: NextFunction) {
     const customFormat = (tokens: any, req: Request, res: Response) => {
@@ -16,7 +16,9 @@ export class MorganMiddleware implements NestMiddleware {
         url: req.url,
         status_code: parseInt(tokens.status(req, res)), // Convert to number
         response_time_ms: parseFloat(tokens['response-time'](req, res)), // Convert to number
-        content_length: parseInt(tokens['res'](req, res, 'content-length') || 0), // Convert to number
+        content_length: parseInt(
+          tokens['res'](req, res, 'content-length') || 0,
+        ), // Convert to number
         content_type: req.get('Content-Type'),
         user_agent: req.get('User-Agent'),
         referer: req.get('Referer'),

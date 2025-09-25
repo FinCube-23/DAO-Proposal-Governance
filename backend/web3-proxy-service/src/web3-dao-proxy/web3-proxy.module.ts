@@ -4,6 +4,7 @@ import { Web3ProxyController } from './web3-proxy.controller';
 import { DAOContract } from './entities/DAO-contract-entity';
 import { RPCProvider } from './entities/RPC-Provider-entity';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 @Module({
   imports: [
@@ -19,6 +20,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     ]),
   ],
   controllers: [Web3ProxyController],
-  providers: [Web3ProxyService, DAOContract, RPCProvider],
+  providers: [Web3ProxyService, DAOContract, RPCProvider, WinstonLogger],
 })
-export class Web3ProxyModule {}
+export class Web3ProxyModule { }
