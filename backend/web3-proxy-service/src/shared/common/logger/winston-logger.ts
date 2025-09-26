@@ -77,8 +77,8 @@ export class WinstonLogger implements LoggerService {
                 new LokiTransport({
                     host: process.env.LOG_SERVER,
                     labels: {
-                        service_name: "web3-service",
-                        service_namespace: "web3-service-api"
+                        service_name: "web3-proxy-service",
+                        service_namespace: "web3-proxy-service-api"
                     },
                     // Keep trace_id as a top-level field for queryability
                     format: winston.format.json(),
