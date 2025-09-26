@@ -1,7 +1,6 @@
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import * as process from 'process';
-import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core';
 import { resourceFromAttributes } from '@opentelemetry/resources';
@@ -16,6 +15,9 @@ import { AmqplibInstrumentation } from '@opentelemetry/instrumentation-amqplib';
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
+import { WSInstrumentation } from 'opentelemetry-instrumentation-ws';
+import { SocketIoInstrumentation } from '@opentelemetry/instrumentation-socket.io';
+import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 require('dotenv').config();
 
 const collectorOptions = {
@@ -35,13 +37,31 @@ export const otelSDK = new NodeSDK({
   }),
   spanProcessor: new SimpleSpanProcessor(traceExporter),
   instrumentations: [
-    new HttpInstrumentation(),
+    new HttpInstrumentation({
+      responseHook: (span, response) => {
+        span.setAttributes({
+          'http.audit.external_service': 'true',
+        });
+      },
+    }),
     new ExpressInstrumentation(),
     new NestInstrumentation(),
     new PgInstrumentation(),
     new AmqplibInstrumentation(),
     new WinstonInstrumentation(),
-    new GraphQLInstrumentation(),
+    new GraphQLInstrumentation({
+      mergeItems: true,
+      responseHook: (span, response) => {
+        if (response.errors?.length > 0) {
+          span.setAttributes({
+            'graphql.audit.has_errors': true,
+            'graphql.audit.error_count': response.errors.length,
+          });
+        }
+      },
+    }),
+    new WSInstrumentation(),
+    new SocketIoInstrumentation(),
   ],
 });
 otelSDK.start();
