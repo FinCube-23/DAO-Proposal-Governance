@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: kong_postgres
+    environment:
+      POSTGRES_DB: kong
+      POSTGRES_USER: kong
+      POSTGRES_PASSWORD: kong
+    volumes:
+      - kong_db_data:/var/lib/postgresql/data
+    networks: [fincube23_network]
+
+  kong:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kong_gateway
+    restart: always
+    environment:
+      KONG_LOG_LEVEL: debug
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: postgres
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+      KONG_PG_DATABASE: kong
+      KONG_ADMIN_LISTEN: 0.0.0.0:8001
+      KONG_ADMIN_GUI_URL: http://localhost:8002
+      KONG_ADMIN_GUI_LISTEN: 0.0.0.0:8002
+      KONG_PLUGINS: "bundled,redirect,rabbitmq-publisher"
+    volumes:
+      - ./kong/plugins/rabbitmq-publisher:/usr/local/share/lua/5.1/kong/plugins/rabbitmq-publisher:ro
+    ports:
+      - "3000:8000" # PROXY
+      - "8001:8001" # ADMIN API
+      - "8002:8002" # ADMIN GUI
+    depends_on:
+      - postgres
+    networks: [fincube23_network]
+    # Migrate, then start
+    command: >
+      sh -lc 'kong migrations bootstrap || kong migrations up; kong start'
+
+volumes:
+  kong_db_data:
+
+networks:
+  fincube23_network:
+      external: true

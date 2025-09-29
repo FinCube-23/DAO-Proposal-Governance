@@ -12,6 +12,7 @@ export enum TransactionConfirmationSource {
     INFURA = 'infura',
     THE_GRAPH = 'graph',
     MANUAL = 'manual',
+    PENDING_SOURCE = 'pending_source'
 }
 
 export enum TransactionStatus {
@@ -32,7 +33,7 @@ export class TransactionEntity {
     @Column({
         type: 'enum',
         enum: TransactionConfirmationSource,
-        default: TransactionConfirmationSource.ALCHEMY,
+        default: TransactionConfirmationSource.PENDING_SOURCE,
         nullable: true,
     })
     confirmation_source: TransactionConfirmationSource;
