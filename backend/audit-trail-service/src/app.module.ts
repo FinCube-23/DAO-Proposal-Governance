@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
 import { ProposalUpdateModule } from './proposal-update/proposal-update.module';
+import { TransactionReceiptModule } from './transaction-receipt/transaction-receipt.module';
 import { TasksService } from './background_tasks/tasks.service';
 import { TasksModule } from './background_tasks/task.module';
 // import { ScheduleModule } from '@nestjs/schedule'; ref: https://github.com/FahimDev/hotel-nft-marketplace/blob/develop/web3-api-service/src/app.module.ts
@@ -21,6 +22,7 @@ import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
     DatabaseModule,
     AuthzModule,
     ProposalUpdateModule,
+    TransactionReceiptModule,
     TasksModule,
     TransactionsModule,
   ],
