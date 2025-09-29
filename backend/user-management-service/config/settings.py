@@ -15,6 +15,7 @@ import environ
 import os
 from datetime import timedelta
 
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -112,6 +113,7 @@ MIDDLEWARE = [
     # # Timeout Adjustment for Swagger
     "django.middleware.http.ConditionalGetMiddleware",
     "django.middleware.gzip.GZipMiddleware",
+    "middleware.http_logger_middleware.HTTPLoggerMiddleware",
 ]
 
 
@@ -120,7 +122,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:8080",
     "http://172.16.231.80",
-    'http://host.docker.internal'
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -239,3 +240,30 @@ RABBITMQ_QUEUES = {
     "AUTHORIZATION_QUEUE": "authorization",
 }
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672//"
+
+
+# Tracing Configuration
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
+            "fmt": "%(context)s %(level)s %(message)s %(span_id)s %(timestamp)s %(trace_id)s",
+        },
+    },
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "json"},
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": True,
+        },
+    },
+}

@@ -1,24 +1,32 @@
-import { Transport, TcpOptions, MicroserviceOptions } from '@nestjs/microservices';
+import './tracing';
+import {
+  Transport,
+  TcpOptions,
+  MicroserviceOptions,
+} from '@nestjs/microservices';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
 import { DocumentBuilder } from '@nestjs/swagger';
+import { WinstonLogger } from './shared/common/logger/winston-logger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose']
+    logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
   });
   const microservice = await app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
     options: {
       urls: ['amqp://rabbitmq:5672'],
-      queue: 'pending-proposal-queue',  //Routing Key
+      queue: 'pending-proposal-queue', //Routing Key
       queueOptions: {
-        durable: true,  // Make the queue durable (survive restarts)
+        durable: true, // Make the queue durable (survive restarts)
       },
     },
   });
 
+  const winstonLogger = app.get(WinstonLogger);
+  app.useLogger(winstonLogger);
   const config = new DocumentBuilder()
     .setTitle('Audit Trail service API')
     .setDescription(
@@ -29,10 +37,9 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  
+
   app.startAllMicroservices();
   app.enableCors();
   await app.listen(3000);
 }
 bootstrap();
-

@@ -1,40 +1,43 @@
 import {
-  CreatedProposalDto, MessageEnvelopeDto, PendingTransactionDto, ProposeEnvelopeDto, MessageResponse
+  CreatedProposalDto,
+  MessageEnvelopeDto,
+  PendingTransactionDto,
+  ProposeEnvelopeDto,
+  MessageResponse,
 } from './dto/proposal-update.dto';
-import {
-  Injectable,
-  Inject,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
-
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 @Injectable()
 export class ProposalUpdateService {
-  private readonly logger = new Logger(ProposalUpdateService.name);
-  public update_proposals: (CreatedProposalDto)[];
+  public update_proposals: CreatedProposalDto[];
 
   constructor(
     @Inject('PROPOSAL_UPDATE_SERVICE') private rabbitClient: ClientProxy,
     private transactionService: TransactionsService,
     private readonly proposalUpdateRepository: ProposalUpdateRepository,
-    private readonly amqpConnection: AmqpConnection
+    private readonly amqpConnection: AmqpConnection,
+    private readonly logger: WinstonLogger,
   ) {
     this.update_proposals = [];
   }
 
   // 📡 Listening MessagePattern Call
-  async handlePendingProposal(data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
-    this.logger.log("Got the pending proposal hash " + data_packet.trx_hash);
+  async handlePendingProposal(
+    data_packet: PendingTransactionDto,
+    @Ctx() context: RmqContext,
+  ): Promise<MessageResponse> {
+    this.logger.log('Got the pending proposal hash ' + data_packet.trx_hash);
     try {
       const new_dao_audit = {
-        "trx_hash": data_packet.trx_hash,
-        "trx_sender": data_packet.proposer_address,
-        "trx_status": 0
+        trx_hash: data_packet.trx_hash,
+        trx_sender: data_packet.proposer_address,
+        trx_status: 0,
       };
       const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
       const originalMsg = context.getMessage();
@@ -47,42 +50,47 @@ export class ProposalUpdateService {
         timestamp: new Date().toISOString(),
         data: {
           db_record_id: dbRecordedTRX.id,
-          current_status: 'INDEXING'
-        }
+          current_status: 'INDEXING',
+        },
       };
-    }
-    catch (error) {
-      this.logger.error('Error processing pending proposal:', {
-        error: error.message,
-        transactionHash: data_packet?.trx_hash
-      });
+    } catch (error) {
+      this.logger.error(
+        'Error processing pending proposal:',
+        JSON.stringify({
+          error: error.message,
+          transactionHash: data_packet?.trx_hash,
+        }),
+      );
       return {
         status: 'FAILED',
         message_id: data_packet?.trx_hash || 'unknown',
         timestamp: new Date().toISOString(),
         data: {
           db_record_id: 0,
-          current_status: 'UNKNOWN'
+          current_status: 'UNKNOWN',
         },
         error: {
           code: 'PROCESSING_ERROR',
           message: error.message,
           details: {
             transactionHash: data_packet?.trx_hash,
-            errorStack: error.stack
-          }
-        }
+            errorStack: error.stack,
+          },
+        },
       };
     }
   }
   // 📡 Listening MessagePattern Call (New Function)
-  async handleUpdatedTransaction(data_packet: PendingTransactionDto, @Ctx() context: RmqContext): Promise<MessageResponse> {
-    this.logger.log("Got a new transaction hash " + data_packet.trx_hash);
+  async handleUpdatedTransaction(
+    data_packet: PendingTransactionDto,
+    @Ctx() context: RmqContext,
+  ): Promise<MessageResponse> {
+    this.logger.log('Got a new transaction hash ' + data_packet.trx_hash);
     try {
       const new_dao_audit = {
-        "trx_hash": data_packet.trx_hash,
-        "trx_sender": data_packet.proposer_address,
-        "trx_status": 0
+        trx_hash: data_packet.trx_hash,
+        trx_sender: data_packet.proposer_address,
+        trx_status: 0,
       };
 
       const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
@@ -96,31 +104,33 @@ export class ProposalUpdateService {
         timestamp: new Date().toISOString(),
         data: {
           db_record_id: dbRecordedTRX.id,
-          current_status: 'INDEXING'
-        }
+          current_status: 'INDEXING',
+        },
       };
-    }
-    catch (error) {
-      this.logger.error('Error processing pending transaction:', {
-        error: error.message,
-        transactionHash: data_packet?.trx_hash
-      });
+    } catch (error) {
+      this.logger.error(
+        'Error processing pending transaction:',
+        JSON.stringify({
+          error: error.message,
+          transactionHash: data_packet?.trx_hash,
+        }),
+      );
       return {
         status: 'FAILED',
         message_id: data_packet?.trx_hash || 'unknown',
         timestamp: new Date().toISOString(),
         data: {
           db_record_id: 0,
-          current_status: 'UNKNOWN'
+          current_status: 'UNKNOWN',
         },
         error: {
           code: 'PROCESSING_ERROR',
           message: error.message,
           details: {
             transactionHash: data_packet?.trx_hash,
-            errorStack: error.stack
-          }
-        }
+            errorStack: error.stack,
+          },
+        },
       };
     }
   }
@@ -128,13 +138,15 @@ export class ProposalUpdateService {
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updatedGeneralProposal(proposal: ResponseTransactionStatusDto) {
     await this.rabbitClient.emit('general-proposal-placed', proposal);
-    return { message: 'Proposal on-chain status update notified to DAO-SERVICE!' };
+    return {
+      message: 'Proposal on-chain status update notified to DAO-SERVICE!',
+    };
   }
 
   // 💬 Pushing Event in the Message Queue in EventPattern
   async updatedTransaction(proposal: ResponseTransactionStatusDto) {
     await this.amqpConnection.publish('proposal-update-exchange', '', proposal);
-    this.logger.log("CRON: Proposal on-chain status update notified!")
+    this.logger.log('CRON: Proposal on-chain status update notified!');
     return { message: 'Proposal on-chain status update notified!' };
   }
 
@@ -143,7 +155,8 @@ export class ProposalUpdateService {
   }
 
   async getTransactionUpdates(trx_hashes: string[]): Promise<any> {
-    return await this.proposalUpdateRepository.getTransactionsUpdated(trx_hashes);
+    return await this.proposalUpdateRepository.getTransactionsUpdated(
+      trx_hashes,
+    );
   }
-
 }

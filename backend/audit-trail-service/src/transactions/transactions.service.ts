@@ -4,19 +4,22 @@ import {
   TransactionStatus,
 } from './entities/transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
 import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 
 @Injectable()
 export class TransactionsService {
-  private readonly logger = new Logger(TransactionsService.name);
   constructor(
     @InjectRepository(TransactionEntity)
     private transactionRepository: Repository<TransactionEntity>,
-  ) {}
+    private readonly logger: WinstonLogger,
+  ) {
+    this.logger.setContext(TransactionsService.name);
+  }
 
   async create(
     transactionPacket: Partial<TransactionEntity>,

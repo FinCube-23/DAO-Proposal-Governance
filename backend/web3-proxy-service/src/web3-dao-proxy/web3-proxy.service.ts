@@ -2,21 +2,20 @@ import {
   Inject,
   Injectable,
   UnauthorizedException,
-  Logger,
 } from '@nestjs/common';
 import { DAOContract } from './entities/DAO-contract-entity';
 import { RPCProvider } from './entities/RPC-Provider-entity';
 import { ethers } from 'ethers';
 import { validateAuth } from '@mskits/validate-auth';
 import { ClientProxy } from '@nestjs/microservices';
-
+import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 @Injectable()
 export class Web3ProxyService {
   private contract: ethers.Contract;
-  private readonly logger = new Logger(Web3ProxyService.name);
   constructor(
     private readonly daoContract: DAOContract,
     private readonly JSONRPCProvider: RPCProvider,
+    private readonly logger: WinstonLogger,
     @Inject('USER_MANAGEMENT_SERVICE') private umsRabbitClient: ClientProxy,
   ) {
     const provider = new ethers.JsonRpcProvider(
