@@ -26,7 +26,7 @@ services:
       KONG_ADMIN_LISTEN: 0.0.0.0:8001
       KONG_ADMIN_GUI_URL: http://localhost:8002
       KONG_ADMIN_GUI_LISTEN: 0.0.0.0:8002
-      KONG_PLUGINS: "bundled,redirect,rabbitmq-publisher"
+      KONG_PLUGINS: "bundled,redirect,rabbitmq-publisher,cors"
     volumes:
       - ./kong/plugins/rabbitmq-publisher:/usr/local/share/lua/5.1/kong/plugins/rabbitmq-publisher:ro
     ports:
@@ -45,4 +45,4 @@ volumes:
 
 networks:
   fincube23_network:
-      external: true
+    external: true
