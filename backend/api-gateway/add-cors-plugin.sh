@@ -45,7 +45,7 @@ if [ -n "$EXISTING_CORS" ]; then
     
     CORS_PLUGIN_CONFIG='{
         "config": {
-            "origins": ["http://localhost:5173", "http://localhost:3000", "http://localhost:8002", "http://172.16.231.80"],
+            "origins": ["http://localhost:5173", "http://localhost:3000", "http://localhost:8002", "http://172.16.231.80", "http://172.16.231.80:3000"],
             "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "headers": ["Accept", "Accept-Version", "Content-Length", "Content-MD5", "Content-Type", "Date", "X-Auth-Token", "Authorization"],
             "exposed_headers": ["X-Auth-Token"],
@@ -63,7 +63,7 @@ else
     CORS_PLUGIN_CONFIG='{
         "name": "cors",
         "config": {
-            "origins": ["http://localhost:5173", "http://localhost:3000", "http://localhost:8002", "http://172.16.231.80"],
+            "origins": ["http://localhost:5173", "http://localhost:3000", "http://localhost:8002", "http://172.16.231.80", "http://172.16.231.80:3000"],
             "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
             "headers": ["Accept", "Accept-Version", "Content-Length", "Content-MD5", "Content-Type", "Date", "X-Auth-Token", "Authorization"],
             "exposed_headers": ["X-Auth-Token"],
@@ -94,7 +94,7 @@ echo ""
 echo "🎉 CORS Configuration Complete!"
 echo "==============================="
 echo ""
-echo "✅ Your frontend at http://localhost:5173 and production server at http://172.16.231.80 can now access:"
+echo "✅ Your frontend at http://localhost:5173 and production server at http://172.16.231.80:3000 can now access:"
 echo "   - http://localhost:3000/user-management-service/api/*"
 echo "   - http://localhost:3000/dao-service/api/*"
 echo "   - http://localhost:3000/audit-trail-service/api/*"
