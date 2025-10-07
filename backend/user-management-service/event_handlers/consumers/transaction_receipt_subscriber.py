@@ -4,6 +4,10 @@ import time
 from typing import Dict, Callable
 from django.conf import settings
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
+from organizations.services.onchain_verification_service import OnchainVerificationService
+from organizations.serializers.onchain_verification_serializers import (
+    OnchainVerificationCreateSerializer
+)
 
 class TransactionReceiptSubscriber:
     def __init__(self):
@@ -105,6 +109,30 @@ class TransactionReceiptSubscriber:
         
         print(f" [💰] {json.dumps(log_message)}")
         
+        
+        
+        # Currently there are mismatch in variable names, that's why used this for temp patch-up.
+        verification_data={
+            "trx_hash"        : onChainData.get("transactionHash"),      # rename
+            "proposer_wallet" : onChainData.get("signedBy"),             # rename
+            "context"         : onChainData.get("context", {}),          # keep as-is
+            "organization_id" : onChainData.get("organizationId", 5), # hard-coded
+        }
+        serializer=OnchainVerificationCreateSerializer(data=verification_data)
+
+        if not serializer.is_valid():
+            print(f" [✘] Validation error: {serializer.errors}")
+            raise ValueError(serializer.errors)   # will trigger nack
+
+        validated_data = serializer.validated_data
+
+        try:
+            obj=OnchainVerificationService.create_onchain_verification(validated_data)
+            print(f" [*] OnchainVerification created: {obj.id}")
+        except Exception as e:
+            print(f" [✘] Failed to create OnchainVerification: {str(e)}")
+
+
         # TODO: Implement transaction receipt processing logic
         # - Log transaction details
         # - Update user transaction history

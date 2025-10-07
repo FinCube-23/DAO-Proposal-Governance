@@ -151,9 +151,9 @@ class Logger:
         json_formatter = jsonlogger.JsonFormatter(fmt)
 
         # Console
-        ch = logging.StreamHandler()
-        ch.setFormatter(json_formatter)
-        self.logger.addHandler(ch)
+        # ch = logging.StreamHandler()
+        # ch.setFormatter(json_formatter)
+        # self.logger.addHandler(ch)
 
         # File
         log_dir = os.environ.get("LOG_DIR", "logs")
