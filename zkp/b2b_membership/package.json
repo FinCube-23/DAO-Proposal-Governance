@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "@zk-kit/eddsa-poseidon": "^1.1.0",
+    "@zk-kit/poseidon-cipher": "^0.3.2",
+    "@zkpassport/poseidon2": "^0.6.2",
+    "circomlibjs": "^0.1.7"
+  }
+}
