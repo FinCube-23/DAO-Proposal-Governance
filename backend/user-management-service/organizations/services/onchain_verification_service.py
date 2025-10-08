@@ -143,6 +143,29 @@ class OnchainVerificationService:
             print(f" [!] Failed to add on-chain ID to verification: {str(e)}")
 
     @staticmethod
+    def get_verification_by_proposer_wallet(proposer_wallet):
+        """
+        Get the latest on-chain verification by proposer wallet address.
+        Returns the most recent verification (by creation time) if multiple exist.
+        """
+        if not proposer_wallet:
+            raise Exception("Proposer wallet is required")
+        
+        return OnchainVerificationRepository.get_latest_verification_by_proposer_wallet(proposer_wallet)
+    
+    @staticmethod
+    def update_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id):
+        """
+        Update the onchain_id field for the latest verification by proposer wallet address.
+        """
+        if not proposer_wallet:
+            raise Exception("Proposer wallet is required")
+        if not onchain_id:
+            raise Exception("On-chain ID is required")
+        
+        return OnchainVerificationRepository.update_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id)
+
+    @staticmethod
     def handle_proposal_creation(proposer_wallet, onchain_id):
         """Handle new proposal creation"""
         if not proposer_wallet:

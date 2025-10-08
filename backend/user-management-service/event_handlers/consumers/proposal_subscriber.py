@@ -126,15 +126,43 @@ class ProposalSubscriber:
             print(f" [✘] Failed to update verification status: {str(e)}")
 
     def handle_proposal_created(self, event: ResponseTransactionStatusDto):
-        """Handle new proposal creation"""
+        """Handle new proposal creation - ProposalAdded event"""
         data = event.get('data', {})
-        proposer_wallet = data.get('proposedWallet').lower()
+        proposer_wallet = data.get('proposedWallet', '').lower()
         trx_hash = event.get('transactionHash')
         onchain_id = data.get('proposalId')
 
-        print(f"Received a proposal transaction update in event pattern - hash: {trx_hash[:10]}...{trx_hash[-10:]}")
+        print(f"Received a ProposalAdded event - hash: {trx_hash[:10]}...{trx_hash[-10:]}")
         print(f"On-Chain Proposal ID: {onchain_id} | Proposer Wallet: {proposer_wallet}")
+        
+        # Validate required fields
+        if not proposer_wallet:
+            print(" [!] Missing proposer wallet in ProposalAdded event")
+            return
+        if not onchain_id:
+            print(" [!] Missing proposal ID in ProposalAdded event")
+            return
+
         try:
-            OnchainVerificationService.handle_proposal_creation(proposer_wallet, onchain_id)
+            # Check if OnChainValidation record exists for this proposer wallet
+            verification = OnchainVerificationService.get_verification_by_proposer_wallet(proposer_wallet)
+            if not verification:
+                print(f" [!] No OnChainValidation record found for proposer wallet: {proposer_wallet}")
+                
+                # Debug: Let's see what wallet addresses actually exist in the database
+                print(f" [🔍] Debugging - checking existing wallet addresses in database...")
+                OnchainVerificationService.debug_existing_wallets()
+                return
+            
+            print(f" [*] Found OnChainValidation record (ID: {verification.id}) for proposer wallet: {proposer_wallet}")
+            
+            # Update the onchain_id field with the proposal ID from the event
+            updated_verification = OnchainVerificationService.update_verification_onchain_id_by_proposer_wallet(
+                proposer_wallet, onchain_id
+            )
+            
+            print(f" [✓] Successfully updated OnChainValidation record (ID: {updated_verification.id}) with proposal ID: {onchain_id}")
+            print(f" [✓] ProposalAdded event processed successfully for wallet: {proposer_wallet}")
+            
         except Exception as e:
-            print(f"Invalid proposal object received: {str(e)}")
+            print(f" [✘] Failed to process ProposalAdded event: {str(e)}")
