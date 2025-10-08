@@ -1,19 +1,22 @@
 # organizations/admin.py
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import Organization, OrganizationUser, OnchainVerification
 
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = [
-        'id',
-        'name', 
+        'name',
+        'display_org_admin',
+        'id', 
         'email', 
         'type', 
         'status', 
         'is_active',
-        'organization_admin',
         'created_at'
     ]
+    
+    list_select_related = ['organization_admin']
     
     list_filter = [
         'status',
@@ -83,6 +86,13 @@ class OrganizationAdmin(admin.ModelAdmin):
         )
     set_pending_status.short_description = "Set selected organizations to pending"
     
+    def display_org_admin(self, obj):
+        if obj.organization_admin:
+            link = f"/admin/users/user/{obj.organization_admin.id}/change/"
+            return format_html(f'<a href="{link}">{obj.organization_admin.get_full_name() or obj.organization_admin.email}</a>')
+        return "No Admin"
+    display_org_admin.short_description = "Organization Admin"
+    
     def save_model(self, request, obj, form, change):
         # Enforce business rule: Only approved organizations can be active
         if obj.status == 'approved':
@@ -93,7 +103,14 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 @admin.register(OrganizationUser)
 class OrganizationUserAdmin(admin.ModelAdmin):
-    list_display = ['user', 'organization', 'list_groups', 'created_at']
+    list_display = ['user', 'display_organization', 'list_groups', 'created_at']
+    
+    # Optimize ForeignKey relationships to avoid the N+1 query problem
+    list_select_related = ['user', 'organization']
+    
+    # Optimize ManyToMany relationships
+    list_prefetch_related = ['groups', 'user_permissions']
+    
     list_filter = ['organization', 'created_at', 'groups', 'user_permissions']
     search_fields = [
         'user__email', 
@@ -114,20 +131,28 @@ class OrganizationUserAdmin(admin.ModelAdmin):
     )
 
     def list_groups(self, obj):
-        return ", ".join([g.name for g in obj.groups.all()])
+        """Display groups as comma-separated list"""
+        return ", ".join([g.name for g in obj.groups.all()]) or "No groups"
     list_groups.short_description = "Groups"
-
+    
+    def display_organization(self, obj):
+        link = f"/admin/organizations/organization/{obj.organization.id}/change/"
+        return format_html(f'<a href="{link}">{obj.organization.name}</a>')
+    display_organization.short_description = "Organization"
+    
+    
 @admin.register(OnchainVerification)
 class OnchainVerificationAdmin(admin.ModelAdmin):
     list_display = [
-        'id',
         'organization',
+        'id',
         'onchain_status',
         'trx_hash',
         'onchain_id',
         'created_at'
     ]
     list_filter = ['onchain_status', 'created_at']
+    list_select_related = ['organization']
     search_fields = [
         'organization__name',
         'trx_hash',
