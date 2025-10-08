@@ -10,6 +10,8 @@ import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
 import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
+import { TempoService } from '../shared/common/tracing/tempo.service';
 
 @Injectable()
 export class TransactionsService {
@@ -17,6 +19,8 @@ export class TransactionsService {
     @InjectRepository(TransactionEntity)
     private transactionRepository: Repository<TransactionEntity>,
     private readonly logger: WinstonLogger,
+    private readonly traceContextService: TraceContextService,
+    private readonly tempoService: TempoService,
   ) {
     this.logger.setContext(TransactionsService.name);
   }
@@ -153,6 +157,8 @@ export class TransactionsService {
       transaction.trx_status = newStatus as TransactionStatus;
       transaction.trx_metadata = metadata;
       transaction.confirmation_source = source;
+      transaction.transaction_confirmation_trace = null;
+
       this.logger.log(
         `Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`,
       );
@@ -176,6 +182,74 @@ export class TransactionsService {
     } catch {
       this.logger.error('Could not find any pending transactions');
       return [];
+    }
+  }
+
+
+  async synchronizeTransactionTrace(transactionHash: string): Promise<void> {
+  try {
+    const transaction = await this.transactionRepository.findOne({
+      where: { trx_hash: transactionHash },
+    });
+
+    if (!transaction) {
+      this.logger.warn(
+        `Transaction with hash ${transactionHash} not found in DB for trace synchronization.`,
+      );
+      return;
+    }
+
+      const traceContext = this.traceContextService.getCurrentTraceContext();
+      const traceId = traceContext.trace_id;
+
+    if (!traceId || traceId === 'N/A') {
+      this.logger.warn(
+        `No valid trace ID found for transaction ${transactionHash}. Skipping trace synchronization.`,
+      );
+      return;
+    }
+
+    this.logger.log(
+      `Starting trace synchronization for transaction ${transactionHash} with trace ID: ${traceId}`,
+    );
+
+    const isTraceAvailable = await this.tempoService.waitForTraceAvailability(
+      traceId,
+      parseInt(process.env.TEMPO_RETRY_COUNT || '3'),
+      parseInt(process.env.TEMPO_RETRY_DELAY_MS || '2000'),
+    );
+
+      if (!isTraceAvailable) {
+        this.logger.warn(
+          `Trace ${traceId} not available in Tempo after retries. Transaction: ${transactionHash}`,
+        );
+        return;
+      }
+
+      const serviceStatuses =
+        await this.tempoService.extractServiceStatus(traceId);
+
+    if (!serviceStatuses || serviceStatuses.length === 0) {
+      this.logger.warn(
+        `No service statuses extracted from trace ${traceId} for transaction ${transactionHash}`,
+      );
+      return;
+    }
+
+    transaction.transaction_confirmation_trace = serviceStatuses;
+
+    await this.transactionRepository.save(transaction);
+
+      this.logger.log(
+        `Transaction trace synchronized successfully for ${transactionHash}. ` +
+          `Services tracked: ${serviceStatuses
+            .map((s) => `${s.service}(${s.status})`)
+            .join(', ')}`,
+      );
+    } catch (err) {
+      this.logger.error(
+        `Error synchronizing trace for transaction hash ${transactionHash}: ${err.message}`,
+      );
     }
   }
 }

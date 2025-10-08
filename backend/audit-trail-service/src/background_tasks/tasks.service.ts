@@ -25,7 +25,7 @@ export class TasksService {
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
     private schedulerRegistry: SchedulerRegistry,
-    private readonly logger: WinstonLogger,
+    private readonly logger: WinstonLogger
   ) {
     this.logger.setContext(TasksService.name);
     this.typeDrivenFunctionCall = {
@@ -173,6 +173,9 @@ export class TasksService {
           await this.handleProposalStatusUpdate(transaction);
         }
 
+        this.transactionService.synchronizeTransactionTrace(
+          transaction.transactionHash,
+        ); 
         this.logger.log(
           `CRON: Transaction ${transaction.transactionHash} successfully updated.`,
         );
@@ -290,10 +293,14 @@ export class TasksService {
               blockNumber: txn.blockNumber,
               transactionHash: txn.transactionHash,
             });
+            this.transactionService.synchronizeTransactionTrace(
+              txn.transactionHash,
+            );
             this.logger.log(
               'WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!',
             );
           }
+         
         } else {
           this.logger.warn(
             'WEBSOCKET: proposalEndTopic is non-zero for ProposalCreated event.',
