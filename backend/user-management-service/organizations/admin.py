@@ -103,7 +103,7 @@ class OrganizationAdmin(admin.ModelAdmin):
 
 @admin.register(OrganizationUser)
 class OrganizationUserAdmin(admin.ModelAdmin):
-    list_display = ['user', 'display_organization', 'list_groups', 'created_at']
+    list_display = ['user', 'display_organization', 'created_at']
     
     # Optimize ForeignKey relationships to avoid the N+1 query problem
     list_select_related = ['user', 'organization']
@@ -111,7 +111,7 @@ class OrganizationUserAdmin(admin.ModelAdmin):
     # Optimize ManyToMany relationships
     list_prefetch_related = ['groups', 'user_permissions']
     
-    list_filter = ['organization', 'created_at', 'groups', 'user_permissions']
+    list_filter = ['organization', 'created_at', 'groups']
     search_fields = [
         'user__email', 
         'user__first_name', 
