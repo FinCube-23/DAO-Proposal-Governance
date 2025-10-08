@@ -39,6 +39,27 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Witness generated successfully"
+echo "✅ Proving key generated successfully"
+
+echo "🔓 Step 5: Generating verification key..."
+bb write_vk -b ./target/b2b_membership.json -o ./target
+
+if [ $? -ne 0 ]; then
+    echo "❌ Verification key generation failed!"
+    exit 1
+fi
+
+echo "✅ Verification key generated successfully"
+
+echo "📜 Step 6: Generating Solidity verifier contract..."
+bb write_solidity_verifier -k ./target/vk -o ./target/Verifier.sol
+
+if [ $? -ne 0 ]; then
+    echo "❌ Verifier contract generation failed!"
+    exit 1
+fi
+
+echo "✅ Solidity verifier contract generated successfully"
 
 echo "🔍 Step 4: Generating proof..."
 bb prove -b ./target/b2b_membership.json -w ./target/b2b_membership.gz -o ./target
