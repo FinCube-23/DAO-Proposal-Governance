@@ -15,6 +15,7 @@ import {
   PendingTransactionDto,
   PaginatedProposalResponse,
   UpdateProposalDto,
+  ProposalDtoV2,
 } from './dto/proposal.dto';
 import { catchError, firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
@@ -87,6 +88,65 @@ export class ProposalServiceService {
       this.logger.log({
         message: `New proposal created with ID: ${saved_proposal.id}`,
         wallet: proposal.proposer_address,
+      });
+
+      return saved_proposal;
+    } catch (err) {
+      this.logger.error(`Failed to create proposal: ${err.message}`);
+      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      throw new HttpException(
+        {
+          status: HttpStatus.SERVICE_UNAVAILABLE,
+          error: 'Audit trail service is currently unavailable',
+        },
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+  }
+
+  async create_v2(req, proposal: ProposalDtoV2): Promise<ProposalEntity> {
+    const res = await validateAuth(req, this.umsRabbitClient as any);
+
+    if (res.status != 'SUCCESS') {
+      throw new UnauthorizedException(
+        'You are not authorized to perform this task',
+      );
+    }
+
+    try {
+      // First verify we have the required fields
+      if (
+        !proposal.onChainData.transactionHash ||
+        !proposal.onChainData.signedBy
+      ) {
+        throw new Error('Transaction hash and proposer address are required');
+      }
+
+      const pendingTrx = {
+        trx_hash: proposal.onChainData.transactionHash,
+        proposer_address: proposal.onChainData.signedBy,
+      };
+
+      // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
+      const audit_record = await this.handlePendingProposal(pendingTrx);
+
+      if (!audit_record?.data?.db_record_id) {
+        throw new Error('Failed to get valid audit record ID');
+      }
+
+      // Creating new proposal with audit ID
+      const new_proposal = this.proposalRepository.create({
+        audit_id: audit_record.data.db_record_id,
+        proposer_address: proposal.onChainData.signedBy,
+        proposal_type: proposal.proposal_type,
+        metadata: proposal.metadata || null,
+        trx_hash: proposal.onChainData.transactionHash,
+      });
+
+      const saved_proposal = await this.proposalRepository.save(new_proposal);
+      this.logger.log({
+        message: `New proposal created with ID: ${saved_proposal.id}`,
+        wallet: proposal.onChainData.signedBy,
       });
 
       return saved_proposal;
@@ -253,10 +313,12 @@ export class ProposalServiceService {
         'proposal.proposal_status',
         'proposal.proposal_onchain_id',
         'proposal.metadata',
-      ])
+      ]);
 
     if (filter && filter !== 'all') {
-      query.where('proposal.proposal_status = :filter', { filter: filter.toLowerCase() });
+      query.where('proposal.proposal_status = :filter', {
+        filter: filter.toLowerCase(),
+      });
     }
 
     const [proposals, total] = await query
@@ -312,7 +374,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
@@ -340,7 +402,7 @@ export class ProposalServiceService {
     if (messageResponse.status == 'SUCCESS') {
       this.logger.log(
         'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
+          messageResponse.data.db_record_id,
       );
       return messageResponse;
     } else {
