@@ -25,7 +25,7 @@ import {
   PaginatedProposalResponse,
   // ProposalDto,
   ProposalDtoV2,
-  UpdateProposalDto,
+  // UpdateProposalDto,
 } from './dto/proposal.dto';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
@@ -127,16 +127,14 @@ export class ProposalServiceController {
     schema: {
       example: {
         proposalId: 1,
-        transactionHash:
-          '0xe53c868443504e899c093736281f99a9d0b99d66a7b2ecd53575209fe69a8d2a',
       },
     },
   })
   async executeProposal(
     @Req() req,
-    @Body() executeProposalDto: UpdateProposalDto,
+    @Body('proposalId') proposalId: number,
   ): Promise<ProposalEntity> {
-    return this.proposalService.executeProposal(req, executeProposalDto);
+    return this.proposalService.executeProposal(req, proposalId);
   }
 
   // 💬 MessagePattern expects a response | This is a Producer
@@ -157,16 +155,14 @@ export class ProposalServiceController {
     schema: {
       example: {
         proposalId: 1,
-        transactionHash:
-          '0xe53c868443504e899c093736281f99a9d0b99d66a7b2ecd53575209fe69a8d2a',
       },
     },
   })
   async cancelProposal(
     @Req() req,
-    @Body() cancelProposalDto: UpdateProposalDto,
+    @Body('proposalId') proposalId: number,
   ): Promise<ProposalEntity> {
-    return this.proposalService.cancelProposal(req, cancelProposalDto);
+    return this.proposalService.cancelProposal(req, proposalId);
   }
 
   @Get(':id')

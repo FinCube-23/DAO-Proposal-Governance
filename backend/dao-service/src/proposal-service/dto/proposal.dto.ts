@@ -176,12 +176,12 @@ export class ProposalDtoV2 {
   onChainData: OnChainDataDto;
 }
 
-export class PendingTransactionDto {
-  trx_hash: string;
-  proposer_address: string;
-}
+// export class PendingTransactionDto {
+//   trx_hash: string;
+//   proposer_address: string;
+// }
 
-export class UpdateProposalDto {
-  proposalId: number;
-  transactionHash: string;
-}
+// export class UpdateProposalDto {
+//   proposalId: number;
+//   transactionHash: string;
+// }

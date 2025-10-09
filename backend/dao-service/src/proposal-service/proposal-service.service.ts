@@ -12,12 +12,12 @@ import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import {
   // ProposalDto,
-  PendingTransactionDto,
+  // PendingTransactionDto,
   PaginatedProposalResponse,
-  UpdateProposalDto,
+  // UpdateProposalDto,
   ProposalDtoV2,
 } from './dto/proposal.dto';
-import { catchError, firstValueFrom, timeout } from 'rxjs';
+// import { catchError, firstValueFrom, timeout } from 'rxjs';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
@@ -163,10 +163,7 @@ export class ProposalServiceService {
     }
   }
 
-  async executeProposal(
-    req: any,
-    executedProposalDto: UpdateProposalDto,
-  ): Promise<any> {
+  async executeProposal(req: any, proposalId: number): Promise<any> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
@@ -176,15 +173,12 @@ export class ProposalServiceService {
     }
 
     try {
-      if (
-        !executedProposalDto.proposalId ||
-        !executedProposalDto.transactionHash
-      ) {
-        throw new Error('Proposal ID and Transaction Hash is required');
+      if (!proposalId) {
+        throw new Error('Proposal ID is required');
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: executedProposalDto.proposalId,
+          proposal_onchain_id: proposalId,
         },
       });
 
@@ -219,10 +213,7 @@ export class ProposalServiceService {
     }
   }
 
-  async cancelProposal(
-    req: any,
-    cancelProposalDto: UpdateProposalDto,
-  ): Promise<any> {
+  async cancelProposal(req: any, proposalId: number): Promise<any> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
@@ -232,12 +223,12 @@ export class ProposalServiceService {
     }
 
     try {
-      if (!cancelProposalDto.proposalId || !cancelProposalDto.transactionHash) {
-        throw new Error('Proposal ID and Transaction Hash is required');
+      if (!proposalId) {
+        throw new Error('Proposal ID is required');
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: cancelProposalDto.proposalId,
+          proposal_onchain_id: proposalId,
         },
       });
 
