@@ -122,21 +122,21 @@ export class ProposalServiceService {
         throw new Error('Transaction hash and proposer address are required');
       }
 
-      const pendingTrx = {
-        trx_hash: proposal.onChainData.transactionHash,
-        proposer_address: proposal.onChainData.signedBy,
-      };
+      // const pendingTrx = {
+      //   trx_hash: proposal.onChainData.transactionHash,
+      //   proposer_address: proposal.onChainData.signedBy,
+      // };
 
       // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
-      const audit_record = await this.handlePendingProposal(pendingTrx);
+      // const audit_record = await this.handlePendingProposal(pendingTrx);
 
-      if (!audit_record?.data?.db_record_id) {
-        throw new Error('Failed to get valid audit record ID');
-      }
+      // if (!audit_record?.data?.db_record_id) {
+      //   throw new Error('Failed to get valid audit record ID');
+      // }
 
       // Creating new proposal with audit ID
       const new_proposal = this.proposalRepository.create({
-        audit_id: audit_record.data.db_record_id,
+        // audit_id: audit_record.data.db_record_id,
         proposer_address: proposal.onChainData.signedBy,
         proposal_type: proposal.proposal_type,
         metadata: proposal.metadata || null,
@@ -189,24 +189,26 @@ export class ProposalServiceService {
       });
 
       this.logger.log(
-        `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        // `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id}`,
       );
 
-      const executedTrx = {
-        trx_hash: executedProposalDto.transactionHash,
-        proposer_address: proposal.proposer_address,
-      };
+      // const executedTrx = {
+      //   trx_hash: executedProposalDto.transactionHash,
+      //   proposer_address: proposal.proposer_address,
+      // };
       //Handle executedProposal using audit trail service
-      const audit_record = await this.handleUpdatedProposal(executedTrx);
+      // const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
-      proposal.audit_id = audit_record.data.db_record_id;
+      // proposal.audit_id = audit_record.data.db_record_id;
       proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        // `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -240,24 +242,26 @@ export class ProposalServiceService {
       });
 
       this.logger.log(
-        `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        // `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id}`,
       );
 
-      const executedTrx = {
-        trx_hash: cancelProposalDto.transactionHash,
-        proposer_address: proposal.proposer_address,
-      };
+      // const executedTrx = {
+      //   trx_hash: cancelProposalDto.transactionHash,
+      //   proposer_address: proposal.proposer_address,
+      // };
       //Handle executedProposal using audit trail service
-      const audit_record = await this.handleUpdatedProposal(executedTrx);
+      // const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
-      proposal.audit_id = audit_record.data.db_record_id;
+      // proposal.audit_id = audit_record.data.db_record_id;
       proposal.trx_status = 0;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        // `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -350,67 +354,67 @@ export class ProposalServiceService {
   }
 
   // 💬 Producing Message in the queue
-  async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log({
-      message: 'Triggering queue-pending-proposal for a new transaction',
-      trxHash: proposal.trx_hash,
-    });
-    // Convert Observable to Promise and await the response
-    const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('queue-pending-proposal', proposal).pipe(
-        timeout(50000), // Nginx default timeout is 60 seconds. So we are setting Message Broker Response as 50 seconds.
-        catchError((err) => {
-          throw new Error('AUDIT-TRAIL-SERVICE timeout or unreachable');
-        }),
-        /* Note:
-                As this project architecture is designed with low number of services
-                we are covering this type of cross service synchronization with Producer-Consumer
-                model where a response is expected. But for larger infrastructure we will mostly rely on
-                Pub/Sub model where Fire and Forget will be implemented.
-                Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.
-        */
-      ),
-    );
-    if (messageResponse.status == 'SUCCESS') {
-      this.logger.log(
-        'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
-      );
-      return messageResponse;
-    } else {
-      this.logger.error(
-        `Audit service returned failure: ${JSON.stringify(messageResponse.error)}`,
-      );
-      throw new Error(
-        messageResponse.error?.message || 'Proposal processing failed',
-      );
-    }
-  }
+  // async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
+  //   this.logger.log({
+  //     message: 'Triggering queue-pending-proposal for a new transaction',
+  //     trxHash: proposal.trx_hash,
+  //   });
+  //   // Convert Observable to Promise and await the response
+  //   const messageResponse = await firstValueFrom(
+  //     this.rabbitClient.send('queue-pending-proposal', proposal).pipe(
+  //       timeout(50000), // Nginx default timeout is 60 seconds. So we are setting Message Broker Response as 50 seconds.
+  //       catchError((err) => {
+  //         throw new Error('AUDIT-TRAIL-SERVICE timeout or unreachable');
+  //       }),
+  //       /* Note:
+  //               As this project architecture is designed with low number of services
+  //               we are covering this type of cross service synchronization with Producer-Consumer
+  //               model where a response is expected. But for larger infrastructure we will mostly rely on
+  //               Pub/Sub model where Fire and Forget will be implemented.
+  //               Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.
+  //       */
+  //     ),
+  //   );
+  //   if (messageResponse.status == 'SUCCESS') {
+  //     this.logger.log(
+  //       'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
+  //         messageResponse.data.db_record_id,
+  //     );
+  //     return messageResponse;
+  //   } else {
+  //     this.logger.error(
+  //       `Audit service returned failure: ${JSON.stringify(messageResponse.error)}`,
+  //     );
+  //     throw new Error(
+  //       messageResponse.error?.message || 'Proposal processing failed',
+  //     );
+  //   }
+  // }
 
   // 💬 Producing Message in the queue
-  async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log({
-      message:
-        'Triggering transaction reference for an updated proposal (Execute/Cancel)',
-      trxHash: proposal.trx_hash,
-    });
-    // Convert Observable to Promise and await the response
-    const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('membership-proposal-status-update', proposal),
-    );
+  // async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
+  //   this.logger.log({
+  //     message:
+  //       'Triggering transaction reference for an updated proposal (Execute/Cancel)',
+  //     trxHash: proposal.trx_hash,
+  //   });
+  //   // Convert Observable to Promise and await the response
+  //   const messageResponse = await firstValueFrom(
+  //     this.rabbitClient.send('membership-proposal-status-update', proposal),
+  //   );
 
-    if (messageResponse.status == 'SUCCESS') {
-      this.logger.log(
-        'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-          messageResponse.data.db_record_id,
-      );
-      return messageResponse;
-    } else {
-      throw new Error(
-        messageResponse.error?.message || 'Proposal processing failed',
-      );
-    }
-  }
+  //   if (messageResponse.status == 'SUCCESS') {
+  //     this.logger.log(
+  //       'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
+  //         messageResponse.data.db_record_id,
+  //     );
+  //     return messageResponse;
+  //   } else {
+  //     throw new Error(
+  //       messageResponse.error?.message || 'Proposal processing failed',
+  //     );
+  //   }
+  // }
 
   async updateProposalCreated(
     trxHash: string,

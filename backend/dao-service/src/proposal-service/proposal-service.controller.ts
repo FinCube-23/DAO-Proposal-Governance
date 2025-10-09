@@ -23,7 +23,7 @@ import {
 import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import {
   PaginatedProposalResponse,
-  ProposalDto,
+  // ProposalDto,
   ProposalDtoV2,
   UpdateProposalDto,
 } from './dto/proposal.dto';
