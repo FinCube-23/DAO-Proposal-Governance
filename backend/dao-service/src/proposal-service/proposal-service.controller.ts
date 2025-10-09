@@ -106,7 +106,7 @@ export class ProposalServiceController {
     @Req() req,
     @Body() proposal_entity: ProposalDtoV2,
   ): Promise<ProposalEntity> {
-    return this.proposalService.create_v2(req, proposal_entity);
+    return this.proposalService.createV2(req, proposal_entity);
   }
 
   // 💬 MessagePattern expects a response | This is a Producer

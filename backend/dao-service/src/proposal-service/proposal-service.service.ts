@@ -11,7 +11,7 @@ import { Repository } from 'typeorm';
 import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import { ClientProxy } from '@nestjs/microservices';
 import {
-  ProposalDto,
+  // ProposalDto,
   PendingTransactionDto,
   PaginatedProposalResponse,
   UpdateProposalDto,
@@ -26,7 +26,7 @@ import { validateAuth } from '@mskits/validate-auth';
 
 @Injectable()
 export class ProposalServiceService {
-  public update_proposals: ProposalDto[];
+  public update_proposals: ProposalDtoV2[];
   private eventDrivenFunctionCall: Record<
     string,
     (proposal: ResponseTransactionStatusDto) => void
@@ -49,62 +49,62 @@ export class ProposalServiceService {
     };
   }
 
-  // 💬 MessagePattern expects a response | This is a publisher
-  async create(
-    req,
-    proposal: Partial<ProposalEntity>,
-  ): Promise<ProposalEntity> {
-    const res = await validateAuth(req, this.umsRabbitClient as any);
+  // // 💬 MessagePattern expects a response | This is a publisher
+  // async create(
+  //   req,
+  //   proposal: Partial<ProposalEntity>,
+  // ): Promise<ProposalEntity> {
+  //   const res = await validateAuth(req, this.umsRabbitClient as any);
 
-    if (res.status != 'SUCCESS') {
-      throw new UnauthorizedException(
-        'You are not authorized to perform this task',
-      );
-    }
+  //   if (res.status != 'SUCCESS') {
+  //     throw new UnauthorizedException(
+  //       'You are not authorized to perform this task',
+  //     );
+  //   }
 
-    try {
-      // First verify we have the required fields
-      if (!proposal.trx_hash || !proposal.proposer_address) {
-        throw new Error('Transaction hash and proposer address are required');
-      }
+  //   try {
+  //     // First verify we have the required fields
+  //     if (!proposal.trx_hash || !proposal.proposer_address) {
+  //       throw new Error('Transaction hash and proposer address are required');
+  //     }
 
-      const pendingTrx = {
-        trx_hash: proposal.trx_hash,
-        proposer_address: proposal.proposer_address,
-      };
+  //     const pendingTrx = {
+  //       trx_hash: proposal.trx_hash,
+  //       proposer_address: proposal.proposer_address,
+  //     };
 
-      // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
-      const audit_record = await this.handlePendingProposal(pendingTrx);
+  //     // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
+  //     const audit_record = await this.handlePendingProposal(pendingTrx);
 
-      if (!audit_record?.data?.db_record_id) {
-        throw new Error('Failed to get valid audit record ID');
-      }
+  //     if (!audit_record?.data?.db_record_id) {
+  //       throw new Error('Failed to get valid audit record ID');
+  //     }
 
-      // Updating new proposal with audit ID
-      proposal.audit_id = audit_record.data.db_record_id;
-      const new_proposal = this.proposalRepository.create(proposal);
+  //     // Updating new proposal with audit ID
+  //     proposal.audit_id = audit_record.data.db_record_id;
+  //     const new_proposal = this.proposalRepository.create(proposal);
 
-      const saved_proposal = await this.proposalRepository.save(new_proposal);
-      this.logger.log({
-        message: `New proposal created with ID: ${saved_proposal.id}`,
-        wallet: proposal.proposer_address,
-      });
+  //     const saved_proposal = await this.proposalRepository.save(new_proposal);
+  //     this.logger.log({
+  //       message: `New proposal created with ID: ${saved_proposal.id}`,
+  //       wallet: proposal.proposer_address,
+  //     });
 
-      return saved_proposal;
-    } catch (err) {
-      this.logger.error(`Failed to create proposal: ${err.message}`);
-      this.logger.debug(`Error details: ${JSON.stringify(err)}`);
-      throw new HttpException(
-        {
-          status: HttpStatus.SERVICE_UNAVAILABLE,
-          error: 'Audit trail service is currently unavailable',
-        },
-        HttpStatus.SERVICE_UNAVAILABLE,
-      );
-    }
-  }
+  //     return saved_proposal;
+  //   } catch (err) {
+  //     this.logger.error(`Failed to create proposal: ${err.message}`);
+  //     this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+  //     throw new HttpException(
+  //       {
+  //         status: HttpStatus.SERVICE_UNAVAILABLE,
+  //         error: 'Audit trail service is currently unavailable',
+  //       },
+  //       HttpStatus.SERVICE_UNAVAILABLE,
+  //     );
+  //   }
+  // }
 
-  async create_v2(req, proposal: ProposalDtoV2): Promise<ProposalEntity> {
+  async createV2(req, proposal: ProposalDtoV2): Promise<ProposalEntity> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
