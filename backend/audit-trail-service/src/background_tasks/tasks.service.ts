@@ -4,6 +4,7 @@ import { TransactionConfirmationSource } from 'src/transactions/entities/transac
 import { TransactionsService } from 'src/transactions/transactions.service';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
 
 require('dotenv').config();
 const { Network, Alchemy } = require('alchemy-sdk');
@@ -25,7 +26,8 @@ export class TasksService {
     private transactionService: TransactionsService,
     private proposalUpdateService: ProposalUpdateService,
     private schedulerRegistry: SchedulerRegistry,
-    private readonly logger: WinstonLogger
+    private readonly logger: WinstonLogger,
+    private readonly traceContextService: TraceContextService
   ) {
     this.logger.setContext(TasksService.name);
     this.typeDrivenFunctionCall = {
@@ -110,7 +112,11 @@ export class TasksService {
 
   @Cron('30 * * * * *', { name: 'check-pending-transactions' })
   async handleCron() {
-    this.logger.log('Cron job started to look for pending transactions');
+    // Get trace context for this cron job
+    const traceContext = this.traceContextService.getCurrentTraceContext();
+    
+    this.logger.log(`Cron job started to look for pending transactions [trace_id=${traceContext.trace_id}] [span_id=${traceContext.span_id}]`);
+    
     //Get pending proposals from DB
     this.logger.log('CRON: Quering transactions from Transaction DB');
 

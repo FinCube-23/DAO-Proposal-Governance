@@ -12,6 +12,7 @@ import { TasksModule } from './background_tasks/task.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { WinstonLogger } from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
+import { TraceContextService } from './shared/common/tracing/trace-context.service';
 
 @Module({
   imports: [
@@ -27,7 +28,7 @@ import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
     TransactionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TasksService, WinstonLogger, MorganMiddleware],
+  providers: [AppService, TasksService, WinstonLogger, MorganMiddleware, TraceContextService],
   exports: [WinstonLogger],
 })
 export class AppModule implements NestModule {
