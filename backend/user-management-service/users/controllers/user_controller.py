@@ -23,9 +23,11 @@ from drf_spectacular.utils import (
     OpenApiTypes,
     OpenApiParameter,
 )
-
+from logging_config import logger
 
 class ProtectedUserController(ViewSet):
+    logger.set_context("ProtectedUserController")
+
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -40,15 +42,18 @@ class ProtectedUserController(ViewSet):
         }
     )
     def get_user_detail(self, request):
+        logger.log({"event": "Getting user detail Started", "user_id": request.user.id})
         try:
             user_id = request.user.id
             user = UserService.get_user_with_organizations(user_id)
             serializer = UserDetailSerializer(
                 user, context={"request": request, "user_id": user_id}
             )
+            logger.log({"event": "Getting user detail Success", "user_id": user_id, "data": serializer.data})
             return Response(serializer.data)
 
         except Exception as e:
+            logger.error({"event": "Getting user detail Error", "user_id": user_id, "error": str(e)})
             return Response(
                 {"error": str(e)},
                 status=(
@@ -69,14 +74,17 @@ class ProtectedUserController(ViewSet):
         }
     )
     def get_user_detail_by_id(self, request, user_id):
+        logger.log({"event": "Getting user detail by id Started", "user_id": user_id})
         try:
             user = UserService.get_user_with_organizations(user_id)
             serializer = UserDetailSerializer(
                 user, context={"request": request, "user_id": user_id}
             )
+            logger.log({"event": "Getting user detail by id Success", "user_id": user_id, "data": serializer.data})
             return Response(serializer.data)
 
         except Exception as e:
+            logger.error({"event": "Getting user detail by id Error", "user_id": user_id, "error": str(e)})
             return Response(
                 {"error": str(e)},
                 status=(
@@ -93,18 +101,20 @@ class ProtectedUserController(ViewSet):
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
     def update_user(self, request):
         """User self profile update (email/contact/wallet)"""
-        user = request.user
-
-        # IMPORTANT: Pass the instance parameter
-        serializer = UserSelfUpdateSerializer(
-            instance=user, data=request.data, partial=True
-        )
-        serializer.is_valid(raise_exception=True)
+        logger.log({"event": "Updating user Started", "user_id": request.user.id})
 
         try:
+            user = request.user
+            # IMPORTANT: Pass the instance parameter
+            serializer = UserSelfUpdateSerializer(
+                instance=user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
             updated_user = UserService.partial_update(user.id, serializer.validated_data)
+            logger.log({"event": "Updating user Success", "user_id": request.user.id, "data": UserSelfUpdateSerializer(updated_user).data})
             return Response(UserSelfUpdateSerializer(updated_user).data)
         except Exception as e:
+            logger.error({"event": "Updating user Error", "user_id": request.user.id, "error": str(e)})
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     """
@@ -122,18 +132,20 @@ class ProtectedUserController(ViewSet):
         description="Allows an authenticated user to update the status of any user by user_id.",
     )
     def update_user_status(self, request, user_id):
-        serializer = UserStatusUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        logger.log({"event": "Updating user status Started", "user_id": user_id})
         try:
+            serializer = UserStatusUpdateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             updated_user = UserService.update_status(
                 user_id=user_id,
                 approved_by=request.user.id,
                 new_status=serializer.validated_data["status"],
             )
-
+            logger.log({"event": "Updating user status Success", "user_id": user_id, "data": UserStatusUpdateSerializer(updated_user).data})
             response_serializer = UserStatusUpdateSerializer(updated_user)
             return Response({"status": "success", "data": response_serializer.data})
         except Exception as e:
+            logger.error({"event": "Updating user status Error", "user_id": user_id, "error": str(e)})
             error_status = (
                 status.HTTP_404_NOT_FOUND
                 if "not found" in str(e).lower()
@@ -152,6 +164,7 @@ class ProtectedUserController(ViewSet):
         }
     )
     def get_user_status(self, request, email):
+        logger.log({"event": "Getting user status Started", "email": email})
         if not email:
             return Response(
                 {"error": "Email parameter is required"},
@@ -160,11 +173,13 @@ class ProtectedUserController(ViewSet):
         try:
             user = UserService.get_user_status_by_email(email)
             response_serializer = UserStatusResponseSerializer(user)
+            logger.log({"event": "Getting user status Success", "email": email, "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
+            logger.error({"event": "Getting user status Error", "email": email, "error": str(e)})
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
@@ -206,24 +221,29 @@ class ProtectedUserController(ViewSet):
         },
     )
     def get_user_list(self, request):
+        logger.log({"event": "Getting user list Started", "data": request.query_params})
         try:
             users, pagination = UserService.get_users(request.query_params)
             serializer = UserListSerializer(users, many=True)
             return Response({"users": serializer.data, "pagination": pagination})
         except Exception as e:
+            logger.error({"event": "Getting user list Error", "data": request.query_params, "error": str(e)})
             return Response({"error": str(e)}, status=400)
 
 
 class PublicUserController(ViewSet):
+    logger.set_context("PublicUserController")
 
     @extend_schema(
         request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
     )
     def register(self, request):
-        registration_serializer = UserRegistrationSerializer(data=request.data)
-        registration_serializer.is_valid(raise_exception=True)
+        logger.log({"event": "Registering user Started", "data": request.data})
+        
 
         try:
+            registration_serializer = UserRegistrationSerializer(data=request.data)
+            registration_serializer.is_valid(raise_exception=True)
             user_dto = UserRegistrationDTO(
                 email=registration_serializer.validated_data["email"],
                 first_name=registration_serializer.validated_data["first_name"],
@@ -235,19 +255,23 @@ class PublicUserController(ViewSet):
             user = UserService.register_user(user_dto)
 
             response_serializer = UserResponseSerializer(user)
-
+            logger.log({"event": "Registering user Success", "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,
             )
 
+
+
         except EmailAlreadyExistsError as e:
+            logger.error({"event": "Registering user Conflict", "error": str(e)})
             return Response(
                 {"status": "error", "message": "Email already exists"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         except Exception as e:
+            logger.error({"event": "Registering user Error", "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

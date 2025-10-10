@@ -9,6 +9,7 @@ from users.utils.exceptions import (
     UserNotFoundError,
 )
 from django.contrib.auth.hashers import make_password, check_password
+from logging_config import logger
 
 
 class UserService:

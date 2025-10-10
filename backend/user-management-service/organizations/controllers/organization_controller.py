@@ -14,9 +14,11 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from logging_config import logger
 
 class ProtectedOrganizationController(ViewSet):
+    logger.set_context("ProtectedOrganizationController")
+    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
     """
@@ -38,22 +40,24 @@ class ProtectedOrganizationController(ViewSet):
         in -> name, email, type, address, legal_entity_identifier, organization_admin_id
         out -> id, name, email, type, address, legal_entity_identifier, organization_admin_id
         """
-        request.data["organization_admin_id"] = request.user.id
-        serializer = OrganizationCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        logger.log({"event": "Creating organization Started", "data": request.data})
 
         try:
+            request.data["organization_admin_id"] = request.user.id
+            serializer = OrganizationCreateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             organization = OrganizationService.create_organization(
                 serializer.validated_data
             )
             response_serializer = OrganizationResponseSerializer(organization)
-
+            logger.log({"event": "Creating organization Success", "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,
             )
 
         except Exception as e:
+            logger.error({"event": "Creating organization Error", "data": request.data, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -101,15 +105,18 @@ class ProtectedOrganizationController(ViewSet):
         Retrieve all organizations with pagination and filtering.
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id, organization_admin_name
         """
+        logger.log({"event": "Getting organization list Started", "data": request.query_params})
         try:
             organizations, pagination = OrganizationService.get_all_organizations(
                 request.query_params
             )
             serializer = OrganizationListSerializer(organizations, many=True)
+            logger.log({"event": "Getting organization list Success", "data": serializer.data})
             return Response(
                 {"organizations": serializer.data, "pagination": pagination}
             )
         except Exception as e:
+            logger.error({"event": "Getting organization list Error", "data": request.query_params, "error": str(e)})
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     @extend_schema(
@@ -135,14 +142,17 @@ class ProtectedOrganizationController(ViewSet):
         in -> org_id
         out -> org data, org_admin data, on_chain_verification data
         """
+        logger.log({"event": "Getting organization by id Started", "org_id": org_id})
         try:
             organization = OrganizationService.get_organization_by_id(org_id)
             serializer = OrganizationDetailSerializer(
                 organization, context={"request": request, "org_id": org_id}
             )
+            logger.log({"event": "Getting organization by id Success", "data": serializer.data})
             return Response(serializer.data)
 
         except Exception as e:
+            logger.error({"event": "Getting organization by id Error", "org_id": org_id, "error": str(e)})
             return Response(
                 {"error": str(e)},
                 status=(
@@ -177,6 +187,8 @@ class ProtectedOrganizationController(ViewSet):
         in -> org_id, email, address (only email and address can be updated)
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id
         """
+        logger.log({"event": "Updating organization Started", "org_id": org_id})
+
         try:
             # Get the organization for the serializer instance
             organization = OrganizationService.get_organization_by_id(org_id)
@@ -200,10 +212,11 @@ class ProtectedOrganizationController(ViewSet):
             )
 
             response_serializer = OrganizationDetailSerializer(updated_organization)
-
+            logger.log({"event": "Updating organization Success", "data": response_serializer.data})
             return Response({"status": "success", "data": response_serializer.data})
 
         except Exception as e:
+            logger.error({"event": "Updating organization Error", "org_id": org_id, "error": str(e)})
             error_status = (
                 status.HTTP_404_NOT_FOUND
                 if "not found" in str(e).lower()

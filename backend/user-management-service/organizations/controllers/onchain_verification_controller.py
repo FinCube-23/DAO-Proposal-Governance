@@ -14,9 +14,11 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
-
+from logging_config import logger
 
 class ProtectedOnchainVerificationController(ViewSet):
+    logger.set_context("ProtectedOnchainVerificationController")
+    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -36,23 +38,25 @@ class ProtectedOnchainVerificationController(ViewSet):
         Standard POST /onchain-verifications/
         """
 
-        serializer = OnchainVerificationCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        validated_data = serializer.validated_data
+        logger.log({"event": "Creating on-chain verification Started", "data": request.data})
 
         try:
+            serializer = OnchainVerificationCreateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            validated_data = serializer.validated_data
             verification = OnchainVerificationService.create_onchain_verification(
                 validated_data
             )
 
             response_serializer = OnchainVerificationResponseSerializer(verification)
-
+            logger.log({"event": "Creating on-chain verification Success", "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,
             )
 
         except Exception as e:
+            logger.error({"event": "Creating on-chain verification Error", "data": request.data, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -91,6 +95,7 @@ class ProtectedOnchainVerificationController(ViewSet):
         Retrieve on-chain verifications by organization ID.
         Returns a paginated list of on-chain verifications for the specified organization.
         """
+        logger.log({"event": "Getting on-chain verifications by organization Started", "org_id": org_id})
         try:
             verifications, pagination = (
                 OnchainVerificationService.get_verifications_by_organization(
@@ -99,7 +104,7 @@ class ProtectedOnchainVerificationController(ViewSet):
             )
 
             serializer = OnchainVerificationListSerializer(verifications, many=True)
-
+            logger.log({"event": "Getting on-chain verifications by organization Success", "data": serializer.data})
             return Response(
                 {
                     "status": "success",
@@ -111,6 +116,7 @@ class ProtectedOnchainVerificationController(ViewSet):
             )
 
         except Exception as e:
+            logger.error({"event": "Getting on-chain verifications by organization Error", "org_id": org_id, "error": str(e)})
             error_status = (
                 status.HTTP_404_NOT_FOUND
                 if "not found" in str(e).lower() or "does not exist" in str(e).lower()
