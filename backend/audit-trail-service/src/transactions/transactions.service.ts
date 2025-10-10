@@ -77,6 +77,7 @@ export class TransactionsService {
         'transaction.trx_hash',
         'transaction.trx_status',
         'transaction.confirmation_source',
+        'transaction.transaction_confirmation_trace',
         'transaction.updated_at',
       ])
       .skip(skip)
@@ -109,6 +110,7 @@ export class TransactionsService {
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
+      transaction_confirmation_trace: transaction.transaction_confirmation_trace,
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
     };
@@ -128,6 +130,7 @@ export class TransactionsService {
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
+      transaction_confirmation_trace: transaction.transaction_confirmation_trace,
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
     };
