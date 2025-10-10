@@ -140,7 +140,7 @@ export class ProposalServiceService {
         proposer_address: proposal.onChainData.signedBy,
         proposal_type: proposal.proposal_type,
         metadata: proposal.metadata || null,
-        trx_hash: proposal.onChainData.transactionHash,
+        transaction_hash: proposal.onChainData.transactionHash,
       });
 
       const saved_proposal = await this.proposalRepository.save(new_proposal);
@@ -195,7 +195,7 @@ export class ProposalServiceService {
       // const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       // proposal.audit_id = audit_record.data.db_record_id;
-      proposal.trx_status = 0;
+      proposal.transaction_status = 0;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
@@ -245,7 +245,7 @@ export class ProposalServiceService {
       // const audit_record = await this.handleUpdatedProposal(executedTrx);
       //Updating proposal with latest audit ID and trx_hash
       // proposal.audit_id = audit_record.data.db_record_id;
-      proposal.trx_status = 0;
+      proposal.transaction_status = 0;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
@@ -408,7 +408,7 @@ export class ProposalServiceService {
   // }
 
   async updateProposalCreated(
-    trxHash: string,
+    transactionHash: string,
     newStatus: number,
     proposalOnChainId: number,
   ) {
@@ -416,24 +416,27 @@ export class ProposalServiceService {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus, proposal_onchain_id: proposalOnChainId })
-        .where('trx_hash = :trxHash', { trxHash })
+        .set({
+          transaction_status: newStatus,
+          proposal_onchain_id: proposalOnChainId,
+        })
+        .where('transaction_hash = :transactionHash', { transactionHash })
         .returning('*')
         .execute();
 
       if (result.affected === 0) {
         throw new NotFoundException(
-          `Transaction with hash ${trxHash} not found`,
+          `Transaction with hash ${transactionHash} not found`,
         );
       }
 
       this.logger.log(
-        `Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
+        `Transaction status successfully updated for hash: ${transactionHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
       );
       return result.raw[0];
     } catch (err) {
       this.logger.error(
-        `Failed to update transaction status for hash: ${trxHash}. Error: ${err}`,
+        `Failed to update transaction status for hash: ${transactionHash}. Error: ${err}`,
       );
       throw new Error(`Failed to update transaction status.`);
     }
@@ -444,7 +447,7 @@ export class ProposalServiceService {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus }) // Updating web3_status
+        .set({ transaction_status: newStatus }) // Updating web3_status
         .where('proposal_onchain_id = :proposalOnChainId', {
           proposalOnChainId,
         }) // Using proposal_onchain_id as the condition

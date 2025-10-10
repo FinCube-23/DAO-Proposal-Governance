@@ -96,8 +96,9 @@ export class ProposalEntity {
       '0xe53c868443504e899c093736281f99a9d0b99d66a7b2ecd53575209fe69a8d2a',
     required: true,
   })
-  trx_hash: string;
+  transaction_hash: string;
 
+  //   We will use this field in future if foreign key relationship is needed
   //   @Column({ type: 'int', nullable: true })
   //   @ApiProperty({
   //     description:
@@ -112,7 +113,7 @@ export class ProposalEntity {
       'This field will be assigned by AUDIT TRAIL SERVICE through inter-service communication.',
     required: false,
   })
-  trx_status: number;
+  transaction_status: number;
 
   @CreateDateColumn({ name: 'created_at' }) 'created_at': Date;
   @UpdateDateColumn({ name: 'updated_at' }) 'updated_at': Date;

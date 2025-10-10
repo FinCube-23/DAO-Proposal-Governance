@@ -57,7 +57,7 @@ export class ProposalServiceController {
         summary: 'Membership Proposal Example',
         description: 'Example of adding a new member to the DAO',
         value: {
-          proposal_type: 'MEMBERSHIP',
+          proposal_type: 'membership',
           metadata:
             '{"title": "Add new member", "description": "Proposal to add Alice to the DAO", "memberAddress": "0x742d35Cc6634C0532925a3b8D58"}',
           onChainData: {
@@ -74,7 +74,7 @@ export class ProposalServiceController {
         summary: 'Currency Proposal Example',
         description: 'Example of proposing a new currency',
         value: {
-          proposal_type: 'CURRENCY',
+          proposal_type: 'general',
           metadata:
             '{"title": "Add USDC support", "description": "Proposal to add USDC as accepted currency", "tokenAddress": "0xA0b86a33E6B6a929b83E4e86a9e4c0b1f1e8c8b2"}',
           onChainData: {
@@ -91,7 +91,7 @@ export class ProposalServiceController {
         summary: 'Minimal Required Fields',
         description: 'Example with only required fields',
         value: {
-          proposal_type: 'MEMBERSHIP',
+          proposal_type: 'membership',
           metadata: '{"title": "Simple proposal"}',
           onChainData: {
             transactionHash:
