@@ -15,6 +15,7 @@ erDiagram
         enum confirmation_source "['alchemy', 'infura', 'graph', 'manual']; default = 'alchemy'"
         string trx_metadata "nullable"
         enum trx_status "[0 => pending, 1 => confirmed]; default = 0"
+        json transaction_confirmation_trace
         timestamptz created_at
         timestamptz updated_at
     }
