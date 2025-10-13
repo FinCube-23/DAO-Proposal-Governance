@@ -22,6 +22,24 @@ export interface Transaction {
   trx_status: boolean;
   confirmation_source: TransactionConfirmationSource;
   updated_at: string;
+  from_address?: string;
+  to_address?: string;
+  function_name?: string;
+  effective_fee_raw?: string;
+  top_event?: string;
+  transaction_confirmation_trace?: Array<{
+    status: 'completed' | 'pending' | 'failed' | 'waiting';
+    service: string;
+    timestamp: string;
+  }>;
+  event_logs?: Array<{
+    event_name: string;
+    contract_address: string;
+    topics: string[];
+    data: string;
+    block_number: number;
+    log_index: number;
+  }>;
 }
 
 export interface GetTrxResponse {

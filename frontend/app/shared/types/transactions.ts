@@ -34,5 +34,9 @@ export interface Transaction {
     log_index: number;
   }>;
   flow?: Array<{ service: string; status: 'completed' | 'pending' | 'failed' | 'waiting'; timestamp: string }>;
-  [key: string]: any; // For any additional dynamic fields
+  transaction_confirmation_trace?: Array<{
+    status: 'completed' | 'pending' | 'failed' | 'waiting';
+    service: string;
+    timestamp: string;
+  }>;
 }
