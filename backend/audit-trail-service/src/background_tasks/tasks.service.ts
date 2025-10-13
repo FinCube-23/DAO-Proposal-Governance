@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
 import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
 import { TransactionsService } from 'src/transactions/transactions.service';
@@ -18,6 +19,7 @@ const alchemy = new Alchemy(settings);
 
 @Injectable()
 export class TasksService {
+  private tracer = trace.getTracer('audit-trail-service', '1.0');
   private cronJobName = 'check-pending-transactions';
   private typeDrivenFunctionCall: Record<string, (transaction: any) => void>;
 
@@ -110,77 +112,117 @@ export class TasksService {
 
   @Cron('30 * * * * *', { name: 'check-pending-transactions' })
   async handleCron() {
-    this.logger.log('Cron job started to look for pending transactions');
-    //Get pending proposals from DB
-    this.logger.log('CRON: Quering transactions from Transaction DB');
-
-    const pendingTransactionHash =
-      await this.transactionService.getPendingTransactionHash();
-
-    this.logger.log(
-      `CRON: This are the pending transaction hashes: ${pendingTransactionHash}`,
+    // ✅ Independent span for cron jobs
+    const span = this.tracer.startSpan(
+      'audit-trail.cron.check-pending-transactions',
     );
 
-    //Query pending transactions (if any) from GraphQL
-    this.logger.log(`CRON: Quering pending transactions from The Graph`);
+    try {
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        this.logger.log('Cron job started to look for pending transactions');
 
-    const pendingTransactions =
-      await this.proposalUpdateService.getTransactionUpdates(
-        pendingTransactionHash,
-      );
+        //Get pending proposals from DB
+        this.logger.log('CRON: Quering transactions from Transaction DB');
 
-    if (!pendingTransactions || pendingTransactions.length === 0) {
-      this.logger.log(`CRON: No pending transactions!`);
-      return;
-    }
+        const pendingTransactionHash =
+          await this.transactionService.getPendingTransactionHash();
 
-    this.logger.log(`CRON: Found pending transactions: ${pendingTransactions}`);
-
-    const eventDataArray: any[] = [];
-
-    const transactionTypes = [
-      'proposalExecuteds',
-      'proposalCreateds',
-      'proposalCanceleds',
-      'proposalAddeds',
-      'ownershipTransferreds',
-      'memberRegistereds',
-      'memberApproveds',
-    ];
-
-    for (const type of transactionTypes) {
-      if (pendingTransactions[type]) {
-        eventDataArray.push(
-          ...pendingTransactions[type].map((tx: any) => ({
-            ...tx,
-            eventType: type, // Store which event type it belongs to
-          })),
+        this.logger.log(
+          `CRON: This are the pending transaction hashes: ${pendingTransactionHash}`,
         );
-      }
-    }
 
-    // Remove duplicates based on `transactionHash`
-    const uniqueTransactions = Array.from(
-      new Map(eventDataArray.map((tx) => [tx.transactionHash, tx])).values(),
-    );
+        //Query pending transactions (if any) from GraphQL
+        this.logger.log(`CRON: Quering pending transactions from The Graph`);
 
-    //update each transactions
-    for (const transaction of uniqueTransactions) {
-      try {
-        if (transaction.__typename == 'ProposalAdded') {
-          await this.handleEventEmissionBasedOnProposalType(transaction);
-        } else {
-          await this.handleProposalStatusUpdate(transaction);
+        const pendingTransactions =
+          await this.proposalUpdateService.getTransactionUpdates(
+            pendingTransactionHash,
+          );
+
+        if (!pendingTransactions || pendingTransactions.length === 0) {
+          this.logger.log(`CRON: No pending transactions!`);
+          return;
         }
 
         this.logger.log(
-          `CRON: Transaction ${transaction.transactionHash} successfully updated.`,
+          `CRON: Found pending transactions: ${pendingTransactions}`,
         );
-      } catch (updateError) {
-        this.logger.error(
-          `CRON: Failed to update transaction ${transaction.transactionHash}: ${updateError.message}`,
+
+        const eventDataArray: any[] = [];
+
+        const transactionTypes = [
+          'proposalExecuteds',
+          'proposalCreateds',
+          'proposalCanceleds',
+          'proposalAddeds',
+          'ownershipTransferreds',
+          'memberRegistereds',
+          'memberApproveds',
+        ];
+
+        for (const type of transactionTypes) {
+          if (pendingTransactions[type]) {
+            eventDataArray.push(
+              ...pendingTransactions[type].map((tx: any) => ({
+                ...tx,
+                eventType: type, // Store which event type it belongs to
+              })),
+            );
+          }
+        }
+
+        // Remove duplicates based on `transactionHash`
+        const uniqueTransactions = Array.from(
+          new Map(
+            eventDataArray.map((tx) => [tx.transactionHash, tx]),
+          ).values(),
         );
-      }
+
+        //update each transactions
+        for (const transaction of uniqueTransactions) {
+          const childSpan = this.tracer.startSpan(
+            'audit-trail.cron.process-transaction',
+          );
+
+          try {
+            await context.with(
+              trace.setSpan(context.active(), childSpan),
+              async () => {
+                if (transaction.__typename == 'ProposalAdded') {
+                  await this.handleEventEmissionBasedOnProposalType(
+                    transaction,
+                  );
+                } else {
+                  await this.handleProposalStatusUpdate(transaction);
+                }
+                this.logger.log(
+                  `CRON: Transaction ${transaction.transactionHash} successfully updated.`,
+                );
+              },
+            );
+            childSpan.setStatus({ code: SpanStatusCode.OK });
+          } catch (error) {
+            childSpan.recordException(error);
+            childSpan.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: error.message,
+            });
+            this.logger.error(
+              `CRON: Failed to update transaction ${transaction.transactionHash}: ${error.message}`,
+            );
+          } finally {
+            childSpan.end();
+          }
+        }
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      this.logger.error('Cron job failed:', error);
+    } finally {
+      span.end();
     }
   }
 
@@ -206,74 +248,123 @@ export class TasksService {
   }
 
   async listenProposalTrx() {
-    const proposalTopic = process.env.PROPOSAL_TOPIC;
-    const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
-    const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
-    // Utility function to pause execution for a given number of milliseconds
-    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+    // ✅ Child span - will inherit parent context from AppModule
+    const span = this.tracer.startSpan('audit-trail.websocket.listener-setup');
 
-    // Create the log options object.
-    const ProposalAddedEvents = {
-      address: daoContractAddress,
-      topics: [proposalTopic, proposalEndTopic],
-    };
+    try {
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        const proposalTopic = process.env.PROPOSAL_TOPIC;
+        const proposalEndTopic = process.env.PROPOSAL_END_TOPIC;
+        const daoContractAddress = process.env.DAO_CONTRACT_ADDRESS;
 
-    // Open the websocket and listen for events!
-    alchemy.ws.on(ProposalAddedEvents, async (txn) => {
-      try {
-        this.logger.log('WEBSOCKET: Stopping Cron');
-        this.stopCronJob();
         this.logger.log(
-          `WEBSOCKET: New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`,
+          'WebSocket listener initialized for proposal transactions',
         );
-        this.logger.log(`WEBSOCKET: proposalEndTopic Value: ${txn.topics[1]}`);
-        console.log(JSON.stringify(txn, null, 2));
-        console.dir(txn, { depth: null });
 
-        const isProposalEndTopicZero = txn.topics[1] === proposalEndTopic;
+        const ProposalAddedEvents = {
+          address: daoContractAddress,
+          topics: [proposalTopic, proposalEndTopic],
+        };
 
-        if (isProposalEndTopicZero) {
+        // ✅ Event handler with separate spans
+        alchemy.ws.on(ProposalAddedEvents, async (txn) => {
+          // Create independent span for each event (not child of setup span)
+          const eventSpan = this.tracer.startSpan(
+            'audit-trail.websocket.proposal-event',
+            {
+              attributes: {
+                'websocket.event.type': 'ProposalAdded',
+                'websocket.transaction.hash': txn.transactionHash,
+                'websocket.block.number': txn.blockNumber,
+              },
+            },
+          );
+
+          try {
+            await context.with(
+              trace.setSpan(context.active(), eventSpan),
+              async () => {
+                this.logger.log('WEBSOCKET: Stopping Cron');
+                this.stopCronJob();
+
+                this.logger.log(
+                  `WEBSOCKET: New Proposal Creation is successful. Transaction Hash: ${txn.transactionHash}`,
+                );
+
+                const isProposalEndTopicZero =
+                  txn.topics[1] === proposalEndTopic;
+
+                if (isProposalEndTopicZero) {
+                  // Process the event within span context
+                  await this.processProposalEvent(txn);
+                }
+
+                this.logger.log('WEBSOCKET: Starting Cron');
+                this.startCronJob();
+              },
+            );
+
+            eventSpan.setStatus({ code: SpanStatusCode.OK });
+          } catch (error) {
+            eventSpan.recordException(error);
+            eventSpan.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: error.message,
+            });
+            this.logger.error(
+              `WEBSOCKET: Error handling event: ${error.message}`,
+            );
+          } finally {
+            eventSpan.end();
+          }
+        });
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      throw error; // Re-throw so AppModule can handle
+    } finally {
+      span.end();
+    }
+  }
+
+  private async processProposalEvent(txn: any) {
+    const processSpan = this.tracer.startSpan(
+      'audit-trail.websocket.process-proposal-event',
+    );
+
+    try {
+      await context.with(
+        trace.setSpan(context.active(), processSpan),
+        async () => {
           this.logger.log(
             'WEBSOCKET: proposalEndTopic is zero for ProposalCreated event.',
           );
+
+          const delay = 10000;
           this.logger.log(
-            'WEBSOCKET: New member proposal transaction placed on-chain.',
+            `WEBSOCKET: Waiting for ${delay / 1000} seconds to allow the indexer to update.`,
           );
+          await new Promise((resolve) => setTimeout(resolve, delay));
 
-          // Introduce a 10-second delay before fetching the data
-          const delay = 10000; // 10 seconds
-          this.logger.log(
-            `WEBSOCKET: Waiting for ${delay / 1000} seconds to allow the indexer to update before our GraphQL query.`,
-          );
-          await sleep(delay);
+          // Fetch data within span context
+          const data =
+            await this.proposalUpdateService.getProposalAddedEventByHash(
+              txn.transactionHash,
+            );
 
-          // Fetch proposal data (await needed)
-          let eventData;
-          try {
-            const data =
-              await this.proposalUpdateService.getProposalAddedEventByHash(
-                txn.transactionHash,
-              );
-            eventData = {
-              data: {
-                proposalId: data?.proposalId,
-                proposalType: data?.proposalType,
-                proposedWallet: data?.data,
-                __typename: data?.__typename,
-              },
-            };
-          } catch (error) {
-            eventData = {
-              error: `WEBSOCKET: Failed to fetch proposal data from THE GRAPH for transaction: ${txn.transactionHash}`,
-            };
-            this.logger.error(eventData.error);
-          }
+          const eventData = {
+            data: {
+              proposalId: data?.proposalId,
+              proposalType: data?.proposalType,
+              proposedWallet: data?.data,
+              __typename: data?.__typename,
+            },
+          };
 
-          this.logger.log(
-            `THE GRAPH: Got the response before emitting event to DAO SERVICE: ${JSON.stringify(eventData)}`,
-          );
-
-          // Update the transaction status
+          // Update transaction within span context
           const updatedTransaction = await this.transactionService.updateStatus(
             txn.transactionHash,
             JSON.stringify(eventData),
@@ -281,7 +372,6 @@ export class TasksService {
             1,
           );
 
-          // Emit updated proposal event
           if (updatedTransaction) {
             await this.proposalUpdateService.updatedTransaction({
               web3Status: 1,
@@ -291,23 +381,22 @@ export class TasksService {
               transactionHash: txn.transactionHash,
             });
             this.logger.log(
-              'WEBSOCKET: New member proposal transaction update event has been emitted and DB has been updated!',
+              'WEBSOCKET: New member proposal transaction update event has been emitted!',
             );
           }
-        } else {
-          this.logger.warn(
-            'WEBSOCKET: proposalEndTopic is non-zero for ProposalCreated event.',
-          );
-        }
-        this.logger.log('WEBSOCKET: Starting Cron');
-        this.startCronJob();
-      } catch (err) {
-        this.logger.error(
-          `WEBSOCKET: Error handling ProposalAddedEvents: ${err.message}`,
-          err.stack,
-        );
-        this.startCronJob();
-      }
-    });
+        },
+      );
+
+      processSpan.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      processSpan.recordException(error);
+      processSpan.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: error.message,
+      });
+      throw error;
+    } finally {
+      processSpan.end();
+    }
   }
 }
