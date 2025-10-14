@@ -12,6 +12,7 @@ import { TasksModule } from './background_tasks/task.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { WinstonLogger } from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
+import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 import { TraceContextService } from './shared/common/tracing/trace-context.service';
 
 @Module({
@@ -32,12 +33,38 @@ import { TraceContextService } from './shared/common/tracing/trace-context.servi
   exports: [WinstonLogger],
 })
 export class AppModule implements NestModule {
+  private tracer = trace.getTracer('audit-trail-service', '1.0');
+
   constructor(
     @Inject(TasksService) private readonly tasksService: TasksService,
   ) {}
+
   async onModuleInit() {
-    // Lifecycle Hooks: Trigger the function when the module initializes
-    await this.tasksService.listenProposalTrx();
+    // ✅ Top-level initialization span
+    const span = this.tracer.startSpan('audit-trail.module.init');
+
+    try {
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        console.log('Audit Trail Service module initializing...');
+
+        // ✅ This will create child spans - perfect hierarchy!
+        await this.tasksService.listenProposalTrx();
+
+        console.log('Audit Trail Service module initialized successfully');
+      });
+
+      span.setStatus({ code: SpanStatusCode.OK });
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      console.error('Module initialization failed:', error);
+    } finally {
+      span.end();
+    }
+  }
+
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MorganMiddleware).forRoutes('*');
   }
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(MorganMiddleware).forRoutes('*'); // Apply it to all routes (or specific ones)
