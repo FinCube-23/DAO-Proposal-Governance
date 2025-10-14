@@ -5,6 +5,7 @@ import { TransactionConfirmationSource } from 'src/transactions/entities/transac
 import { TransactionsService } from 'src/transactions/transactions.service';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
 
 require('dotenv').config();
 const { Network, Alchemy } = require('alchemy-sdk');
@@ -28,6 +29,7 @@ export class TasksService {
     private proposalUpdateService: ProposalUpdateService,
     private schedulerRegistry: SchedulerRegistry,
     private readonly logger: WinstonLogger,
+    private readonly traceContextService: TraceContextService
   ) {
     this.logger.setContext(TasksService.name);
     this.typeDrivenFunctionCall = {
@@ -116,6 +118,28 @@ export class TasksService {
     const span = this.tracer.startSpan(
       'audit-trail.cron.check-pending-transactions',
     );
+    // Get trace context for this cron job
+    const traceContext = this.traceContextService.getCurrentTraceContext();
+    
+    this.logger.log(`Cron job started to look for pending transactions [trace_id=${traceContext.trace_id}] [span_id=${traceContext.span_id}]`);
+    
+    //Get pending proposals from DB
+    this.logger.log('CRON: Quering transactions from Transaction DB');
+
+    const pendingTransactionHash =
+      await this.transactionService.getPendingTransactionHash();
+
+    this.logger.log(
+      `CRON: This are the pending transaction hashes: ${pendingTransactionHash}`,
+    );
+
+    //Query pending transactions (if any) from GraphQL
+    this.logger.log(`CRON: Quering pending transactions from The Graph`);
+
+    const pendingTransactions =
+      await this.proposalUpdateService.getTransactionUpdates(
+        pendingTransactionHash,
+      );
 
     try {
       await context.with(trace.setSpan(context.active(), span), async () => {
@@ -195,6 +219,9 @@ export class TasksService {
                 } else {
                   await this.handleProposalStatusUpdate(transaction);
                 }
+                this.transactionService.synchronizeTransactionTrace(
+                  transaction.transactionHash,
+                );
                 this.logger.log(
                   `CRON: Transaction ${transaction.transactionHash} successfully updated.`,
                 );
@@ -266,7 +293,7 @@ export class TasksService {
           topics: [proposalTopic, proposalEndTopic],
         };
 
-        // ✅ Event handler with separate spans
+        // Event handler with separate spans
         alchemy.ws.on(ProposalAddedEvents, async (txn) => {
           // Create independent span for each event (not child of setup span)
           const eventSpan = this.tracer.startSpan(
@@ -380,6 +407,9 @@ export class TasksService {
               blockNumber: txn.blockNumber,
               transactionHash: txn.transactionHash,
             });
+            this.transactionService.synchronizeTransactionTrace(
+              txn.transactionHash,
+            );
             this.logger.log(
               'WEBSOCKET: New member proposal transaction update event has been emitted!',
             );

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
 import StableCoinABI from '@/core/contract/stablecoin-abi.json';
-import StatCard from './stat-card';
+import StatCard from '../../../shared/components/dashboard/stat-card';
 
 export default function StatTotalBalance() {
   const { address, isConnected } = useAccount();

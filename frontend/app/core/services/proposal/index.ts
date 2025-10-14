@@ -6,9 +6,9 @@ import type {
   ProposalExecutePayload,
   ProposalOnchainVerificationPayload,
   ProposalOnchainVerificationResponse,
-} from "./types";
-import { api } from "@/core/api/client";
-import { ORGANIZATION_ENDPOINT, PROPOSAL_ENDPOINT } from "@/core/api/endpoints";
+} from './types';
+import { api } from '@/core/api/client';
+import { ORGANIZATION_ENDPOINT, PROPOSAL_ENDPOINT } from '@/core/api/endpoints';
 
 export const proposalApis = {
   getAllProposals: (queryParams: any) =>
@@ -16,9 +16,9 @@ export const proposalApis = {
       queryParams,
     }),
   executeProposal: (payload: ProposalExecutePayload) =>
-    api.post(`${PROPOSAL_ENDPOINT.BASE}/execute`, payload),
+    api.post(`${PROPOSAL_ENDPOINT.BASE}/execute-proposal`, payload),
   cancelProposal: (payload: ProposalCancelPayload) =>
-    api.post(`${PROPOSAL_ENDPOINT.BASE}/cancel`, payload),
+    api.post(`${PROPOSAL_ENDPOINT.BASE}/cancel-proposal`, payload),
   createProposal: (payload: ProposalCreatePayload) =>
     api.post(`${PROPOSAL_ENDPOINT.BASE}`, payload),
   getProposalById: (id: number) =>
@@ -26,6 +26,6 @@ export const proposalApis = {
   createOnchainVerification: (payload: ProposalOnchainVerificationPayload) =>
     api.post<ProposalOnchainVerificationResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
-      payload
+      payload,
     ),
 };

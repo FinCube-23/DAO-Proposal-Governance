@@ -6,7 +6,7 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
- 
+
     steps:
       - name: Deploy via SSH
         id: deploy
@@ -17,6 +17,16 @@ jobs:
           key: ${{ secrets.VM_PRIVATE_KEY }}
           port: ${{ secrets.VM_PORT }}
           script: |
+            echo "=== Setting up Node.js environment ==="
+            export NVM_DIR="/home/web3/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+            export PATH="/home/web3/.nvm/versions/node/v22.13.1/bin:$PATH"
+            echo "=== Verifying Node.js tools ==="
+            which node npm pm2
+            node --version
+            npm --version
+            pm2 --version
             echo "=== Navigating to project directory ==="
             cd /mnt/ext/projects/web3-governance-kit
             echo "Pulling latest changes from repository"
@@ -28,7 +38,7 @@ jobs:
             echo "=== Navigating to frontend directory ==="
             cd /mnt/ext/projects/web3-governance-kit/frontend
             echo "Stopping frontend services"
-            pm2 delete 0
+            pm2 delete 0 || echo "No existing pm2 process to delete"
             echo "Building Frontend"
             npm run build
             echo "Starting frontend services"

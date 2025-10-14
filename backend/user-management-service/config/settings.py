@@ -34,6 +34,10 @@ DEBUG = env.bool("DEBUG", default=False)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 
+# Proxy/Gateway configuration
+USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST", default=False)
+USE_X_FORWARDED_PORT = env.bool("USE_X_FORWARDED_PORT", default=False)
+
 
 # Application definition
 

@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { config } from '@/core/config';
 import ContractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
-import StatCard from './stat-card';
+import StatCard from '../../../shared/components/dashboard/stat-card';
 
 export default function StatProposalThreshold() {
   const { address, isConnected } = useAccount();

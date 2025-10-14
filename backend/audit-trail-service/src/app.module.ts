@@ -13,6 +13,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { WinstonLogger } from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
+import { TraceContextService } from './shared/common/tracing/trace-context.service';
 
 @Module({
   imports: [
@@ -28,7 +29,7 @@ import { trace, context, SpanStatusCode } from '@opentelemetry/api';
     TransactionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TasksService, WinstonLogger, MorganMiddleware],
+  providers: [AppService, TasksService, WinstonLogger, MorganMiddleware, TraceContextService],
   exports: [WinstonLogger],
 })
 export class AppModule implements NestModule {
@@ -64,5 +65,8 @@ export class AppModule implements NestModule {
 
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(MorganMiddleware).forRoutes('*');
+  }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(MorganMiddleware).forRoutes('*'); // Apply it to all routes (or specific ones)
   }
 }

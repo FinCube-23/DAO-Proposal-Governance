@@ -183,6 +183,27 @@ kong_api PUT /routes/web3-proxy-route "$ROUTE_DATA"
 
 echo "   ✅ All routes created!"
 
+echo ""
+echo "4. Configuring Plugins..."
+
+# Enable CORS plugin globally
+echo "   Enabling CORS plugin globally..."
+CORS_PLUGIN_CONFIG='{
+    "name": "cors",
+    "config": {
+        "origins": ["http://localhost:5173", "http://localhost:3000", "http://172.16.231.80:8001", "http://172.16.231.80:8002", "http://172.16.231.80", "http://172.16.231.80:3000"],
+        "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        "headers": ["Accept", "Accept-Version", "Content-Length", "Content-MD5", "Content-Type", "Date", "X-Auth-Token", "Authorization"],
+        "exposed_headers": ["X-Auth-Token"],8002
+        "credentials": true,
+        "max_age": 3600,
+        "preflight_continue": false
+    }
+}'
+kong_api POST /plugins "$CORS_PLUGIN_CONFIG"
+
+# Enable RabbitMQ publisher plugin for specific routes that need on-chain data
+echo "   Enabling RabbitMQ publisher plugin for on-chain routes..."
 PLUGIN_CONFIG='{
     "name": "rabbitmq-publisher",
     "config": {

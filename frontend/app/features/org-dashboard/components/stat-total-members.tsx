@@ -1,5 +1,5 @@
 import { UsersIcon } from 'lucide-react';
-import StatCard from './stat-card';
+import StatCard from '../../../shared/components/dashboard/stat-card';
 
 export default function StatTotalMembers() {
   return (

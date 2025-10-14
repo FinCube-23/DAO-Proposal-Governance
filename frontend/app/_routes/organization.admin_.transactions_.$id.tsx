@@ -329,7 +329,7 @@ function TrxDetails() {
               </CardHeader>
               <CardContent>
                 <a
-                  href={`${import.meta.env.VITE_TRX_EXPLORER}${trx.trx_hash}`}
+                  href={`${import.meta.env.VITE_TRX_EXPLORER}/${trx.trx_hash}`}
                   target="_blank"
                   className="text-sm text-blue-400 hover:underline"
                 >
