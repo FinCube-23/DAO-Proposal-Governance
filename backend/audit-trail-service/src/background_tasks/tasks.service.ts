@@ -343,6 +343,7 @@ export class TasksService {
             );
           } finally {
             eventSpan.end();
+            this.startCronJob();
           }
         });
       });
@@ -353,6 +354,7 @@ export class TasksService {
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
       throw error; // Re-throw so AppModule can handle
     } finally {
+      this.startCronJob();
       span.end();
     }
   }
