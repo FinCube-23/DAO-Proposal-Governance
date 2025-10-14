@@ -219,58 +219,71 @@ export class ProposalUpdateRepository {
 
   //To get transaction updates, this will be updated in the following CARD #242 after cron job completes.
   transactionUpdateQuery(transactionHashes: string[]): any {
+    // const query = gql`
+    //   query GetTransactionsByHashes($transactionHashes: [String!]!) {
+    //     proposalExecuteds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       proposalId
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       proposalId
+    //       proposalType
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       proposalId
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     ownershipTransferreds(
+    //       where: { transactionHash_in: $transactionHashes }
+    //     ) {
+    //       transactionHash
+    //       id
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     memberRegistereds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //     memberApproveds(where: { transactionHash_in: $transactionHashes }) {
+    //       transactionHash
+    //       id
+    //       blockNumber
+    //       blockTimestamp
+    //     }
+    //   }
+    // `;
     const query = gql`
+      query MyQuery {
       query GetTransactionsByHashes($transactionHashes: [String!]!) {
-        proposalExecuteds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          proposalId
-          blockNumber
-          blockTimestamp
-        }
-        proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          proposalId
-          proposalType
-          blockNumber
-          blockTimestamp
-        }
-        proposalCanceleds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          proposalId
-          blockNumber
-          blockTimestamp
-        }
-        proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          blockNumber
-          blockTimestamp
-        }
-        ownershipTransferreds(
-          where: { transactionHash_in: $transactionHashes }
-        ) {
-          transactionHash
-          id
-          blockNumber
-          blockTimestamp
-        }
-        memberRegistereds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          blockNumber
-          blockTimestamp
-        }
-        memberApproveds(where: { transactionHash_in: $transactionHashes }) {
-          transactionHash
-          id
-          blockNumber
-          blockTimestamp
+          proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+            transactionHash
+            id
+            proposalId
+            proposalType
+            blockNumber
+            blockTimestamp
         }
       }
-    `;
+    `;            
     return query;
   }
 }
