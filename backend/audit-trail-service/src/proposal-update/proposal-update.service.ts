@@ -10,8 +10,9 @@ import { ClientProxy, Ctx, RmqContext } from '@nestjs/microservices';
 import { ProposalUpdateRepository } from './proposal-update.repository';
 import { TransactionsService } from 'src/transactions/transactions.service';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
-import { AmqpConnection } from '@golevelup/nestjs-rabbitmq';
+import { AmqpConnection, RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+import { TransactionReceiptEventDto } from 'src/shared/common/dto/transaction-receipt-event.dto';
 
 @Injectable()
 export class ProposalUpdateService {
@@ -80,6 +81,35 @@ export class ProposalUpdateService {
       };
     }
   }
+
+  @RabbitSubscribe({
+    exchange: 'exchange.transaction-receipt.fanout',
+    routingKey: '',
+    queue: 'audit-trail-transaction-receipt-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  async handlePendingProposalV2(event: TransactionReceiptEventDto) {
+    this.logger.log(
+      'Got the pending proposal hash ' + event.onChainData?.transactionHash,
+    );
+    try {
+      const new_dao_audit = {
+        trx_hash: event.onChainData?.transactionHash,
+        trx_sender: event.onChainData?.signedBy,
+        trx_status: 0,
+      };
+      const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
+      this.logger.log(
+        'Recorded transaction ID: ' + dbRecordedTRX.id + ' in DB',
+      );
+      this.logger.log('✅ Transaction receipt processing complete');
+    } catch (error) {
+      this.logger.error(`❌ Processing failed: ${error.message}`, error.stack);
+    }
+  }
+
   // 📡 Listening MessagePattern Call (New Function)
   async handleUpdatedTransaction(
     data_packet: PendingTransactionDto,
@@ -132,6 +162,34 @@ export class ProposalUpdateService {
           },
         },
       };
+    }
+  }
+
+  @RabbitSubscribe({
+    exchange: 'exchange.transaction-receipt.fanout',
+    routingKey: '',
+    queue: 'audit-trail-transaction-receipt-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  async handleUpdatedTransactionV2(event: TransactionReceiptEventDto) {
+    this.logger.log(
+      'Got a new transaction hash ' + event.onChainData?.transactionHash,
+    );
+    try {
+      const new_dao_audit = {
+        trx_hash: event.onChainData?.transactionHash,
+        trx_sender: event.onChainData?.signedBy,
+        trx_status: 0,
+      };
+      const dbRecordedTRX = await this.transactionService.create(new_dao_audit);
+      this.logger.log(
+        'Recorded transaction ID: ' + dbRecordedTRX.id + ' in DB',
+      );
+      this.logger.log('✅ Transaction receipt processing complete');
+    } catch (error) {
+      this.logger.error(`❌ Processing failed: ${error.message}`, error.stack);
     }
   }
 
