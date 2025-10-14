@@ -16,9 +16,9 @@ export const proposalApis = {
       queryParams,
     }),
   executeProposal: (payload: ProposalExecutePayload) =>
-    api.post(`${PROPOSAL_ENDPOINT.BASE}/execute-proposal`, payload),
+    api.patch(`${PROPOSAL_ENDPOINT.BASE}/execute-proposal`, payload),
   cancelProposal: (payload: ProposalCancelPayload) =>
-    api.post(`${PROPOSAL_ENDPOINT.BASE}/cancel-proposal`, payload),
+    api.patch(`${PROPOSAL_ENDPOINT.BASE}/cancel-proposal`, payload),
   createProposal: (payload: ProposalCreatePayload) =>
     api.post(`${PROPOSAL_ENDPOINT.BASE}`, payload),
   getProposalById: (id: number) =>
