@@ -272,18 +272,17 @@ export class ProposalUpdateRepository {
     //   }
     // `;
     const query = gql`
-      query MyQuery {
       query GetTransactionsByHashes($transactionHashes: [String!]!) {
-          proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
-            transactionHash
-            id
-            proposalId
-            proposalType
-            blockNumber
-            blockTimestamp
+        proposalAddeds(where: { transactionHash_in: $transactionHashes }) {
+          transactionHash
+          id
+          proposalId
+          proposalType
+          blockNumber
+          blockTimestamp
         }
       }
-    `;            
+    `;
     return query;
   }
 }

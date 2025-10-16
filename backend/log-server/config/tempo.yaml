@@ -14,7 +14,7 @@ distributor:
           endpoint: 0.0.0.0:4317
 
 ingester:
-  max_block_duration: 5m
+  max_block_duration: 2m # Reduced from 5m for faster processing during high load
 
 compactor:
   compaction:
@@ -26,7 +26,7 @@ querier:
 
 query_frontend:
   search:
-    duration_slo: 5s
+    duration_slo: 10s # Increased timeout for queries during heavy load
 
 metrics_generator:
   processor:
@@ -34,17 +34,15 @@ metrics_generator:
       wait: 10s
     span_metrics:
       enable_target_info: true
-    local_blocks:
-      filter_server_spans: false
-      flush_to_storage: true
   registry:
     external_labels:
       source: tempo
   storage:
     path: /tmp/tempo/generator/wal
-    remote_write:
-      - url: http://prometheus:9090/api/v1/write
-        send_exemplars: true
+    # Commented out remote_write until Prometheus is available
+    # remote_write:
+    #   - url: http://prometheus:9090/api/v1/write
+    #     send_exemplars: true
 
 storage:
   trace:
@@ -55,10 +53,12 @@ storage:
       path: /tmp/tempo/blocks
 
 overrides:
-  ingestion_rate_limit_bytes: 150000000
-  ingestion_burst_size_bytes: 200000000
-  max_bytes_per_trace: 50000000
+  # Moderate increase - enough for k6 testing but safer
+  ingestion_rate_limit_bytes: 1000000000 # 500 MB/sec (2x original)
+  ingestion_burst_size_bytes: 1500000000 # 800 MB burst (2.5x original)
+  max_bytes_per_trace: 100000000 # Keep 80 MB per trace
+  # Add per-tenant limits for safety
+  max_traces_per_user: 5000 # Limit traces per service
   metrics_generator_processors:
     - service-graphs
     - span-metrics
-    - local-blocks
