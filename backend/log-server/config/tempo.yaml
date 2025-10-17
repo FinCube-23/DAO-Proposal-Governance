@@ -54,9 +54,9 @@ storage:
 
 overrides:
   # Moderate increase - enough for k6 testing but safer
-  ingestion_rate_limit_bytes: 1000000000 # 500 MB/sec (2x original)
-  ingestion_burst_size_bytes: 1500000000 # 800 MB burst (2.5x original)
-  max_bytes_per_trace: 100000000 # Keep 80 MB per trace
+  ingestion_rate_limit_bytes: 150000000
+  ingestion_burst_size_bytes: 200000000
+  max_bytes_per_trace: 50000000
   # Add per-tenant limits for safety
   max_traces_per_user: 5000 # Limit traces per service
   metrics_generator_processors:
