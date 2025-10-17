@@ -182,6 +182,7 @@ export class TransactionsService {
         where: {
           trx_status: TransactionStatus.PENDING,
         },
+        take: 100,
       });
       return transactions.map((transaction) => transaction.trx_hash);
     } catch {
@@ -202,6 +203,7 @@ export class TransactionsService {
           trx_status: TransactionStatus.CONFIRMED,
         },
         select: ['id', 'trx_hash'],
+        take: 25,
       });
       this.logger.log(
         `Found ${transactions.length} transactions needing trace synchronization.`,
