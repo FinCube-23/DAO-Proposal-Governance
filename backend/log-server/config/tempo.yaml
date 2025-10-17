@@ -14,7 +14,7 @@ distributor:
           endpoint: 0.0.0.0:4317
 
 ingester:
-  max_block_duration: 30s
+  max_block_duration: 2m # Reduced from 5m for faster processing during high load
 
 compactor:
   compaction:
