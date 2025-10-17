@@ -23,6 +23,7 @@ const alchemy = new Alchemy(settings);
 export class TasksService {
   private tracer = trace.getTracer('audit-trail-service', '1.0');
   private cronJobName = 'check-pending-transactions';
+  private cronTraceSyncFlag = false;
   private typeDrivenFunctionCall: Record<string, (transaction: any) => void>;
 
   constructor(
@@ -423,6 +424,14 @@ export class TasksService {
       'audit-trail.cron.sync-pending-transaction-traces',
     );
 
+    if (this.cronTraceSyncFlag) {
+      this.logger.log(
+        'CRON: Trace synchronization is already in progress. Skipping this run.',
+      );
+      span.end();
+      return;
+    }
+
     /*
       1. Get trx_hash where tracing is not available yet
       2. Check & get the latest trace_ids for those trx_hashes
@@ -433,6 +442,7 @@ export class TasksService {
 
     try {
       await context.with(trace.setSpan(context.active(), span), async () => {
+        this.cronTraceSyncFlag = true;
         this.logger.log(
           'CRON: Querying transactions from Transaction DB for trace synchronization',
         );
@@ -522,6 +532,7 @@ export class TasksService {
       span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
       this.logger.error('Cron job failed:', error);
     } finally {
+      this.cronTraceSyncFlag = false;
       span.end();
     }
   }
