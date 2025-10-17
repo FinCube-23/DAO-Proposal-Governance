@@ -14,6 +14,7 @@ import { WinstonLogger } from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
 import { TraceContextService } from './shared/common/tracing/trace-context.service';
+import { TracingModule } from './shared/common/tracing/tracing.module';
 
 @Module({
   imports: [
@@ -27,9 +28,16 @@ import { TraceContextService } from './shared/common/tracing/trace-context.servi
     TransactionReceiptModule,
     TasksModule,
     TransactionsModule,
+    TracingModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TasksService, WinstonLogger, MorganMiddleware, TraceContextService],
+  providers: [
+    AppService,
+    TasksService,
+    WinstonLogger,
+    MorganMiddleware,
+    TraceContextService,
+  ],
   exports: [WinstonLogger],
 })
 export class AppModule implements NestModule {

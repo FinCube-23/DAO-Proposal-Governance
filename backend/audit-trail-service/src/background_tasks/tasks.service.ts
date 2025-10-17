@@ -6,6 +6,7 @@ import { TransactionsService } from 'src/transactions/transactions.service';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
+import { TempoService } from 'src/shared/common/tracing/tempo.service';
 
 require('dotenv').config();
 const { Network, Alchemy } = require('alchemy-sdk');
@@ -29,7 +30,8 @@ export class TasksService {
     private proposalUpdateService: ProposalUpdateService,
     private schedulerRegistry: SchedulerRegistry,
     private readonly logger: WinstonLogger,
-    private readonly traceContextService: TraceContextService
+    private readonly traceContextService: TraceContextService,
+    private readonly tempoService: TempoService,
   ) {
     this.logger.setContext(TasksService.name);
     this.typeDrivenFunctionCall = {
@@ -112,52 +114,33 @@ export class TasksService {
     }
   }
 
+  // Update confirmation source and status for pending transactions
   @Cron('30 * * * * *', { name: 'check-pending-transactions' })
   async handleCron() {
-    // ✅ Independent span for cron jobs
     const span = this.tracer.startSpan(
       'audit-trail.cron.check-pending-transactions',
     );
-    // Get trace context for this cron job
-    const traceContext = this.traceContextService.getCurrentTraceContext();
-    
-    this.logger.log(`Cron job started to look for pending transactions [trace_id=${traceContext.trace_id}] [span_id=${traceContext.span_id}]`);
-    
-    //Get pending proposals from DB
-    this.logger.log('CRON: Quering transactions from Transaction DB');
-
-    const pendingTransactionHash =
-      await this.transactionService.getPendingTransactionHash();
-
-    this.logger.log(
-      `CRON: This are the pending transaction hashes: ${pendingTransactionHash}`,
-    );
-
-    //Query pending transactions (if any) from GraphQL
-    this.logger.log(`CRON: Quering pending transactions from The Graph`);
-
-    const pendingTransactions =
-      await this.proposalUpdateService.getTransactionUpdates(
-        pendingTransactionHash,
-      );
 
     try {
+      // ✅ ALL logic inside trace context
       await context.with(trace.setSpan(context.active(), span), async () => {
-        this.logger.log('Cron job started to look for pending transactions');
+        // Now this will have proper trace context
+        const traceContext = this.traceContextService.getCurrentTraceContext();
+        this.logger.log(
+          `Cron job started to look for pending transactions [trace_id=${traceContext.trace_id}] [span_id=${traceContext.span_id}]`,
+        );
 
-        //Get pending proposals from DB
-        this.logger.log('CRON: Quering transactions from Transaction DB');
-
+        // Get pending proposals from DB
+        this.logger.log('CRON: Querying transactions from Transaction DB');
         const pendingTransactionHash =
           await this.transactionService.getPendingTransactionHash();
 
         this.logger.log(
-          `CRON: This are the pending transaction hashes: ${pendingTransactionHash}`,
+          `CRON: These are the pending transaction hashes: ${pendingTransactionHash}`,
         );
 
-        //Query pending transactions (if any) from GraphQL
-        this.logger.log(`CRON: Quering pending transactions from The Graph`);
-
+        // Query pending transactions from GraphQL
+        this.logger.log(`CRON: Querying pending transactions from The Graph`);
         const pendingTransactions =
           await this.proposalUpdateService.getTransactionUpdates(
             pendingTransactionHash,
@@ -173,7 +156,6 @@ export class TasksService {
         );
 
         const eventDataArray: any[] = [];
-
         const transactionTypes = [
           'proposalExecuteds',
           'proposalCreateds',
@@ -189,20 +171,20 @@ export class TasksService {
             eventDataArray.push(
               ...pendingTransactions[type].map((tx: any) => ({
                 ...tx,
-                eventType: type, // Store which event type it belongs to
+                eventType: type,
               })),
             );
           }
         }
 
-        // Remove duplicates based on `transactionHash`
+        // Remove duplicates based on transactionHash
         const uniqueTransactions = Array.from(
           new Map(
             eventDataArray.map((tx) => [tx.transactionHash, tx]),
           ).values(),
         );
 
-        //update each transactions
+        // Update each transaction
         for (const transaction of uniqueTransactions) {
           const childSpan = this.tracer.startSpan(
             'audit-trail.cron.process-transaction',
@@ -219,6 +201,7 @@ export class TasksService {
                 } else {
                   await this.handleProposalStatusUpdate(transaction);
                 }
+
                 this.transactionService.synchronizeTransactionTrace(
                   transaction.transactionHash,
                 );
@@ -227,6 +210,7 @@ export class TasksService {
                 );
               },
             );
+
             childSpan.setStatus({ code: SpanStatusCode.OK });
           } catch (error) {
             childSpan.recordException(error);
@@ -429,6 +413,116 @@ export class TasksService {
       throw error;
     } finally {
       processSpan.end();
+    }
+  }
+
+  // Update transaction confirmation trace for pending transactions.
+  @Cron('30 */2 * * * *', { name: 'sync-pending-transaction-traces' })
+  async syncPendingTransactionTraces() {
+    const span = this.tracer.startSpan(
+      'audit-trail.cron.sync-pending-transaction-traces',
+    );
+
+    /*
+      1. Get trx_hash where tracing is not available yet
+      2. Check & get the latest trace_ids for those trx_hashes
+      3. For each trace_id
+        a. call tempoService.extractServiceStatus(id)
+        b. populate db (query through trx_hash)
+    */
+
+    try {
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        this.logger.log(
+          'CRON: Querying transactions from Transaction DB for trace synchronization',
+        );
+        const transactionHashes =
+          await this.transactionService.getTransactionHashForTraceSync();
+
+        if (transactionHashes.length === 0) {
+          this.logger.log(
+            'CRON: No transaction hashes found needing trace sync',
+          );
+          return;
+        }
+
+        this.logger.log(
+          `CRON: These are the transaction hashes needing trace sync: ${transactionHashes}`,
+        );
+
+        for (const trxHash of transactionHashes) {
+          const childSpan = this.tracer.startSpan(
+            'audit-trail.cron.sync-single-transaction-trace',
+          );
+
+          try {
+            await context.with(
+              trace.setSpan(context.active(), childSpan),
+              async () => {
+                this.logger.log(
+                  `CRON: Synchronizing trace for transaction hash: ${trxHash}`,
+                );
+                const trace_id =
+                  await this.transactionService.getLatestTraceIdFromLoki(
+                    trxHash,
+                  );
+
+                if (!trace_id) {
+                  this.logger.log(
+                    `CRON: No trace ID found for transaction ${trxHash}`,
+                  );
+                  return;
+                }
+
+                this.logger.log(
+                  `CRON: Found trace ID ${trace_id} for transaction ${trxHash}. Extracting service status...`,
+                );
+
+                const trace =
+                  await this.tempoService.extractServiceStatus(trace_id);
+
+                if (trace.length === 0) {
+                  this.logger.log(
+                    `CRON: No spans found for trace ID ${trace_id}`,
+                  );
+                  return;
+                }
+
+                this.logger.log(
+                  `CRON: Extracted ${trace.length} spans for trace ID ${trace_id}. Updating transaction...`,
+                );
+
+                await this.transactionService.updateTransactionTrace(
+                  trxHash,
+                  trace,
+                );
+                this.logger.log(
+                  `CRON: Transaction ${trxHash} trace synchronization attempted.`,
+                );
+              },
+            );
+
+            childSpan.setStatus({ code: SpanStatusCode.OK });
+          } catch (error) {
+            childSpan.recordException(error);
+            childSpan.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: error.message,
+            });
+            this.logger.error(
+              `CRON: Failed to synchronize trace for transaction ${trxHash}: ${error.message}`,
+            );
+          } finally {
+            childSpan.end();
+          }
+        }
+      });
+    } catch (error) {
+      span.recordException(error);
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error.message });
+      this.logger.error('Cron job failed:', error);
+    } finally {
+      span.end();
     }
   }
 }
