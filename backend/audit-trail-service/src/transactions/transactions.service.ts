@@ -208,7 +208,7 @@ export class TransactionsService {
           trx_status: TransactionStatus.CONFIRMED,
         },
         select: ['id', 'trx_hash'],
-        take: 25,
+        take: 100,
       });
       this.logger.log(
         `Found ${transactions.length} transactions needing trace synchronization.`,

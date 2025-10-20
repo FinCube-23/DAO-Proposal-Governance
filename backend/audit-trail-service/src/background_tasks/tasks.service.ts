@@ -457,7 +457,7 @@ export class TasksService {
         }
 
         this.logger.log(
-          `CRON: These are the transaction hashes needing trace sync: ${transactionHashes}`,
+          `CRON: Total transactions needing trace sync: ${transactionHashes.length}`,
         );
 
         for (const trxHash of transactionHashes) {
