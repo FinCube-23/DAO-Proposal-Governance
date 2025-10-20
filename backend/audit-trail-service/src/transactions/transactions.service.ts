@@ -138,6 +138,84 @@ export class TransactionsService {
     };
   }
 
+  async getStatistics(): Promise<any> {
+    const totalTransactions = await this.transactionRepository.count();
+    
+    const pendingTransactions = await this.transactionRepository.count({
+      where: { trx_status: TransactionStatus.PENDING },
+    });
+
+    const confirmedTransactions = await this.transactionRepository.count({
+      where: { trx_status: TransactionStatus.CONFIRMED },
+    });
+
+    const unsyncedTransactions = await this.transactionRepository.count({
+    where: { transaction_confirmation_trace: IsNull() },
+  });
+
+    const syncedTransactions = totalTransactions - unsyncedTransactions;
+    const syncRate =
+    totalTransactions === 0
+      ? 0
+      : (syncedTransactions / totalTransactions) * 100;
+
+    const totalLiquidityResult = 100000;
+
+    const confirmationSourceBreakdown = await this.transactionRepository
+      .createQueryBuilder('transaction')
+      .select('transaction.confirmation_source', 'source')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('transaction.confirmation_source')
+      .getRawMany();
+
+    const breakdown = {};
+    confirmationSourceBreakdown.forEach((item) => {
+      breakdown[item.source] = parseInt(item.count, 10);
+    });
+
+    const confirmedTxWithTimes = await this.transactionRepository.find({
+    where: { trx_status: TransactionStatus.CONFIRMED },
+    select: ['created_at', 'updated_at'],
+  });
+
+  let averageConfirmationTime = null;
+  if (confirmedTxWithTimes.length > 0) {
+    const totalMilliseconds = confirmedTxWithTimes.reduce((sum, tx) => {
+      const createdAt = new Date(tx.created_at).getTime();
+      const updatedAt = new Date(tx.updated_at).getTime();
+      return sum + (updatedAt - createdAt);
+    }, 0);
+
+    const avgMilliseconds = totalMilliseconds / confirmedTxWithTimes.length;
+    
+    // Convert to human-readable format
+    const seconds = Math.floor(avgMilliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (days > 0) {
+      averageConfirmationTime = `${days} day${days > 1 ? 's' : ''} ${hours % 24} hour${hours % 24 !== 1 ? 's' : ''}`;
+    } else if (hours > 0) {
+      averageConfirmationTime = `${hours} hour${hours > 1 ? 's' : ''} ${minutes % 60} minute${minutes % 60 !== 1 ? 's' : ''}`;
+    } else if (minutes > 0) {
+      averageConfirmationTime = `${minutes} minute${minutes > 1 ? 's' : ''} ${seconds % 60} second${seconds % 60 !== 1 ? 's' : ''}`;
+    } else {
+      averageConfirmationTime = `${seconds} second${seconds !== 1 ? 's' : ''}`;
+    }
+  }
+
+    return {
+      totalTransactions,
+      pendingTransactions,
+      confirmedTransactions,
+      syncRate: parseFloat(syncRate.toFixed(2)),
+      totalLiquidity: totalLiquidityResult.toString(),
+      confirmationSourceBreakdown: breakdown,
+      averageConfirmationTime: averageConfirmationTime || 'N/A',
+    };
+  }
+
   async updateStatus(
     trxHash: string,
     metadata: string,

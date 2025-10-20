@@ -1,4 +1,4 @@
-import type { GetOneTrxResponse, GetTrxResponse } from '@/core/api/types';
+import type { DashboardStatsResponse, GetOneTrxResponse, GetTrxResponse } from '@/core/api/types';
 import { api } from '@/core/api/client';
 import { AUDIT_ENDPOINT } from '@/core/api/endpoints';
 
@@ -16,4 +16,7 @@ export const auditTrailApis = {
 
   getTransaction: (id: string) =>
     api.get<GetOneTrxResponse>(`${AUDIT_ENDPOINT.BASE}/transactions/${id}`),
+
+  getDashboardStats: () =>
+    api.get<DashboardStatsResponse>(`${AUDIT_ENDPOINT.BASE}/transactions/dashboard-stats`),
 };

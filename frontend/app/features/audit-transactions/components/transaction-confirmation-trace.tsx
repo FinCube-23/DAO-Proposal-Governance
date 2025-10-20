@@ -2,6 +2,7 @@ import { GitBranch } from 'lucide-react';
 import { TimeDisplay } from '@/shared/components/time-display';
 import { Button } from '@/shared/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
+import { cn } from '@/shared/utils';
 
 interface TransactionConfirmationTraceProps {
   lifecycle: Array<{
@@ -22,7 +23,7 @@ export function TransactionConfirmationTrace({ lifecycle }: TransactionConfirmat
           onClick={e => e.stopPropagation()}
           title="View Transaction Confirmation Trace"
         >
-          <GitBranch className="h-3 w-3" />
+          <GitBranch className={cn('size-3', lifecycle.length === 0 && 'text-yellow-500')} />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-96">
