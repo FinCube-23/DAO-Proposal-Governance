@@ -164,6 +164,11 @@ export class TransactionsService {
       transaction.confirmation_source = source;
       transaction.transaction_confirmation_trace = null;
 
+      // * Trace id is not unique per transaction, meaning multiple transactions can share the same trace id
+      // * As the graph can fetch multiple transactions under the same trace id, we set the trace id here again to ensure it's captured
+      const { trace_id } = this.traceContextService.getCurrentTraceContext();
+      transaction.trace_id = trace_id;
+
       this.logger.log(
         `Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`,
       );
@@ -284,104 +289,27 @@ export class TransactionsService {
     }
   }
 
-  async getLatestTraceIdFromLoki(trxHash: string): Promise<string | null> {
+  async getTraceIdByTransactionHash(trxHash: string): Promise<string | null> {
+    this.logger.log(
+      `Fetching trace ID from database for transaction hash: ${trxHash}`,
+    );
     try {
-      if (!trxHash || !trxHash.startsWith('0x') || trxHash.length !== 66) {
-        this.logger.error(`Invalid transaction hash format: ${trxHash}`);
-        return null;
-      }
-
-      const lokiUrl = process.env.LOKI_URL || 'http://loki:3100';
-      const now = Date.now();
-      const startTime = now - 24 * 60 * 60 * 1000; // 24 hours back
-
-      // Convert to nanoseconds (Loki uses nanosecond timestamps)
-      const start = (startTime * 1_000_000).toString();
-      const end = (now * 1_000_000).toString();
-
-      // LogQL query to find logs containing the transaction hash
-      const logQuery = `{service_name=~".+"} |= "${trxHash}" | json | line_format "{{.trace_id}}"`;
-
-      const queryParams = new URLSearchParams({
-        query: logQuery,
-        start: start,
-        end: end,
-        direction: 'backward', // Get most recent first
-        limit: '50',
+      const transaction = await this.transactionRepository.findOne({
+        where: { trx_hash: trxHash },
+        select: ['trace_id'],
       });
 
-      const url = `${lokiUrl}/loki/api/v1/query_range?${queryParams}`;
-
-      this.logger.log(
-        `Querying Loki for trace ID with transaction hash: ${trxHash}`,
-      );
-
-      // Use native fetch or axios if available in your service
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: {
-          Accept: 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        this.logger.error(`Loki query failed with status: ${response.status}`);
-        return null;
-      }
-
-      const data = await response.json();
-
-      if (data.status !== 'success') {
-        this.logger.error(`Loki query failed with status: ${data.status}`);
-        return null;
-      }
-
-      const results = data.data.result;
-      if (!results || results.length === 0) {
-        this.logger.warn(`No logs found for transaction hash: ${trxHash}`);
-        return null;
-      }
-
-      // Extract trace IDs from log entries
-      const traceIds = new Set<string>();
-
-      for (const result of results) {
-        for (const [timestamp, logLine] of result.values) {
-          try {
-            // Try to parse as JSON first
-            const logEntry = JSON.parse(logLine);
-            if (logEntry.trace_id && logEntry.trace_id !== 'N/A') {
-              traceIds.add(logEntry.trace_id);
-            }
-          } catch {
-            // If not JSON, check if the line is just a trace ID
-            const traceIdPattern = /^[a-f0-9]{32}$/;
-            if (traceIdPattern.test(logLine.trim())) {
-              traceIds.add(logLine.trim());
-            }
-          }
-        }
-      }
-
-      if (traceIds.size === 0) {
+      if (!transaction) {
         this.logger.warn(
-          `No valid trace IDs found for transaction hash: ${trxHash}`,
+          `Transaction with hash ${trxHash} not found in DB for trace ID retrieval.`,
         );
         return null;
       }
 
-      // Return the first (most recent) trace ID
-      const latestTraceId = Array.from(traceIds)[0];
-
-      this.logger.log(
-        `Found trace ID ${latestTraceId} for transaction hash ${trxHash}. ` +
-          `Total unique trace IDs found: ${traceIds.size}`,
-      );
-
-      return latestTraceId;
+      return transaction.trace_id || null;
     } catch (error) {
       this.logger.error(
-        `Error querying Loki for transaction hash ${trxHash}: ${error.message}`,
+        `Error fetching trace ID for transaction hash ${trxHash}: ${error.message}`,
       );
       return null;
     }

@@ -473,7 +473,7 @@ export class TasksService {
                   `CRON: Synchronizing trace for transaction hash: ${trxHash}`,
                 );
                 const trace_id =
-                  await this.transactionService.getLatestTraceIdFromLoki(
+                  await this.transactionService.getTraceIdByTransactionHash(
                     trxHash,
                   );
 
