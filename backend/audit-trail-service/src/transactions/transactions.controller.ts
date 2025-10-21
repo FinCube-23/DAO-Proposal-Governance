@@ -26,6 +26,47 @@ export class TransactionsController {
     return this.transactionsService.findAll(query);
   }
 
+  @Get('dashboard-stats')
+  @ApiTags('Transaction Off-Chain Backup')
+  @ApiOperation({ summary: 'Get transaction statistics and metrics' })
+  @ApiOkResponse({
+    status: 200,
+    description: 'Transaction statistics retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        totalTransactions: { type: 'number', example: 1500 },
+        pendingTransactions: { type: 'number', example: 45 },
+        confirmedTransactions: { type: 'number', example: 1455 },
+        unsyncedTransactions: { type: 'number', example: 188 },
+        syncRate: {
+          type: 'number',
+          example: 87.5,
+          description: 'Percentage of synced transactions',
+        },
+        totalLiquidity: { type: 'string', example: '1500000000000000000' },
+        confirmationSourceBreakdown: {
+          type: 'object',
+          example: {
+            alchemy: 500,
+            infura: 300,
+            graph: 200,
+            manual: 100,
+            pending_source: 400,
+          },
+        },
+        averageConfirmationTime: {
+          type: 'string',
+          example: '5 minutes',
+          description: 'Average time between creation and confirmation',
+        },
+      },
+    },
+  })
+  async getDashboardStatistics() {
+    return this.transactionsService.getStatistics();
+  }
+
   @Get(':identifier')
   @ApiTags('Transaction Off-Chain Backup')
   @ApiOperation({

@@ -171,3 +171,16 @@ export interface GetStatusByEmailResponse {
   email: string;
   membership_onchain_status: string;
 }
+
+export interface DashboardStatsResponse {
+  totalTransactions: number;
+  pendingTransactions: number;
+  confirmedTransactions: number;
+  syncRate: number;
+  totalLiquidity: string;
+  confirmationSourceBreakdown: {
+    graph: number;
+    alchemy: number;
+  };
+  averageConfirmationTime: number; // milliseconds
+}
