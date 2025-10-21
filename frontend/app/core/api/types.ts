@@ -182,5 +182,5 @@ export interface DashboardStatsResponse {
     graph: number;
     alchemy: number;
   };
-  averageConfirmationTime: string;
+  averageConfirmationTime: number; // milliseconds
 }

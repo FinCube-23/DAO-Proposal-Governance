@@ -1,7 +1,29 @@
 import { useQuery } from '@tanstack/react-query';
-import { ActivityIcon, ClockIcon, CoinsIcon, TrendingUp } from 'lucide-react';
+import { ActivityIcon, ClockIcon, TimerIcon, TrendingUp } from 'lucide-react';
 import { auditTrailApis } from '@/core/services/audit';
 import StatCard from '@/shared/components/dashboard/stat-card';
+
+// Utility function to convert milliseconds to human-readable format
+function formatTimeFromMs(milliseconds: number): string {
+  if (milliseconds < 1000) {
+    return `${milliseconds}ms`;
+  }
+
+  const seconds = Math.floor(milliseconds / 1000);
+  if (seconds < 60) {
+    return `${seconds}s`;
+  }
+
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  if (minutes < 60) {
+    return remainingSeconds > 0 ? `${minutes}m ${remainingSeconds}s` : `${minutes}m`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
+}
 
 export default function StatCardList() {
   const { data, isLoading, error } = useQuery({
@@ -14,9 +36,9 @@ export default function StatCardList() {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 gap-4">
         <StatCard title="Total Transactions" value="..." icon={ActivityIcon} variants="emrald" />
-        <StatCard title="Pending Transactions" value="..." icon={ClockIcon} isFromOnChain variants="blue" />
+        <StatCard title="Pending Transactions" value="..." icon={ClockIcon} variants="blue" />
         <StatCard title="Success Rate" value="..." icon={TrendingUp} variants="purple" />
-        <StatCard title="Total Liquidity" value="..." icon={CoinsIcon} isFromOnChain variants="red" />
+        <StatCard title="Avg Confirmation Time" value="..." icon={TimerIcon} variants="red" />
       </div>
     );
   }
@@ -26,9 +48,9 @@ export default function StatCardList() {
     return (
       <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 gap-4">
         <StatCard title="Total Transactions" value="Error" icon={ActivityIcon} variants="emrald" />
-        <StatCard title="Pending Transactions" value="Error" icon={ClockIcon} isFromOnChain variants="blue" />
+        <StatCard title="Pending Transactions" value="Error" icon={ClockIcon} variants="blue" />
         <StatCard title="Success Rate" value="Error" icon={TrendingUp} variants="purple" />
-        <StatCard title="Total Liquidity" value="Error" icon={CoinsIcon} isFromOnChain variants="red" />
+        <StatCard title="Avg Confirmation Time" value="Error" icon={TimerIcon} variants="red" />
       </div>
     );
   }
@@ -37,6 +59,11 @@ export default function StatCardList() {
   const successRate = data?.totalTransactions
     ? `${((data.confirmedTransactions / data.totalTransactions) * 100).toFixed(1)}%`
     : '0%';
+
+  // Format average confirmation time from milliseconds
+  const formattedConfirmationTime = data?.averageConfirmationTime
+    ? formatTimeFromMs(data.averageConfirmationTime)
+    : 'N/A';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 gap-4">
@@ -50,7 +77,6 @@ export default function StatCardList() {
         title="Pending Transactions"
         value={data?.pendingTransactions ?? 0}
         icon={ClockIcon}
-        isFromOnChain
         variants="blue"
       />
       <StatCard
@@ -60,10 +86,9 @@ export default function StatCardList() {
         variants="purple"
       />
       <StatCard
-        title="Total Liquidity"
-        value={data?.totalLiquidity ? `${data.totalLiquidity} USDC` : '0 USDC'}
-        icon={CoinsIcon}
-        isFromOnChain
+        title="Avg Confirmation Time"
+        value={formattedConfirmationTime}
+        icon={TimerIcon}
         variants="red"
       />
     </div>
