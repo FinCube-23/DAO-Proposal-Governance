@@ -6,6 +6,8 @@ services:
       - fincube23_network
     ports:
       - "3100:3100"  # Expose Loki's port for queries
+      - "9096:9096"  # Expose Loki's gRPC port
+      - "9097:9097"  # Expose Loki's Alertmanager port
     volumes:
       - ./config/loki-config.yaml:/etc/loki/local-config.yaml  # Mount the custom Loki config
 

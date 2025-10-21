@@ -27,8 +27,8 @@ ingester:
         store: inmemory
       replication_factor: 1
     final_sleep: 0s
-  chunk_idle_period: 1h
-  max_chunk_age: 1h
+  chunk_idle_period: 30s
+  max_chunk_age: 1m
   chunk_target_size: 1048576
   chunk_retain_period: 30s
 
@@ -78,7 +78,7 @@ ruler:
     local:
       directory: /tmp/loki/rules
   rule_path: /tmp/loki/rules-temp
-  alertmanager_url: http://localhost:9096
+  alertmanager_url: http://localhost:9097
   ring:
     kvstore:
       store: inmemory

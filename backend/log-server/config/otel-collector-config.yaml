@@ -16,9 +16,9 @@ receivers:
 
 processors:
   memory_limiter:
-    check_interval: 1s
-    limit_percentage: 80
-    spike_limit_percentage: 10
+    check_interval: 2s
+    limit_percentage: 90
+    spike_limit_percentage: 30
   batch:
     send_batch_size: 8192
     timeout: 1s
@@ -34,6 +34,14 @@ exporters:
     endpoint: tempo:4317
     tls:
       insecure: true
+    sending_queue:
+      enabled: true
+      queue_size: 10000
+    retry_on_failure:
+      enabled: true
+      initial_interval: 5s
+      max_interval: 30s
+      max_elapsed_time: 300s
   otlphttp:
     endpoint: http://loki:3100/otlp
     tls:

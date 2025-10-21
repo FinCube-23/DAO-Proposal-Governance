@@ -14,11 +14,11 @@ distributor:
           endpoint: 0.0.0.0:4317
 
 ingester:
-  max_block_duration: 30s
+  max_block_duration: 120s
 
 compactor:
   compaction:
-    block_retention: 0s
+    block_retention: 10m
 
 querier:
   frontend_worker:
@@ -26,7 +26,7 @@ querier:
 
 query_frontend:
   search:
-    duration_slo: 10s # Increased timeout for queries during heavy load
+    duration_slo: 5s # Increased timeout for queries during heavy load
 
 metrics_generator:
   processor:
