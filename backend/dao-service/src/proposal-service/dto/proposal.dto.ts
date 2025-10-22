@@ -163,7 +163,7 @@ export class ProposalDtoV2 {
     description: 'Metadata containing additional proposal information',
     example:
       '{"title": "Add new member", "description": "Proposal to add new member to DAO"}',
-    required: true,
+    required: false,
   })
   metadata: string;
 
