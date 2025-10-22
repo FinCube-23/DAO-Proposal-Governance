@@ -106,19 +106,39 @@ class TransactionReceiptSubscriber:
             'message': 'Triggering transaction hash from the from Kong API as on-chain referance',
             'trxHash': trxHash
         }
+
+        
+        
+        # Parse context from JSON string to dict
+        context_str = onChainData.get("context", "{}")
+        
+        try:
+            context = json.loads(context_str)
+        except (json.JSONDecodeError, TypeError):
+            print(f" [✘] Failed to parse context JSON: {context_str}")
+            raise ValueError("Invalid context JSON format")
+        # Check proposal type
+        proposal_type = context.get("proposal_type")
+        if proposal_type != "membership":
+            print(f" [⏭️] Skipping non-membership proposal (type: {proposal_type})")
+            return
         
         print(f" [💰] {json.dumps(log_message)}")
+        # Extract organization_id from parsed context
+        organization_id = context.get("organization_id")
+        if not organization_id:
+            print(f" [✘] Missing organization_id in context")
+            raise ValueError("organization_id is required in context")
         
-        
-        
-        # Currently there are mismatch in variable names, that's why used this for temp patch-up.
-        verification_data={
-            "trx_hash"        : onChainData.get("transactionHash"),      # rename
-            "proposer_wallet" : onChainData.get("signedBy"),             # rename
-            "context"         : onChainData.get("context", {}),          # keep as-is
-            "organization_id" : onChainData.get("organizationId", 5), # hard-coded
+        # Prepare verification data
+        verification_data = {
+            "trx_hash": onChainData.get("transactionHash"),
+            "proposer_wallet": onChainData.get("signedBy"),
+            "context": context,  # Use parsed context dict
+            "organization_id": organization_id,  # Extract from context
         }
-        serializer=OnchainVerificationCreateSerializer(data=verification_data)
+        
+        serializer = OnchainVerificationCreateSerializer(data=verification_data)
 
         if not serializer.is_valid():
             print(f" [✘] Validation error: {serializer.errors}")
@@ -127,7 +147,7 @@ class TransactionReceiptSubscriber:
         validated_data = serializer.validated_data
 
         try:
-            obj=OnchainVerificationService.create_onchain_verification(validated_data)
+            obj = OnchainVerificationService.create_onchain_verification(validated_data)
             print(f" [*] OnchainVerification created: {obj.id}")
         except Exception as e:
             print(f" [✘] Failed to create OnchainVerification: {str(e)}")
