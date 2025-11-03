@@ -24,6 +24,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'trx_status',
       header: 'Status',
+      enableSorting: false,
       cell: ({ row }) => (
         <StatusBadge status={row.getValue('trx_status') === 0 ? 'pending' : 'success'} showIcon />
       ),
@@ -31,6 +32,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'trx_hash',
       header: 'Hash',
+      enableSorting: false,
       cell: ({ row }) => (
         <CopyableCode
           value={row.getValue('trx_hash')}
@@ -41,6 +43,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'from_address',
       header: 'From',
+      enableSorting: false,
       cell: ({ row }) => (
         <CopyableCode
           value={row.getValue('from_address') || '0xF15E6b68541AAe83bB96F61498812c3E0A35F09a'}
@@ -51,6 +54,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'function_name',
       header: 'Function',
+      enableSorting: false,
       cell: ({ row }) => {
         const functionName = row.getValue('function_name') as string;
         const topEvent = row.original.top_event;
@@ -65,6 +69,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'effective_fee_raw',
       header: 'Gas Cost',
+      enableSorting: false,
       cell: ({ row }) => {
         const tx = row.original;
         const fee = tx.effective_fee_raw;
@@ -78,6 +83,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'confirmation_source',
       header: 'Source',
+      enableSorting: false,
       cell: ({ row }) => {
         const source = (row.original as any).confirmation_source;
         return (
@@ -95,6 +101,7 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
     {
       accessorKey: 'actions',
       header: 'Actions',
+      enableSorting: false,
       cell: ({ row }) => {
         const lifecycle = row.original.transaction_confirmation_trace || [];
         const eventLogs = row.original.event_logs || [];

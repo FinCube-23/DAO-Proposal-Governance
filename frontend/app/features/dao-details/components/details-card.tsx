@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { BadgeDollarSign, CheckCircle, Code, Copy, ExternalLink } from 'lucide-react';
+import { BadgeDollarSign, CheckCircle, Copy, ExternalLink } from 'lucide-react';
 import { useState } from 'react';
 import { env } from '@/core/env';
 import { Card, CardContent } from '@/shared/components/ui/card';
@@ -49,7 +49,6 @@ export default function DetailsCard({ title, subtitle, description, infoItems }:
 
             {/* Contract Address */}
             <div className="flex items-center gap-2 py-3 bg-slate-900/30 rounded-lg">
-              <Code className="w-4 h-4 text-slate-400" />
               <span className="text-slate-400 text-sm">Contract:</span>
               <code className="text-emerald-400 font-mono text-sm">{env.VITE_SMART_CONTRACT_ADDRESS}</code>
               <button

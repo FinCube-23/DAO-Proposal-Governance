@@ -22,10 +22,12 @@ interface UserProfile {
 interface AuthStoreState {
   access: string | null;
   profile: UserProfile | null;
+  isHydrated?: boolean;
 
   setTokens: (payload: TokenPayload | null) => void;
   setProfile: (payload: UserProfile | null) => void;
   updateWalletAddress: (walletAddress: string) => void;
+  setHydrated: (isHydrated: boolean) => void;
   setOrg: (org: UserOrgs | null) => void;
   setOrgTrxHash: (hash: string | null) => void;
   sortOrganizations: () => void;
@@ -37,9 +39,11 @@ const useAuthStore = create<AuthStoreState>()(
     (set, get) => ({
       access: null,
       profile: null,
+      isHydrated: false,
 
       setTokens: payload =>
         set({ access: payload?.access || null }),
+      setHydrated: (isHydrated: boolean) => set({ isHydrated }),
 
       setProfile: (payload) => {
         if (!payload) {
@@ -50,7 +54,7 @@ const useAuthStore = create<AuthStoreState>()(
         // Sort organizations to keep Brain Station 23 at index 1
         let sortedOrganizations = payload.organizations || [];
         if (sortedOrganizations.length > 1) {
-          const brainStationIndex = sortedOrganizations.findIndex(org => org.name === "Brain Station 23");
+          const brainStationIndex = sortedOrganizations.findIndex(org => org.name === 'Brain Station 23');
           if (brainStationIndex !== -1 && brainStationIndex !== 1) {
             sortedOrganizations = [...sortedOrganizations];
             // Remove Brain Station 23 from its current position
@@ -99,23 +103,23 @@ const useAuthStore = create<AuthStoreState>()(
             is_admin: org.is_admin,
           };
           const updatedOrgs = [...currentOrgs, userOrg];
-          
+
           // Sort organizations to keep "Brain Station 23" at index 1 (second position)
           const sortedOrgs = updatedOrgs.sort((a, b) => {
             // If one of them is "Brain Station 23", prioritize it for index 1
-            if (a.name === "Brain Station 23" && b.name !== "Brain Station 23") {
+            if (a.name === 'Brain Station 23' && b.name !== 'Brain Station 23') {
               return updatedOrgs.length === 1 ? 0 : 1; // Put at index 1 if there are multiple orgs
             }
-            if (b.name === "Brain Station 23" && a.name !== "Brain Station 23") {
+            if (b.name === 'Brain Station 23' && a.name !== 'Brain Station 23') {
               return updatedOrgs.length === 1 ? 0 : -1; // Put Brain Station 23 at index 1
             }
             // For other organizations, maintain their relative order
             return 0;
           });
-          
+
           // If we have more than 1 org and Brain Station 23 exists, ensure proper positioning
           if (sortedOrgs.length > 1) {
-            const brainStationIndex = sortedOrgs.findIndex(org => org.name === "Brain Station 23");
+            const brainStationIndex = sortedOrgs.findIndex(org => org.name === 'Brain Station 23');
             if (brainStationIndex !== -1 && brainStationIndex !== 1) {
               // Remove Brain Station 23 from its current position
               const brainStationOrg = sortedOrgs.splice(brainStationIndex, 1)[0];
@@ -124,7 +128,7 @@ const useAuthStore = create<AuthStoreState>()(
               sortedOrgs.splice(targetIndex, 0, brainStationOrg);
             }
           }
-          
+
           set({
             profile: {
               ...profile,
@@ -144,16 +148,16 @@ const useAuthStore = create<AuthStoreState>()(
         const profile = get().profile;
         if (profile && profile.organizations && profile.organizations.length > 1) {
           const orgs = [...profile.organizations];
-          
+
           // Find Brain Station 23 and move it to index 1
-          const brainStationIndex = orgs.findIndex(org => org.name === "Brain Station 23");
+          const brainStationIndex = orgs.findIndex(org => org.name === 'Brain Station 23');
           if (brainStationIndex !== -1 && brainStationIndex !== 1) {
             // Remove Brain Station 23 from its current position
             const brainStationOrg = orgs.splice(brainStationIndex, 1)[0];
             // Insert it at index 1 (or at the end if there's only 1 other org)
             const targetIndex = Math.min(1, orgs.length);
             orgs.splice(targetIndex, 0, brainStationOrg);
-            
+
             set({
               profile: {
                 ...profile,
@@ -168,6 +172,9 @@ const useAuthStore = create<AuthStoreState>()(
     }),
     {
       name: 'auth-storage', // localStorage key
+      onRehydrateStorage: () => (state) => {
+        state?.setHydrated(true);
+      },
       partialize: state => ({
         access: state.access,
         profile: state.profile,

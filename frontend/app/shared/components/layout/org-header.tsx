@@ -17,7 +17,7 @@ export default function OrgHeader() {
   const topPosition = isUserNotificationVisible ? 'top-[52px]' : 'top-0';
 
   return (
-    <div className={`flex fixed bg-sidebar backdrop-blur-xl ${topPosition} w-full shrink-0 items-center gap-2 border-b px-2 py-4 z-50`}>
+    <div className={`flex fixed bg-sidebar backdrop-blur-xl ${topPosition} w-full shrink-0 items-center gap-2 border-b px-2 py-4 z-10`}>
       <div className="flex flex-1 items-center gap-2 px-3">
         <SidebarTrigger />
         <Separator

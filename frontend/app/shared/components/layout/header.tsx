@@ -30,9 +30,9 @@ export default function Header() {
           </div>
           <div>
             <ul className="flex space-x-4">
-              <li>
-                {authStore.access
-                  ? (
+              {authStore.access
+                ? (
+                    <li>
                       <Button
                         className="rounded-xl"
                         variant="destructive"
@@ -51,17 +51,31 @@ export default function Header() {
                       >
                         <LogOut size={20} />
                       </Button>
-                    )
-                  : (
-                      <Button
-                        onClick={() => {
-                          navigate('/login');
-                        }}
-                      >
-                        Login
-                      </Button>
-                    )}
-              </li>
+                    </li>
+                  )
+                : (
+                    <>
+                      <li>
+                        <Button
+                          onClick={() => {
+                            navigate('/login');
+                          }}
+                        >
+                          Login
+                        </Button>
+                      </li>
+                      <li>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            navigate('/register');
+                          }}
+                        >
+                          Register
+                        </Button>
+                      </li>
+                    </>
+                  )}
             </ul>
           </div>
         </div>

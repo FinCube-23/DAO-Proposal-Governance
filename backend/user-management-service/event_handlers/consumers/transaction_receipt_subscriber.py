@@ -22,34 +22,34 @@ class TransactionReceiptSubscriber:
         while True:
             try:
                 connection, channel = RabbitMQConnector.get_connection()
-                
+
                 # Declare the transaction receipt exchange
                 channel.exchange_declare(
                     exchange='exchange.transaction-receipt.fanout',
                     exchange_type='fanout',
                     durable=True
                 )
-                
+
                 # Declare dedicated queue for user management service
                 result = channel.queue_declare(
                     queue='user-management-transaction-receipt-queue',
                     durable=True,
                 )
-                
+
                 # Bind queue to exchange
                 channel.queue_bind(
                     exchange='exchange.transaction-receipt.fanout',
                     queue='user-management-transaction-receipt-queue',
                     routing_key=''  # Empty for fanout
                 )
-                
+
                 channel.basic_consume(
                     queue='user-management-transaction-receipt-queue',
                     on_message_callback=self.process_message,
                     auto_ack=False,
                     consumer_tag='user-management-transaction-receipt-consumer'
                 )
-                
+
                 print("\n" + "="*50)
                 print(" [*] Transaction Receipt Consumer READY")
                 print(f" [*] Queue: {result.method.queue}")
@@ -63,7 +63,7 @@ class TransactionReceiptSubscriber:
                 logger.log("Waiting for transaction receipt events...")
 
                 channel.start_consuming()
-                
+
             except KeyboardInterrupt:
                 print("\n [⚠️] Transaction Receipt Consumer stopped by user")
                 logger.log("Transaction Receipt Consumer stopped by user")
@@ -89,7 +89,7 @@ class TransactionReceiptSubscriber:
             logger.log(f"Timestamp: {event.get('timestamp', 'N/A')}")
             logger.log(f"Method: {event.get('method', 'N/A')}")
             logger.log(f"Path: {event.get('path', 'N/A')}")
-            
+
             onChainData = event.get('onChainData', {})
             print(f" [ⓘ] Transaction Hash: {onChainData.get('transactionHash', 'N/A')}")
             print(f" [ⓘ] Signed By: {onChainData.get('signedBy', 'N/A')}")
@@ -98,18 +98,18 @@ class TransactionReceiptSubscriber:
             logger.log(f"Transaction Hash: {onChainData.get('transactionHash', 'N/A')}")
             logger.log(f"Signed By: {onChainData.get('signedBy', 'N/A')}")
             logger.log(f"Context: {onChainData.get('context', 'N/A')}")
-            
+
             # Always use transaction_receipt handler
             print(f" [⚡] Event Type: transaction_receipt")
             print(f" [⚙] Executing handler...")
 
             logger.log("Executing handler...")
             self.event_handlers['transaction_receipt'](event)
-            
+
             ch.basic_ack(delivery_tag=method.delivery_tag)
             print(" [✓] Transaction receipt processing complete")
             logger.log("Transaction receipt processing complete")
-            
+
         except json.JSONDecodeError:
             print(" [✘] Invalid JSON payload")
             logger.log("Invalid JSON payload")
@@ -124,16 +124,16 @@ class TransactionReceiptSubscriber:
         """Handle transaction receipts from Kong API"""
         onChainData = event.get('onChainData', {})
         trxHash = onChainData.get('transactionHash')
-        
+
         # Log the specific message format as requested
         log_message = {
             'message': 'Triggering transaction hash from the from Kong API as on-chain referance',
             'trxHash': trxHash
         }
-        
+
         # Parse context from JSON string
         context_str = onChainData.get("context")
-        
+
         # ✅ Parse the JSON string to dictionary
         try:
             if isinstance(context_str, str):
@@ -144,16 +144,16 @@ class TransactionReceiptSubscriber:
             print(f" [✘] Failed to parse context: {str(e)}")
             logger.log(f"Failed to parse context: {str(e)}")
             raise ValueError("Invalid context format")
-        
-        
+
+
         # Check proposal type
         proposal_type = context.get("proposalType")
-        if proposal_type != 0 and proposal_type != "membership":  
+        if proposal_type != 0 and proposal_type != "membership":
             print(f" [⏭️] Skipping non-membership proposal (type: {proposal_type})")
             logger.log(f"Skipping non-membership proposal (type: {proposal_type})")
             return
 
-        
+
         print(f" [💰] {json.dumps(log_message)}")
         logger.log(f" {json.dumps(log_message)}")
         # Extract organizationId from parsed context
@@ -163,7 +163,7 @@ class TransactionReceiptSubscriber:
             logger.log(f"Missing organization_id in context")
             raise ValueError("organization_id is required in context")
 
-        
+
         # Prepare verification data
         verification_data = {
             "trx_hash": onChainData.get("transactionHash"),
@@ -172,7 +172,7 @@ class TransactionReceiptSubscriber:
             "organization_id": organization_id,  # Extract from context
         }
 
-        
+
         serializer = OnchainVerificationCreateSerializer(data=verification_data)
 
         if not serializer.is_valid():

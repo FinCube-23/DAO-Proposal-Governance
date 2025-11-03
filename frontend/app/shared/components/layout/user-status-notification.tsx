@@ -48,8 +48,8 @@ export default function UserStatusNotification() {
 
   // Different styles based on status
   const containerClasses = isApproved
-    ? 'bg-green-100 border-l-4 border-green-500 text-green-700 p-3 fixed top-0 left-0 right-0 z-[60] w-full'
-    : 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 fixed top-0 left-0 right-0 z-[60] w-full';
+    ? 'bg-green-100 border-l-4 border-green-500 text-green-700 p-3 fixed top-0 left-0 right-0 z-20 w-full'
+    : 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-3 fixed top-0 left-0 right-0 z-20 w-full';
 
   const iconColor = isApproved ? 'text-green-500' : 'text-yellow-500';
   const buttonClasses = isApproved

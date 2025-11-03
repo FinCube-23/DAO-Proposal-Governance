@@ -19,6 +19,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'block_timestamp',
     header: 'Time',
+    enableSorting: false,
     cell: ({ row }) => (
       <TimeDisplay
         timestamp={row.getValue('block_timestamp')}
@@ -30,6 +31,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'status',
     header: 'Status',
+    enableSorting: false,
     cell: ({ row }) => (
       <StatusBadge status={row.getValue('status')} showIcon />
     ),
@@ -37,6 +39,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'tx_hash',
     header: 'Hash',
+    enableSorting: false,
     cell: ({ row }) => (
       <CopyableCode
         value={row.getValue('tx_hash')}
@@ -47,6 +50,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'from_address',
     header: 'From',
+    enableSorting: false,
     cell: ({ row }) => (
       <CopyableCode
         value={row.getValue('from_address')}
@@ -57,6 +61,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'function_name',
     header: 'Function',
+    enableSorting: false,
     cell: ({ row }) => {
       const functionName = row.getValue('function_name') as string;
       const topEvent = row.original.top_event;
@@ -71,6 +76,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'effective_fee_raw',
     header: 'Gas Cost',
+    enableSorting: false,
     cell: ({ row }) => {
       const tx = row.original;
       const fee = tx.effective_fee_raw;
@@ -84,6 +90,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'source',
     header: 'Source',
+    enableSorting: false,
     cell: ({ row }) => {
       const source = (row.original as any).source;
       return (
@@ -101,6 +108,7 @@ const transactionColumns: ColumnDef<Transaction>[] = [
   {
     accessorKey: 'actions',
     header: 'Actions',
+    enableSorting: false,
     cell: ({ row }) => {
       const lifecycle = row.original.flow || [];
       const eventLogs = row.original.event_logs || [];

@@ -1,5 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
+import { Eye, EyeOff } from 'lucide-react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -26,6 +28,7 @@ const formSchema = z.object({
 export default function LoginForm() {
   const navigate = useNavigate();
   const authStore = useAuthStore(state => state);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchMeMutation = useMutation({
     mutationKey: ['fetchMe'],
@@ -91,7 +94,28 @@ export default function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" {...field} />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    className="[&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
+                    {...field}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword
+                      ? (
+                          <EyeOff className="size-5 text-gray-400" />
+                        )
+                      : (
+                          <Eye className="size-5 text-gray-400" />
+                        )}
+                  </Button>
+                </div>
               </FormControl>
               <FormMessage />
             </FormItem>

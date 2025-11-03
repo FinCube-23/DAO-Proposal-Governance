@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import useAuthStore from '@/shared/stores/auth';
 import Prompt from './components/prompt';
 import StepClosure from './components/step-closure';
@@ -61,11 +61,26 @@ export default function UserEnrollStepper() {
   const handleOrganizationSelected = (_orgId: number) => {
   };
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (shouldShowModal) {
+      document.body.style.overflow = 'hidden';
+    }
+    else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to reset overflow when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [shouldShowModal]);
+
   return (
     <>
       {shouldShowModal && (
-        <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50">
-          <div className="bg-card p-10 rounded-xl shadow-lg border w-[425px] md:w-[600px]">
+        <div className="fixed inset-0 bg-opacity-50 backdrop-blur flex items-center justify-center z-50 p-4">
+          <div className="bg-card p-6 sm:p-8 md:p-10 rounded-xl shadow-lg border w-full max-w-[425px] md:max-w-[600px] max-h-[90vh] overflow-y-auto">
             {current === 0 && (
               <Prompt incrementStep={incrementStep} />
             )}

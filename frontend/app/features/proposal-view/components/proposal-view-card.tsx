@@ -77,13 +77,13 @@ export default function ProposalViewCard({ proposal }: any) {
               </div>
             )}
         <div className="font-bold text-2xl">{proposal.proposalURI}</div>
-        <a
+        {/* <a
           target="_"
           href={`${env.VITE_ADDRESS_EXPLORER}/${proposal.data}`}
           className="text-muted-foreground hover:underline"
         >
           {proposal.data.slice(0, 42)}
-        </a>
+        </a> */}
       </CardHeader>
       <CardFooter>
         <div className="flex gap-1 text-sm">

@@ -201,13 +201,7 @@ export default function AdminDashboard() {
                 Membership Status
               </CardTitle>
               <Badge variant="secondary">On-chain</Badge>
-              {approvalStatus
-                ? (
-                    <Badge variant="success" className="h-5" />
-                  )
-                : (
-                    <Badge variant="warning" className="h-5" />
-                  )}
+              <Badge variant={approvalStatus ? 'success' : 'warning'} className="size-5 rounded-full animate-pulse" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">

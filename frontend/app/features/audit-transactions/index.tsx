@@ -60,11 +60,6 @@ export default function AuditTransactions() {
     setPage(1);
   };
 
-  if (getTransactions.isPending)
-    return <p>Loading...</p>;
-  if (getTransactions.isError)
-    return <p>Error loading data</p>;
-
   const handleTransactionClick = (transaction: Transaction) => {
     toast.success(`Transaction clicked: ${transaction.trx_hash}`);
   };
@@ -88,12 +83,29 @@ export default function AuditTransactions() {
             </div>
           </CardHeader>
           <CardContent>
-            <DataTable
-              columns={transactionColumns}
-              data={trxList}
-              isLoading={getTransactions.isPending}
-              onRowClick={handleTransactionClick}
-            />
+            {
+              getTransactions.isPending
+                ? (
+                    <div className="text-center text-sm text-muted-foreground py-10">
+                      Loading transactions...
+                    </div>
+                  )
+                : getTransactions.isError
+                  ? (
+                      <div className="text-center text-sm text-muted-foreground py-10">
+                        Failed to load transactions
+                      </div>
+                    )
+                  : (
+                      <DataTable
+                        columns={transactionColumns}
+                        data={trxList}
+                        isLoading={getTransactions.isPending}
+                        onRowClick={handleTransactionClick}
+                      />
+                    )
+            }
+
           </CardContent>
           <CardFooter className="flex justify-center">
             <CustomPagination limit={limit} total={total} page={page} onPageChange={setPage} />

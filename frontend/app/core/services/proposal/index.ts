@@ -5,9 +5,9 @@ import type {
   ProposalOnchainVerificationPayload,
   ProposalOnchainVerificationResponse,
   ProposalOperationPayload,
-} from "./types";
-import { api } from "@/core/api/client";
-import { ORGANIZATION_ENDPOINT, PROPOSAL_ENDPOINT } from "@/core/api/endpoints";
+} from './types';
+import { api } from '@/core/api/client';
+import { ORGANIZATION_ENDPOINT, PROPOSAL_ENDPOINT } from '@/core/api/endpoints';
 
 export const proposalApis = {
   getAllProposals: (queryParams: any) =>
@@ -25,6 +25,6 @@ export const proposalApis = {
   createOnchainVerification: (payload: ProposalOnchainVerificationPayload) =>
     api.post<ProposalOnchainVerificationResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
-      payload
+      payload,
     ),
 };

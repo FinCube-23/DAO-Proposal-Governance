@@ -19,6 +19,7 @@ const menus = [
         name: 'Dashboard',
         url: '/organization',
         icon: LayoutDashboard,
+        match: '/organization',
       },
     ],
   },
@@ -27,13 +28,15 @@ const menus = [
     items: [
       {
         name: 'Overview',
-        url: '/organization/dao',
+        url: '/organization/dao/overview',
         icon: Layers,
+        match: '/organization/dao/overview',
       },
       {
         name: 'Proposals',
         url: '/organization/dao/proposals/on-chain',
         icon: ScrollTextIcon,
+        match: '/organization/dao/proposals',
       },
     ],
   },
@@ -44,6 +47,18 @@ const menus = [
         name: 'Dashboard',
         url: '/organization/admin/dashboard',
         icon: LayoutDashboard,
+        match: '/organization/admin',
+      },
+    ],
+  },
+  {
+    name: 'Audit Explorer',
+    items: [
+      {
+        name: 'Dashboard',
+        url: '/organization/audit/dashboard',
+        icon: LayoutDashboard,
+        match: '/organization/audit',
       },
     ],
   },

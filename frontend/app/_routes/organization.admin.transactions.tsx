@@ -86,8 +86,8 @@ function TrxList() {
     <>
       <div className="flex justify-between">
         <div className="w-[200px] flex flex-col">
-          <div className="flex w-[500px] gap-2">
-            <span className="text-xs">Search by Hash:</span>
+          <div className="flex w-[500px] gap-2 items-center">
+            <span className="text-xs">Search:</span>
             <Input
               placeholder="Filter by hash"
               value={searchTerm}
@@ -134,7 +134,6 @@ function TrxList() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ID</TableHead>
             <TableHead>Transaction Hash</TableHead>
             <TableHead>Transaction Status</TableHead>
             <TableHead>Confirmation Source</TableHead>
@@ -150,7 +149,6 @@ function TrxList() {
               className="hover:bg-gray-800 hover:cursor-pointer"
               key={trx.id}
             >
-              <TableCell>{trx.id}</TableCell>
               <TableCell>{trx.trx_hash}</TableCell>
               <TableCell>
                 {trx.trx_status

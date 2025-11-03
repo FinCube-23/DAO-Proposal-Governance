@@ -21,6 +21,7 @@ const columns: ColumnDef<Organization>[] = [
   {
     accessorKey: 'name',
     header: 'Name',
+    enableSorting: false,
     cell: ({ row }) => (
       <div className="font-medium">{row.getValue('name')}</div>
     ),
@@ -28,14 +29,17 @@ const columns: ColumnDef<Organization>[] = [
   {
     accessorKey: 'type',
     header: 'Type',
+    enableSorting: false,
   },
   {
     accessorKey: 'location',
     header: 'Location',
+    enableSorting: false,
   },
   {
     accessorKey: 'membership_status',
     header: 'Membership',
+    enableSorting: false,
     cell: ({ row }) => {
       const status = row.getValue('membership_status') as OrgStatus;
       const txStatus = ORG_STATUS_TO_TX[status];
@@ -65,6 +69,7 @@ const columns: ColumnDef<Organization>[] = [
   {
     accessorKey: 'treasury_address',
     header: 'Treasury',
+    enableSorting: false,
     cell: ({ row }) => (
       row.original.treasury_address
         ? (

@@ -1,60 +1,57 @@
-import type { ChangeEvent, FormEvent } from "react";
-import type { ProposalCreatePayload } from "@/core/services/proposal/types";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { simulateContract, writeContract } from "@wagmi/core";
-import { CheckCircle } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
-import { useAccount, useChainId } from "wagmi";
-import { config } from "@/core/config";
-import contractABI from "@/core/contract/contract-abi.json";
-import { env } from "@/core/env";
-import { orgApis } from "@/core/services/org";
-import { proposalApis } from "@/core/services/proposal";
-import { Button } from "@/shared/components/ui/button";
+import type { ChangeEvent, FormEvent } from 'react';
+import type { ProposalCreatePayload } from '@/core/services/proposal/types';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { simulateContract, writeContract } from '@wagmi/core';
+import { CheckCircle } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { useAccount, useChainId } from 'wagmi';
+import { config } from '@/core/config';
+import contractABI from '@/core/contract/contract-abi.json';
+import { env } from '@/core/env';
+import { orgApis } from '@/core/services/org';
+import { proposalApis } from '@/core/services/proposal';
+import { Button } from '@/shared/components/ui/button';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/ui/dialog";
+} from '@/shared/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/shared/components/ui/select";
-import { shortenAddress } from "@/shared/utils";
+} from '@/shared/components/ui/select';
+import { shortenAddress } from '@/shared/utils';
 
 export default function MemberProposal() {
   const [data, setData] = useState({
-    _newMember: "",
-    description: "",
-    organizationId: "",
+    _newMember: '',
+    description: '',
+    organizationId: '',
   });
   const { address } = useAccount();
   const chainId = useChainId();
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [trxHash, setTrxHash] = useState("");
+  const [trxHash, setTrxHash] = useState('');
   const navigate = useNavigate();
 
   // Fetch organizations
-  const {
-    data: organizationsData,
-    isLoading: organizationsLoading,
-    error: _organizationsError,
-  } = useQuery({
-    queryKey: ["organizations"],
+  const { data: organizationsData, isLoading: organizationsLoading, error: _organizationsError } = useQuery({
+    queryKey: ['organizations'],
     queryFn: async () => {
       try {
-        const response = await orgApis.getAllOrgs({ status: "approved" });
+        const response = await orgApis.getAllOrgs({ status: 'approved' });
         return response;
-      } catch (error) {
-        console.error("Error fetching organizations:", error);
+      }
+      catch (error) {
+        console.error('Error fetching organizations:', error);
         throw error;
       }
     },
@@ -64,7 +61,7 @@ export default function MemberProposal() {
 
   // Add error boundary-like handling
   if (_organizationsError) {
-    console.error("Organizations query error:", _organizationsError);
+    console.error('Organizations query error:', _organizationsError);
   }
 
   const createProposal = useMutation({
@@ -72,17 +69,17 @@ export default function MemberProposal() {
   });
 
   const handleInput = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
-    setData((prevData) => ({
+    setData(prevData => ({
       ...prevData,
       [name]: value,
     }));
   };
 
   const handleOrganizationSelect = (value: string) => {
-    setData((prevData) => ({
+    setData(prevData => ({
       ...prevData,
       organizationId: value,
     }));
@@ -93,13 +90,13 @@ export default function MemberProposal() {
     setLoadingStatus(true);
 
     if (!data.organizationId) {
-      toast.error("Please select an organization");
+      toast.error('Please select an organization');
       setLoadingStatus(false);
       return;
     }
 
     if (!address) {
-      toast.error("Please connect your wallet first");
+      toast.error('Please connect your wallet first');
       setLoadingStatus(false);
       return;
     }
@@ -108,7 +105,7 @@ export default function MemberProposal() {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
-        functionName: "newMemberApprovalProposal",
+        functionName: 'newMemberApprovalProposal',
         args: [data._newMember, data.description],
       });
 
@@ -116,44 +113,45 @@ export default function MemberProposal() {
 
       // Create context object and stringify it
       const contextData = {
-        __typename: "ProposalAdded",
-        description: data.description,
-        organizationId: Number.parseInt(data.organizationId),
-        proposalType: "membership",
+        metadata: data.description,
+        organization_id: Number.parseInt(data.organizationId),
+        proposal_type: 'membership',
       };
 
       const backendData: ProposalCreatePayload = {
-        proposal_type: "membership",
+        proposal_type: 'membership',
         onChainData: {
           transactionHash: hash,
           signedBy: address,
-          signedWith: "metamask",
+          signedWith: 'metamask',
           chainId: chainId.toString(),
-          context: contextData,
+          context: JSON.stringify(contextData),
         },
       };
 
       try {
         await createProposal.mutateAsync(backendData);
-        toast.success("Proposal submitted successfully");
+        toast.success('Proposal submitted successfully');
         setDialogOpen(true);
         setTrxHash(hash);
-      } catch (proposalError: any) {
-        console.error("Proposal creation failed:", proposalError);
+      }
+      catch (proposalError: any) {
+        console.error('Proposal creation failed:', proposalError);
         toast.error(`Failed to create proposal: ${proposalError.message}`);
       }
-    } catch (e: any) {
+    }
+    catch (e: any) {
       let errorMessage = e.message;
 
-      if (errorMessage.includes("reverted with the following reason:")) {
+      if (errorMessage.includes('reverted with the following reason:')) {
         const match = errorMessage.match(
-          /reverted with the following reason:\s*(.*)/
+          /reverted with the following reason:\s*(.*)/,
         );
         if (match) {
           errorMessage = match[1];
         }
       }
-      console.error("Smart contract error:", e);
+      console.error('Smart contract error:', e);
       toast.error(errorMessage);
     }
     setLoadingStatus(false);
@@ -171,7 +169,7 @@ export default function MemberProposal() {
             <p>Error loading organizations. Please try refreshing the page.</p>
             <p className="text-sm mt-2">
               Error:
-              {_organizationsError?.message || "Unknown error"}
+              {_organizationsError?.message || 'Unknown error'}
             </p>
           </div>
         </div>
@@ -216,23 +214,21 @@ export default function MemberProposal() {
                 <SelectValue placeholder="Select an organization" />
               </SelectTrigger>
               <SelectContent>
-                {_organizationsError ? (
-                  <SelectItem value="" disabled>
-                    Error loading organizations
-                  </SelectItem>
-                ) : (
-                  organizationsData?.organizations?.map((org) => (
+                {_organizationsError
+                  ? (
+                      <SelectItem value="" disabled>
+                        Error loading organizations
+                      </SelectItem>
+                    )
+                  : organizationsData?.organizations?.map(org => (
                     <SelectItem key={org.id} value={org.id.toString()}>
                       {org.name}
                     </SelectItem>
                   )) || (
                     <SelectItem value="" disabled>
-                      {organizationsLoading
-                        ? "Loading..."
-                        : "No organizations available"}
+                      {organizationsLoading ? 'Loading...' : 'No organizations available'}
                     </SelectItem>
-                  )
-                )}
+                  )}
               </SelectContent>
             </Select>
           </div>
@@ -256,7 +252,8 @@ export default function MemberProposal() {
               placeholder="Enter description"
               rows={10}
               required
-            ></textarea>
+            >
+            </textarea>
           </div>
           <div className="flex justify-center">
             <Button type="submit" isLoading={loadingStatus}>
@@ -269,7 +266,8 @@ export default function MemberProposal() {
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) navigate("/organization/dao/proposals");
+          if (!open)
+            navigate('/organization/dao/proposals');
         }}
       >
         <DialogContent className="border-gray-700 bg-gray-900">
@@ -281,8 +279,7 @@ export default function MemberProposal() {
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-gray-300">
-              Your membership proposal has been successfully submitted to the
-              blockchain and is now under review by DAO members.
+              Your membership proposal has been successfully submitted to the blockchain and is now under review by DAO members.
             </p>
             <div className="p-4 bg-gray-800 rounded-lg">
               <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
@@ -307,7 +304,9 @@ export default function MemberProposal() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => navigate("/organization/dao/proposals")}>
+            <Button
+              onClick={() => navigate('/organization/dao/proposals')}
+            >
               View All Proposals
             </Button>
           </DialogFooter>

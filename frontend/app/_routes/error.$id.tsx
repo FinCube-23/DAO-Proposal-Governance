@@ -12,6 +12,15 @@ export default function ErrorPage() {
   // Get error details based on ID
   const getErrorDetails = (errorId: string) => {
     switch (errorId) {
+      case 'not-logged-in':
+        return {
+          title: 'Not Logged In',
+          message: 'You need to login to access this page.',
+          description: 'Please login with your credentials to continue using the application.',
+          icon: <LogIn className="h-16 w-16 text-blue-500" />,
+          redirectTo: '/login',
+          redirectText: 'Login Page',
+        };
       case '401':
         return {
           title: 'Session Expired',
@@ -99,10 +108,10 @@ export default function ErrorPage() {
               <h1 className="text-3xl font-bold mb-2">
                 {errorDetails.title}
               </h1>
-              <p className="text-lg text-slate-600 dark:text-slate-300 mb-3">
+              <p className="text-lg text-slate-600 dark:text-slate-300 mb-1">
                 {errorDetails.message}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mb-3">
                 {errorDetails.description}
               </p>
             </div>
