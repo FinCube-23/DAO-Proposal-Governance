@@ -1,4 +1,3 @@
-# organizations/services/onchain_verification_service.py
 from organizations.repositories.onchain_verification_repository import OnchainVerificationRepository
 from organizations.repositories.organization_repository import OrganizationRepository
 from django.db import transaction
@@ -54,6 +53,14 @@ class OnchainVerificationService:
         return OnchainVerificationRepository.get_verifications_by_organization(
             organization_id, page, limit
         )
+
+    @staticmethod
+    def get_verifications_by_trx_hash(trx_hash):
+        verification = OnchainVerificationRepository.get_verification_by_trx_hash(trx_hash)
+        if not verification:
+            raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
+        
+        return verification
     
     @staticmethod
     def update_verification_status_by_trx_hash(trx_hash, status):

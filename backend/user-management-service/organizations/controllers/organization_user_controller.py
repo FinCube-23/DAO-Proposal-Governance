@@ -9,9 +9,11 @@ from organizations.serializers.organization_user_serializers import (
 from drf_spectacular.utils import extend_schema
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
-
+from logging_config import logger
 
 class ProtectedOrganizationUserController(ViewSet):
+    logger.set_context("ProtectedOrganizationUserController")
+    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -29,23 +31,25 @@ class ProtectedOrganizationUserController(ViewSet):
         Add a user to an organization.
         Creates a new organization user membership with proper validation.
         """
-
-        serializer = OrganizationUserCreateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        logger.log({"event": "Adding user to organization Started", "data": request.data})
+        
 
         try:
+            serializer = OrganizationUserCreateSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
             organization_user = OrganizationUserService.create_organization_user(
                 serializer.validated_data
             )
 
             response_serializer = OrganizationUserResponseSerializer(organization_user)
-
+            logger.log({"event": "Adding user to organization Success", "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,
             )
 
         except Exception as e:
+            logger.error({"event": "Adding user to organization Error", "data": request.data, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,

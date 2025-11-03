@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { TransactionsModule } from 'src/transactions/transactions.module';
-import { ProposalUpdateModule } from 'src/proposal-update/proposal-update.module';
+import { TransactionGatewayModule } from 'src/transaction-gateway/transaction-gateway.module';
+import { TransactionUpdateModule } from 'src/transaction-updater/transaction-update.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { TracingModule } from 'src/shared/common/tracing/tracing.module';
 
 @Module({
   imports: [
-    TransactionsModule,
-    ProposalUpdateModule,
+    TransactionGatewayModule,
+    TransactionUpdateModule,
     ScheduleModule.forRoot(),
     TracingModule,
   ],

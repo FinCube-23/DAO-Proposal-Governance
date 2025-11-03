@@ -1,9 +1,6 @@
-# utils/types.py
 from typing import TypedDict, Literal, Optional, Any, Dict
-from datetime import datetime
 
 # Message Pattern
-
 class ValidateAuthorizationDto(TypedDict):
     access_token: str
     options: dict

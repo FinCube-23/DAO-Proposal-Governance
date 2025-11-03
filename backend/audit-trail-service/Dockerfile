@@ -25,6 +25,9 @@ RUN ls -la dist/
 FROM node:20-alpine AS production
 WORKDIR /app
 
+# Change ownership of working directory to node user
+RUN chown -R node:node /app
+
 COPY package*.json ./
 
 # Copy built application
@@ -45,9 +48,6 @@ RUN if [ "$APP_ENV" = "DEVELOPMENT" ] || [ "$APP_ENV" = "DEV" ]; then \
   echo "Installing only production dependencies..."; \
   npm ci --omit-dev && npm cache clean --force; \
   fi
-
-# Fix permissions for node user before switching
-RUN chown -R node:node /app
 
 # Run as non-root user
 # This is a good practice for security reasons

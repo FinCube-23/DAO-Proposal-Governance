@@ -1,4 +1,3 @@
-# organizations/services/organization_user_service.py
 from organizations.repositories.organization_user_repository import OrganizationUserRepository
 from organizations.repositories.organization_repository import OrganizationRepository
 from users.repositories.user_repository import UserRepository

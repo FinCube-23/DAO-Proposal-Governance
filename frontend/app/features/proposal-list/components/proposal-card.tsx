@@ -61,9 +61,6 @@ export default function ProposalCard({ id, description, status, address, href, v
                 <span className="capitalize">{status}</span>
               </div>
             </div>
-            {/* <h3 className="text-lg font-semibold text-white mb-2 group-hover:text-emerald-400 transition-colors">
-              {title}
-            </h3> */}
           </div>
         </div>
         <div className="flex justify-between">

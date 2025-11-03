@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   TransactionConfirmationSource,
   TransactionStatus,
-} from '../entities/transaction.entity';
+} from '../../shared/common/entity/transaction.entity';
 
 export class ListTransactionsQueryDto {
   @ApiProperty({ required: false, default: 1 })

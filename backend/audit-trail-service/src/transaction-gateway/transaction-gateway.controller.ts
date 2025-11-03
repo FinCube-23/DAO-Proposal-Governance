@@ -7,14 +7,14 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { TransactionsService } from './transactions.service';
+import { TransactionGatewayService } from './transaction-gateway.service';
 import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
 import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 
 @Controller('transactions')
-export class TransactionsController {
-  constructor(private readonly transactionsService: TransactionsService) {}
+export class TransactionGatewayController {
+  constructor(private readonly transactionsGatewayService: TransactionGatewayService) {}
 
   @Get()
   @ApiTags('Transaction Off-Chain Backup')
@@ -23,7 +23,7 @@ export class TransactionsController {
   async findAll(
     @Query() query: ListTransactionsQueryDto,
   ): Promise<TransactionListResponseDto> {
-    return this.transactionsService.findAll(query);
+    return this.transactionsGatewayService.findAll(query);
   }
 
   @Get('dashboard-stats')
@@ -64,7 +64,7 @@ export class TransactionsController {
     },
   })
   async getDashboardStatistics() {
-    return this.transactionsService.getStatistics();
+    return this.transactionsGatewayService.getStatistics();
   }
 
   @Get(':identifier')
@@ -86,9 +86,9 @@ export class TransactionsController {
   ): Promise<TransactionDetailResponseDto> {
     // Check if identifier is a number (ID) or string (hash)
     if (/^\d+$/.test(identifier)) {
-      return this.transactionsService.findById(Number(identifier));
+      return this.transactionsGatewayService.findById(Number(identifier));
     } else {
-      return this.transactionsService.findByHash(identifier);
+      return this.transactionsGatewayService.findByHash(identifier);
     }
   }
 }

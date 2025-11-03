@@ -8,8 +8,7 @@ echo "================================================="
 
 # Test data with login DTO + onChainData scenarios
 declare -a TEST_CASES=(
-    '{"email":"user@example.com","password":"password123","onChainData":{"transactionHash":"0x1234567890abcdef","signedBy":"0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6","signedWith":"MetaMask","chainId":"1","context":"dao-vote"}}'
-    '{"email":"admin@company.com","password":"adminpass456","onChainData":{"transactionHash":"0xabcdef1234567890","signedBy":"0x8ba1f109551bD432803012645Hac136c","signedWith":"MetaMask","chainId":"137","context":"sell-nft"}}'
+    '{"email":"fahim@gmail.com","password":"12345678","onChainData":{"transactionHash":"0xabcdef1234567890","signedBy":"0x8ba1f109551bD432803012645Hac136c","signedWith":"MetaMask","chainId":"137","context":"sell-nft"}}'
     '{"email":"trader@crypto.com","password":"trading789","onChainData":{"transactionHash":"0x9876543210fedcba","signedBy":"0x1234567890123456789012345678901234567890","signedWith":"MetaMask","chainId":"56","context":"buy-token"}}'
     '{"email":"admin@bs23.com","password":"12345678","onChainData":{"transactionHash":"0xfedcba0987654321","signedBy":"0xabcdefabcdefabcdefabcdefabcdefabcdefabcd","signedWith":"MetaMask","chainId":"42161","context":"stake-liquidity"}}'
 )

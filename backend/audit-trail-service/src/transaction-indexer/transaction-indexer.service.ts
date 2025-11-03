@@ -18,8 +18,8 @@ interface TransactionReceiptEvent {
 }
 
 @Injectable()
-export class TransactionReceiptService {
-  private readonly logger = new Logger(TransactionReceiptService.name);
+export class TransactionIndexerService {
+  private readonly logger = new Logger(TransactionIndexerService.name);
   private eventHandlers: Record<string, (event: TransactionReceiptEvent) => Promise<void>>;
 
   constructor() {
@@ -29,14 +29,14 @@ export class TransactionReceiptService {
   }
 
   // 📡 Listening to Transaction Receipt Exchange
-  @RabbitSubscribe({
-    exchange: 'exchange.transaction-receipt.fanout',
-    routingKey: '',
-    queue: 'audit-trail-transaction-receipt-queue',
-    queueOptions: {
-      durable: true,
-    },
-  })
+  // @RabbitSubscribe({
+  //   exchange: 'exchange.transaction-receipt.fanout',
+  //   routingKey: '',
+  //   queue: 'audit-trail-transaction-receipt-queue',
+  //   queueOptions: {
+  //     durable: true,
+  //   },
+  // })
   async handleTransactionReceiptEvent(event: TransactionReceiptEvent) {
     this.logger.log(
       `📧 Received transaction receipt event: ${JSON.stringify({

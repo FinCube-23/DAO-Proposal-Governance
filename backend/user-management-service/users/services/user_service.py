@@ -1,12 +1,8 @@
-from typing import Optional
 from users.models import User
 from users.repositories import UserRepository
-from users.dtos import UserRegistrationDTO, WalletUpdateDTO
-from django.core.paginator import Paginator, EmptyPage
+from users.dtos import UserRegistrationDTO
 from users.utils.exceptions import (
     EmailAlreadyExistsError,
-    InvalidWalletAddressError,
-    UserNotFoundError,
 )
 from django.contrib.auth.hashers import make_password, check_password
 

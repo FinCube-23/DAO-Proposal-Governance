@@ -29,12 +29,7 @@ urlpatterns = [
         ),
         name="organization-users",
     ),
-    # Onchain verifications - manual ViewSet action mappings
-    path(
-        "/onchain-verifications",
-        ProtectedOnchainVerificationController.as_view({"post": "create"}),
-        name="onchain-verifications-create",
-    ),
+    
     path(
         "/<int:org_id>/onchain-verifications",
         ProtectedOnchainVerificationController.as_view(

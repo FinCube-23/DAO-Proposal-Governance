@@ -32,14 +32,14 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
       uri: 'amqp://rabbitmq:5672',
       exchanges: [
         {
-          name: 'proposal-update-exchange',
+          name: 'exchange.web3_event_hub.fanout',
           type: 'fanout',
         },
       ],
       queues: [
         {
-          name: 'dao-service-queue',
-          exchange: 'proposal-update-exchange',
+          name: 'dao_service.web3_events.queue',
+          exchange: 'exchange.web3_event_hub.fanout',
           routingKey: '', // Empty for fanout exchanges
           createQueueIfNotExists: true,
           options: {

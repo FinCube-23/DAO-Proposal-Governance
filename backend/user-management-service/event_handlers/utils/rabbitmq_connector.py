@@ -1,4 +1,3 @@
-# utils/rabbitmq_connector.py
 import pika
 import time
 from django.conf import settings

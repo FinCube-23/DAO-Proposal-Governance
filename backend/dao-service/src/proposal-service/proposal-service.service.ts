@@ -5,22 +5,16 @@ import {
   UnauthorizedException,
   HttpException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProposalEntity, ProposalStatus } from './entities/proposal.entity';
 import { ClientProxy } from '@nestjs/microservices';
-import {
-  ProposalDto,
-  PendingTransactionDto,
-  PaginatedProposalResponse,
-  UpdateProposalDto,
-} from './dto/proposal.dto';
-import { catchError, firstValueFrom, timeout } from 'rxjs';
+import { PaginatedProposalResponse, ProposalDto } from './dto/proposal.dto';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
-import { ValidateAuthorizationDto } from 'src/shared/common/dto/validate-proposal.dto';
 import { validateAuth } from '@mskits/validate-auth';
 
 @Injectable()
@@ -43,16 +37,12 @@ export class ProposalServiceService {
     this.eventDrivenFunctionCall = {
       ProposalCanceled: this.handleProposalUpdatedEvent.bind(this),
       ProposalExecuted: this.handleProposalUpdatedEvent.bind(this),
-      ProposalAdded: this.handleCreatedProposalPlacedEvent.bind(this),
+      ProposalAdded: this.handleProposalPlacedEvent.bind(this),
       // Add more strings and corresponding functions as needed
     };
   }
 
-  // 💬 MessagePattern expects a response | This is a publisher
-  async create(
-    req,
-    proposal: Partial<ProposalEntity>,
-  ): Promise<ProposalEntity> {
+  async create(req, proposal: ProposalDto): Promise<ProposalEntity> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
@@ -63,50 +53,64 @@ export class ProposalServiceService {
 
     try {
       // First verify we have the required fields
-      if (!proposal.trx_hash || !proposal.proposer_address) {
+      if (
+        !proposal.onChainData.transactionHash ||
+        !proposal.onChainData.signedBy
+      ) {
         throw new Error('Transaction hash and proposer address are required');
       }
 
-      const pendingTrx = {
-        trx_hash: proposal.trx_hash,
-        proposer_address: proposal.proposer_address,
-      };
+      const existingProposal = await this.proposalRepository.findOne({
+        where: { transaction_hash: proposal.onChainData.transactionHash },
+      });
 
-      // Handle pending proposal and get audit record from AUDIT TRAIL SERVICE
-      const audit_record = await this.handlePendingProposal(pendingTrx);
-
-      if (!audit_record?.data?.db_record_id) {
-        throw new Error('Failed to get valid audit record ID');
+      if (existingProposal) {
+        this.logger.warn(
+          `Proposal with transaction hash ${proposal.onChainData.transactionHash} already exists.`,
+        );
+        throw new BadRequestException(
+          `Proposal with this transaction hash already exists.`,
+        );
       }
 
-      // Updating new proposal with audit ID
-      proposal.audit_id = audit_record.data.db_record_id;
-      const new_proposal = this.proposalRepository.create(proposal);
+      const context = proposal.onChainData.context;
+      this.logger.log(
+        `Creating proposal with context: ${JSON.stringify(context)}`,
+      );
+      const new_proposal = this.proposalRepository.create({
+        proposer_address: proposal.onChainData.signedBy,
+        proposal_type: proposal.proposal_type,
+        description: proposal.onChainData.context.description || null,
+        transaction_hash: proposal.onChainData.transactionHash,
+      });
 
       const saved_proposal = await this.proposalRepository.save(new_proposal);
       this.logger.log({
         message: `New proposal created with ID: ${saved_proposal.id}`,
-        wallet: proposal.proposer_address,
+        wallet: proposal.onChainData.signedBy,
       });
 
       return saved_proposal;
     } catch (err) {
       this.logger.error(`Failed to create proposal: ${err.message}`);
       this.logger.debug(`Error details: ${JSON.stringify(err)}`);
+      if (
+        err instanceof BadRequestException ||
+        err instanceof UnauthorizedException
+      ) {
+        throw err;
+      }
       throw new HttpException(
         {
-          status: HttpStatus.SERVICE_UNAVAILABLE,
-          error: 'Audit trail service is currently unavailable',
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `Failed to create proposal ${err.message}`,
         },
-        HttpStatus.SERVICE_UNAVAILABLE,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
 
-  async executeProposal(
-    req: any,
-    executedProposalDto: UpdateProposalDto,
-  ): Promise<any> {
+  async executeProposal(req: any, proposalId: number): Promise<any> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
@@ -116,37 +120,28 @@ export class ProposalServiceService {
     }
 
     try {
-      if (
-        !executedProposalDto.proposalId ||
-        !executedProposalDto.transactionHash
-      ) {
-        throw new Error('Proposal ID and Transaction Hash is required');
+      if (!proposalId) {
+        throw new Error('Proposal ID is required');
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: executedProposalDto.proposalId,
+          proposal_onchain_id: proposalId,
         },
       });
 
       this.logger.log(
-        `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        // `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        `Initiating audit for Proposal Executed with ID: ${proposal.proposal_onchain_id}`,
       );
 
-      const executedTrx = {
-        trx_hash: executedProposalDto.transactionHash,
-        proposer_address: proposal.proposer_address,
-      };
-      //Handle executedProposal using audit trail service
-      const audit_record = await this.handleUpdatedProposal(executedTrx);
-      //Updating proposal with latest audit ID and trx_hash
-      proposal.audit_id = audit_record.data.db_record_id;
-      proposal.trx_status = 0;
+      proposal.transaction_status = 0;
       proposal.proposal_status = ProposalStatus.EXECUTED;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        // `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -157,10 +152,7 @@ export class ProposalServiceService {
     }
   }
 
-  async cancelProposal(
-    req: any,
-    cancelProposalDto: UpdateProposalDto,
-  ): Promise<any> {
+  async cancelProposal(req: any, proposalId: number): Promise<any> {
     const res = await validateAuth(req, this.umsRabbitClient as any);
 
     if (res.status != 'SUCCESS') {
@@ -170,34 +162,28 @@ export class ProposalServiceService {
     }
 
     try {
-      if (!cancelProposalDto.proposalId || !cancelProposalDto.transactionHash) {
-        throw new Error('Proposal ID and Transaction Hash is required');
+      if (!proposalId) {
+        throw new Error('Proposal ID is required');
       }
       const proposal = await this.proposalRepository.findOne({
         where: {
-          proposal_onchain_id: cancelProposalDto.proposalId,
+          proposal_onchain_id: proposalId,
         },
       });
 
       this.logger.log(
-        `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        // `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id} and Audit ID: ${proposal.audit_id}`,
+        `Initiating audit for Proposal Cancelled with ID: ${proposal.proposal_onchain_id}`,
       );
 
-      const executedTrx = {
-        trx_hash: cancelProposalDto.transactionHash,
-        proposer_address: proposal.proposer_address,
-      };
-      //Handle executedProposal using audit trail service
-      const audit_record = await this.handleUpdatedProposal(executedTrx);
-      //Updating proposal with latest audit ID and trx_hash
-      proposal.audit_id = audit_record.data.db_record_id;
-      proposal.trx_status = 0;
+      proposal.transaction_status = 0;
       proposal.proposal_status = ProposalStatus.CANCEL;
 
       const updatedProposal = await this.proposalRepository.save(proposal);
 
       this.logger.log(
-        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        // `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with latest Audit ID: ${proposal.audit_id} and status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
+        `Proposal with ID: ${proposal.proposal_onchain_id} successfully updated with status: ${proposal.proposal_status} | Waiting for confirmation from Audit Trail`,
       );
 
       return updatedProposal;
@@ -252,14 +238,18 @@ export class ProposalServiceService {
         'proposal.proposer_address',
         'proposal.proposal_status',
         'proposal.proposal_onchain_id',
-        'proposal.metadata',
-      ])
+        'proposal.description',
+        'proposal.event_logs',
+      ]);
 
     if (filter && filter !== 'all') {
-      query.where('proposal.proposal_status = :filter', { filter: filter.toLowerCase() });
+      query.where('proposal.proposal_status = :filter', {
+        filter: filter.toLowerCase(),
+      });
     }
 
     const [proposals, total] = await query
+      .orderBy('proposal.id', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -287,96 +277,38 @@ export class ProposalServiceService {
     return this.proposalRepository.find({ where: { proposal_status: status } });
   }
 
-  // 💬 Producing Message in the queue
-  async handlePendingProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log({
-      message: 'Triggering queue-pending-proposal for a new transaction',
-      trxHash: proposal.trx_hash,
-    });
-    // Convert Observable to Promise and await the response
-    const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('queue-pending-proposal', proposal).pipe(
-        timeout(50000), // Nginx default timeout is 60 seconds. So we are setting Message Broker Response as 50 seconds.
-        catchError((err) => {
-          throw new Error('AUDIT-TRAIL-SERVICE timeout or unreachable');
-        }),
-        /* Note:
-                As this project architecture is designed with low number of services
-                we are covering this type of cross service synchronization with Producer-Consumer
-                model where a response is expected. But for larger infrastructure we will mostly rely on
-                Pub/Sub model where Fire and Forget will be implemented.
-                Overall, in this architecture though we have used Prod-Cons Model but Timeout is integrated.
-        */
-      ),
-    );
-    if (messageResponse.status == 'SUCCESS') {
-      this.logger.log(
-        'New proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
-      );
-      return messageResponse;
-    } else {
-      this.logger.error(
-        `Audit service returned failure: ${JSON.stringify(messageResponse.error)}`,
-      );
-      throw new Error(
-        messageResponse.error?.message || 'Proposal processing failed',
-      );
-    }
-  }
-
-  // 💬 Producing Message in the queue
-  async handleUpdatedProposal(proposal: PendingTransactionDto): Promise<any> {
-    this.logger.log({
-      message:
-        'Triggering transaction reference for an updated proposal (Execute/Cancel)',
-      trxHash: proposal.trx_hash,
-    });
-    // Convert Observable to Promise and await the response
-    const messageResponse = await firstValueFrom(
-      this.rabbitClient.send('membership-proposal-status-update', proposal),
-    );
-
-    if (messageResponse.status == 'SUCCESS') {
-      this.logger.log(
-        'Executed proposal Transaction Hash is stored at AUDIT-TRAIL-SERVICE where DB PK is : ' +
-        messageResponse.data.db_record_id,
-      );
-      return messageResponse;
-    } else {
-      throw new Error(
-        messageResponse.error?.message || 'Proposal processing failed',
-      );
-    }
-  }
-
   async updateProposalCreated(
-    trxHash: string,
+    transactionHash: string,
     newStatus: number,
     proposalOnChainId: number,
+    metadata: string,
   ) {
     try {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus, proposal_onchain_id: proposalOnChainId })
-        .where('trx_hash = :trxHash', { trxHash })
+        .set({
+          transaction_status: newStatus,
+          proposal_onchain_id: proposalOnChainId,
+          event_logs: metadata,
+        })
+        .where('transaction_hash = :transactionHash', { transactionHash })
         .returning('*')
         .execute();
 
       if (result.affected === 0) {
         throw new NotFoundException(
-          `Transaction with hash ${trxHash} not found`,
+          `Transaction with hash ${transactionHash} not found`,
         );
       }
 
       this.logger.log(
-        `Transaction status successfully updated for hash: ${trxHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
+        `Transaction status successfully updated for hash: ${transactionHash} to status: ${newStatus} | Result: ${result.raw[0]}`,
       );
       return result.raw[0];
     } catch (err) {
       this.logger.error(
-        `Failed to update transaction status for hash: ${trxHash}. Error: ${err}`,
+        `Failed to update transaction status for hash: ${transactionHash}. Error: ${err}`,
       );
       throw new Error(`Failed to update transaction status.`);
     }
@@ -387,7 +319,7 @@ export class ProposalServiceService {
       const result = await this.proposalRepository
         .createQueryBuilder()
         .update()
-        .set({ trx_status: newStatus }) // Updating web3_status
+        .set({ transaction_status: newStatus }) // Updating web3_status
         .where('proposal_onchain_id = :proposalOnChainId', {
           proposalOnChainId,
         }) // Using proposal_onchain_id as the condition
@@ -414,9 +346,9 @@ export class ProposalServiceService {
 
   // 📡 Listening Event from Publisher
   @RabbitSubscribe({
-    exchange: 'proposal-update-exchange',
+    exchange: 'exchange.web3_event_hub.fanout',
     routingKey: '',
-    queue: 'dao-service-queue',
+    queue: 'dao_service.web3_events.queue',
     queueOptions: {
       durable: true,
     },
@@ -438,12 +370,14 @@ export class ProposalServiceService {
     }
   }
 
-  async handleCreatedProposalPlacedEvent(
-    proposal: ResponseTransactionStatusDto,
-  ) {
+  async handleProposalPlacedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
-        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
+        `Received a proposal transaction update in event pattern - hash: ${proposal?.onChainData?.transactionHash}`,
+      );
+
+      this.logger.log(
+        `Full proposal object received: ${JSON.stringify(proposal)}`,
       );
 
       const proposalId =
@@ -453,9 +387,10 @@ export class ProposalServiceService {
       );
       if (proposalId) {
         await this.updateProposalCreated(
-          proposal.transactionHash,
+          proposal.onChainData.transactionHash,
           proposal.web3Status,
           proposalId,
+          JSON.stringify(proposal.onChainData.context.event_logs) || null,
         );
       } else {
         this.logger.warn(
@@ -471,7 +406,7 @@ export class ProposalServiceService {
   async handleProposalUpdatedEvent(proposal: ResponseTransactionStatusDto) {
     try {
       this.logger.log(
-        `Received a proposal transaction update in event pattern - hash: ${proposal.transactionHash}`,
+        `Received a proposal transaction update in event pattern - hash: ${proposal?.onChainData?.transactionHash}`,
       );
 
       const proposalId =
@@ -495,21 +430,5 @@ export class ProposalServiceService {
     } catch (error) {
       this.logger.error('Invalid proposal object received:', error);
     }
-  }
-
-  async test(req: any, packet: ValidateAuthorizationDto): Promise<any> {
-    const res = await validateAuth(
-      req,
-      this.umsRabbitClient as any,
-      packet.options,
-    );
-
-    if (res.status != 'SUCCESS') {
-      throw new UnauthorizedException(
-        'You are not authorized to perform this task',
-      );
-    }
-
-    return res;
   }
 }

@@ -1,4 +1,3 @@
-# users/repositories/user_repository.py
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from users.models import User

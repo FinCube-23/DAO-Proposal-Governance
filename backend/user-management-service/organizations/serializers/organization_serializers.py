@@ -1,4 +1,3 @@
-# organizations/serializers/organization_serializers.py
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from organizations.models import Organization

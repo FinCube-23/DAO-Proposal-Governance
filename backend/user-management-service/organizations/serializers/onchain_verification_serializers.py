@@ -1,8 +1,5 @@
-# organizations/serializers/onchain_verification_serializers.py
 from rest_framework import serializers
 from organizations.models import OnchainVerification, Organization
-from typing import Optional
-from drf_spectacular.utils import extend_schema_field
 
 
 class OnchainVerificationCreateSerializer(serializers.ModelSerializer):

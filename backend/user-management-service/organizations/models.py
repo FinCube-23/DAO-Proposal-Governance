@@ -1,4 +1,3 @@
-# organizations/models.py
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
@@ -99,7 +98,7 @@ class OnchainVerification(models.Model):
     onchain_status = models.CharField(
         max_length=20,
         choices=ONCHAIN_STATUS_CHOICES,
-        default='register'
+        default='pending'
     )
     context = models.JSONField()
     proposer_wallet = models.CharField(max_length=42)  # Assuming Ethereum address length

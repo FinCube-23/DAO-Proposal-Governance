@@ -2,7 +2,7 @@ import {
   TransactionConfirmationSource,
   TransactionEntity,
   TransactionStatus,
-} from './entities/transaction.entity';
+} from '../shared/common/entity/transaction.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Not, IsNull, Repository } from 'typeorm';
@@ -12,9 +12,11 @@ import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
 import { TempoService } from '../shared/common/tracing/tempo.service';
+import { TransactionReceiptEventDto } from 'src/shared/common/dto/transaction-receipt-event.dto';
+import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
 
 @Injectable()
-export class TransactionsService {
+export class TransactionGatewayService {
   constructor(
     @InjectRepository(TransactionEntity)
     private transactionRepository: Repository<TransactionEntity>,
@@ -22,24 +24,42 @@ export class TransactionsService {
     private readonly traceContextService: TraceContextService,
     private readonly tempoService: TempoService,
   ) {
-    this.logger.setContext(TransactionsService.name);
+    this.logger.setContext(TransactionGatewayService.name);
   }
 
-  async create(
-    transactionPacket: Partial<TransactionEntity>,
-  ): Promise<TransactionEntity> {
+  @RabbitSubscribe({
+    exchange: 'exchange.transaction-receipt.fanout',
+    routingKey: '',
+    queue: 'audit-trail-transaction-receipt-queue',
+    queueOptions: {
+      durable: true,
+    },
+  })
+  async handleTransactionReceipt(event: TransactionReceiptEventDto) {
+    this.logger.log(
+      'Got a new transaction hash ' + event.onChainData?.transactionHash,
+    );
     try {
-      const new_transaction =
-        this.transactionRepository.create(transactionPacket);
+      const new_dao_audit = {
+        trx_hash: event.onChainData?.transactionHash,
+        trx_sender: event.onChainData?.signedBy,
+        trx_status: 0,
+      };
+      const dbRecordedTRX = this.transactionRepository.create(new_dao_audit);
       this.logger.log(
-        `New transaction initialized at Audit Trail DB, where transaction hash: ${new_transaction.trx_hash}`,
+        `New transaction initialized at Audit Trail DB, where transaction hash: ${dbRecordedTRX.trx_hash}`,
       );
-      return this.transactionRepository.save(new_transaction);
-    } catch (err) {
+      const savedTransaction =
+        await this.transactionRepository.save(dbRecordedTRX);
+
+      this.logger.log(`Recorded transaction ID: ${savedTransaction.id} in DB`);
+      this.logger.log('✅ Transaction receipt processing complete');
+    } catch (error) {
       this.logger.error(
-        `Transaction couldn't logged in Web2 DB where transaction hash is ${transactionPacket.trx_hash}. Error: ${err}`,
+        `Transaction couldn't be logged in DB where transaction hash is ${event.onChainData?.transactionHash}. Error: ${error.message}`,
+        error.stack,
       );
-      throw new Error("Transaction couldn't logged in Web2 DB.");
+      throw new Error("Transaction couldn't be logged in Web2 DB.");
     }
   }
 
@@ -199,64 +219,6 @@ export class TransactionsService {
     };
   }
 
-  async updateStatus(
-    trxHash: string,
-    metadata: string,
-    source: TransactionConfirmationSource,
-    newStatus: number,
-  ): Promise<TransactionEntity> {
-    try {
-      const transaction = await this.transactionRepository.findOne({
-        where: { trx_hash: trxHash },
-      });
-
-      if (!transaction) {
-        this.logger.warn(
-          'Transaction is an off-system transaction, not found in DB',
-        );
-        return null;
-      }
-      this.logger.log(
-        `Transaction status found! Getting updated at Audit Trail DB at PK: ${transaction.id} where transaction status is: ${transaction.trx_status}.`,
-      );
-
-      transaction.trx_status = newStatus as TransactionStatus;
-      transaction.trx_metadata = metadata;
-      transaction.confirmation_source = source;
-      transaction.transaction_confirmation_trace = null;
-
-      // * Trace id is not unique per transaction, meaning multiple transactions can share the same trace id
-      // * As the graph can fetch multiple transactions under the same trace id, we set the trace id here again to ensure it's captured
-      const { trace_id } = this.traceContextService.getCurrentTraceContext();
-      transaction.trace_id = trace_id;
-
-      this.logger.log(
-        `Transaction status updating at PK: ${transaction.id} where transaction status is: ${transaction.trx_status} and Source: ${transaction.confirmation_source}.`,
-      );
-      return await this.transactionRepository.save(transaction);
-    } catch (err) {
-      this.logger.error(
-        `Transaction status couldn't get updated for transaction hash: ${trxHash}. Error: ${err}`,
-      );
-      throw new Error("Transaction status couldn't get updated.");
-    }
-  }
-
-  async getPendingTransactionHash(): Promise<string[]> {
-    try {
-      const transactions = await this.transactionRepository.find({
-        where: {
-          trx_status: TransactionStatus.PENDING,
-        },
-        take: 100,
-      });
-      return transactions.map((transaction) => transaction.trx_hash);
-    } catch {
-      this.logger.error('Could not find any pending transactions');
-      return [];
-    }
-  }
-
   async getTransactionHashForTraceSync(): Promise<string[]> {
     this.logger.log('Fetching transactions for trace synchronization.');
     try {
@@ -280,73 +242,6 @@ export class TransactionsService {
         `Could not find any transactions for trace synchronization. Error: ${err}`,
       );
       return [];
-    }
-  }
-
-  async synchronizeTransactionTrace(transactionHash: string): Promise<void> {
-    try {
-      const transaction = await this.transactionRepository.findOne({
-        where: { trx_hash: transactionHash },
-      });
-
-      if (!transaction) {
-        this.logger.warn(
-          `Transaction with hash ${transactionHash} not found in DB for trace synchronization.`,
-        );
-        return;
-      }
-
-      const traceContext = this.traceContextService.getCurrentTraceContext();
-      const traceId = traceContext.trace_id;
-
-      if (!traceId || traceId === 'N/A') {
-        this.logger.warn(
-          `No valid trace ID found for transaction ${transactionHash}. Skipping trace synchronization.`,
-        );
-        return;
-      }
-
-      this.logger.log(
-        `Starting trace synchronization for transaction ${transactionHash} with trace ID: ${traceId}`,
-      );
-
-      const isTraceAvailable = await this.tempoService.waitForTraceAvailability(
-        traceId,
-        parseInt(process.env.TEMPO_RETRY_COUNT || '3'),
-        parseInt(process.env.TEMPO_RETRY_DELAY_MS || '2000'),
-      );
-
-      if (!isTraceAvailable) {
-        this.logger.warn(
-          `Trace ${traceId} not available in Tempo after retries. Transaction: ${transactionHash}`,
-        );
-        return;
-      }
-
-      const serviceStatuses =
-        await this.tempoService.extractServiceStatus(traceId);
-
-      if (!serviceStatuses || serviceStatuses.length === 0) {
-        this.logger.warn(
-          `No service statuses extracted from trace ${traceId} for transaction ${transactionHash}`,
-        );
-        return;
-      }
-
-      transaction.transaction_confirmation_trace = serviceStatuses;
-
-      await this.transactionRepository.save(transaction);
-
-      this.logger.log(
-        `Transaction trace synchronized successfully for ${transactionHash}. ` +
-        `Services tracked: ${serviceStatuses
-          .map((s) => `${s.service}(${s.status})`)
-          .join(', ')}`,
-      );
-    } catch (err) {
-      this.logger.error(
-        `Error synchronizing trace for transaction hash ${transactionHash}: ${err.message}`,
-      );
     }
   }
 

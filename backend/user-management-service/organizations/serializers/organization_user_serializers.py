@@ -1,4 +1,3 @@
-# organizations/serializers/organization_user_serializers.py
 from rest_framework import serializers
 from organizations.models import OrganizationUser, Organization
 from users.models import User

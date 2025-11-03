@@ -1,8 +1,6 @@
-# event_handlers/consumers/jwt_consumer.py
 import pika
 import time
 import json
-from django.conf import settings
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
 from event_handlers.utils.authorization_processor import process_authorization_request
 

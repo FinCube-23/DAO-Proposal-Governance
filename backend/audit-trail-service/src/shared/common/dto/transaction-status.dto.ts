@@ -1,6 +1,6 @@
 import { OnChainDataDto } from './onchain-data.dto';
 
-export class ResponseTransactionStatusDto {
+export class TransactionStatusDto {
   web3Status: number;
   message: string;
   data?: Record<string, any>;

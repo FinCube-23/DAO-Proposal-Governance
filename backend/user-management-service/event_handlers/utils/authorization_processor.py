@@ -1,4 +1,3 @@
-# utils/authorization_processor.py
 import json
 import jwt
 from django.conf import settings

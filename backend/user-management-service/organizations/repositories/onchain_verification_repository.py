@@ -1,4 +1,3 @@
-# organizations/repositories/onchain_verification_repository.py
 from django.core.paginator import Paginator, EmptyPage
 from organizations.models import OnchainVerification, Organization
 

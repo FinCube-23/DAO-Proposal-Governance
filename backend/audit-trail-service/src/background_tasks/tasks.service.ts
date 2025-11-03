@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
-import { ProposalUpdateService } from 'src/proposal-update/proposal-update.service';
-import { TransactionConfirmationSource } from 'src/transactions/entities/transaction.entity';
-import { TransactionsService } from 'src/transactions/transactions.service';
+import { TransactionUpdateService } from 'src/transaction-updater/transaction-update.service';
+import { TransactionConfirmationSource } from 'src/shared/common/entity/transaction.entity';
+import { TransactionGatewayService } from 'src/transaction-gateway/transaction-gateway.service';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { TraceContextService } from 'src/shared/common/tracing/trace-context.service';
 import { TempoService } from 'src/shared/common/tracing/tempo.service';
+import { ProposalType } from 'src/shared/common/dto/onchain-data.dto';
 
 require('dotenv').config();
 const { Network, Alchemy } = require('alchemy-sdk');
@@ -24,95 +25,47 @@ export class TasksService {
   private tracer = trace.getTracer('audit-trail-service', '1.0');
   private cronJobName = 'check-pending-transactions';
   private cronTraceSyncFlag = false;
-  private typeDrivenFunctionCall: Record<string, (transaction: any) => void>;
 
   constructor(
-    private transactionService: TransactionsService,
-    private proposalUpdateService: ProposalUpdateService,
+    private transactionGatewayService: TransactionGatewayService,
+    private transactionUpdateService: TransactionUpdateService,
     private schedulerRegistry: SchedulerRegistry,
     private readonly logger: WinstonLogger,
     private readonly traceContextService: TraceContextService,
     private readonly tempoService: TempoService,
   ) {
     this.logger.setContext(TasksService.name);
-    this.typeDrivenFunctionCall = {
-      '0': this.handleMembershipApprovalProposalCreated.bind(this),
-      '1': this.handleGeneralProposalCreated.bind(this),
-      // Add more strings and corresponding functions as needed
-    };
   }
 
-  async handleGeneralProposalCreated(transaction: any) {
-    this.logger.log(`CRON: General Proposal Being Sent To DAO-Service!`);
-
-    await this.transactionService.updateStatus(
-      transaction.transactionHash,
-      transaction,
-      TransactionConfirmationSource.THE_GRAPH,
-      1,
-    );
-
-    await this.proposalUpdateService.updatedGeneralProposal({
-      web3Status: 1,
-      message: 'Transaction updated successfully.',
-      data: { ...transaction },
-      blockNumber: transaction.blockNumber,
-      transactionHash: transaction.transactionHash,
-    });
-  }
-
-  async handleMembershipApprovalProposalCreated(transaction: any) {
+  // Handle transaction event emission
+  async handleTransactionEventEmission(transaction: any) {
     this.logger.log(
-      `CRON: Membership Approval Proposal being emitted to event bus`,
+      `Handling event emission for transaction: ${transaction.transactionHash}`,
     );
-
-    await this.transactionService.updateStatus(
+    await this.transactionUpdateService.updateTransactionStatus(
       transaction.transactionHash,
       transaction,
       TransactionConfirmationSource.THE_GRAPH,
       1,
     );
-    await this.proposalUpdateService.updatedTransaction({
+    await this.transactionUpdateService.handleTransactionEventEmission({
       web3Status: 1,
       message: 'Transaction updated successfully.',
       data: { ...transaction },
       blockNumber: transaction.blockNumber,
-      transactionHash: transaction.transactionHash,
+      onChainData: {
+        transactionHash: transaction.transactionHash,
+        context: {
+          proposalType: transaction.proposalType as ProposalType,
+          __typename: transaction.__typename,
+          event_logs: JSON.stringify({ ...transaction }),
+        },
+      },
     });
-  }
 
-  async handleProposalStatusUpdate(transaction: any) {
     this.logger.log(
-      `CRON: Proposal Executed or Cancelled being emitted to event bus`,
+      `Event emission handled for transaction: ${transaction.transactionHash}`,
     );
-
-    await this.transactionService.updateStatus(
-      transaction.transactionHash,
-      transaction,
-      TransactionConfirmationSource.THE_GRAPH,
-      1,
-    );
-    await this.proposalUpdateService.updatedTransaction({
-      web3Status: 1,
-      message: 'Transaction updated successfully.',
-      data: { ...transaction },
-      blockNumber: transaction.blockNumber,
-      transactionHash: transaction.transactionHash,
-    });
-  }
-
-  async handleEventEmissionBasedOnProposalType(transaction: any) {
-    const proposalType = transaction.proposalType;
-
-    if (this.typeDrivenFunctionCall[proposalType]) {
-      // Call the corresponding function from the dictionary
-      this.logger.log(
-        `Calling function for on-chain event: ${this.typeDrivenFunctionCall[proposalType]?.name ?? 'Unknown function'}`,
-      );
-      await this.typeDrivenFunctionCall[proposalType](transaction);
-    } else {
-      this.logger.warn(`Proposal type ${proposalType} is not recognized.`);
-    }
   }
 
   // Update confirmation source and status for pending transactions
@@ -134,7 +87,12 @@ export class TasksService {
         // Get pending proposals from DB
         this.logger.log('CRON: Querying transactions from Transaction DB');
         const pendingTransactionHash =
-          await this.transactionService.getPendingTransactionHash();
+          await this.transactionUpdateService.getHashOfPendingTransactions();
+
+        if (pendingTransactionHash.length === 0) {
+          this.logger.log('CRON: No pending transactions found!');
+          return;
+        }
 
         this.logger.log(
           `CRON: These are the pending transaction hashes: ${pendingTransactionHash}`,
@@ -143,7 +101,7 @@ export class TasksService {
         // Query pending transactions from GraphQL
         this.logger.log(`CRON: Querying pending transactions from The Graph`);
         const pendingTransactions =
-          await this.proposalUpdateService.getTransactionUpdates(
+          await this.transactionUpdateService.getTransactionUpdatesFromTheGraph(
             pendingTransactionHash,
           );
 
@@ -159,7 +117,6 @@ export class TasksService {
         const eventDataArray: any[] = [];
         const transactionTypes = [
           'proposalExecuteds',
-          'proposalCreateds',
           'proposalCanceleds',
           'proposalAddeds',
           'ownershipTransferreds',
@@ -195,17 +152,7 @@ export class TasksService {
             await context.with(
               trace.setSpan(context.active(), childSpan),
               async () => {
-                if (transaction.__typename == 'ProposalAdded') {
-                  await this.handleEventEmissionBasedOnProposalType(
-                    transaction,
-                  );
-                } else {
-                  await this.handleProposalStatusUpdate(transaction);
-                }
-
-                this.transactionService.synchronizeTransactionTrace(
-                  transaction.transactionHash,
-                );
+                await this.handleTransactionEventEmission(transaction);
                 this.logger.log(
                   `CRON: Transaction ${transaction.transactionHash} successfully updated.`,
                 );
@@ -259,7 +206,7 @@ export class TasksService {
     }
   }
 
-  async listenProposalTrx() {
+  async listenTransaction() {
     // ✅ Child span - will inherit parent context from AppModule
     const span = this.tracer.startSpan('audit-trail.websocket.listener-setup');
 
@@ -308,11 +255,10 @@ export class TasksService {
 
                 if (isProposalEndTopicZero) {
                   // Process the event within span context
-                  await this.processProposalEvent(txn);
+                  await this.processTransactionEvent(txn);
                 }
 
                 this.logger.log('WEBSOCKET: Starting Cron');
-                this.startCronJob();
               },
             );
 
@@ -344,7 +290,9 @@ export class TasksService {
     }
   }
 
-  private async processProposalEvent(txn: any) {
+  // * Helpers
+  private async processTransactionEvent(txn: any) {
+    // Start a new span for processing the proposal event
     const processSpan = this.tracer.startSpan(
       'audit-trail.websocket.process-proposal-event',
     );
@@ -365,38 +313,54 @@ export class TasksService {
 
           // Fetch data within span context
           const data =
-            await this.proposalUpdateService.getProposalAddedEventByHash(
-              txn.transactionHash,
+            await this.transactionUpdateService.getTransactionUpdatesFromTheGraph(
+              [txn.transactionHash],
             );
+
+          const proposalAddedEvent = data?.proposalAddeds?.[0];
+          if (!proposalAddedEvent) {
+            this.logger.warn(
+              `WEBSOCKET: No proposalAddedEvent found for transaction: ${txn.transactionHash}`,
+            );
+          }
 
           const eventData = {
             data: {
-              proposalId: data?.proposalId,
-              proposalType: data?.proposalType,
-              proposedWallet: data?.data,
-              __typename: data?.__typename,
+              proposalId: proposalAddedEvent?.proposalId,
+              proposalType: proposalAddedEvent?.proposalType,
+              proposedWallet: proposalAddedEvent?.proposedWallet,
+              __typename: proposalAddedEvent?.__typename,
             },
           };
 
-          // Update transaction within span context
-          const updatedTransaction = await this.transactionService.updateStatus(
-            txn.transactionHash,
-            JSON.stringify(eventData),
-            TransactionConfirmationSource.ALCHEMY,
-            1,
-          );
+          /* 
+            TODO: Update transaction within span context
+          */
+          const updatedTransaction =
+            await this.transactionUpdateService.updateTransactionStatus(
+              txn.transactionHash,
+              JSON.stringify(eventData),
+              TransactionConfirmationSource.ALCHEMY,
+              1,
+            );
 
+          // * For emitting event to DAO-Service & UMS via MQ
           if (updatedTransaction) {
-            await this.proposalUpdateService.updatedTransaction({
+            await this.transactionUpdateService.handleTransactionEventEmission({
               web3Status: 1,
               message: 'New Member Proposal Placed Successfully.',
               ...eventData,
               blockNumber: txn.blockNumber,
-              transactionHash: txn.transactionHash,
+              onChainData: {
+                transactionHash: txn.transactionHash,
+                context: {
+                  proposalType: eventData.data.proposalType as ProposalType,
+                  __typename: eventData.data.__typename,
+                  event_logs: JSON.stringify({ ...eventData.data }),
+                },
+              },
             });
-            this.transactionService.synchronizeTransactionTrace(
-              txn.transactionHash,
-            );
+
             this.logger.log(
               'WEBSOCKET: New member proposal transaction update event has been emitted!',
             );
@@ -447,7 +411,7 @@ export class TasksService {
           'CRON: Querying transactions from Transaction DB for trace synchronization',
         );
         const transactionHashes =
-          await this.transactionService.getTransactionHashForTraceSync();
+          await this.transactionGatewayService.getTransactionHashForTraceSync();
 
         if (transactionHashes.length === 0) {
           this.logger.log(
@@ -473,7 +437,7 @@ export class TasksService {
                   `CRON: Synchronizing trace for transaction hash: ${trxHash}`,
                 );
                 const trace_id =
-                  await this.transactionService.getTraceIdByTransactionHash(
+                  await this.transactionGatewayService.getTraceIdByTransactionHash(
                     trxHash,
                   );
 
@@ -502,7 +466,7 @@ export class TasksService {
                   `CRON: Extracted ${trace.length} spans for trace ID ${trace_id}. Updating transaction...`,
                 );
 
-                await this.transactionService.updateTransactionTrace(
+                await this.transactionGatewayService.updateTransactionTrace(
                   trxHash,
                   trace,
                 );

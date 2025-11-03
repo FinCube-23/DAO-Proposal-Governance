@@ -6,6 +6,7 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from '@wagmi/core';
+import { CheckCircle } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -23,6 +24,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/shared/components/ui/dialog';
+import { shortenAddress } from '@/shared/utils';
 import VotingProgressBar from './voting-progress-bar';
 
 export default function VotingBreakdown({ proposalId }: any) {
@@ -34,8 +36,10 @@ export default function VotingBreakdown({ proposalId }: any) {
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [voteStatus, setVoteStatus] = useState(true);
+  const [voteTrxHash, setVoteTrxHash] = useState('');
+  const [executeTrxHash, setExecuteTrxHash] = useState('');
+  const [cancelTrxHash, setCancelTrxHash] = useState('');
   const navigate = useNavigate();
-  // const [executeProposal] = useExecuteProposalMutation();
   const executeProposal = useMutation({
     mutationFn: proposalApis.executeProposal,
     onSuccess: () => {
@@ -61,6 +65,7 @@ export default function VotingBreakdown({ proposalId }: any) {
       });
       const hash = await writeContract(config, request);
 
+      setVoteTrxHash(hash);
       setVoteDialogOpen(true);
 
       await waitForTransactionReceipt(config, { hash });
@@ -101,9 +106,21 @@ export default function VotingBreakdown({ proposalId }: any) {
       });
       const hash = await writeContract(config, request);
 
+      setExecuteTrxHash(hash);
       setExecuteDialogOpen(true);
 
-      executeProposal.mutate({ proposalId, transactionHash: hash });
+      const backendData = {
+        proposalId,
+        onChainData: {
+          transactionHash: hash,
+          signedBy: `0x${address}`,
+          signedWith: 'metamask',
+          chainId: 11155,
+          context: { __typename: 'ProposalExecuted' },
+        },
+      };
+
+      executeProposal.mutate(backendData);
       await waitForTransactionReceipt(config, { hash });
     }
     catch (e: any) {
@@ -133,9 +150,21 @@ export default function VotingBreakdown({ proposalId }: any) {
       });
       const hash = await writeContract(config, request);
 
+      setCancelTrxHash(hash);
       setCancelDialogOpen(true);
 
-      cancelProposal.mutate({ proposalId, transactionHash: hash });
+      const backendData = {
+        proposalId,
+        onChainData: {
+          transactionHash: hash,
+          signedBy: `0x${address}`,
+          signedWith: 'metamask',
+          chainId: 11155,
+          context: { __typename: 'ProposalCanceled' },
+        },
+      };
+
+      cancelProposal.mutate(backendData);
 
       await waitForTransactionReceipt(config, { hash });
     }
@@ -275,19 +304,55 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent>
+        <DialogContent className="border-gray-700 bg-gray-900">
           <DialogHeader>
-            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-6 w-6" />
+              Vote Cast Successfully
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-center text-yellow-400">
-            You have successfully casted your vote and is now under process!
-          </p>
+          <div className="space-y-4">
+            <p className="text-gray-300">
+              You have successfully cast your vote
+              {' '}
+              <span className="font-semibold text-white">
+                {voteRef.current.support ? 'SUPPORT' : 'AGAINST'}
+              </span>
+              {' '}
+              for proposal ID:
+              {' '}
+              <span className="font-semibold text-blue-400">
+                {proposalId}
+              </span>
+              . Your vote is now being processed on the blockchain.
+            </p>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex items-center gap-2">
+                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                  {shortenAddress(voteTrxHash)}
+                </code>
+                <a
+                  href={`${env.VITE_TRX_EXPLORER}/${voteTrxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                  >
+                    View on Explorer
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
             <Button
-              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
               onClick={() => navigate('/organization/dao/proposals')}
             >
-              Back to Dashboard
+              View All Proposals
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -300,19 +365,44 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent>
+        <DialogContent className="border-gray-700 bg-gray-900">
           <DialogHeader>
-            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-6 w-6" />
+              Proposal Execution Started
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-center text-yellow-400">
-            Proposal execution is now under process.
-          </p>
+          <div className="space-y-4">
+            <p className="text-gray-300">
+              Proposal execution has been initiated and is now being processed on the blockchain. This may take a few moments to complete.
+            </p>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex items-center gap-2">
+                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                  {shortenAddress(executeTrxHash)}
+                </code>
+                <a
+                  href={`${env.VITE_TRX_EXPLORER}/${executeTrxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                  >
+                    View on Explorer
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
             <Button
-              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
               onClick={() => navigate('/organization/dao/proposals')}
             >
-              Back to Dashboard
+              View All Proposals
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -325,19 +415,44 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent>
+        <DialogContent className="border-gray-700 bg-gray-900">
           <DialogHeader>
-            <h2 className="text-lg font-bold text-green-400">Vote casted</h2>
+            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-6 w-6" />
+              Proposal Cancellation Started
+            </DialogTitle>
           </DialogHeader>
-          <p className="text-center text-yellow-400">
-            Proposal cancellation is now under process.
-          </p>
+          <div className="space-y-4">
+            <p className="text-gray-300">
+              Proposal cancellation has been initiated and is now being processed on the blockchain. This may take a few moments to complete.
+            </p>
+            <div className="p-4 bg-gray-800 rounded-lg">
+              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex items-center gap-2">
+                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                  {shortenAddress(cancelTrxHash)}
+                </code>
+                <a
+                  href={`${env.VITE_TRX_EXPLORER}/${cancelTrxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                  >
+                    View on Explorer
+                  </Button>
+                </a>
+              </div>
+            </div>
+          </div>
           <DialogFooter>
             <Button
-              className="bg-blue-600 font-bold hover:bg-blue-700 text-white"
               onClick={() => navigate('/organization/dao/proposals')}
             >
-              Back to Dashboard
+              View All Proposals
             </Button>
           </DialogFooter>
         </DialogContent>

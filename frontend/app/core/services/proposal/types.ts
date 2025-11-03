@@ -13,21 +13,26 @@ export interface GetAllProposalResponse {
   total: number;
 }
 
-export interface ProposalExecutePayload {
+export interface ProposalOperationPayload {
   proposalId: number;
-  transactionHash: string;
-}
-
-export interface ProposalCancelPayload {
-  proposalId: number;
-  transactionHash: string;
+  onChainData: {
+    transactionHash: string;
+    signedBy: string;
+    signedWith: string;
+    chainId: number;
+    context: object;
+  };
 }
 
 export interface ProposalCreatePayload {
   proposal_type: string;
-  metadata: string;
-  proposer_address: string;
-  trx_hash: string;
+  onChainData: {
+    transactionHash: string;
+    signedBy: string;
+    signedWith: string;
+    chainId: string;
+    context: object;
+  };
 }
 
 export interface GetOffchainProposalResponse {

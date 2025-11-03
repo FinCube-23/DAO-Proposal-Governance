@@ -9,7 +9,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import { labels } from '../utils/labels';
 import VotingBreakdown from './voting-breakdown';
-// import VoterList from "./VoterList";
 
 function convertStatusToVariant(status: boolean) {
   return status ? 'danger' : 'warning';

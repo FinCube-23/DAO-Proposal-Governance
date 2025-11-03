@@ -170,7 +170,7 @@ This section defines the rules and guarantees for event payloads, naming convent
 | **Parameter**          | **Value** |
 |-------------------------|-----------|
 | **Default Exchange Type** | `fanout` |
-| **Default Exchange Name** | `proposal-update-exchange` |
+| **Default Exchange Name** | `exchange.web3_event_hub.fanout` |
 | **Default Exchange Name** `Proposed` | `audit.web3_event_hub.exchange.fanout` |
 | **Default Routing Key** | _N/A_ (Fanout) |
 | **Message Delivery Guarantee** | At-least-once |

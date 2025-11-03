@@ -4,12 +4,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { AuthzModule } from './authz/authz.module';
-import { ProposalUpdateModule } from './proposal-update/proposal-update.module';
-import { TransactionReceiptModule } from './transaction-receipt/transaction-receipt.module';
+import { TransactionUpdateModule } from './transaction-updater/transaction-update.module';
+import { TransactionIndexerModule } from './transaction-indexer/transaction-indexer.module';
 import { TasksService } from './background_tasks/tasks.service';
 import { TasksModule } from './background_tasks/task.module';
 // import { ScheduleModule } from '@nestjs/schedule'; ref: https://github.com/FahimDev/hotel-nft-marketplace/blob/develop/web3-api-service/src/app.module.ts
-import { TransactionsModule } from './transactions/transactions.module';
+import { TransactionGatewayModule } from './transaction-gateway/transaction-gateway.module';
 import { WinstonLogger } from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
 import { trace, context, SpanStatusCode } from '@opentelemetry/api';
@@ -24,10 +24,10 @@ import { TracingModule } from './shared/common/tracing/tracing.module';
     }),
     DatabaseModule,
     AuthzModule,
-    ProposalUpdateModule,
-    TransactionReceiptModule,
+    TransactionUpdateModule,
+    TransactionIndexerModule,
     TasksModule,
-    TransactionsModule,
+    TransactionGatewayModule,
     TracingModule,
   ],
   controllers: [AppController],
@@ -56,7 +56,7 @@ export class AppModule implements NestModule {
         console.log('Audit Trail Service module initializing...');
 
         // ✅ This will create child spans - perfect hierarchy!
-        await this.tasksService.listenProposalTrx();
+        await this.tasksService.listenTransaction();
 
         console.log('Audit Trail Service module initialized successfully');
       });

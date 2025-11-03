@@ -1,6 +1,9 @@
 // src/transactions/dto/transaction-list-response.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
-import { TransactionConfirmationSource, TransactionStatus } from '../entities/transaction.entity';
+import {
+  TransactionConfirmationSource,
+  TransactionStatus,
+} from '../../shared/common/entity/transaction.entity';
 
 export class TransactionListItemDto {
   @ApiProperty()
@@ -16,12 +19,21 @@ export class TransactionListItemDto {
   confirmation_source: TransactionConfirmationSource;
 
   @ApiProperty({
-    description: "Tracks which services have been synchronized for this transaction confirmation",
+    description:
+      'Tracks which services have been synchronized for this transaction confirmation',
     example: [
-      { service: 'DAO Service', status: 'completed', timestamp: '2025-10-08T10:30:00Z' },
-      { service: 'UMS Service', status: 'completed', timestamp: '2025-10-08T10:30:15Z' }
+      {
+        service: 'DAO Service',
+        status: 'completed',
+        timestamp: '2025-10-08T10:30:00Z',
+      },
+      {
+        service: 'UMS Service',
+        status: 'completed',
+        timestamp: '2025-10-08T10:30:15Z',
+      },
     ],
-    required: false
+    required: false,
   })
   transaction_confirmation_trace: Array<{
     service: string;

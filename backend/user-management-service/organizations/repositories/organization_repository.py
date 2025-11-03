@@ -1,4 +1,3 @@
-# organizations/repositories/organization_repository.py
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
 from organizations.models import Organization

@@ -21,7 +21,7 @@ import logging_loki
 MASK_CONFIG = {
     "emailFields": ["email"],
     "passwordFields": ["password"],
-    "phoneFields": ["phone"],
+    "phoneFields": ["phone","contact_number"],
     "cardFields": ["creditCard", "cardNumber", "wallet"],
     "uuidFields": ["uuid"],
     "jwtFields": ["jwtToken"],
@@ -61,6 +61,7 @@ def mask_sensitive_data(obj):
     """
     A simple masking implementation: it walks the dict and masks values for keys listed in MASK_CONFIG.
     """
+    # If obj is not a dictionary, return it
     if not isinstance(obj, dict):
         return obj
     out = {}
@@ -84,6 +85,12 @@ def mask_sensitive_data(obj):
                 out[k] = _mask_value(name, 1, 0, "*") + "@" + domain
             except Exception:
                 out[k] = _mask_value(v, 1, 0, "*")
+            continue
+        if any(
+            field.lower() == lowered for field in MASK_CONFIG.get("phoneFields", [])
+        ):
+            # mask inside number
+            out[k] = _mask_value(v, 1, 0, "*")
             continue
         if any(field.lower() == lowered for field in MASK_CONFIG.get("cardFields", [])):
             out[k] = _mask_value(v, 0, 4, "*")
@@ -200,19 +207,22 @@ class Logger:
         return "{:016x}".format(ctx.span_id)
 
     def _create_log_entry(self, message, level="info", contextValue=None):
-        if isinstance(message, dict):
-            masked = mask_sensitive_data(message)
-        else:
-            masked = message
+        
+        masked = mask_sensitive_data(message)
+        
+        
         entry = {
-            "message": masked,
             "context": contextValue or self.default_context,
+            "message": masked,
             "level": level,
             "trace_id": self._get_trace_id(),
             "span_id": self._get_span_id(),
             "timestamp": datetime.utcnow().isoformat() + "Z",
         }
         return entry
+
+    def set_context(self, contextValue):
+        self.default_context = contextValue
 
     def log(self, message, contextValue=None):
         entry = self._create_log_entry(message, "info", contextValue)
@@ -222,7 +232,7 @@ class Logger:
         )
 
     def error(self, message, trace_str=None, contextValue=None):
-        entry = self._create_log_entry(message, "error", contextValue)
+        entry = self._create_log_entry(message, level="error", contextValue=contextValue)
         if trace_str:
             entry["error_stack"] = trace_str
         self.logger.error(
