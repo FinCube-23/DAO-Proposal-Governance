@@ -25,6 +25,6 @@ export const proposalApis = {
   createOnchainVerification: (payload: ProposalOnchainVerificationPayload) =>
     api.post<ProposalOnchainVerificationResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
-      payload,
+      payload
     ),
 };

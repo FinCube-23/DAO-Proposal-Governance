@@ -59,7 +59,7 @@ class ProposalSubscriber:
                 logger.log("Proposal Consumer READY")
                 logger.log(f"Queue: {result.method.queue}")
                 logger.log("Waiting for blockchain events...")
-
+                
                 channel.start_consuming()
 
             except KeyboardInterrupt:
