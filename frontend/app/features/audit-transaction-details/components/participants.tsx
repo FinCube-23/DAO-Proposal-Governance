@@ -51,12 +51,12 @@ export default function TransactionParticipants({ transaction }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Users className="h-4 w-4 sm:h-5 sm:w-5" />
           Transaction Participants
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto -mx-4 sm:mx-0 px-8 sm:px-6">
         <DataTable
           columns={participantColumns}
           data={transaction.participants}

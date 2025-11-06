@@ -66,12 +66,12 @@ export default function TransactionEvents({ transaction }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Zap className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
           Transaction Events
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto -mx-4 sm:mx-0 px-8 sm:px-6">
         <DataTable
           columns={eventColumns}
           data={transaction.events}

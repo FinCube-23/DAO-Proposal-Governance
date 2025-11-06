@@ -48,29 +48,29 @@ export default function ProposalCard({ id, description, status, address, href, v
 
   return (
     <Card onClick={href ? onClick : undefined} className={cn(href && 'cursor-pointer  transition-all hpver:border hover:border-emerald-400 duration-300')}>
-      <CardContent className="flex flex-col gap-4">
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
+      <CardContent className="flex flex-col gap-3 sm:gap-4 overflow-hidden">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1 min-w-0">
             <div className="flex justify-between items-center gap-2">
               <span className="text-xs font-mono text-slate-400">
                 #
                 {id}
               </span>
-              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.border} ${config.color} border`}>
-                <config.icon className="w-3 h-3" />
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${config.bg} ${config.border} ${config.color} border whitespace-nowrap`}>
+                <config.icon className="w-3 h-3 flex-shrink-0" />
                 <span className="capitalize">{status}</span>
               </div>
             </div>
           </div>
         </div>
-        <div className="flex justify-between">
-          <p>{description}</p>
+        <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-4 min-w-0">
+          <p className="text-sm sm:text-base break-words overflow-wrap-anywhere">{description}</p>
           {vote && <VotingBadge voteStart={vote?.start} voteDuration={vote.duration} canceled={vote.canceled} />}
         </div>
 
-        <div className="text-muted-foreground text-sm flex items-center gap-2">
+        <div className="text-muted-foreground text-xs sm:text-sm flex items-center gap-2 flex-wrap">
           Published by
-          <div className="font-mono text-emerald-400 hover:underline cursor-pointer" onClick={handlePublisherClick}>
+          <div className="font-mono text-emerald-400 hover:underline cursor-pointer break-all" onClick={handlePublisherClick}>
             {shortenAddress(address)}
           </div>
         </div>

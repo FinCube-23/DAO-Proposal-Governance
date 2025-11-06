@@ -1,12 +1,12 @@
-import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { useMutation } from "@tanstack/react-query";
-import { CircleChevronRight } from "lucide-react";
-import { useState } from "react";
-import { toast } from "sonner";
-import { useAccount, useDisconnect } from "wagmi";
-import { proxyApis } from "@/core/services/proxy";
-import { userApis } from "@/core/services/user";
-import { Button } from "@/shared/components/ui/button";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { useMutation } from '@tanstack/react-query';
+import { CircleChevronRight } from 'lucide-react';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useAccount, useDisconnect } from 'wagmi';
+import { proxyApis } from '@/core/services/proxy';
+import { userApis } from '@/core/services/user';
+import { Button } from '@/shared/components/ui/button';
 
 interface Props {
   incrementStep: () => void;
@@ -27,7 +27,7 @@ export default function StepWalletConnect({ incrementStep }: Props) {
 
   const handleNext = async () => {
     if (!address || !isConnected) {
-      toast.error("Please connect your wallet first");
+      toast.error('Please connect your wallet first');
       return;
     }
 
@@ -40,8 +40,8 @@ export default function StepWalletConnect({ incrementStep }: Props) {
       });
       // Check if the response contains error messages
       if (
-        updateResponse.wallet_address &&
-        Array.isArray(updateResponse.wallet_address)
+        updateResponse.wallet_address
+        && Array.isArray(updateResponse.wallet_address)
       ) {
         const errorMessage = updateResponse.wallet_address[0];
         disconnect();
@@ -56,26 +56,28 @@ export default function StepWalletConnect({ incrementStep }: Props) {
 
       // Step 3: Apply the business logic based on requirements
       if (
-        updateResponse.wallet_address &&
-        updateResponse.wallet_address !== address
+        updateResponse.wallet_address
+        && updateResponse.wallet_address !== address
       ) {
         // Backend says wallet exists (different from current address) AND member is approved
         if (isMemberApproved) {
           disconnect();
-          toast.error("Wallet already exists, please use another wallet");
+          toast.error('Wallet already exists, please use another wallet');
           return;
         }
-      } else if (!updateResponse.wallet_address && isMemberApproved) {
+      }
+      else if (!updateResponse.wallet_address && isMemberApproved) {
         // Backend says wallet does not exist but member is approved on contract
         disconnect();
-        toast.error("Wallet already exists, please use another wallet");
+        toast.error('Wallet already exists, please use another wallet');
         return;
       }
 
       // If we reach here, wallet update can proceed
-      toast.success("Wallet connected successfully");
+      toast.success('Wallet connected successfully');
       incrementStep();
-    } catch (error: any) {
+    }
+    catch (error: any) {
       console.error(error);
 
       // Check if the error is a 400 bad request with wallet_address validation error
@@ -89,15 +91,19 @@ export default function StepWalletConnect({ incrementStep }: Props) {
       // Check if the error is related to wallet existence (fallback)
       // Check for wallet existence error using structured error code or property
       else if (
-        error.code === "WALLET_EXISTS" ||
-        error.data?.code === "WALLET_EXISTS"
+        error.code === 'WALLET_EXISTS'
+        || error.data?.code === 'WALLET_EXISTS'
       ) {
         disconnect();
-        toast.error("Wallet already exists, please use another wallet");
-      } else {
-        toast.error("An unexpected error occurred. Please try again.");
+        toast.error('Wallet already exists, please use another wallet');
       }
-    } finally {
+      else {
+        const rawMessage = error.response.data.error;
+        const match = rawMessage.match(/string='([^']+)'/);
+        toast.error(match ? match[1] : rawMessage);
+      }
+    }
+    finally {
       setIsValidating(false);
     }
   };
@@ -118,7 +124,7 @@ export default function StepWalletConnect({ incrementStep }: Props) {
           onClick={handleNext}
           isLoading={isValidating}
         >
-          {isValidating ? "Validating..." : "Next"}
+          {isValidating ? 'Validating...' : 'Next'}
           {!isValidating && (
             <>
               <CircleChevronRight />

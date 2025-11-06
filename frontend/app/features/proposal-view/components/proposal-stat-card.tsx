@@ -30,21 +30,21 @@ function convertToDate(time: number) {
 
 export function ProposalStatCard({ proposal, proposalId }: any) {
   return (
-    <div className="flex items-center gap-5">
+    <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4 lg:gap-5">
       <Card className="flex-grow w-full">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-xl">Proposal Status</CardTitle>
-            <div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-2">
+            <CardTitle className="text-lg sm:text-xl">Proposal Status</CardTitle>
+            <div className="w-full sm:w-auto">
               <p className="font-bold text-xs text-right">
-                Vote Started On:
+                Started On:
                 {' '}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteStart)}
                 </span>
               </p>
               <p className="font-bold text-xs text-right">
-                Vote Ended On:
+                Ended On:
                 {' '}
                 <span className="text-blue-400">
                   {convertToDate(proposal.voteDuration)}
@@ -53,7 +53,7 @@ export function ProposalStatCard({ proposal, proposalId }: any) {
             </div>
           </div>
           <CardDescription>
-            <Badge variant={convertStatusToVariant(proposal.canceled)}>
+            <Badge variant={convertStatusToVariant(proposal.canceled)} className="text-xs">
               <p className="capitalize">
                 {proposal.canceled ? 'Canceled' : 'Pending'}
               </p>
@@ -62,8 +62,8 @@ export function ProposalStatCard({ proposal, proposalId }: any) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="breakdown">
-            <TabsList className="rounded-xl">
-              <TabsTrigger className="rounded-xl" value="breakdown">
+            <TabsList className="rounded-xl w-fit">
+              <TabsTrigger className="rounded-xl text-xs sm:text-sm" value="breakdown">
                 Breakdown
               </TabsTrigger>
             </TabsList>
@@ -73,12 +73,12 @@ export function ProposalStatCard({ proposal, proposalId }: any) {
           </Tabs>
         </CardContent>
       </Card>
-      <div>
-        <p className="text-lg font-bold py-2">Vote Labels:</p>
+      <div className="lg:min-w-[150px]">
+        <p className="text-base sm:text-lg font-bold py-2">Vote Labels:</p>
         {labels.map((label, idx) => (
           <div key={idx} className="flex items-center gap-2">
-            <div className={`h-4 w-4 bg-${label.color}-400`}></div>
-            <span>{label.label}</span>
+            <div className={`h-3 w-3 sm:h-4 sm:w-4 bg-${label.color}-400`}></div>
+            <span className="text-sm sm:text-base">{label.label}</span>
           </div>
         ))}
       </div>

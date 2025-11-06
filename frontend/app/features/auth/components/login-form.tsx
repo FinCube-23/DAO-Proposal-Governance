@@ -97,22 +97,22 @@ export default function LoginForm() {
                 <div className="relative">
                   <Input
                     type={showPassword ? 'text' : 'password'}
-                    className="[&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
+                    className="pr-12 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                     {...field}
                   />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                    className="absolute right-0 top-0 h-full px-2 sm:px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword
                       ? (
-                          <EyeOff className="size-5 text-gray-400" />
+                          <EyeOff className="size-4 sm:size-5 text-gray-400" />
                         )
                       : (
-                          <Eye className="size-5 text-gray-400" />
+                          <Eye className="size-4 sm:size-5 text-gray-400" />
                         )}
                   </Button>
                 </div>

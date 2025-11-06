@@ -206,10 +206,10 @@ function TrxDetails() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Transaction Details</h1>
-        <p className="text-muted-foreground my-5 text-xl">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6">
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Transaction Details</h1>
+        <p className="text-muted-foreground my-3 sm:my-5 text-base sm:text-xl break-all">
           Off-Chain ID:
           {' '}
           {trx.id}
@@ -218,23 +218,23 @@ function TrxDetails() {
 
       <Tabs defaultValue="overview" className="w-full">
         <TabsList className="mb-2 rounded-xl">
-          <TabsTrigger className="rounded-xl" value="overview">
+          <TabsTrigger className="rounded-xl text-center text-xs sm:text-sm flex-1 sm:flex-initial" value="overview">
             Overview
           </TabsTrigger>
-          <TabsTrigger className="rounded-xl" value="raw">
+          <TabsTrigger className="rounded-xl text-center text-xs sm:text-sm flex-1 sm:flex-initial" value="raw">
             Raw Data
           </TabsTrigger>
         </TabsList>
         <TabsContent value="overview">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Transaction Status</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Transaction Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <Badge
                   variant={trx.trx_status ? 'success' : 'warning'}
-                  className="text-sm"
+                  className="text-xs sm:text-sm"
                 >
                   {trx.trx_status ? 'Confirmed' : 'Pending'}
                 </Badge>
@@ -243,30 +243,32 @@ function TrxDetails() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Activity</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Activity</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <p>
-                  Created At:
+                <p className="text-sm sm:text-base break-words">
+                  <span className="font-medium">Created At:</span>
+                  {' '}
                   {formatDate(trx.created_at)}
                 </p>
-                <p>
-                  Updated At:
+                <p className="text-sm sm:text-base break-words">
+                  <span className="font-medium">Updated At:</span>
+                  {' '}
                   {formatDate(trx.updated_at)}
                 </p>
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2 lg:col-span-1">
+            <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader>
-                <CardTitle className="text-lg">Sources</CardTitle>
+                <CardTitle className="text-base sm:text-lg">Sources</CardTitle>
               </CardHeader>
               <CardContent>
                 {trx.source === 'alchemy'
                   ? (
                       <Badge
                         variant="outline"
-                        className="border-2 border-blue-400 text-white"
+                        className="border-2 border-blue-400 text-white text-xs sm:text-sm"
                       >
                         Alchemy
                       </Badge>
@@ -275,14 +277,14 @@ function TrxDetails() {
                     ? (
                         <Badge
                           variant="outline"
-                          className="border-2 border-purple-400 text-white"
+                          className="border-2 border-purple-400 text-white text-xs sm:text-sm"
                         >
                           The Graph
                         </Badge>
                       )
                     : trx.source === 'infura'
                       ? (
-                          <Badge variant="outline" className="border-2 border-gray-400">
+                          <Badge variant="outline" className="border-2 border-gray-400 text-xs sm:text-sm">
                             Infura
                           </Badge>
                         )
@@ -290,7 +292,7 @@ function TrxDetails() {
                           trx.source === 'manual' && (
                             <Badge
                               variant="outline"
-                              className="border-2 border-yellow-400"
+                              className="border-2 border-yellow-400 text-xs sm:text-sm"
                             >
                               Manual
                             </Badge>
@@ -299,14 +301,14 @@ function TrxDetails() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2 lg:col-span-1">
+            <Card className="sm:col-span-2 lg:col-span-1">
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">Transaction Hash</CardTitle>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-base sm:text-lg min-w-0">Transaction Hash</CardTitle>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:text-primary"
+                    className="text-muted-foreground hover:text-primary flex-shrink-0"
                     onClick={() => {
                       copyToClipboard(trx.trx_hash);
                       setCopiedTrxHash(true);
@@ -316,22 +318,24 @@ function TrxDetails() {
                     {copiedTrxHash
                       ? (
                           <>
-                            <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                            <CheckIcon className="h-4 w-4 sm:mr-2 text-green-400" />
+                            <span className="hidden sm:inline">Copied</span>
                           </>
                         )
                       : (
                           <>
-                            <CopyIcon className="h-4 w-4 mr-2" />
+                            <CopyIcon className="h-4 w-4 sm:mr-2" />
+                            <span className="hidden sm:inline">Copy</span>
                           </>
                         )}
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="min-w-0">
                 <a
                   href={`${import.meta.env.VITE_TRX_EXPLORER}/${trx.trx_hash}`}
                   target="_blank"
-                  className="text-sm text-blue-400 hover:underline"
+                  className="text-xs sm:text-sm text-blue-400 hover:underline break-all"
                 >
                   {trx.trx_hash}
                 </a>
@@ -340,12 +344,12 @@ function TrxDetails() {
             {parsedMetadata !== null && (
               <Card className="col-span-full">
                 <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle className="text-lg">Metadata</CardTitle>
+                  <div className="flex justify-between items-center gap-2">
+                    <CardTitle className="text-base sm:text-lg min-w-0">Metadata</CardTitle>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary flex-shrink-0"
                       onClick={() => {
                         copyToClipboard(
                           JSON.stringify(parsedMetadata.data, null, 2),
@@ -357,19 +361,21 @@ function TrxDetails() {
                       {copiedMetadata
                         ? (
                             <>
-                              <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                              <CheckIcon className="h-4 w-4 sm:mr-2 text-green-400" />
+                              <span className="hidden sm:inline">Copied</span>
                             </>
                           )
                         : (
                             <>
-                              <CopyIcon className="h-4 w-4 mr-2" />
+                              <CopyIcon className="h-4 w-4 sm:mr-2" />
+                              <span className="hidden sm:inline">Copy</span>
                             </>
                           )}
                     </Button>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+                <CardContent className="min-w-0">
+                  <pre className="bg-muted rounded-lg p-3 sm:p-4 text-xs sm:text-sm overflow-auto max-w-full">
                     <JsonRenderer data={parsedMetadata} />
                   </pre>
                 </CardContent>
@@ -380,12 +386,12 @@ function TrxDetails() {
         <TabsContent value="raw">
           <Card>
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg">Raw Transaction Data</CardTitle>
+              <div className="flex justify-between items-center gap-2">
+                <CardTitle className="text-base sm:text-lg min-w-0">Raw Transaction Data</CardTitle>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-muted-foreground hover:text-primary"
+                  className="text-muted-foreground hover:text-primary flex-shrink-0"
                   onClick={() => {
                     copyToClipboard(JSON.stringify(newTrx, null, 2));
                     setCopiedRawData(true);
@@ -395,19 +401,21 @@ function TrxDetails() {
                   {copiedRawData
                     ? (
                         <>
-                          <CheckIcon className="h-4 w-4 mr-2 text-green-400" />
+                          <CheckIcon className="h-4 w-4 sm:mr-2 text-green-400" />
+                          <span className="hidden sm:inline">Copied</span>
                         </>
                       )
                     : (
                         <>
-                          <CopyIcon className="h-4 w-4 mr-2" />
+                          <CopyIcon className="h-4 w-4 sm:mr-2" />
+                          <span className="hidden sm:inline">Copy</span>
                         </>
                       )}
                 </Button>
               </div>
             </CardHeader>
-            <CardContent>
-              <pre className="bg-muted rounded-lg p-4 text-sm overflow-auto">
+            <CardContent className="min-w-0">
+              <pre className="bg-muted rounded-lg p-3 sm:p-4 text-xs sm:text-sm overflow-auto max-w-full">
                 <JsonRenderer data={newTrx} />
               </pre>
             </CardContent>

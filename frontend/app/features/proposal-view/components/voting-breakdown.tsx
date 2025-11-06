@@ -216,10 +216,10 @@ export default function VotingBreakdown({ proposalId }: any) {
 
   return (
     <div>
-      <div className="flex justify-between">
-        <div className="text-primary font-bold">Approved By</div>
+      <div className="flex flex-col sm:flex-row justify-between gap-2 sm:gap-0">
+        <div className="text-primary font-bold text-sm sm:text-base">Approved By</div>
         {proposal && (
-          <div>
+          <div className="text-sm sm:text-base">
             <span className="text-primary font-bold">
               {proposal.yesvotes.toString()}
               {' '}
@@ -239,30 +239,30 @@ export default function VotingBreakdown({ proposalId }: any) {
           no={Number(proposal.novotes)}
         />
       )}
-      <div className="flex justify-end">
+      <div className="flex flex-wrap justify-start sm:justify-end gap-2">
         {voteStatus && !proposal?.canceled && (
           <Dialog>
             <DialogTrigger asChild>
-              <Button className="bg-green-400 font-bold mt-2">Vote</Button>
+              <Button className="bg-green-400 font-bold mt-2 text-xs sm:text-sm">Vote</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="w-[95vw] max-w-[425px]">
               <DialogHeader>
-                <DialogTitle className="text-center text-orange-400">
+                <DialogTitle className="text-center text-orange-400 text-base sm:text-lg">
                   Cast your vote?
                 </DialogTitle>
               </DialogHeader>
               <div className="mt-4">
-                <div className="flex justify-center">
+                <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
                   <Button
                     isLoading={loadingStatus}
-                    className="bg-green-400 font-bold mx-4"
+                    className="bg-green-400 font-bold text-sm sm:text-base"
                     onClick={() => castVote(true)}
                   >
                     SUPPORT
                   </Button>
                   <Button
                     isLoading={loadingStatus}
-                    className="bg-red-400 font-bold mx-4"
+                    className="bg-red-400 font-bold text-sm sm:text-base"
                     onClick={() => castVote(false)}
                   >
                     AGAINST
@@ -279,7 +279,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <Button
             isLoading={loadingStatus}
             onClick={execute}
-            className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 mx-2 text-white"
+            className="bg-blue-400 hover:bg-blue-500 font-bold mt-2 text-white text-xs sm:text-sm"
           >
             Execute
           </Button>
@@ -290,7 +290,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <Button
             isLoading={loadingStatus}
             onClick={cancel}
-            className="bg-red-400 hover:bg-red-500 font-bold mt-2 mx-2 text-white"
+            className="bg-red-400 hover:bg-red-500 font-bold mt-2 text-white text-xs sm:text-sm"
           >
             Cancel
           </Button>
@@ -304,15 +304,15 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent className="border-gray-700 bg-gray-900">
+        <DialogContent className="border-gray-700 bg-gray-900 w-[95vw] max-w-md sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
-              <CheckCircle className="h-6 w-6" />
+            <DialogTitle className="text-lg sm:text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               Vote Cast Successfully
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm sm:text-base">
               You have successfully cast your vote
               {' '}
               <span className="font-semibold text-white">
@@ -326,21 +326,22 @@ export default function VotingBreakdown({ proposalId }: any) {
               </span>
               . Your vote is now being processed on the blockchain.
             </p>
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center gap-2">
-                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+            <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
                   {shortenAddress(voteTrxHash)}
                 </code>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${voteTrxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="flex-shrink-0"
                 >
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10 w-full sm:w-auto text-xs sm:text-sm"
                   >
                     View on Explorer
                   </Button>
@@ -351,6 +352,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               View All Proposals
             </Button>
@@ -365,32 +367,33 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent className="border-gray-700 bg-gray-900">
+        <DialogContent className="border-gray-700 bg-gray-900 w-[95vw] max-w-md sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
-              <CheckCircle className="h-6 w-6" />
+            <DialogTitle className="text-lg sm:text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               Proposal Execution Started
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm sm:text-base">
               Proposal execution has been initiated and is now being processed on the blockchain. This may take a few moments to complete.
             </p>
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center gap-2">
-                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+            <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
                   {shortenAddress(executeTrxHash)}
                 </code>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${executeTrxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="flex-shrink-0"
                 >
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10 w-full sm:w-auto text-xs sm:text-sm"
                   >
                     View on Explorer
                   </Button>
@@ -401,6 +404,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               View All Proposals
             </Button>
@@ -415,32 +419,33 @@ export default function VotingBreakdown({ proposalId }: any) {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent className="border-gray-700 bg-gray-900">
+        <DialogContent className="border-gray-700 bg-gray-900 w-[95vw] max-w-md sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
-              <CheckCircle className="h-6 w-6" />
+            <DialogTitle className="text-lg sm:text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               Proposal Cancellation Started
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm sm:text-base">
               Proposal cancellation has been initiated and is now being processed on the blockchain. This may take a few moments to complete.
             </p>
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center gap-2">
-                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+            <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
                   {shortenAddress(cancelTrxHash)}
                 </code>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${cancelTrxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="flex-shrink-0"
                 >
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10 w-full sm:w-auto text-xs sm:text-sm"
                   >
                     View on Explorer
                   </Button>
@@ -451,6 +456,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           <DialogFooter>
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               View All Proposals
             </Button>

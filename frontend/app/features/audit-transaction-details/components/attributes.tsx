@@ -41,12 +41,12 @@ export default function TransactionAttributes({ transaction }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
           Transaction Attributes
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="overflow-x-auto -mx-4 sm:mx-0 px-8 sm:px-6">
         <DataTable
           columns={attributeColumns}
           data={transaction.attributes}

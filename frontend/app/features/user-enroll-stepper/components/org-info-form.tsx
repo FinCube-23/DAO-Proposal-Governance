@@ -146,22 +146,23 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
-        <div className="grid grid-cols-2 gap-5">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Org Name</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Org Name</FormLabel>
                 <FormControl>
                   <Input
                     type="text"
                     disabled={isFieldDisabled('name')}
+                    className="text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
@@ -170,35 +171,37 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Org Email</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Org Email</FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="m@example.com"
                     disabled={isFieldDisabled('email')}
+                    className="text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
         </div>
-        <div className="grid grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-5">
           <FormField
             control={form.control}
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Address</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Address</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="123 Main St, City, Country"
                     disabled={isFieldDisabled('address')}
+                    className="text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
@@ -207,53 +210,54 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
             name="type"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Type</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Type</FormLabel>
                 <FormControl>
                   <Select
                     disabled={isFieldDisabled('type')}
                     onValueChange={field.onChange}
                     value={field.value}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-sm sm:text-base">
                       <SelectValue placeholder="Select organization type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="plc">PLC</SelectItem>
-                      <SelectItem value="llc">LLC</SelectItem>
-                      <SelectItem value="inc">INC</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
+                      <SelectItem value="plc" className="text-sm sm:text-base">PLC</SelectItem>
+                      <SelectItem value="llc" className="text-sm sm:text-base">LLC</SelectItem>
+                      <SelectItem value="inc" className="text-sm sm:text-base">INC</SelectItem>
+                      <SelectItem value="other" className="text-sm sm:text-base">Other</SelectItem>
                     </SelectContent>
                   </Select>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
         </div>
-        <div className="grid grid-cols-1 gap-5">
+        <div className="grid grid-cols-1 gap-3 sm:gap-5">
           <FormField
             control={form.control}
             name="legal_entity_identifier"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Legal Entity Identifier</FormLabel>
+                <FormLabel className="text-sm sm:text-base">Legal Entity Identifier</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter legal entity identifier"
                     disabled={isFieldDisabled('legal_entity_identifier')}
+                    className="text-sm sm:text-base"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-xs sm:text-sm" />
               </FormItem>
             )}
           />
         </div>
 
-        <div className="flex justify-center pt-4">
+        <div className="flex justify-center pt-3 sm:pt-4">
           {organization
             ? (
-                <div className="text-center text-green-500 font-bold">
+                <div className="text-center text-green-500 font-bold text-sm sm:text-base px-4">
                   You have already registered your MFS Profile.
                   {' '}
                   <br />
@@ -265,13 +269,14 @@ export default function OrgInfoForm({ organization, onSuccess }: Props) {
             : (
                 <Button
                   type="submit"
+                  className="text-sm sm:text-base"
                   isLoading={
                     createOrgMutation.isPending || addUserToOrgMutation.isPending
                   }
                 >
                   Submit
                   {' '}
-                  <CircleChevronUp />
+                  <CircleChevronUp className="ml-1 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               )}
         </div>

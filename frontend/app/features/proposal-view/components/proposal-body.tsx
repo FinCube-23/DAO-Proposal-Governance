@@ -42,12 +42,12 @@ export default function ProposalBody({ onChainId }: Props) {
   }, [onChainId]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6">
       {!loading && proposal
         ? (
             <>
               <ProposalViewCard proposal={proposal} proposalId={onChainId} />
-              <div className="flex flex-col-reverse md:grid md:grid-cols-12">
+              <div className="flex flex-col-reverse gap-4 md:gap-0 md:grid md:grid-cols-12">
                 <div className="md:col-span-7">
                   <ProposalStatCard proposal={proposal} proposalId={onChainId} />
                 </div>
@@ -55,7 +55,7 @@ export default function ProposalBody({ onChainId }: Props) {
               </div>
             </>
           )
-        : 'Loading...'}
+        : <div className="text-sm sm:text-base">Loading...</div>}
     </div>
   );
 }

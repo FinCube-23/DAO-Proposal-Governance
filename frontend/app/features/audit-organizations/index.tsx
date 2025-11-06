@@ -110,13 +110,13 @@ export default function AuditOrganizations() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <CardTitle className="text-lg">Organizations</CardTitle>
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Type</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <CardTitle className="text-base sm:text-lg">Organizations</CardTitle>
+          <div className="flex flex-row items-center gap-3 sm:gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Type:</span>
               <Select value={typeFilter} onValueChange={v => setTypeFilter(v as any)}>
-                <SelectTrigger className="w-40 h-8">
+                <SelectTrigger className="w-32 h-8">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -128,10 +128,10 @@ export default function AuditOrganizations() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Status</span>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Status:</span>
               <Select value={statusFilter} onValueChange={v => setStatusFilter(v as any)}>
-                <SelectTrigger className="w-40 h-8">
+                <SelectTrigger className="w-36 h-8">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>

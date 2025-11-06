@@ -338,7 +338,7 @@ function MFSDetails() {
                       {' '}
                       {mfs.organization_admin.phone_number}
                     </p>
-                    <p>
+                    <p className="break-all">
                       <span className="font-medium">Wallet Address:</span>
                       {' '}
                       {mfs.organization_admin.wallet_address}

@@ -49,13 +49,13 @@ export default function VotingBadge({ canceled, voteStart, voteDuration }: Props
     <>
       {votingStatus !== 'Voting not started'
         ? (
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-row gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
               {!canceled && (
                 <>
-                  <Badge variant="outline">{votingStatus}</Badge>
+                  <Badge variant="outline" className="text-xs whitespace-nowrap">{votingStatus}</Badge>
                   {votingStatus !== 'Voting has ended' && (
                     <>
-                      <Badge variant="outline">{formatTime(timeLeft)}</Badge>
+                      <Badge variant="outline" className="text-xs whitespace-nowrap">{formatTime(timeLeft)}</Badge>
                     </>
                   )}
                 </>
@@ -63,8 +63,8 @@ export default function VotingBadge({ canceled, voteStart, voteDuration }: Props
             </div>
           )
         : (
-            <div className="flex gap-3 justify-end">
-              <Loader className="animate-spin"></Loader>
+            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
+              <Loader className="animate-spin w-4 h-4 sm:w-5 sm:h-5"></Loader>
             </div>
           )}
     </>

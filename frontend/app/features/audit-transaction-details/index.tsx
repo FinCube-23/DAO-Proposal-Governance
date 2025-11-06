@@ -43,29 +43,31 @@ export default function AuditTransactionDetails({ id }: Props) {
     return <p>No data found</p>;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6 px-4 sm:px-0">
       {modified
         ? (
             <>
               <TransactionHeader transaction={modified} />
-              <Tabs defaultValue="overview" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-8">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="lifecycle">Lifecycle</TabsTrigger>
-                  <TabsTrigger value="participants">
-                    Participants
-                  </TabsTrigger>
-                  <TabsTrigger value="resources">
-                    Resources
-                  </TabsTrigger>
-                  <TabsTrigger value="events">
-                    Events
-                  </TabsTrigger>
-                  <TabsTrigger value="attributes">
-                    Attributes
-                  </TabsTrigger>
-                  <TabsTrigger value="raw">Raw Data</TabsTrigger>
-                </TabsList>
+              <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
+                <div className="w-full">
+                  <TabsList className="flex flex-wrap h-auto w-full sm:grid sm:w-full sm:grid-cols-7 sm:h-10 gap-2">
+                    <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Overview</TabsTrigger>
+                    <TabsTrigger value="lifecycle" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Lifecycle</TabsTrigger>
+                    <TabsTrigger value="participants" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[90px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+                      Participants
+                    </TabsTrigger>
+                    <TabsTrigger value="resources" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[85px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+                      Resources
+                    </TabsTrigger>
+                    <TabsTrigger value="events" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[70px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+                      Events
+                    </TabsTrigger>
+                    <TabsTrigger value="attributes" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[85px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+                      Attributes
+                    </TabsTrigger>
+                    <TabsTrigger value="raw" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Raw Data</TabsTrigger>
+                  </TabsList>
+                </div>
                 <TabsContent value="overview">
                   <TransactionOverview transaction={modified} />
                 </TabsContent>

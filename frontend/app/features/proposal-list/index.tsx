@@ -19,9 +19,9 @@ export default function ProposalList({ source }: Props) {
   const debouncedSearch = useDebounce(search, 300);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center gap-6">
-        <div className="flex-1 max-w-md">
+    <div className="flex flex-col gap-4 sm:gap-6">
+      <div className="flex flex-row items-center gap-3 sm:gap-6">
+        <div className="flex-1 max-w-full sm:max-w-md">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
@@ -29,13 +29,13 @@ export default function ProposalList({ source }: Props) {
               placeholder="Search proposals..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
+              className="w-full pl-10 pr-4 py-2 text-sm sm:text-base bg-slate-800/50 border border-slate-700/50 rounded-xl text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all"
             />
           </div>
         </div>
         {filterOptions[source].length > 0 && (
           <Select onValueChange={value => setStatusFilter(value)} value={statusFilter}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[140px] sm:w-[180px] h-9 sm:h-10 text-sm sm:text-base flex-shrink-0">
               <SelectValue placeholder="Select a fruit" />
             </SelectTrigger>
             <SelectContent>
@@ -51,7 +51,6 @@ export default function ProposalList({ source }: Props) {
             </SelectContent>
           </Select>
         )}
-
       </div>
       {source === 'ongoing' && <OngoingProposals />}
       {source === 'on-chain' && <OnChainProposals search={debouncedSearch} />}

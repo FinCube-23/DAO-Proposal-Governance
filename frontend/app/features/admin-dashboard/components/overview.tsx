@@ -60,21 +60,23 @@ const data = [
 
 export function Overview() {
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={350} minWidth={300}>
       <BarChart data={data}>
         <XAxis
           dataKey="name"
           stroke="#888888"
-          fontSize={12}
+          fontSize={10}
           tickLine={false}
           axisLine={false}
+          interval="preserveStartEnd"
         />
         <YAxis
           stroke="#888888"
-          fontSize={12}
+          fontSize={10}
           tickLine={false}
           axisLine={false}
           tickFormatter={value => `$${value}`}
+          width={40}
         />
         <Tooltip
           cursor={{ fill: 'rgba(255, 255, 255, 0.1)' }}

@@ -183,89 +183,91 @@ export function DataTable<TData, TValue>({
 
   // Standard table rendering
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map(headerGroup => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map(header => (
-                <TableHead key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : (
-                        <div
-                          {...{
-                            className: header.column.getCanSort()
-                              ? 'cursor-pointer select-none flex items-center gap-2'
-                              : '',
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}
-                        >
-                          {flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                          {header.column.getCanSort() && (
-                            <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
-                              <ArrowUpDown className="h-3 w-3" />
-                            </Button>
-                          )}
-                          {{
-                            asc: <ChevronUp className="h-3 w-3" />,
-                            desc: <ChevronDown className="h-3 w-3" />,
-                          }[header.column.getIsSorted() as string] ?? null}
-                        </div>
-                      )}
-                </TableHead>
-              ))}
-            </TableRow>
-          ))}
-        </TableHeader>
-        <TableBody>
-          {table.getRowModel().rows?.length
-            ? (
-                table.getRowModel().rows.map(row => (
-                  <TableRow
-                    key={row.id}
-                    className={cn(
-                      'hover:bg-muted/50',
-                      onRowClick && 'cursor-pointer',
-                    )}
-                    onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                  >
-                    {row.getVisibleCells().map(cell => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
+    <div className="rounded-md border overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableHead key={header.id} className="whitespace-nowrap">
+                    {header.isPlaceholder
+                      ? null
+                      : (
+                          <div
+                            {...{
+                              className: header.column.getCanSort()
+                                ? 'cursor-pointer select-none flex items-center gap-2'
+                                : '',
+                              onClick: header.column.getToggleSortingHandler(),
+                            }}
+                          >
+                            {flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                            {header.column.getCanSort() && (
+                              <Button variant="ghost" size="sm" className="h-4 w-4 p-0">
+                                <ArrowUpDown className="h-3 w-3" />
+                              </Button>
+                            )}
+                            {{
+                              asc: <ChevronUp className="h-3 w-3" />,
+                              desc: <ChevronDown className="h-3 w-3" />,
+                            }[header.column.getIsSorted() as string] ?? null}
+                          </div>
                         )}
-                      </TableCell>
-                    ))}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      className={cn(
+                        'hover:bg-muted/50',
+                        onRowClick && 'cursor-pointer',
+                      )}
+                      onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                    >
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id} className="whitespace-nowrap">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
                   </TableRow>
-                ))
-              )
-            : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )}
-          {hasNextPage && (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="text-center">
-                <Button
-                  variant="ghost"
-                  onClick={onLoadMore}
-                  disabled={isFetchingNextPage}
-                >
-                  {isFetchingNextPage ? 'Loading...' : 'Load More'}
-                </Button>
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+                )}
+            {hasNextPage && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="text-center">
+                  <Button
+                    variant="ghost"
+                    onClick={onLoadMore}
+                    disabled={isFetchingNextPage}
+                  >
+                    {isFetchingNextPage ? 'Loading...' : 'Load More'}
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

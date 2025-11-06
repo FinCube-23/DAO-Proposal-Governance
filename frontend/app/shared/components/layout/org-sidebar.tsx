@@ -62,16 +62,6 @@ const menus = [
       },
     ],
   },
-  {
-    name: 'Audit Explorer',
-    items: [
-      {
-        name: 'Dashboard',
-        url: '/organization/audit/dashboard',
-        icon: LayoutDashboard,
-      },
-    ],
-  }
 ];
 
 export default function OrgSidebar({

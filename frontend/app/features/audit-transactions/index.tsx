@@ -2,6 +2,7 @@ import type { TransactionFilters } from './types/transaction';
 import type { Transaction } from '@/core/api/types';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
 import { auditTrailApis } from '@/core/services/audit';
 import CustomPagination from '@/shared/components/custom-pagination';
@@ -13,6 +14,7 @@ import { TransactionFilterCard } from './components/transaction-filter';
 const limit = 10;
 
 export default function AuditTransactions() {
+  const navigate = useNavigate();
   const [trxList, setTrxList] = useState<Transaction[]>([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -61,11 +63,11 @@ export default function AuditTransactions() {
   };
 
   const handleTransactionClick = (transaction: Transaction) => {
-    toast.success(`Transaction clicked: ${transaction.trx_hash}`);
+    navigate(`/organization/audit/transactions/${transaction.id}`);
   };
 
   return (
-    <div className="grid lg:gap-6 gap-4 lg:grid-cols-4 h-full">
+    <div className="grid gap-4 lg:gap-6 grid-cols-1 lg:grid-cols-4 h-full">
       <div className="lg:col-span-1">
         <TransactionFilterCard
           className="lg:sticky lg:top-20"
@@ -77,12 +79,12 @@ export default function AuditTransactions() {
         <Card className="h-full">
           <CardHeader>
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">
+              <CardTitle className="text-base sm:text-lg">
                 Transactions
               </CardTitle>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto -mx-4 sm:mx-0 px-8 sm:px-6">
             {
               getTransactions.isPending
                 ? (

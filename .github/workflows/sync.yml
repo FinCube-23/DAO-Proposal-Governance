@@ -39,6 +39,8 @@ jobs:
             cd /mnt/ext/projects/web3-governance-kit/frontend
             echo "Stopping frontend services"
             pm2 delete 0 || echo "No existing pm2 process to delete"
+            echo "Installing npm dependencies"
+            npm install
             echo "Building Frontend"
             npm run build
             echo "Starting frontend services"

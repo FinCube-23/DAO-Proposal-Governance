@@ -84,22 +84,21 @@ function TrxList() {
 
   return (
     <>
-      <div className="flex justify-between">
-        <div className="w-[200px] flex flex-col">
-          <div className="flex w-[500px] gap-2 items-center">
-            <span className="text-xs">Search:</span>
-            <Input
-              placeholder="Filter by hash"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
+      <div className="flex flex-col lg:flex-row gap-4 lg:justify-between">
+        <div className="flex gap-2 items-center w-full lg:w-auto">
+          <span className="text-xs whitespace-nowrap">Search:</span>
+          <Input
+            placeholder="Filter by hash"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            className="flex-1 sm:w-64 lg:w-80"
+          />
         </div>
-        <div className="flex gap-5">
-          <div className="flex items-center gap-2">
-            <span className="text-xs">Filter by Source:</span>
+        <div className="flex gap-2 sm:gap-3 lg:gap-5 overflow-x-auto">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs whitespace-nowrap">Source:</span>
             <Select value={source} onValueChange={value => setSource(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="w-32 sm:w-40">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
@@ -112,14 +111,14 @@ function TrxList() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs">Filter by Status:</span>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="text-xs whitespace-nowrap">Status:</span>
 
             <Select
               value={`${status}`}
               onValueChange={value => setStatus(value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="w-28 sm:w-32">
                 <SelectValue placeholder="All" />
               </SelectTrigger>
               <SelectContent>
@@ -131,84 +130,90 @@ function TrxList() {
           </div>
         </div>
       </div>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Transaction Hash</TableHead>
-            <TableHead>Transaction Status</TableHead>
-            <TableHead>Confirmation Source</TableHead>
-            <TableHead>Updated At</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {trxList.map(trx => (
-            <TableRow
-              onClick={() => {
-                navigate(`/organization/admin/transactions/${trx.id}`);
-              }}
-              className="hover:bg-gray-800 hover:cursor-pointer"
-              key={trx.id}
-            >
-              <TableCell>{trx.trx_hash}</TableCell>
-              <TableCell>
-                {trx.trx_status
-                  ? (
-                      <Badge variant="success">Confirmed</Badge>
-                    )
-                  : (
-                      <Badge variant="warning">Pending</Badge>
-                    )}
-              </TableCell>
-              <TableCell>
-                {trx.confirmation_source === TransactionConfirmationSource.ALCHEMY
-                  ? (
-                      <Badge
-                        variant="outline"
-                        className="border-2 border-blue-400 text-white"
-                      >
-                        Alchemy
-                      </Badge>
-                    )
-                  : trx.confirmation_source === TransactionConfirmationSource.THE_GRAPH
-                    ? (
-                        <Badge
-                          variant="outline"
-                          className="border-2 border-purple-400 text-white"
-                        >
-                          The Graph
-                        </Badge>
-                      )
-                    : trx.confirmation_source === TransactionConfirmationSource.INFURA
-                      ? (
-                          <Badge variant="outline" className="border-2 border-gray-400">
-                            Infura
-                          </Badge>
-                        )
-                      : trx.confirmation_source === TransactionConfirmationSource.MANUAL
+      <div className="overflow-x-auto -mx-4 sm:mx-0">
+        <div className="inline-block min-w-full align-middle">
+          <div className="overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="whitespace-nowrap">Transaction Hash</TableHead>
+                  <TableHead className="whitespace-nowrap">Transaction Status</TableHead>
+                  <TableHead className="whitespace-nowrap">Confirmation Source</TableHead>
+                  <TableHead className="whitespace-nowrap">Updated At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {trxList.map(trx => (
+                  <TableRow
+                    onClick={() => {
+                      navigate(`/organization/admin/transactions/${trx.id}`);
+                    }}
+                    className="hover:bg-gray-800 hover:cursor-pointer"
+                    key={trx.id}
+                  >
+                    <TableCell className="whitespace-nowrap">{trx.trx_hash}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {trx.trx_status
+                        ? (
+                            <Badge variant="success">Confirmed</Badge>
+                          )
+                        : (
+                            <Badge variant="warning">Pending</Badge>
+                          )}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {trx.confirmation_source === TransactionConfirmationSource.ALCHEMY
                         ? (
                             <Badge
                               variant="outline"
-                              className="border-2 border-yellow-400"
+                              className="border-2 border-blue-400 text-white"
                             >
-                              Manual
+                              Alchemy
                             </Badge>
                           )
-                        : trx.confirmation_source === TransactionConfirmationSource.PENDING_SOURCE
+                        : trx.confirmation_source === TransactionConfirmationSource.THE_GRAPH
                           ? (
                               <Badge
                                 variant="outline"
-                                className="border-2 border-orange-400 text-white"
+                                className="border-2 border-purple-400 text-white"
                               >
-                                Pending Source
+                                The Graph
                               </Badge>
                             )
-                          : null}
-              </TableCell>
-              <TableCell>{formatDate(trx.updated_at)}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                          : trx.confirmation_source === TransactionConfirmationSource.INFURA
+                            ? (
+                                <Badge variant="outline" className="border-2 border-gray-400">
+                                  Infura
+                                </Badge>
+                              )
+                            : trx.confirmation_source === TransactionConfirmationSource.MANUAL
+                              ? (
+                                  <Badge
+                                    variant="outline"
+                                    className="border-2 border-yellow-400"
+                                  >
+                                    Manual
+                                  </Badge>
+                                )
+                              : trx.confirmation_source === TransactionConfirmationSource.PENDING_SOURCE
+                                ? (
+                                    <Badge
+                                      variant="outline"
+                                      className="border-2 border-orange-400 text-white"
+                                    >
+                                      Pending Source
+                                    </Badge>
+                                  )
+                                : null}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap">{formatDate(trx.updated_at)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+      </div>
       {trxList.length === 0 && (
         <p className="text-center font-bold">No data found</p>
       )}

@@ -110,46 +110,46 @@ export default function SidebarUser({
                 </div>
               </div>
               <Dialog open={dialogueOpen} onOpenChange={setDialogueOpen}>
-                <DialogContent className="max-h-[80vh] overflow-y-auto">
+                <DialogContent className="max-h-[80vh] overflow-y-auto w-[95vw] max-w-2xl sm:max-w-3xl">
                   <DialogHeader>
-                    <h2 className="text-lg font-bold text-green-400">
+                    <h2 className="text-base sm:text-lg font-bold text-green-400">
                       User Profile
                     </h2>
                   </DialogHeader>
-                  <div className="space-y-6">
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-4 sm:space-y-6">
+                    <div className="space-y-3 sm:space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div>
-                          <p className="text-sm font-medium text-gray-400">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Full Name
                           </p>
-                          <p className="text-white font-semibold">{name}</p>
+                          <p className="text-sm sm:text-base text-white font-semibold break-words">{name}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-400">
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Email
                           </p>
-                          <p className="text-blue-300 break-all">{email}</p>
+                          <p className="text-sm sm:text-base text-blue-300 break-all">{email}</p>
                         </div>
-                        <div>
-                          <p className="text-sm font-medium text-gray-400">
+                        <div className="min-w-0">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Contact Number
                           </p>
-                          <p className="text-blue-300 break-all">{contactNumber}</p>
+                          <p className="text-sm sm:text-base text-blue-300 break-all">{contactNumber}</p>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-400">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Active Status
                           </p>
-                          <Badge variant={isActive ? 'default' : 'secondary'} className={isActive ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}>
+                          <Badge variant={isActive ? 'default' : 'secondary'} className={`text-xs sm:text-sm ${isActive ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
                             {isActive ? 'Active' : 'Inactive'}
                           </Badge>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-400">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Staff Status
                           </p>
-                          <Badge variant={isStaff ? 'default' : 'secondary'} className={isStaff ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'}>
+                          <Badge variant={isStaff ? 'default' : 'secondary'} className={`text-xs sm:text-sm ${isStaff ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'}`}>
                             {isStaff ? 'Staff' : 'Not Staff'}
                           </Badge>
                         </div>
@@ -157,53 +157,53 @@ export default function SidebarUser({
                     </div>
 
                     {/* Organization Information Section */}
-                    <div className="border-t border-gray-700 pt-4">
-                      <h3 className="text-md font-semibold text-green-400 mb-4">
+                    <div className="border-t border-gray-700 pt-3 sm:pt-4">
+                      <h3 className="text-sm sm:text-md font-semibold text-green-400 mb-3 sm:mb-4">
                         Organization Profile
                       </h3>
 
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="space-y-3 sm:space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Organization Name
                             </p>
-                            <p className="text-white font-semibold">
+                            <p className="text-sm sm:text-base text-white font-semibold break-words">
                               {organizationData?.name || authStore.profile?.organizations?.[0]?.name || 'N/A'}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-400">
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Organization Email
                             </p>
-                            <p className="text-blue-300">
+                            <p className="text-sm sm:text-base text-blue-300 break-all">
                               {organizationData?.email || 'N/A'}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Organization Type
                             </p>
-                            <p className="text-purple-300">
+                            <p className="text-sm sm:text-base text-purple-300">
                               {organizationData?.type.toLocaleUpperCase() || 'N/A'}
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Location
                             </p>
-                            <p className="text-amber-300">
+                            <p className="text-sm sm:text-base text-amber-300 break-words">
                               {(organizationData as any)?.address || 'N/A'}
                             </p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                          <div>
-                            <p className="text-sm font-medium text-gray-400">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Admin Wallet Address
                             </p>
-                            <p className="text-blue-400 break-words font-mono text-sm">
+                            <p className="text-xs sm:text-sm text-blue-400 break-all font-mono">
                               {(organizationData as any)?.organization_admin?.wallet_address
                                 ? `${(organizationData as any).organization_admin.wallet_address.slice(
                                   0,
@@ -212,64 +212,64 @@ export default function SidebarUser({
                                 : 'N/A'}
                             </p>
                           </div>
-                          <div>
-                            <p className="text-sm font-medium text-gray-400">
+                          <div className="min-w-0">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Legal Entity ID
                             </p>
-                            <p className="text-emerald-400">
+                            <p className="text-sm sm:text-base text-emerald-400 break-words">
                               {(organizationData as any)?.legal_entity_identifier || 'N/A'}
                             </p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Organization Status
                             </p>
                             <span
-                              className={`px-2 py-1 rounded ${
+                              className={`px-2 py-1 rounded text-xs capitalize ${
                                 (organizationData as any)?.status === 'approved'
                                   ? 'bg-green-600'
                                   : 'bg-yellow-600'
-                              } text-xs capitalize`}
+                              }`}
                             >
                               {(organizationData as any)?.status || 'Pending'}
                             </span>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Admin Status
                             </p>
                             <span
-                              className={`px-2 py-1 rounded ${
+                              className={`px-2 py-1 rounded text-xs capitalize ${
                                 (organizationData as any)?.organization_admin?.status === 'approved'
                                   ? 'bg-blue-600'
                                   : 'bg-gray-600'
-                              } text-xs capitalize`}
+                              }`}
                             >
                               {(organizationData as any)?.organization_admin?.status || 'N/A'}
                             </span>
                           </div>
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-400">
+                          <p className="text-xs sm:text-sm font-medium text-gray-400">
                             Organization Admin
                           </p>
-                          <p className="text-green-300">
+                          <p className="text-sm sm:text-base text-green-300 break-words">
                             {(organizationData as any)?.organization_admin?.full_name || 'N/A'}
                           </p>
-                          <p className="text-sm text-blue-300">
+                          <p className="text-xs sm:text-sm text-blue-300 break-all">
                             {(organizationData as any)?.organization_admin?.email || ''}
                           </p>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Created At
                             </p>
-                            <p className="text-cyan-300 text-sm">
+                            <p className="text-xs sm:text-sm text-cyan-300">
                               {(organizationData as any)?.created_at
                                 ? new Date((organizationData as any).created_at).toLocaleDateString(
                                     undefined,
@@ -285,10 +285,10 @@ export default function SidebarUser({
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-400">
+                            <p className="text-xs sm:text-sm font-medium text-gray-400">
                               Updated At
                             </p>
-                            <p className="text-orange-300 text-sm">
+                            <p className="text-xs sm:text-sm text-orange-300">
                               {(organizationData as any)?.updated_at
                                 ? new Date((organizationData as any).updated_at).toLocaleDateString(
                                     undefined,
@@ -307,9 +307,10 @@ export default function SidebarUser({
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-center">
+                  <div className="flex justify-center pt-2">
                     <Button
                       variant="secondary"
+                      className="text-sm sm:text-base"
                       onClick={() => {
                         try {
                           authStore.clearAuthState();
@@ -323,7 +324,7 @@ export default function SidebarUser({
                         }
                       }}
                     >
-                      <LogOut />
+                      <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
                       Log out
                     </Button>
                   </div>

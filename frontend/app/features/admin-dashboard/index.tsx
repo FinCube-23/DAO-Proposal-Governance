@@ -162,9 +162,9 @@ export default function AdminDashboard() {
   ]);
 
   return (
-    <div className="hidden flex-col md:flex">
-      <div className="flex-1 space-y-4 p-8 pt-6">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col">
+      <div className="flex-1 space-y-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -173,7 +173,7 @@ export default function AdminDashboard() {
               <Badge variant="secondary">On-chain</Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {getBalance.isPending
                   ? (
                       <span className="text-muted-foreground">Loading...</span>
@@ -204,7 +204,7 @@ export default function AdminDashboard() {
               <Badge variant={approvalStatus ? 'success' : 'warning'} className="size-5 rounded-full animate-pulse" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {approvalStatus ? <p>Approved</p> : <p>Pending</p>}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
               <Badge variant="secondary">On-chain</Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{threshold}</div>
+              <div className="text-xl sm:text-2xl font-bold">{threshold}</div>
               <p className="text-xs text-muted-foreground">
                 Minimum number of votes needed to execute
               </p>
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
               <Badge variant="secondary">On-chain</Badge>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-xl sm:text-2xl font-bold">
                 {ongoingProposals?.length || 0}
               </div>
               <p className="text-xs text-muted-foreground">
@@ -243,8 +243,8 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4">
+        <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+          <Card className="lg:col-span-4">
             <CardHeader>
               <CardTitle>Overview</CardTitle>
             </CardHeader>
@@ -252,7 +252,7 @@ export default function AdminDashboard() {
               <Overview />
             </CardContent>
           </Card>
-          <Card className="col-span-3">
+          <Card className="lg:col-span-3">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <CardTitle>Recent Proposals</CardTitle>

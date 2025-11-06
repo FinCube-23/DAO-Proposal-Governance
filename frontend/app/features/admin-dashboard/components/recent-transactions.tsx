@@ -41,23 +41,23 @@ export function RecentTransactions() {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {loading
         ? (
-            <div className="flex justify-center mt-28">
+            <div className="flex justify-center mt-20 sm:mt-28">
               <Loader className="animate-spin" />
             </div>
           )
         : (
             <>
               {proposalsByPage?.map((proposal, idx) => (
-                <div key={idx} className="flex items-center">
-                  <Avatar className="h-9 w-9">
+                <div key={idx} className="flex items-start sm:items-center flex-col sm:flex-row gap-3 sm:gap-0">
+                  <Avatar className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
                     <AvatarImage src="/avatars/01.png" alt="Avatar" />
                     <AvatarFallback>{proposal.proposalURI[0]}</AvatarFallback>
                   </Avatar>
-                  <div className="ml-4 space-y-1">
-                    <p className="text-sm font-medium leading-none">
+                  <div className="sm:ml-4 space-y-1 min-w-0 flex-1">
+                    <p className="text-sm font-medium leading-none break-words">
                       {proposal.proposalURI}
                     </p>
                     <a
@@ -65,12 +65,12 @@ export function RecentTransactions() {
                       href={`${import.meta.env.VITE_ADDRESS_EXPLORER}${
                         proposal.proposer
                       }`}
-                      className="text-sm text-muted-foreground hover:underline"
+                      className="text-xs sm:text-sm text-muted-foreground hover:underline break-all block"
                     >
                       {proposal.proposer}
                     </a>
                   </div>
-                  <div className="ml-auto font-medium">
+                  <div className="sm:ml-auto font-medium flex-shrink-0">
                     {proposal.canceled && !proposal.executed
                       ? (
                           <Badge variant="danger">Canceled</Badge>

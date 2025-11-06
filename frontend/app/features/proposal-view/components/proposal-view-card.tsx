@@ -46,11 +46,11 @@ export default function ProposalViewCard({ proposal }: any) {
   }, [votingDelay, votingPeriod]);
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between mb-2">
-          <Badge variant="secondary">On-chain</Badge>
-          <Badge variant={convertStatusToVariant(proposal.canceled)}>
+    <Card className="overflow-hidden">
+      <CardHeader className="min-w-0">
+        <div className="flex flex-col sm:flex-row justify-between gap-3 sm:gap-2 mb-2">
+          <Badge variant="secondary" className="w-fit text-xs">On-chain</Badge>
+          <Badge variant={convertStatusToVariant(proposal.canceled)} className="w-fit text-xs">
             <p className="capitalize">
               {proposal.canceled ? 'Canceled' : 'Pending'}
             </p>
@@ -58,13 +58,13 @@ export default function ProposalViewCard({ proposal }: any) {
         </div>
         {votingStatus !== 'Voting not started'
           ? (
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-wrap gap-2 sm:gap-3 justify-end">
                 {!proposal.canceled && (
                   <>
-                    <Badge variant="outline">{votingStatus}</Badge>
+                    <Badge variant="outline" className="text-xs whitespace-nowrap">{votingStatus}</Badge>
                     {votingStatus !== 'Voting has ended' && (
                       <>
-                        <Badge variant="outline">{formatTime(timeLeft)}</Badge>
+                        <Badge variant="outline" className="text-xs whitespace-nowrap">{formatTime(timeLeft)}</Badge>
                       </>
                     )}
                   </>
@@ -72,28 +72,21 @@ export default function ProposalViewCard({ proposal }: any) {
               </div>
             )
           : (
-              <div className="flex gap-3 justify-end">
-                <Loader className="animate-spin"></Loader>
+              <div className="flex gap-2 sm:gap-3 justify-end">
+                <Loader className="animate-spin w-4 h-4 sm:w-5 sm:h-5"></Loader>
               </div>
             )}
-        <div className="font-bold text-2xl">{proposal.proposalURI}</div>
-        {/* <a
-          target="_"
-          href={`${env.VITE_ADDRESS_EXPLORER}/${proposal.data}`}
-          className="text-muted-foreground hover:underline"
-        >
-          {proposal.data.slice(0, 42)}
-        </a> */}
+        <div className="font-bold text-lg sm:text-xl lg:text-2xl break-words overflow-wrap-anywhere min-w-0 max-w-full">{proposal.proposalURI}</div>
       </CardHeader>
       <CardFooter>
-        <div className="flex gap-1 text-sm">
+        <div className="flex flex-wrap gap-1 text-xs sm:text-sm">
           <div className="text-muted-foreground">Published by</div>
           <a
             target="_"
             href={`${env.VITE_ADDRESS_EXPLORER}/${
               proposal.proposer
             }`}
-            className="text-green-500 hover:underline cursor-pointer"
+            className="text-green-500 hover:underline cursor-pointer break-all"
           >
             <p className="overflow-tranc">{proposal.proposer}</p>
           </a>

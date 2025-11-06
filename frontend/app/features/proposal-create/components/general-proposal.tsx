@@ -1,46 +1,46 @@
-import type { ChangeEvent, FormEvent } from "react";
-import type { ProposalCreatePayload } from "@/core/services/proposal/types";
-import { useMutation } from "@tanstack/react-query";
-import { simulateContract, writeContract } from "@wagmi/core";
-import { AlertCircle, CheckCircle, Info, Send } from "lucide-react";
-import { useState } from "react";
-import { useNavigate } from "react-router";
-import { toast } from "sonner";
-import { useAccount, useChainId } from "wagmi";
-import { config } from "@/core/config";
-import contractABI from "@/core/contract/contract-abi.json";
-import { env } from "@/core/env";
-import { proposalApis } from "@/core/services/proposal";
-import { Alert, AlertDescription } from "@/shared/components/ui/alert";
-import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
+import type { ChangeEvent, FormEvent } from 'react';
+import type { ProposalCreatePayload } from '@/core/services/proposal/types';
+import { useMutation } from '@tanstack/react-query';
+import { simulateContract, writeContract } from '@wagmi/core';
+import { AlertCircle, CheckCircle, Info, Send } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router';
+import { toast } from 'sonner';
+import { useAccount, useChainId } from 'wagmi';
+import { config } from '@/core/config';
+import contractABI from '@/core/contract/contract-abi.json';
+import { env } from '@/core/env';
+import { proposalApis } from '@/core/services/proposal';
+import { Alert, AlertDescription } from '@/shared/components/ui/alert';
+import { Badge } from '@/shared/components/ui/badge';
+import { Button } from '@/shared/components/ui/button';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/shared/components/ui/card";
+} from '@/shared/components/ui/card';
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/components/ui/dialog";
-import { Input } from "@/shared/components/ui/input";
-import { Label } from "@/shared/components/ui/label";
-import { shortenAddress } from "@/shared/utils";
+} from '@/shared/components/ui/dialog';
+import { Input } from '@/shared/components/ui/input';
+import { Label } from '@/shared/components/ui/label';
+import { shortenAddress } from '@/shared/utils';
 
 export default function GeneralProposal() {
-  const [targets, setTargets] = useState("");
-  const [values, setValues] = useState("");
-  const [calldatas, setCalldatas] = useState("");
-  const [description, setDescription] = useState("");
+  const [targets, setTargets] = useState('');
+  const [values, setValues] = useState('');
+  const [calldatas, setCalldatas] = useState('');
+  const [description, setDescription] = useState('');
   const { address } = useAccount();
   const chainId = useChainId();
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [trxHash, setTrxHash] = useState("");
+  const [trxHash, setTrxHash] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const navigate = useNavigate();
 
@@ -49,30 +49,33 @@ export default function GeneralProposal() {
     const newErrors: { [key: string]: string } = {};
 
     if (!targets.trim()) {
-      newErrors.targets = "Target addresses are required";
-    } else if (!targets.match(/^0x[a-fA-F0-9]{40}(,\s*0x[a-fA-F0-9]{40})*$/)) {
-      newErrors.targets =
-        "Please enter valid Ethereum addresses separated by commas";
+      newErrors.targets = 'Target addresses are required';
+    }
+    else if (!targets.match(/^0x[a-fA-F0-9]{40}(,\s*0x[a-fA-F0-9]{40})*$/)) {
+      newErrors.targets
+        = 'Please enter valid Ethereum addresses separated by commas';
     }
 
     if (!values.trim()) {
-      newErrors.values = "Values are required";
-    } else if (!values.match(/^\d+(,\s*\d+)*$/)) {
-      newErrors.values = "Please enter valid numbers separated by commas";
+      newErrors.values = 'Values are required';
+    }
+    else if (!values.match(/^\d+(,\s*\d+)*$/)) {
+      newErrors.values = 'Please enter valid numbers separated by commas';
     }
 
     if (!calldatas.trim()) {
-      newErrors.calldatas = "Calldata is required";
+      newErrors.calldatas = 'Calldata is required';
     }
 
     if (!description.trim()) {
-      newErrors.description = "Description is required";
-    } else if (description.length < 10) {
-      newErrors.description = "Description must be at least 10 characters long";
+      newErrors.description = 'Description is required';
+    }
+    else if (description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters long';
     }
 
     if (!address) {
-      newErrors.wallet = "Please connect your wallet";
+      newErrors.wallet = 'Please connect your wallet';
     }
 
     setErrors(newErrors);
@@ -82,7 +85,7 @@ export default function GeneralProposal() {
   const createProposal = useMutation({
     mutationFn: proposalApis.createProposal,
     onSuccess: () => {
-      toast.warning("Proposal is pending");
+      toast.warning('Proposal is pending');
       setDialogOpen(true);
     },
     onError: (error: any) => {
@@ -92,19 +95,19 @@ export default function GeneralProposal() {
   });
 
   const handleTargetsChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setTargets(e.target.value);
   };
 
   const handleValuesChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setValues(e.target.value);
   };
 
   const handleCalldatasChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setCalldatas(e.target.value);
   };
@@ -117,7 +120,7 @@ export default function GeneralProposal() {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error("Please fix the form errors before submitting");
+      toast.error('Please fix the form errors before submitting');
       return;
     }
 
@@ -125,9 +128,9 @@ export default function GeneralProposal() {
     setErrors({});
 
     const data = {
-      targets: targets.split(",").map((addr) => addr.trim()),
-      values: values.split(",").map((val) => Number(val.trim())),
-      calldatas: calldatas.split(",").map((data) => data.trim()),
+      targets: targets.split(',').map(addr => addr.trim()),
+      values: values.split(',').map(val => Number(val.trim())),
+      calldatas: calldatas.split(',').map(data => data.trim()),
       description,
     };
 
@@ -135,7 +138,7 @@ export default function GeneralProposal() {
       const { request } = await simulateContract(config, {
         abi: contractABI,
         address: env.VITE_SMART_CONTRACT_ADDRESS as `0x${string}`,
-        functionName: "propose",
+        functionName: 'propose',
         args: [data.targets, data.values, data.calldatas, data.description],
       });
 
@@ -143,29 +146,30 @@ export default function GeneralProposal() {
 
       // Create context object and stringify it
       const contextData = {
-        __typename: "ProposalAdded",
+        __typename: 'ProposalAdded',
         description: data.description,
-        proposalType: "general",
+        proposalType: 'general',
       };
 
       const backendData: ProposalCreatePayload = {
-        proposal_type: "general",
+        proposal_type: 'general',
         onChainData: {
           transactionHash: hash,
-          signedBy: address || "",
-          signedWith: "metamask",
+          signedBy: address || '',
+          signedWith: 'metamask',
           chainId: chainId.toString(),
           context: contextData,
         },
       };
       createProposal.mutate(backendData);
       setTrxHash(hash);
-    } catch (e: any) {
+    }
+    catch (e: any) {
       let errorMessage = e.message;
 
-      if (errorMessage.includes("reverted with the following reason:")) {
+      if (errorMessage.includes('reverted with the following reason:')) {
         const match = errorMessage.match(
-          /reverted with the following reason:\s*(.*)/
+          /reverted with the following reason:\s*(.*)/,
         );
         if (match) {
           errorMessage = match[1];
@@ -178,35 +182,35 @@ export default function GeneralProposal() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-4">General Proposal</h1>
+    <div className="container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">General Proposal</h1>
       </div>
 
       {errors.wallet && (
         <Alert className="mb-6 border-red-500 bg-red-500/10">
           <AlertCircle className="h-4 w-4 text-red-500" />
-          <AlertDescription className="text-red-400">
+          <AlertDescription className="text-red-400 text-sm">
             {errors.wallet}
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Form Section */}
         <Card className="border-gray-700 bg-gray-900/50 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-2xl text-white flex items-center gap-2">
-              <Send className="h-6 w-6 text-blue-500" />
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-white flex items-center gap-2">
+              <Send className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
               Proposal Details
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={propose} className="space-y-6">
+            <form onSubmit={propose} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="targets" className="text-white font-medium">
+                <Label htmlFor="targets" className="text-white font-medium text-sm sm:text-base">
                   Target Addresses
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 text-xs">
                     Required
                   </Badge>
                 </Label>
@@ -215,14 +219,14 @@ export default function GeneralProposal() {
                   value={targets}
                   onChange={handleTargetsChange}
                   placeholder="0xAbc123...0001, 0xDef456...0002"
-                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 ${
+                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.targets
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : ''
                   }`}
                 />
                 {errors.targets && (
-                  <p className="text-red-400 text-sm flex items-center gap-1">
+                  <p className="text-red-400 text-xs sm:text-sm flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {errors.targets}
                   </p>
@@ -230,9 +234,9 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="values" className="text-white font-medium">
+                <Label htmlFor="values" className="text-white font-medium text-sm sm:text-base">
                   Values (in Wei)
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 text-xs">
                     Required
                   </Badge>
                 </Label>
@@ -241,14 +245,14 @@ export default function GeneralProposal() {
                   value={values}
                   onChange={handleValuesChange}
                   placeholder="0, 0, 1000000000000000000"
-                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 ${
+                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.values
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : ''
                   }`}
                 />
                 {errors.values && (
-                  <p className="text-red-400 text-sm flex items-center gap-1">
+                  <p className="text-red-400 text-xs sm:text-sm flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {errors.values}
                   </p>
@@ -256,9 +260,9 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="calldatas" className="text-white font-medium">
+                <Label htmlFor="calldatas" className="text-white font-medium text-sm sm:text-base">
                   Call Data
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 text-xs">
                     Required
                   </Badge>
                 </Label>
@@ -268,14 +272,14 @@ export default function GeneralProposal() {
                   onChange={handleCalldatasChange}
                   placeholder="0xe0a8f6f5000...0001, 0x..."
                   rows={3}
-                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 ${
+                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
                     errors.calldatas
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : ''
                   }`}
                 />
                 {errors.calldatas && (
-                  <p className="text-red-400 text-sm flex items-center gap-1">
+                  <p className="text-red-400 text-xs sm:text-sm flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {errors.calldatas}
                   </p>
@@ -283,9 +287,9 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-white font-medium">
+                <Label htmlFor="description" className="text-white font-medium text-sm sm:text-base">
                   Proposal Description
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="secondary" className="ml-2 text-xs">
                     Required
                   </Badge>
                 </Label>
@@ -295,18 +299,22 @@ export default function GeneralProposal() {
                   onChange={handleDescriptionChange}
                   placeholder="Provide a detailed explanation of your proposal, including the rationale and expected outcomes..."
                   rows={6}
-                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 ${
+                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
                     errors.description
-                      ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                      : ""
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : ''
                   }`}
                 />
-                <div className="flex justify-between text-sm text-gray-400">
-                  <span>{description.length} characters</span>
+                <div className="flex justify-between text-xs sm:text-sm text-gray-400">
+                  <span>
+                    {description.length}
+                    {' '}
+                    characters
+                  </span>
                   <span>Minimum 10 characters</span>
                 </div>
                 {errors.description && (
-                  <p className="text-red-400 text-sm flex items-center gap-1">
+                  <p className="text-red-400 text-xs sm:text-sm flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
                     {errors.description}
                   </p>
@@ -316,10 +324,10 @@ export default function GeneralProposal() {
               <Button
                 type="submit"
                 isLoading={loadingStatus}
-                className="w-full"
+                className="w-full text-sm sm:text-base"
                 disabled={!address}
               >
-                {loadingStatus ? "Placing Proposal..." : "Place Proposal"}
+                {loadingStatus ? 'Placing Proposal...' : 'Place Proposal'}
               </Button>
             </form>
           </CardContent>
@@ -328,54 +336,54 @@ export default function GeneralProposal() {
         {/* Help Section */}
         <Card className="border-gray-700 bg-gray-900/50 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle className="text-2xl text-white flex items-center gap-2">
-              <Info className="h-6 w-6 text-yellow-500" />
+            <CardTitle className="text-lg sm:text-xl lg:text-2xl text-white flex items-center gap-2">
+              <Info className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />
               How to Fill This Form
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-500/5">
-                <h3 className="text-blue-400 font-semibold mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
+          <CardContent className="space-y-4 sm:space-y-6">
+            <div className="space-y-3 sm:space-y-4">
+              <div className="p-3 sm:p-4 rounded-lg border border-blue-500/20 bg-blue-500/5">
+                <h3 className="text-blue-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Target Addresses
                 </h3>
-                <p className="text-gray-300 text-sm mb-2">
+                <p className="text-gray-300 text-xs sm:text-sm mb-2">
                   Smart contract addresses that will be called when the proposal
                   executes.
                 </p>
-                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400">
+                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400 break-all">
                   0xA0b86a33E6441E1bf4f0a5dB8c8dc1B8C9F2AC2d
                 </code>
               </div>
 
-              <div className="p-4 rounded-lg border border-green-500/20 bg-green-500/5">
-                <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
+              <div className="p-3 sm:p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+                <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Values (Wei)
                   <div className="group relative">
-                    <Info size={14} className="text-gray-400 cursor-help" />
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-64 z-10">
+                    <Info size={14} className="text-gray-400 cursor-help flex-shrink-0" />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 sm:w-64 z-10">
                       Amount of ETH (in wei) to send with each transaction. Use
                       0 for most governance proposals.
                     </div>
                   </div>
                 </h3>
-                <p className="text-gray-300 text-sm mb-2">
+                <p className="text-gray-300 text-xs sm:text-sm mb-2">
                   Amount of ETH to send with transactions (usually 0 for
                   governance).
                 </p>
-                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400">
+                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400 break-all">
                   0, 0, 1000000000000000000
                 </code>
               </div>
 
-              <div className="p-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5">
-                <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
+              <div className="p-3 sm:p-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5">
+                <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Call Data
                 </h3>
-                <p className="text-gray-300 text-sm mb-2">
+                <p className="text-gray-300 text-xs sm:text-sm mb-2">
                   Encoded function calls to execute on target contracts.
                 </p>
                 <code className="text-xs bg-gray-800 p-2 rounded block text-yellow-400 break-all">
@@ -383,12 +391,12 @@ export default function GeneralProposal() {
                 </code>
               </div>
 
-              <div className="p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
-                <h3 className="text-purple-400 font-semibold mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
+              <div className="p-3 sm:p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
+                <h3 className="text-purple-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
+                  <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Description
                 </h3>
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-300 text-xs sm:text-sm">
                   Clear explanation of what this proposal does and why it should
                   be approved.
                 </p>
@@ -396,9 +404,11 @@ export default function GeneralProposal() {
             </div>
 
             <Alert className="border-blue-500/20 bg-blue-500/10">
-              <Info className="h-4 w-4 text-blue-400" />
-              <AlertDescription className="text-blue-300">
-                <strong>Pro Tip:</strong> Test your proposal parameters on a
+              <Info className="h-4 w-4 text-blue-400 flex-shrink-0" />
+              <AlertDescription className="text-blue-300 text-xs sm:text-sm">
+                <strong>Pro Tip:</strong>
+                {' '}
+                Test your proposal parameters on a
                 testnet first to ensure they work as expected.
               </AlertDescription>
             </Alert>
@@ -410,36 +420,38 @@ export default function GeneralProposal() {
         open={dialogOpen}
         onOpenChange={(open) => {
           setDialogOpen(open);
-          if (!open) navigate("/organization/dao/proposals");
+          if (!open)
+            navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent className="border-gray-700 bg-gray-900">
+        <DialogContent className="border-gray-700 bg-gray-900 w-[95vw] max-w-md sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-green-400 flex items-center gap-2">
-              <CheckCircle className="h-6 w-6" />
+            <DialogTitle className="text-lg sm:text-xl font-bold text-green-400 flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               Proposal Submitted Successfully
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-gray-300">
+            <p className="text-gray-300 text-sm sm:text-base">
               Your general proposal has been successfully submitted to the
               blockchain and is now under review by DAO members.
             </p>
-            <div className="p-4 bg-gray-800 rounded-lg">
-              <p className="text-sm text-gray-400 mb-2">Transaction Hash:</p>
-              <div className="flex items-center gap-2">
-                <code className="text-blue-400 text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+            <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
+              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
                   {shortenAddress(trxHash)}
                 </code>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="flex-shrink-0"
                 >
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10"
+                    className="border-blue-500 text-blue-400 hover:bg-blue-500/10 w-full sm:w-auto text-xs sm:text-sm"
                   >
                     View on Explorer
                   </Button>
@@ -448,7 +460,7 @@ export default function GeneralProposal() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => navigate("/organization/dao/proposals")}>
+            <Button onClick={() => navigate('/organization/dao/proposals')} className="w-full sm:w-auto text-sm sm:text-base">
               View All Proposals
             </Button>
           </DialogFooter>
