@@ -1,7 +1,6 @@
 # FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services
 
 ![Layer 1: Ethereum](https://img.shields.io/badge/Layer%201-Ethereum-blue)
-![Layer 2: Polygon](https://img.shields.io/badge/Layer%202-Polygon-blueviolet)
 ![Technology: Blockchain](https://img.shields.io/badge/Technology-Blockchain-lightgrey)
 ![Made by: Brain Station 23](https://img.shields.io/badge/Made%20by-Brain%20Station%2023-green)
 
@@ -65,21 +64,20 @@ FinCube leverages a combination of blockchain technology, smart contracts, and d
 - **DAO Governance**: Ensuring democratic decision-making and policy setting.
 - **Web3 Integration**: For seamless on-ramping and off-ramping of digital assets.
 
+For a detailed visual representation of the system architecture, see the [Enhanced Architecture Diagram](FinCubeArchitectureDiagram.png).
+
 ### Backend Services
 
 | Services                | Technology Used           |
 | ----------------------- | ------------------------- |
-| Audit-trail-service     | NestJS, RabbitMQ          |
+| Audit-trail-service     | NestJS, Alchemy, TheGraph, RabbitMQ          |
 | DAO-service             | NestJS, PostgreSQL        |
-| API-gateway             | NestJS                    |
-| User-management-service | NestJS, PostgreSQL, Auth0 |
-| Web3-proxy-service      | NestJS, Alchemy, Web3JS   |
+| API-gateway             | Kong Gateway, PostgreSQL  |
+| User-management-service | Django, Django Admin, PostgreSQL |
+| Web3-proxy-service      | NestJS, Alchemy, TheGraph   |
+
 
 Backend folder contains more details regarding each of the services and the APIs.
-
-### Frontend Services
-
-<! -- we can add the screenshots from our project to this -->
 
 ### Web3 services
 
@@ -202,11 +200,12 @@ Please ensure your code adheres to our coding standards and includes appropriate
 
 | Name                                                 | Role                            | Technical Contribution                                                              |
 | ---------------------------------------------------- | ------------------------------- | ----------------------------------------------------------------------------------- |
-| [@FahimDev](https://www.github.com/FahimDev)         | Technical Lead and Scrum Master | Event Driven Architecture Design, Message queue, Backend Dev, The Graph integration |
+| [@FahimDev](https://www.github.com/FahimDev)         | Technical Lead, Solution Architect, Scrum Master | System Architect, Event Driven Architecture Design, Message queue, Backend Dev, Fault-tolerant designer, DevOps |
 | [@antonin686](https://www.github.com/antonin686)     | Frontend Lead                   | Full Stack, DevOps, Code Review, UI/UX                                              |
-| [@SampadSikder](https://www.github.com/SampadSikder) | Backend Dev, System designer    | Smart contract dev, smart contract testing                                          |
-| [@Raad05](https://github.com/Raad05)                 | Frontend Dev                    | API integration, Smart Contract Integration, RainbowKit wagmi                       |
-| [@mashiat0808](https://www.github.com/mashiat0808)   | Backend Dev, Policy analyst     | GraphQL, smart contract testing, FDX                                                |
+| [@SampadSikder](https://www.github.com/SampadSikder) | Backend Dev, System designer, ZKP Expert, AI/ML    | System Architect, Event Driven Architecture Design, Message queue, Backend Dev, ZKP designer, Smart contract dev |
+| [@Raad05](https://github.com/Raad05)                 | Frontend Dev                    | API integration, DevOps, Smart Contract Integration, RainbowKit wagmi, Smart contract dev         |
+| [@mashiat0808](https://www.github.com/mashiat0808)   | Backend Dev, Policy analyst     | GraphQL, smart contract testing, FDX                                          |
+| [@Samonto-Karmaker](https://github.com/Samonto-Karmaker)   | Backend Dev, ZKP Expert        | Backend Dev, ZKP designer, Smart contract dev, Event Driven Architecture Design    |
 
 ---
 
