@@ -24,6 +24,7 @@ from drf_spectacular.views import (
     SpectacularRedocView,
 )
 
+
 # Customize admin site titles
 admin.site.site_header = "FinCube DAO Administration"
 admin.site.site_title = "FinCube Admin"
@@ -56,4 +57,7 @@ urlpatterns = [
     ),
     # Redoc
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+
+    # django-prometheus metrics endpoint
+    path('', include('django_prometheus.urls')),  # This adds /metrics endpoint
 ]

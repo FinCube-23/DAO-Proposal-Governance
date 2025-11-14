@@ -4,7 +4,6 @@ import { CopyableCode } from '@/shared/components/copyable-code';
 import { StatusBadge } from '@/shared/components/status-badge';
 import { TimeDisplay } from '@/shared/components/time-display';
 import { formatAddress } from '@/shared/utils';
-import { formatValue } from '@/shared/utils/formatters';
 import { TransactionConfirmationTrace } from './transaction-confirmation-trace';
 import { TransactionEventLogs } from './transaction-event-logs';
 
@@ -41,41 +40,38 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
       ),
     },
     {
-      accessorKey: 'from_address',
+      accessorKey: 'from',
       header: 'From',
       enableSorting: false,
       cell: ({ row }) => (
         <CopyableCode
-          value={row.getValue('from_address') || '0xF15E6b68541AAe83bB96F61498812c3E0A35F09a'}
-          displayValue={formatAddress(row.getValue('from_address') || '0xF15E6b68541AAe83bB96F61498812c3E0A35F09a')}
+          value={row.getValue('from') || 'N/A'}
+          displayValue={formatAddress(row.getValue('from') || 'N/A')}
         />
       ),
     },
     {
-      accessorKey: 'function_name',
+      accessorKey: 'function',
       header: 'Function',
       enableSorting: false,
       cell: ({ row }) => {
-        const functionName = row.getValue('function_name') as string;
-        const topEvent = row.original.top_event;
-
+        const functionName = row.getValue('function') as string;
         return (
           <div className="font-mono text-xs">
-            {functionName || topEvent || 'Unknown'}
+            {functionName || 'Unknown'}
           </div>
         );
       },
     },
     {
-      accessorKey: 'effective_fee_raw',
+      accessorKey: 'gas_cost',
       header: 'Gas Cost',
       enableSorting: false,
       cell: ({ row }) => {
-        const tx = row.original;
-        const fee = tx.effective_fee_raw;
+        const gasCost = row.getValue('gas_cost') as number;
         return (
           <div className="font-mono text-xs">
-            {fee ? formatValue(fee, 18, 'ETH') : '-'}
+            {gasCost ? `${gasCost.toFixed(18)} ETH` : '-'}
           </div>
         );
       },

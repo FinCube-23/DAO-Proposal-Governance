@@ -1,103 +1,110 @@
 import type { ColumnDef } from '@tanstack/react-table';
-import type { Transaction } from '@/shared/types/transactions';
-import { Activity, ChevronRight, ExternalLink, GitBranch } from 'lucide-react';
+import type { Transaction } from '@/core/api/types';
+import { useQuery } from '@tanstack/react-query';
+import { Activity, ExternalLink, GitBranch } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import { toast } from 'sonner';
+import { auditTrailApis } from '@/core/services/audit';
 import { CopyableCode } from '@/shared/components/copyable-code';
 import { DataTable } from '@/shared/components/dashboard/data-table';
 import { StatusBadge } from '@/shared/components/status-badge';
 import { TimeDisplay } from '@/shared/components/time-display';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { formatAddress } from '@/shared/utils';
-import { formatValue } from '@/shared/utils/formatters';
-import { TRANSACTIONS } from '../mock-data/recent-trxs';
 
 const transactionColumns: ColumnDef<Transaction>[] = [
   {
-    accessorKey: 'block_timestamp',
+    accessorKey: 'updated_at',
     header: 'Time',
     enableSorting: false,
     cell: ({ row }) => (
       <TimeDisplay
-        timestamp={row.getValue('block_timestamp')}
+        timestamp={row.getValue('updated_at')}
         enableToggle
         className="text-xs"
       />
     ),
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'trx_status',
     header: 'Status',
     enableSorting: false,
-    cell: ({ row }) => (
-      <StatusBadge status={row.getValue('status')} showIcon />
-    ),
+    cell: ({ row }) => {
+      const status = row.getValue('trx_status') as number;
+      return (
+        <StatusBadge status={status === 1 ? 'success' : 'failed'} showIcon />
+      );
+    },
   },
   {
-    accessorKey: 'tx_hash',
+    accessorKey: 'trx_hash',
     header: 'Hash',
     enableSorting: false,
     cell: ({ row }) => (
       <CopyableCode
-        value={row.getValue('tx_hash')}
-        displayValue={formatAddress(row.getValue('tx_hash'), 8)}
+        value={row.getValue('trx_hash')}
+        displayValue={formatAddress(row.getValue('trx_hash'), 8)}
       />
     ),
   },
   {
-    accessorKey: 'from_address',
+    accessorKey: 'from',
     header: 'From',
     enableSorting: false,
-    cell: ({ row }) => (
-      <CopyableCode
-        value={row.getValue('from_address')}
-        displayValue={formatAddress(row.getValue('from_address'))}
-      />
-    ),
+    cell: ({ row }) => {
+      const from = row.getValue('from') as string;
+      return from
+        ? (
+            <CopyableCode
+              value={from}
+              displayValue={formatAddress(from)}
+            />
+          )
+        : (
+            <span className="text-gray-400">-</span>
+          );
+    },
   },
   {
-    accessorKey: 'function_name',
+    accessorKey: 'function',
     header: 'Function',
     enableSorting: false,
     cell: ({ row }) => {
-      const functionName = row.getValue('function_name') as string;
-      const topEvent = row.original.top_event;
-
+      const functionName = row.getValue('function') as string;
       return (
         <div className="font-mono text-xs">
-          {functionName || topEvent || 'Unknown'}
+          {functionName || 'Unknown'}
         </div>
       );
     },
   },
   {
-    accessorKey: 'effective_fee_raw',
+    accessorKey: 'gas_cost',
     header: 'Gas Cost',
     enableSorting: false,
     cell: ({ row }) => {
-      const tx = row.original;
-      const fee = tx.effective_fee_raw;
+      const gasCost = row.getValue('gas_cost') as number;
       return (
         <div className="font-mono text-xs">
-          {fee ? formatValue(fee, 18, 'ETH') : '-'}
+          {gasCost ? `${gasCost.toFixed(18)} ETH` : '-'}
         </div>
       );
     },
   },
   {
-    accessorKey: 'source',
+    accessorKey: 'confirmation_source',
     header: 'Source',
     enableSorting: false,
     cell: ({ row }) => {
-      const source = (row.original as any).source;
+      const source = row.getValue('confirmation_source') as string;
       return (
         <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize ${
           source === 'alchemy'
             ? 'bg-blue-500 text-white'
-            : 'bg-purple-500 text-white'
+            : source === 'graph'
+              ? 'bg-purple-500 text-white'
+              : 'bg-gray-500 text-white'
         }`}
         >
           {source}
@@ -110,8 +117,28 @@ const transactionColumns: ColumnDef<Transaction>[] = [
     header: 'Actions',
     enableSorting: false,
     cell: ({ row }) => {
-      const lifecycle = row.original.flow || [];
-      const eventLogs = row.original.event_logs || [];
+      const lifecycle = row.original.transaction_confirmation_trace || [];
+      const eventLogsRaw = row.original.event_logs;
+
+      // Parse event logs
+      let eventLogs: any[] = [];
+      if (eventLogsRaw) {
+        try {
+          const parsed = JSON.parse(eventLogsRaw);
+          if (parsed.data) {
+            eventLogs = [parsed];
+          }
+          else if (Array.isArray(parsed)) {
+            eventLogs = parsed;
+          }
+          else {
+            eventLogs = [parsed];
+          }
+        }
+        catch (e) {
+          console.error('Failed to parse event logs:', e);
+        }
+      }
 
       return (
         <div className="flex items-center gap-0.5">
@@ -204,54 +231,39 @@ const transactionColumns: ColumnDef<Transaction>[] = [
               <div className="space-y-3">
                 <h4 className="font-medium text-sm">Event Logs</h4>
                 <div className="space-y-3">
-                  {eventLogs.map((event: any, index: number) => (
-                    <Collapsible key={index}>
-                      <CollapsibleTrigger asChild>
-                        <div
-                          className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-gray-200 bg-gray-100"
-                          onClick={e => e.stopPropagation()}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-gray-900">{event.event_name}</span>
-                            <span className="text-xs text-gray-600">
-                              #
-                              {event.log_index}
-                            </span>
-                          </div>
-                          <ChevronRight className="h-4 w-4 text-gray-600" />
+                  {eventLogs.map((event: any, index: number) => {
+                    const eventData = event.data || event;
+                    const eventName = eventData.__typename || eventData.eventType || 'Event';
+                    const proposalId = eventData.proposalId;
+
+                    return (
+                      <div key={index} className="p-3 bg-gray-100 border rounded space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-sm text-gray-900">{eventName}</span>
                         </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div className="p-3 bg-gray-200 border rounded space-y-2">
+                        {proposalId && (
                           <div className="text-xs">
-                            <div className="font-medium text-gray-900">Contract:</div>
-                            <div className="font-mono text-xs break-all text-gray-800">{formatAddress(event.contract_address)}</div>
+                            <span className="font-medium text-gray-700">Proposal ID: </span>
+                            <span className="text-gray-600">{proposalId}</span>
                           </div>
-                          <div className="text-xs">
-                            <div className="font-medium text-gray-900">Topics:</div>
-                            {event.topics.map((topic: string, topicIndex: number) => (
-                              <div key={topicIndex} className="font-mono text-xs break-all text-gray-800">
-                                [
-                                {topicIndex}
-                                ]:
+                        )}
+                        {Object.entries(eventData).map(([key, value]) => {
+                          if (key === '__typename' || key === 'proposalId')
+                            return null;
+                          return (
+                            <div key={key} className="text-xs">
+                              <span className="font-medium text-gray-700 capitalize">
+                                {key.replace(/_/g, ' ')}
+                                :
                                 {' '}
-                                {topic}
-                              </div>
-                            ))}
-                          </div>
-                          <div className="text-xs">
-                            <div className="font-medium text-gray-900">Data:</div>
-                            <div className="font-mono text-xs break-all text-gray-800">{event.data}</div>
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            Block:
-                            {' '}
-                            {event.block_number}
-                          </div>
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
-                  ))}
+                              </span>
+                              <span className="text-gray-600">{String(value)}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </PopoverContent>
@@ -264,10 +276,17 @@ const transactionColumns: ColumnDef<Transaction>[] = [
 
 export default function RecentTransactions() {
   const navigate = useNavigate();
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['recentTransactions'],
+    queryFn: () => auditTrailApis.getTransactions({ page: 1, limit: 5 }),
+  });
+
   const handleTransactionClick = (transaction: Transaction) => {
     // Navigate to transaction details page
     navigate(`/organization/audit/transactions/${transaction.id}`);
   };
+
   return (
     <Card>
       <CardHeader>
@@ -288,8 +307,8 @@ export default function RecentTransactions() {
       <CardContent>
         <DataTable
           columns={transactionColumns}
-          data={TRANSACTIONS.slice(0, 10)}
-          isLoading={false}
+          data={data?.data || []}
+          isLoading={isLoading}
           onRowClick={handleTransactionClick}
         />
       </CardContent>

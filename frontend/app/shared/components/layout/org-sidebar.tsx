@@ -40,7 +40,7 @@ const menus = [
       },
     ],
   },
-  {
+  /* {
     name: 'Admin Panel',
     items: [
       {
@@ -50,7 +50,7 @@ const menus = [
         match: '/organization/admin',
       },
     ],
-  },
+  }, */
   {
     name: 'Audit Explorer',
     items: [

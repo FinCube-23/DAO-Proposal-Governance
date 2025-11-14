@@ -20,4 +20,10 @@ export class ListTransactionsQueryDto {
 
   @ApiProperty({ required: false })
   hash?: string;
+
+  @ApiProperty({ required: false })
+  address?: string;
+
+  @ApiProperty({ required: false })
+  functionName?: string;
 }

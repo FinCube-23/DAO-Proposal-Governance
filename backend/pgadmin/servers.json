@@ -1,0 +1,34 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "User Management DB",
+      "Group": "DAO Services",
+      "Host": "user-management-pgsqldb",
+      "Port": 5432,
+      "MaintenanceDB": "dao_db",
+      "Username": "dao",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    },
+    "2": {
+      "Name": "DAO Service DB",
+      "Group": "DAO Services",
+      "Host": "dao-service-pgsqldb",
+      "Port": 5432,
+      "MaintenanceDB": "dao_db",
+      "Username": "dao",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    },
+    "3": {
+      "Name": "Audit Trail DB",
+      "Group": "DAO Services",
+      "Host": "audit-trail-pgsqldb",
+      "Port": 5432,
+      "MaintenanceDB": "dao_db",
+      "Username": "dao",
+      "SSLMode": "prefer",
+      "PassFile": "/pgpass"
+    }
+  }
+}

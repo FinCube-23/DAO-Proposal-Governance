@@ -1,0 +1,21 @@
+apiVersion: 1
+
+providers:
+  # Provider name
+  - name: 'Default'
+    # Organization ID (1 is default)
+    orgId: 1
+    # Type of dashboard provider
+    type: file
+    # Disable dashboard deletion in UI
+    disableDeletion: false
+    # Enable dashboard editing in UI
+    editable: true
+    # Update interval for scanning dashboard files
+    updateIntervalSeconds: 10
+    # Allow updating provisioned dashboards from the UI
+    allowUiUpdates: true
+    options:
+      path: /var/lib/grafana/dashboards  
+      foldersFromFilesStructure: false
+      

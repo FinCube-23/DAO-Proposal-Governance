@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+    pgadmin:
+        container_name: pgadmin4
+        image: dpage/pgadmin4:8.0
+        env_file:
+          - .env
+        ports:
+          - '5050:80'
+        volumes:
+          - pgadmin_data:/var/lib/pgadmin
+          - ./servers.json:/pgadmin4/servers.json:ro
+          - ./pgpass:/pgpass:ro
+        environment:
+          - PGADMIN_CONFIG_SERVER_MODE=False
+          - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+        entrypoint: >
+          /bin/sh -c "
+          chmod 600 /pgpass;
+          /entrypoint.sh
+          "
+        networks:
+          - fincube23_network
+        
+volumes:
+  postgres_data:
+  pgadmin_data:
+  
+networks:
+  fincube23_network:
+    external: true

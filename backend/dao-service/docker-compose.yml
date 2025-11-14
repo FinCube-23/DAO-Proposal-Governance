@@ -7,6 +7,7 @@ services:
         - APP_ENV=${APP_ENV}
     ports:
       - '3002:3000'
+      - '9465:9465'  # Expose Prometheus metrics port
     volumes:
       #- .:/app # Mount dao-service code
       - ./src:/app/src              # Only sync source code

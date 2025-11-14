@@ -8,7 +8,7 @@ import { Input } from '@/shared/components/ui/input';
 import { Label } from '@/shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
 import { cn } from '@/shared/utils';
-import { CHAIN_INFO, RESOURCE_KINDS, STATUS_CONFIG } from '../constants/chains';
+import { SOURCE_TYPES, STATUS_CONFIG } from '../constants/chains';
 
 interface TransactionFiltersProps {
   filters: TransactionFilters;
@@ -17,14 +17,6 @@ interface TransactionFiltersProps {
   isCollapsed?: boolean;
   onToggleCollapsed?: () => void;
 }
-
-const TIME_RANGES = [
-  { label: '15 minutes', value: 15 * 60 * 1000 },
-  { label: '1 hour', value: 60 * 60 * 1000 },
-  { label: '24 hours', value: 24 * 60 * 60 * 1000 },
-  { label: '7 days', value: 7 * 24 * 60 * 60 * 1000 },
-  { label: '30 days', value: 30 * 24 * 60 * 60 * 1000 },
-];
 
 export function TransactionFilterCard({
   filters,
@@ -41,25 +33,17 @@ export function TransactionFilterCard({
     onFiltersChange(newFilters);
   };
 
-  const toggleArrayFilter = (key: keyof TransactionFilters, value: string) => {
-    const currentArray = (localFilters[key] as string[]) || [];
-    const newArray = currentArray.includes(value)
-      ? currentArray.filter(item => item !== value)
-      : [...currentArray, value];
-
-    updateFilter(key, newArray.length > 0 ? newArray : undefined);
+  const toggleStatus = (status: string) => {
+    const statusNumber = Number.parseInt(status);
+    // If clicking the same status, deselect it; otherwise select the new one
+    const newStatus = localFilters.status === statusNumber ? undefined : statusNumber;
+    updateFilter('status', newStatus);
   };
 
   const clearFilters = () => {
     const emptyFilters: TransactionFilters = {};
     setLocalFilters(emptyFilters);
     onFiltersChange(emptyFilters);
-  };
-
-  const setTimeRange = (minutes: number) => {
-    const end = new Date().toISOString();
-    const start = new Date(Date.now() - minutes).toISOString();
-    updateFilter('time_range', { start, end });
   };
 
   const activeFilterCount = Object.values(localFilters).filter((value) => {
@@ -87,15 +71,15 @@ export function TransactionFilterCard({
 
         {activeFilterCount > 0 && (
           <div className="flex items-center gap-1 flex-wrap">
-            {localFilters.status?.map(status => (
-              <Badge key={status} variant="secondary" className="gap-1">
-                {STATUS_CONFIG[status as keyof typeof STATUS_CONFIG]?.label || status}
+            {localFilters.status !== undefined && (
+              <Badge variant="secondary" className="gap-1">
+                {Object.entries(STATUS_CONFIG).find(([k]) => Number.parseInt(k) === localFilters.status)?.[1].label ?? localFilters.status}
                 <X
                   className="h-3 w-3 cursor-pointer"
-                  onClick={() => toggleArrayFilter('status', status)}
+                  onClick={() => updateFilter('status', undefined)}
                 />
               </Badge>
-            ))}
+            )}
             <Button
               variant="ghost"
               size="sm"
@@ -144,39 +128,42 @@ export function TransactionFilterCard({
         <div>
           <Label className="text-sm font-medium mb-2 block">Status</Label>
           <div className="flex flex-wrap gap-2">
-            {Object.entries(STATUS_CONFIG).map(([status, config]) => (
-              <button
-                type="button"
-                key={status}
-                onClick={() => toggleArrayFilter('status', status)}
-                className={cn(
-                  'px-3 py-1 rounded-full text-xs font-medium border transition-colors',
-                  localFilters.status?.includes(status)
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-muted hover:bg-muted/80 border-border',
-                )}
-              >
-                {config.label}
-              </button>
-            ))}
+            {Object.entries(STATUS_CONFIG).map(([status, config]) => {
+              const statusNumber = Number.parseInt(status);
+              return (
+                <button
+                  type="button"
+                  key={status}
+                  onClick={() => toggleStatus(status)}
+                  className={cn(
+                    'px-3 py-1 rounded-full text-xs font-medium border transition-colors',
+                    localFilters.status === statusNumber
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-muted hover:bg-muted/80 border-border',
+                  )}
+                >
+                  {config.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Resource Kind Filter */}
+        {/* Source Type Filter */}
         <div>
-          <Label className="text-sm font-medium mb-2 block">Resource Type</Label>
+          <Label className="text-sm font-medium mb-2 block">Source Type</Label>
           <Select
-            value={localFilters.resource_kind?.[0] || ''}
-            onValueChange={value => updateFilter('resource_kind', value === 'all-resource-kinds' ? undefined : [value])}
+            value={localFilters.source || ''}
+            onValueChange={value => updateFilter('source', value === 'all-sources' ? undefined : value)}
           >
-            <SelectTrigger>
-              <SelectValue placeholder="Select resource type" />
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select source type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all-resource-kinds">All Types</SelectItem>
-              {RESOURCE_KINDS.map(kind => (
-                <SelectItem key={kind} value={kind}>
-                  {kind}
+              <SelectItem value="all-sources">All Sources</SelectItem>
+              {SOURCE_TYPES.map(source => (
+                <SelectItem key={source} value={source}>
+                  {source.charAt(0).toUpperCase() + source.slice(1)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -186,13 +173,26 @@ export function TransactionFilterCard({
         {/* Address Filter */}
         <div>
           <Label htmlFor="address-filter" className="text-sm font-medium mb-2 block">
-            Address
+            From
           </Label>
           <Input
             id="address-filter"
             placeholder="0x... or ENS name"
-            value={localFilters.participant_address || ''}
-            onChange={e => updateFilter('participant_address', e.target.value || undefined)}
+            value={localFilters.address || ''}
+            onChange={e => updateFilter('address', e.target.value || undefined)}
+          />
+        </div>
+
+        {/* Address Filter */}
+        <div>
+          <Label htmlFor="address-filter" className="text-sm font-medium mb-2 block">
+            Hash
+          </Label>
+          <Input
+            id="address-filter"
+            placeholder="0x... or ENS name"
+            value={localFilters.hash || ''}
+            onChange={e => updateFilter('hash', e.target.value || undefined)}
           />
         </div>
 
@@ -204,35 +204,9 @@ export function TransactionFilterCard({
           <Input
             id="function-filter"
             placeholder="transfer, approve, swap..."
-            value={localFilters.function_name || ''}
-            onChange={e => updateFilter('function_name', e.target.value || undefined)}
+            value={localFilters.functionName || ''}
+            onChange={e => updateFilter('functionName', e.target.value || undefined)}
           />
-        </div>
-
-        {/* Value Range */}
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label htmlFor="min-value" className="text-sm font-medium mb-2 block">
-              Min Value
-            </Label>
-            <Input
-              id="min-value"
-              placeholder="0.1"
-              value={localFilters.min_value || ''}
-              onChange={e => updateFilter('min_value', e.target.value || undefined)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="max-value" className="text-sm font-medium mb-2 block">
-              Max Value
-            </Label>
-            <Input
-              id="max-value"
-              placeholder="1000"
-              value={localFilters.max_value || ''}
-              onChange={e => updateFilter('max_value', e.target.value || undefined)}
-            />
-          </div>
         </div>
       </CardContent>
     </Card>

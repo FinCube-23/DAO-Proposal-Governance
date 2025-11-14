@@ -9,7 +9,6 @@ import { AuthzModule } from './authz/authz.module';
 import { WinstonLogger } from './shared/common/logger/winston-logger'
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
 
-
 @Module({
   imports: [
     ProposalServiceModule,

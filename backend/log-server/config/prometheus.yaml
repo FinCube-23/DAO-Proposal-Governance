@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+      
+  - job_name: 'dao-service'
+    static_configs:
+      - targets: ['dao_service_api:9465']
+    metrics_path: '/metrics'
+
+  - job_name: 'audit-trail-service'
+    static_configs:
+      - targets: ['audit_service_api:9466']
+    metrics_path: '/metrics'
+
+  - job_name: 'web3-proxy-service'
+    static_configs:
+      - targets: ['web3_proxy:9467']
+    metrics_path: '/metrics'
+
+    # Job 1: Scrape User Management Service metrics
+  - job_name: 'user-management-service'
+    # Scrape interval specific to this service
+    scrape_interval: 15s
+    # Path where metrics are exposed (default is /metrics)
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['user-management-api:8000']  # Container name and internal port
+        labels:
+          service: 'user-management-service'
+          component: 'backend'
+  

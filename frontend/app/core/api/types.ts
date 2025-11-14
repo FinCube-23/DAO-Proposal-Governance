@@ -19,26 +19,17 @@ export interface Response {
 export interface Transaction {
   id: number;
   trx_hash: string;
-  trx_status: boolean;
+  trx_status: number;
   confirmation_source: TransactionConfirmationSource;
   updated_at: string;
-  from_address?: string;
-  to_address?: string;
-  function_name?: string;
-  effective_fee_raw?: string;
-  top_event?: string;
+  from?: string;
+  gas_cost?: number;
+  function?: string;
+  event_logs?: string;
   transaction_confirmation_trace?: Array<{
     status: 'completed' | 'pending' | 'failed' | 'waiting';
     service: string;
     timestamp: string;
-  }>;
-  event_logs?: Array<{
-    event_name: string;
-    contract_address: string;
-    topics: string[];
-    data: string;
-    block_number: number;
-    log_index: number;
   }>;
 }
 
@@ -51,11 +42,24 @@ export interface GetTrxResponse {
 }
 
 export interface GetOneTrxResponse {
-  id: string;
+  id: number;
   trx_hash: string;
-  trx_status: boolean;
+  trx_status: number;
   source: string;
   metaData: string;
+  transaction_lifecycle: Array<{
+    service: string;
+    status: 'completed' | 'pending' | 'failed' | 'waiting';
+    timestamp: string;
+  }>;
+  transaction_fee: number;
+  to: string;
+  from: string;
+  event_logs: string;
+  raw_transaction: string;
+  transaction_receipt: string;
+  function: string;
+  gas_cost: number;
   created_at: string;
   updated_at: string;
 }
@@ -173,14 +177,21 @@ export interface GetStatusByEmailResponse {
 }
 
 export interface DashboardStatsResponse {
-  totalTransactions: number;
-  pendingTransactions: number;
-  confirmedTransactions: number;
-  syncRate: number;
-  totalLiquidity: string;
-  confirmationSourceBreakdown: {
-    graph: number;
-    alchemy: number;
+  overallStats: {
+    totalTransactions: number;
+    pendingTransactions: number;
+    confirmedTransactions: number;
+    syncRate: number;
+    averageConfirmationTime: number;
   };
-  averageConfirmationTime: number; // milliseconds
+  timeSeries: {
+    date: string;
+    successful: number;
+    pending: number;
+  }[];
+  resourceTypeStats: Record<string, number>;
+  topParticipants: {
+    participant: string;
+    count: number;
+  }[];
 }

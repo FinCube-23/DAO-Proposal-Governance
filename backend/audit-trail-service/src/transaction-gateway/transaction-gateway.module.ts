@@ -5,10 +5,11 @@ import { TransactionEntity } from '../shared/common/entity/transaction.entity';
 import { TransactionGatewayController } from './transaction-gateway.controller';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
 import { TracingModule } from '../shared/common/tracing/tracing.module';
+import { TransactionGatewayUtil } from './transactions-gateway.util';
 
 @Module({
   controllers: [TransactionGatewayController],
-  providers: [TransactionGatewayService, WinstonLogger],
+  providers: [TransactionGatewayService, WinstonLogger, TransactionGatewayUtil],
   imports: [TypeOrmModule.forFeature([TransactionEntity]), TracingModule],
   exports: [TransactionGatewayService],
 })

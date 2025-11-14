@@ -43,6 +43,26 @@ export class TransactionListItemDto {
 
   @ApiProperty()
   updated_at: Date;
+
+  @ApiProperty({
+    description: 'wallet address that initiated the transaction',
+  })
+  from: string;
+
+  @ApiProperty({
+    description: 'Gas cost from trx_receipt converted to ETH',
+  })
+  gas_cost: number;
+
+  @ApiProperty({
+    description: 'trx_metadata as a JSON string',
+  })
+  event_logs: string;
+
+  @ApiProperty({
+    description: '__typename extracted from trx_metadata',
+  })
+  function: string;
 }
 
 export class TransactionListResponseDto {

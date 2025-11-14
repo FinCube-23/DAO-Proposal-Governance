@@ -18,6 +18,7 @@ import { GraphQLInstrumentation } from '@opentelemetry/instrumentation-graphql';
 import { WSInstrumentation } from 'opentelemetry-instrumentation-ws';
 import { SocketIoInstrumentation } from '@opentelemetry/instrumentation-socket.io';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 require('dotenv').config();
 
 const collectorOptions = {
@@ -26,7 +27,15 @@ const collectorOptions = {
   concurrencyLimit: 10, // an optional limit on the number of concurrent requests
 };
 
+
+
 const traceExporter = new OTLPTraceExporter(collectorOptions);
+const prometheusExporter = new PrometheusExporter(
+  {
+    port: 9466,
+    endpoint: '/metrics',
+  }
+)
 
 export const otelSDK = new NodeSDK({
   resource: resourceFromAttributes({
@@ -36,6 +45,7 @@ export const otelSDK = new NodeSDK({
     [SEMRESATTRS_SERVICE_INSTANCE_ID]: '1',
   }),
   spanProcessor: new SimpleSpanProcessor(traceExporter),
+  metricReader: prometheusExporter,
   instrumentations: [
     new HttpInstrumentation({
       responseHook: (span, response) => {
@@ -66,6 +76,11 @@ export const otelSDK = new NodeSDK({
 });
 otelSDK.start();
 console.log('OpenTelemetry SDK started');
+
+
+prometheusExporter.startServer().then(() => {
+    console.log('✅ Prometheus metrics server started on http://localhost:9466/metrics');
+});
 
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {

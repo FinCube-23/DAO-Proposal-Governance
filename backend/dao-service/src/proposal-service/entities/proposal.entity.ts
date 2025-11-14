@@ -58,7 +58,7 @@ export class ProposalEntity {
 
   @Column({ type: 'varchar', nullable: true })
   @ApiProperty({
-    description: 'Event log of the proposal',
+    description: 'Event log of the proposal when created',
     example: '{"__typename": "ProposalCreated", "id": "1", "proposer": "0xBb85D1852E67D6BEaa64A7eDba802189F0714F97", "eta": "1625247600"}',
     required: false,
   })

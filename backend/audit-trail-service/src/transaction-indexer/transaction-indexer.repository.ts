@@ -1,6 +1,14 @@
 import { ApolloClient, gql } from '@apollo/client';
 import { Injectable, Inject } from '@nestjs/common';
 import { WinstonLogger } from 'src/shared/common/logger/winston-logger';
+const { Network, Alchemy } = require('alchemy-sdk');
+
+const settings = {
+  apiKey: process.env.ALCHEMY_API_KEY,
+  network: Network[process.env.ALCHEMY_NETWORK] || Network.ETH_SEPOLIA,
+};
+
+const alchemy = new Alchemy(settings);
 
 @Injectable()
 export class TransactionIndexerRepository {
@@ -10,6 +18,25 @@ export class TransactionIndexerRepository {
   ) {
     this.logger.setContext(TransactionIndexerRepository.name);
   }
+
+  async getTransactionReceiptUpdatesFromAlchemy(
+    transactionHash: string): Promise<any> {
+      try{
+        this.logger.log(
+          `Fetching transaction receipt for hash: ${transactionHash}`,
+        );
+        
+        const receipt = await alchemy.core.getTransactionReceipt(transactionHash);
+
+        return receipt;
+      } catch (error) {
+        this.logger.error(
+          `Error fetching transaction receipt for hash: ${transactionHash}`,
+          error,
+        );
+        throw new Error(`ALCHEMY_API_ERROR`);
+      }
+    }
 
   async getTransactionUpdatesFromTheGraph(
     transactionHashes: string[],

@@ -19,6 +19,22 @@ export enum TransactionStatus {
   PENDING = 0,
   CONFIRMED = 1,
 }
+export interface TransactionReceipt {
+  transactionHash: string;
+  transactionIndex: number;
+  blockHash: string;
+  blockNumber: number;
+  from: string;
+  to: string;
+  cumulativeGasUsed: string;
+  gasUsed: string;
+  contractAddress: string | null;
+  logs: any[];
+  logsBloom: string;
+  status: number;
+  effectiveGasPrice?: string;
+  type?: string;
+}
 
 @Entity('transactions')
 export class TransactionEntity {
@@ -92,4 +108,35 @@ export class TransactionEntity {
     status: 'completed' | 'failed';
     timestamp: string;
   }>;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty({
+    description: 'Raw transaction data as stringified JSON',
+    example:
+      '{"hash":"0x123...","nonce":42,"gasPrice":"20000000000","gas":"21000","to":"0xabc...","value":"1000000000000000000","input":"0x","v":"0x1c","r":"0x456...","s":"0x789..."}',
+    required: false,
+  })
+  raw_trx: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  @ApiProperty({
+    description: 'Complete transaction receipt from blockchain',
+    example: {
+      transactionHash:
+        '0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
+      transactionIndex: 5,
+      blockHash:
+        '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890',
+      blockNumber: 18500000,
+      from: '0x742d35Cc6634C0532925a3b8D4C9db96C4b4d8b6',
+      to: '0xF15E6b68541AAe83bB96F61498812c3E0A35F09b',
+      cumulativeGasUsed: '121000',
+      gasUsed: '21000',
+      contractAddress: null,
+      logs: [],
+      status: 1,
+    },
+    required: false,
+  })
+  trx_receipt: TransactionReceipt;
 }

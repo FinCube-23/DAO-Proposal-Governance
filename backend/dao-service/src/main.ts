@@ -32,11 +32,23 @@ async function bootstrap() {
     )
     .setVersion('1.0')
     .addTag('dao')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
   app.startAllMicroservices();
+
   app.enableCors();
   await app.listen(3000);
 }

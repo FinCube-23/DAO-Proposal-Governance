@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthzModule } from './authz/authz.module';
 import {WinstonLogger} from './shared/common/logger/winston-logger';
 import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
+import { MetricsService } from './shared/common/metrics/metrics.service';
 @Module({
   imports: [
     Web3ProxyModule,
@@ -16,7 +17,7 @@ import { MorganMiddleware } from './shared/common/logger/morgan.middleware';
     AuthzModule,
   ],
   controllers: [AppController],
-  providers: [AppService, WinstonLogger, MorganMiddleware],
+  providers: [AppService, WinstonLogger, MorganMiddleware, MetricsService],
   exports: [WinstonLogger]
 })
 export class AppModule implements NestModule {

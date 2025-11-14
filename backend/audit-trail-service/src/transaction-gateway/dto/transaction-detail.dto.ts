@@ -64,11 +64,50 @@ export class TransactionDetailResponseDto {
     ],
     required: false,
   })
-  transaction_confirmation_trace: Array<{
+  transaction_lifecycle: Array<{
     service: string;
     status: 'completed' | 'failed';
     timestamp: string;
   }>;
+
+  @ApiProperty()
+  from: string;
+
+  @ApiProperty()
+  to: string;
+
+  @ApiProperty()
+  gas_cost: number;
+
+  @ApiProperty({
+    description: 'trx_metadata as a JSON string',
+  })
+  event_logs: string;
+
+  @ApiProperty({
+    description: 'value transferred in the transaction',
+  })
+  value?: number;
+
+  @ApiProperty({
+    description: 'trx_fee from effective_gas_price * gas_used',
+  })
+  transaction_fee: number;
+
+  @ApiProperty({
+    description: '__typename extracted from trx_metadata',
+  })
+  function: string;
+
+  @ApiProperty({
+    description: 'The raw transaction data as a stringified JSON',
+  })
+  raw_transaction: string;
+
+  @ApiProperty({
+    description: 'The raw transaction receipt as a stringified JSON',
+  })
+  transaction_receipt: string;
 
   @ApiProperty()
   updated_at: Date;

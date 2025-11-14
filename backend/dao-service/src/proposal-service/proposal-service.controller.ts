@@ -15,6 +15,7 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiBearerAuth,
   ApiParam,
   ApiQuery,
   ApiResponse,
@@ -25,6 +26,7 @@ import { PaginatedProposalResponse, ProposalDto } from './dto/proposal.dto';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ResponseTransactionStatusDto } from 'src/shared/common/dto/response-transaction-status.dto';
 
+@ApiBearerAuth('JWT-auth')
 @Controller('proposal-service')
 export class ProposalServiceController {
   constructor(private readonly proposalService: ProposalServiceService) {}

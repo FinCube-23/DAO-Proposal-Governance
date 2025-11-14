@@ -9,3 +9,4 @@ scripts/*/r*.json
 
 
 node_modules/*
+backend/pgadmin/pgpass

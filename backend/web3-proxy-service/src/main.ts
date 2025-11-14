@@ -1,4 +1,4 @@
-import './tracing'; 
+import './tracing';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule } from '@nestjs/swagger';
@@ -6,7 +6,7 @@ import { DocumentBuilder } from '@nestjs/swagger';
 import { WinstonLogger } from './shared/common/logger/winston-logger';
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create(AppModule, {
     logger: ['log', 'fatal', 'error', 'warn', 'debug', 'verbose'],
   });
 
@@ -15,6 +15,17 @@ async function bootstrap() {
     .setDescription('Web3 Proxy Service is used to interact with smart-contract')
     .setVersion('1.0')
     .addTag('web3-proxy')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
     .build();
 
   const winstonLogger = app.get(WinstonLogger);

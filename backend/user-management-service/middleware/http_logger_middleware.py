@@ -41,4 +41,11 @@ class HTTPLoggerMiddleware(MiddlewareMixin):
 
         logger.log(logData)
 
+        
+
         return response
+        
+    
+
+    
+   

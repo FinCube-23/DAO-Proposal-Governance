@@ -2,7 +2,6 @@ import { Activity, ChevronRight } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
-import { formatAddress } from '@/shared/utils';
 
 interface EventLog {
   event_name: string;
@@ -14,10 +13,36 @@ interface EventLog {
 }
 
 interface TransactionEventLogsProps {
-  eventLogs: EventLog[];
+  eventLogs: string | EventLog[] | null;
 }
 
 export function TransactionEventLogs({ eventLogs }: TransactionEventLogsProps) {
+  // Parse event logs if it's a string
+  const parsedEventLogs = (() => {
+    if (!eventLogs)
+      return [];
+    if (typeof eventLogs === 'string') {
+      try {
+        const parsed = JSON.parse(eventLogs);        
+        // Check if there's a root 'data' field
+        if (parsed.data.__typename) {
+          return [parsed.data]
+        }
+        
+        // If __typename exists at root level, use the parsed object directly
+        if (parsed.__typename) {
+          return [parsed];
+        }
+        
+        return Array.isArray(parsed) ? parsed : [parsed];
+      }
+      catch {
+        return [];
+      }
+    }
+    return Array.isArray(eventLogs) ? eventLogs : [];
+  })();
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -34,7 +59,7 @@ export function TransactionEventLogs({ eventLogs }: TransactionEventLogsProps) {
       <PopoverContent className="w-96 max-h-80 overflow-y-auto">
         <div className="space-y-3">
           <h4 className="font-medium text-sm">Event Logs</h4>
-          {eventLogs.length === 0
+          {parsedEventLogs.length === 0
             ? (
                 <div className="space-y-2">
                   <div className="text-sm text-gray-500 text-center py-4">
@@ -47,7 +72,7 @@ export function TransactionEventLogs({ eventLogs }: TransactionEventLogsProps) {
               )
             : (
                 <div className="space-y-3">
-                  {eventLogs.map((event: EventLog, index: number) => (
+                  {parsedEventLogs.map((event: any, index: number) => (
                     <Collapsible key={index}>
                       <CollapsibleTrigger asChild>
                         <div
@@ -55,42 +80,32 @@ export function TransactionEventLogs({ eventLogs }: TransactionEventLogsProps) {
                           onClick={e => e.stopPropagation()}
                         >
                           <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-gray-900">{event.event_name}</span>
-                            <span className="text-xs text-gray-600">
-                              #
-                              {event.log_index}
+                            <span className="font-medium text-sm text-gray-900">
+                              {event.__typename || event.event_name || 'Event'}
                             </span>
+                            {event.proposalId && (
+                              <span className="text-xs text-gray-600">
+                                #
+                                {event.proposalId}
+                              </span>
+                            )}
                           </div>
                           <ChevronRight className="h-4 w-4 text-gray-600" />
                         </div>
                       </CollapsibleTrigger>
                       <CollapsibleContent>
                         <div className="p-3 bg-gray-200 border rounded space-y-2">
-                          <div className="text-xs">
-                            <div className="font-medium text-gray-900">Contract:</div>
-                            <div className="font-mono text-xs break-all text-gray-800">{formatAddress(event.contract_address)}</div>
-                          </div>
-                          <div className="text-xs">
-                            <div className="font-medium text-gray-900">Topics:</div>
-                            {event.topics.map((topic: string, topicIndex: number) => (
-                              <div key={topicIndex} className="font-mono text-xs break-all text-gray-800">
-                                [
-                                {topicIndex}
-                                ]:
-                                {' '}
-                                {topic}
+                          {Object.entries(event).map(([key, value]) => (
+                            <div key={key} className="text-xs">
+                              <div className="font-medium text-gray-900 capitalize">
+                                {key.replace(/_/g, ' ')}
+                                :
                               </div>
-                            ))}
-                          </div>
-                          <div className="text-xs">
-                            <div className="font-medium text-gray-900">Data:</div>
-                            <div className="font-mono text-xs break-all text-gray-800">{event.data}</div>
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            Block:
-                            {' '}
-                            {event.block_number}
-                          </div>
+                              <div className="font-mono text-xs break-all text-gray-800">
+                                {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </CollapsibleContent>
                     </Collapsible>

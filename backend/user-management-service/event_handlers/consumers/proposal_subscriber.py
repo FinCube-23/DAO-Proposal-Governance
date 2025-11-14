@@ -2,7 +2,9 @@ import json
 import time
 from typing import Dict, Callable
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
+from event_handlers.utils.types import ResponseTransactionStatusDto
 from organizations.services.onchain_verification_service import OnchainVerificationService
+from custom_metrics import track_rabbitmq_consume
 from logging_config import logger
 
 """
@@ -122,7 +124,11 @@ class ProposalSubscriber:
                 self.event_handlers[typename](event, context)
             else:
                 print(f" [⚠️] No handler for {typename}")
-                logger.log(f"No handler for {typename}")
+
+            # Track successful consumption(update queue name after merging)
+            track_rabbitmq_consume(queue="user-management-service-queue", success=True)
+            
+            logger.log(f"No handler for {typename}")
 
             ch.basic_ack(delivery_tag=method.delivery_tag)
             print(" [✓] Processing complete")
@@ -137,6 +143,8 @@ class ProposalSubscriber:
             logger.log(f"Missing required field: {str(e)}")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         except Exception as e:
+            # Track failed consumption
+            track_rabbitmq_consume(queue="user-management-service-queue", success=False)
             print(f" [✘] Processing failed: {str(e)}")
             logger.log(f"Processing failed: {str(e)}")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)

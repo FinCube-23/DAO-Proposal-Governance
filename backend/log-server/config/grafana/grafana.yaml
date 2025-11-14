@@ -34,3 +34,17 @@ datasources:
           name: TraceID
           url: $${__value.raw}
           urlDisplayLabel: Find this trace in Tempo
+
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+    jsonData:
+       httpMethod: POST
+       exemplarTraceIdDestinations:
+        - datasourceUid: tempo
+          name: TraceID     
+             

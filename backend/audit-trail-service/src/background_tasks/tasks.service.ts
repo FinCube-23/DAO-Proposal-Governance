@@ -42,6 +42,7 @@ export class TasksService {
     this.logger.log(
       `Handling event emission for transaction: ${transaction.transactionHash}`,
     );
+
     await this.transactionUpdateService.updateTransactionStatus(
       transaction.transactionHash,
       transaction,
@@ -330,6 +331,9 @@ export class TasksService {
               proposalType: proposalAddedEvent?.proposalType,
               proposedWallet: proposalAddedEvent?.proposedWallet,
               __typename: proposalAddedEvent?.__typename,
+              blockTimestamp: proposalAddedEvent?.blockTimestamp,
+              blockNumber: proposalAddedEvent?.blockNumber,
+              transactionHash: proposalAddedEvent?.transactionHash,
             },
           };
 

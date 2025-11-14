@@ -1,20 +1,22 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Organization, OrgStatus } from './types';
-import { useMemo, useState } from 'react';
-import { CopyableCode } from '@/shared/components/copyable-code';
+import { useMutation } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
+import { orgApis } from '@/core/services/org';
 import CustomPagination from '@/shared/components/custom-pagination';
 import { DataTable } from '@/shared/components/dashboard/data-table';
 import { TimeDisplay } from '@/shared/components/time-display';
 import { Badge } from '@/shared/components/ui/badge';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/components/ui/select';
-import { cn, formatAddress, STATUS_BADGE_CONFIG } from '@/shared/utils';
-import { ORGANIZATIONS } from './mock-data';
+import { cn, STATUS_BADGE_CONFIG } from '@/shared/utils';
 
 const ORG_STATUS_TO_TX: Record<OrgStatus, keyof typeof STATUS_BADGE_CONFIG> = {
   active: 'success',
   pending: 'pending',
   suspended: 'failed',
+  approved: 'approved',
 };
 
 const columns: ColumnDef<Organization>[] = [
@@ -30,21 +32,24 @@ const columns: ColumnDef<Organization>[] = [
     accessorKey: 'type',
     header: 'Type',
     enableSorting: false,
+    cell: ({ row }) => (
+      <div className="uppercase">{row.getValue('type')}</div>
+    ),
   },
   {
-    accessorKey: 'location',
+    accessorKey: 'address',
     header: 'Location',
     enableSorting: false,
   },
   {
-    accessorKey: 'membership_status',
-    header: 'Membership',
+    accessorKey: 'status',
+    header: 'Status',
     enableSorting: false,
     cell: ({ row }) => {
-      const status = row.getValue('membership_status') as OrgStatus;
+      const status = row.getValue('status') as OrgStatus;
       const txStatus = ORG_STATUS_TO_TX[status];
       const config = STATUS_BADGE_CONFIG[txStatus];
-      const dotColor = txStatus === 'success'
+      const dotColor = txStatus === 'success' || txStatus === 'approved'
         ? 'bg-green-600'
         : txStatus === 'failed'
           ? 'bg-red-600'
@@ -58,27 +63,6 @@ const columns: ColumnDef<Organization>[] = [
         </Badge>
       );
     },
-  },
-  {
-    accessorKey: 'members_count',
-    header: 'Members',
-    cell: ({ row }) => (
-      <div className="tabular-nums">{row.original.members_count ?? '-'}</div>
-    ),
-  },
-  {
-    accessorKey: 'treasury_address',
-    header: 'Treasury',
-    enableSorting: false,
-    cell: ({ row }) => (
-      row.original.treasury_address
-        ? (
-            <CopyableCode value={row.original.treasury_address} displayValue={formatAddress(row.original.treasury_address)} />
-          )
-        : (
-            <span className="text-muted-foreground">-</span>
-          )
-    ),
   },
   {
     accessorKey: 'created_at',
@@ -96,17 +80,48 @@ const columns: ColumnDef<Organization>[] = [
   },
 ];
 
+const limit = 10;
+
 export default function AuditOrganizations() {
+  const [orgList, setOrgList] = useState<any>([]);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState<number>(0);
+  const navigate = useNavigate();
+
   const [typeFilter, setTypeFilter] = useState<'all' | Organization['type']>('all');
   const [statusFilter, setStatusFilter] = useState<'all' | OrgStatus>('all');
 
-  const filteredData = useMemo(() => {
-    return ORGANIZATIONS.filter((org) => {
-      const typeOk = typeFilter === 'all' || org.type === typeFilter;
-      const statusOk = statusFilter === 'all' || org.membership_status === statusFilter;
-      return typeOk && statusOk;
+  const getAllOrgs = useMutation({
+    mutationKey: ['getAllOrgs'],
+    mutationFn: orgApis.getAllOrgs,
+    onSuccess: (data) => {
+      setOrgList(data.organizations);
+      setPage(data.pagination.page);
+      setTotal(data.pagination.total);
+    },
+    onError: (error) => {
+      console.error('Get all orgs failed', error);
+    },
+  });
+
+  useEffect(() => {
+    getAllOrgs.mutate({
+      page,
+      limit,
+      status: statusFilter === 'all' ? undefined : statusFilter,
+      type: typeFilter === 'all' ? undefined : typeFilter,
     });
-  }, [typeFilter, statusFilter]);
+  }, [page, statusFilter, location, typeFilter]);
+
+  const handleRowClick = (row: any) => {
+    navigate(`/organization/audit/organizations/${row.id}`);
+  };
+
+  if (getAllOrgs.isPending)
+    return <p>Loading...</p>;
+  if (getAllOrgs.isError)
+    return <p>Error loading data</p>;
+
   return (
     <Card>
       <CardHeader>
@@ -121,10 +136,10 @@ export default function AuditOrganizations() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="PLC">PLC</SelectItem>
-                  <SelectItem value="LLC">LLC</SelectItem>
-                  <SelectItem value="INC">INC</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  <SelectItem value="plc">PLC</SelectItem>
+                  <SelectItem value="llc">LLC</SelectItem>
+                  <SelectItem value="inc">INC</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -136,9 +151,8 @@ export default function AuditOrganizations() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="approved">Approved</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -146,10 +160,10 @@ export default function AuditOrganizations() {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={filteredData} isLoading={false} />
+        <DataTable columns={columns} data={orgList} isLoading={false} onRowClick={handleRowClick} />
       </CardContent>
       <CardFooter className="flex justify-center">
-        <CustomPagination limit={5} total={100} page={1} onPageChange={() => {}} />
+        <CustomPagination limit={limit} total={total} page={page} onPageChange={setPage} />
       </CardFooter>
     </Card>
   );

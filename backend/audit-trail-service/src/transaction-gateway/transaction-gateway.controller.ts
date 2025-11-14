@@ -14,7 +14,9 @@ import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
 
 @Controller('transactions')
 export class TransactionGatewayController {
-  constructor(private readonly transactionsGatewayService: TransactionGatewayService) {}
+  constructor(
+    private readonly transactionsGatewayService: TransactionGatewayService,
+  ) {}
 
   @Get()
   @ApiTags('Transaction Off-Chain Backup')
@@ -44,7 +46,6 @@ export class TransactionGatewayController {
           example: 87.5,
           description: 'Percentage of synced transactions',
         },
-        totalLiquidity: { type: 'string', example: '1500000000000000000' },
         confirmationSourceBreakdown: {
           type: 'object',
           example: {

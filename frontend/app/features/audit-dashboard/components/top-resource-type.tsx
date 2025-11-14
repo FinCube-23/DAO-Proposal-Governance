@@ -5,13 +5,50 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui
 import { TagBadge } from './tag-badge';
 
 interface Props {
-  topResourceKinds: {
-    kind: string;
-    count: number;
-  }[];
+  topResourceTypes: Record<string, number>;
 }
 
-export default function TopResourceType({ topResourceKinds }: Props) {
+function getResourceType(func: string) {
+  switch (func) {
+    case 'ProposalAdded':
+    case 'ProposalCanceleds':
+    case 'ProposalCanceled':
+    case 'ProposalExecuteds':
+    case 'ProposalExecuted':
+      return {
+        title: 'Proposal',
+        tag: 'GOVERNANCE',
+      };
+    default:
+      return {
+        title: 'Others',
+        tag: 'DEFAULT',
+      };
+  }
+}
+
+function aggregateResourceTypes(topResourceTypes: Record<string, number>) {
+  const aggregated: Record<string, { count: number; tag: string }> = {};
+
+  Object.entries(topResourceTypes).forEach(([func, count]) => {
+    const { title, tag } = getResourceType(func);
+
+    if (!aggregated[title]) {
+      aggregated[title] = { count: 0, tag };
+    }
+
+    aggregated[title].count += count;
+  });
+
+  // Convert to sorted array
+  return Object.entries(aggregated)
+    .map(([title, { count, tag }]) => ({ title, count, tag }))
+    .sort((a, b) => b.count - a.count); // Sort by count descending
+}
+
+export default function TopResourceType({ topResourceTypes }: Props) {
+  const aggregatedData = aggregateResourceTypes(topResourceTypes);
+
   return (
     <Card>
       <CardHeader>
@@ -20,32 +57,31 @@ export default function TopResourceType({ topResourceKinds }: Props) {
             <Archive className="h-5 w-5" />
             Top Resource Types
           </CardTitle>
-          <Link to="/resources">
+          {/*  <Link to="/resources">
             <Button variant="ghost" size="sm">
               View All
               {' '}
               <ArrowRight className="h-4 w-4 ml-1" />
             </Button>
-          </Link>
+          </Link> */}
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {topResourceKinds?.map((resource, index) => (
-            <div key={resource.kind} className="flex items-center justify-between">
+          {aggregatedData.map(({ title, count, tag }, index) => (
+            <div key={title} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">
                   #
                   {index + 1}
                 </span>
-                <TagBadge tag={resource.kind} />
+                <TagBadge title={title} tag={tag} />
               </div>
-              <span className="text-sm font-mono">{resource.count.toLocaleString()}</span>
+              <span className="text-sm font-mono">{count.toLocaleString()}</span>
             </div>
           ))}
         </div>
       </CardContent>
     </Card>
-
   );
 }

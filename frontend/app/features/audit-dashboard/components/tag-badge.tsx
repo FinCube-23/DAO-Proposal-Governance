@@ -2,6 +2,7 @@ import { Badge } from '@/shared/components/ui/badge';
 import { cn } from '@/shared/utils/style';
 
 interface TagBadgeProps {
+  title?: string;
   tag: string;
   className?: string;
   variant?: 'default' | 'secondary' | 'destructive' | 'outline';
@@ -17,6 +18,7 @@ const TAG_COLORS = {
 } as const;
 
 export function TagBadge({
+  title,
   tag,
   className,
   variant = 'secondary',
@@ -32,7 +34,7 @@ export function TagBadge({
         className,
       )}
     >
-      {tag}
+      {title}
     </Badge>
   );
 }

@@ -37,16 +37,16 @@ export default function AuditTransactions() {
 
   useEffect(() => {
     const getTrxs = async () => {
-      const status = filters.status?.[0];
-      const source = 'all';
-      const hash = '';
+      const { status, source, hash, address, functionName } = filters;
 
       getTransactions.mutate({
         page,
         limit,
-        status: status === 'all' ? undefined : status,
-        source: source === 'all' ? undefined : source,
-        hash: hash === '' ? undefined : hash,
+        ...(status !== undefined && { status: status.toString() }),
+        ...(source && { source }),
+        ...(hash && { hash }),
+        ...(address && { address }),
+        ...(functionName && { functionName }),
       });
     };
 

@@ -1,0 +1,4 @@
+# pgpass.example
+user-management-pgsqldb:5432:dao_db:USERNAME:YOUR_PASSWORD_HERE
+dao-service-pgsqldb:5432:dao_db:USERNAME:YOUR_PASSWORD_HERE
+audit-trail-pgsqldb:5432:dao_db:USERNAME:YOUR_PASSWORD_HERE

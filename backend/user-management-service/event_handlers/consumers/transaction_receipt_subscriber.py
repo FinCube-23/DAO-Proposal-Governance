@@ -1,6 +1,7 @@
 import json
 import time
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
+from custom_metrics import track_rabbitmq_consume
 from organizations.services.onchain_verification_service import OnchainVerificationService
 from organizations.serializers.onchain_verification_serializers import (
     OnchainVerificationCreateSerializer
@@ -106,6 +107,9 @@ class TransactionReceiptSubscriber:
             logger.log("Executing handler...")
             self.event_handlers['transaction_receipt'](event)
 
+            # Track successful consumption(update queue name after merging)
+            track_rabbitmq_consume(queue="user-management-transaction-receipt-queue", success=True)
+            
             ch.basic_ack(delivery_tag=method.delivery_tag)
             print(" [✓] Transaction receipt processing complete")
             logger.log("Transaction receipt processing complete")
@@ -115,6 +119,8 @@ class TransactionReceiptSubscriber:
             logger.log("Invalid JSON payload")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)
         except Exception as e:
+            # Track failed consumption(update queue name after merging)
+            track_rabbitmq_consume(queue="user-management-transaction-receipt-queue", success=False)
             print(f" [✘] Processing failed: {str(e)}")
             logger.log(f"Processing failed: {str(e)}")
             ch.basic_nack(delivery_tag=method.delivery_tag, requeue=False)

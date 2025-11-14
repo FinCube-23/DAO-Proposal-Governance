@@ -43,9 +43,10 @@ exporters:
       max_interval: 30s
       max_elapsed_time: 300s
   otlphttp:
-    endpoint: http://loki:3100/otlp
+    endpoint: https://loki:3100/otlp
     tls:
-      insecure: true
+      insecure_skip_verify: true
+    
   debug:
     verbosity: detailed
     sampling_initial: 2
@@ -61,6 +62,7 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, resource, batch]
       exporters: [otlphttp, debug]
+      
   extensions: [health_check]
   telemetry:
     metrics:

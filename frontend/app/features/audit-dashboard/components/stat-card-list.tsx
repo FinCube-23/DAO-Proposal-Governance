@@ -25,12 +25,13 @@ function formatTimeFromMs(milliseconds: number): string {
   return remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m` : `${hours}h`;
 }
 
-export default function StatCardList() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboardStats'],
-    queryFn: auditTrailApis.getDashboardStats,
-  });
+interface Props {
+  data: any;
+  isLoading: boolean;
+  error: any;
+}
 
+export default function StatCardList({ data, isLoading, error }: Props) {
   // Show loading state if data is still being fetched
   if (isLoading) {
     return (

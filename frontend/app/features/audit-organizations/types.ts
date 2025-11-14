@@ -1,4 +1,4 @@
-export type OrgStatus = 'active' | 'suspended' | 'pending';
+export type OrgStatus = 'active' | 'suspended' | 'pending' | 'approved';
 
 export interface Organization {
   id: string;
@@ -14,5 +14,3 @@ export interface Organization {
   treasury_address?: string;
   members_count?: number;
 }
-
-

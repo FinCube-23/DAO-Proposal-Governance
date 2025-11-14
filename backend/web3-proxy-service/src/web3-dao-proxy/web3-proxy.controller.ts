@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, Param, Req } from '@nestjs/common';
 import { Web3ProxyService } from './web3-proxy.service';
-import { ApiBody, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiBearerAuth} from '@nestjs/swagger';
 
+@ApiBearerAuth('JWT-auth')
 @Controller('web3-dao-proxy')
 export class Web3ProxyController {
   constructor(private readonly web3ProxyService: Web3ProxyService) {}

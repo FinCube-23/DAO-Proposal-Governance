@@ -1,3 +1,4 @@
+import { metrics } from '@opentelemetry/api';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
@@ -10,7 +11,8 @@ import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { NestInstrumentation } from '@opentelemetry/instrumentation-nestjs-core';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
 import { AmqplibInstrumentation } from '@opentelemetry/instrumentation-amqplib';
-
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import { MeterProvider } from '@opentelemetry/sdk-metrics';
 
 const collectorOptions = {
     url: process.env.OTEL_TRACE_COLLECTOR, // url is optional and can be omitted - default is http://localhost:4318/v1/traces
@@ -19,6 +21,12 @@ const collectorOptions = {
 };
 
 const traceExporter = new OTLPTraceExporter(collectorOptions);
+const prometheusExporter = new PrometheusExporter(
+    {
+        port: 9467,
+        endpoint: '/metrics',
+    }
+)
 
 export const otelSDK = new NodeSDK({
     resource: resourceFromAttributes({
@@ -28,10 +36,11 @@ export const otelSDK = new NodeSDK({
         [SEMRESATTRS_SERVICE_INSTANCE_ID]: "1",
     }),
     spanProcessor: new SimpleSpanProcessor(traceExporter),
+    metricReader: prometheusExporter,
     instrumentations: [
-        new HttpInstrumentation(), 
-        new ExpressInstrumentation(), 
-        new NestInstrumentation(), 
+        new HttpInstrumentation(),
+        new ExpressInstrumentation(),
+        new NestInstrumentation(),
         new WinstonInstrumentation(),
         new AmqplibInstrumentation()
     ],
@@ -40,6 +49,9 @@ export const otelSDK = new NodeSDK({
 otelSDK.start();
 console.log('OpenTelemetry SDK started for web3-proxy-service');
 
+prometheusExporter.startServer().then(() => {
+    console.log('✅ Prometheus metrics server started on http://localhost:9467/metrics');
+});
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {
     otelSDK

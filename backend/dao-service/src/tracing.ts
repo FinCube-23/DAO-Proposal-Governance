@@ -12,6 +12,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http';
 import { AmqplibInstrumentation } from "@opentelemetry/instrumentation-amqplib";
 import { PgInstrumentation } from '@opentelemetry/instrumentation-pg';
 import { WinstonInstrumentation } from '@opentelemetry/instrumentation-winston';
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 require('dotenv').config();
 
 const collectorOptions = {
@@ -21,8 +22,13 @@ const collectorOptions = {
 };
 
 
-
 const traceExporter = new OTLPTraceExporter(collectorOptions);
+const prometheusExporter = new PrometheusExporter(
+    {
+        port: 9465,
+        endpoint: '/metrics',
+    }
+)
 
 export const otelSDK = new NodeSDK({
     resource: resourceFromAttributes({
@@ -32,11 +38,17 @@ export const otelSDK = new NodeSDK({
         [SEMRESATTRS_SERVICE_INSTANCE_ID]: "1",
     }),
     spanProcessor: new SimpleSpanProcessor(traceExporter),
+    metricReader: prometheusExporter,
     instrumentations: [new HttpInstrumentation(), new ExpressInstrumentation(), new NestInstrumentation(), new PgInstrumentation(), new AmqplibInstrumentation(), new WinstonInstrumentation()],
 });
+
 otelSDK.start();
 console.log('OpenTelemetry SDK started');
 
+
+prometheusExporter.startServer().then(() => {
+    console.log('✅ Prometheus metrics server started on http://localhost:9465/metrics');
+});
 // gracefully shut down the SDK on process exit
 process.on('SIGTERM', () => {
     otelSDK

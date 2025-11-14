@@ -14,6 +14,7 @@ import { TraceContextService } from 'src/shared/common/tracing/trace-context.ser
 import { TempoService } from '../shared/common/tracing/tempo.service';
 import { TransactionReceiptEventDto } from 'src/shared/common/dto/transaction-receipt-event.dto';
 import { RabbitSubscribe } from '@golevelup/nestjs-rabbitmq';
+import { TransactionGatewayUtil } from './transactions-gateway.util';
 
 @Injectable()
 export class TransactionGatewayService {
@@ -23,6 +24,7 @@ export class TransactionGatewayService {
     private readonly logger: WinstonLogger,
     private readonly traceContextService: TraceContextService,
     private readonly tempoService: TempoService,
+    private readonly transactionGatewayUtil: TransactionGatewayUtil,
   ) {
     this.logger.setContext(TransactionGatewayService.name);
   }
@@ -44,6 +46,7 @@ export class TransactionGatewayService {
         trx_hash: event.onChainData?.transactionHash,
         trx_sender: event.onChainData?.signedBy,
         trx_status: 0,
+        raw_trx: JSON.stringify(event.onChainData?.context),
       };
       const dbRecordedTRX = this.transactionRepository.create(new_dao_audit);
       this.logger.log(
@@ -66,7 +69,7 @@ export class TransactionGatewayService {
   async findAll(
     query: ListTransactionsQueryDto,
   ): Promise<TransactionListResponseDto> {
-    const { page = 1, limit = 10, status, source, hash } = query;
+    const { page = 1, limit = 10, status, source, hash, address, functionName } = query;
     const skip = (page - 1) * limit;
 
     const queryBuilder =
@@ -87,6 +90,20 @@ export class TransactionGatewayService {
       queryBuilder.andWhere('transaction.trx_hash = :hash', { hash });
     }
 
+    if(address){
+      queryBuilder.andWhere("transaction.trx_receipt->>'from' = :address", { address });
+    }
+
+
+    if(functionName){
+      queryBuilder.andWhere(
+        "(transaction.trx_metadata::jsonb->>'__typename' ILIKE :functionName OR transaction.trx_metadata::jsonb->'data'->>'__typename' ILIKE :functionName)", 
+        { functionName: `%${functionName}%` }
+      );
+    }
+
+
+    //from er wallet address diye query
     // Get total count for pagination
     const total = await queryBuilder.getCount();
 
@@ -99,16 +116,36 @@ export class TransactionGatewayService {
         'transaction.confirmation_source',
         'transaction.transaction_confirmation_trace',
         'transaction.updated_at',
+        'transaction.trx_receipt',
+        'transaction.trx_metadata',
       ])
       .skip(skip)
       .take(limit)
       .orderBy('transaction.created_at', 'DESC');
 
     const transactions = await queryBuilder.getMany();
+    const transactionsDto = transactions.map((tx) => {
+      const gasUsed = tx.trx_receipt?.gasUsed || '0';
+      const event_logs = this.transactionGatewayUtil.parseMetadata(tx);
+      const functionName = event_logs.__typename || 'unknown';
+      return {
+        id: tx.id,
+        trx_hash: tx.trx_hash,
+        trx_status: tx.trx_status,
+        confirmation_source: tx.confirmation_source,
+        transaction_confirmation_trace: tx.transaction_confirmation_trace || [],
+        updated_at: tx.updated_at,
+        from: tx.trx_receipt?.from || 'unknown',
+        gas_cost: Number(gasUsed) / 1e18,
+        event_logs: tx.trx_metadata,
+        function: functionName,
+      };
+    });
+
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: transactions,
+      data: transactionsDto,
       total,
       page,
       limit,
@@ -124,14 +161,35 @@ export class TransactionGatewayService {
     if (!transaction) {
       throw new NotFoundException('Transaction not found');
     }
+    const transactionFee = this.transactionGatewayUtil.calculateTransactionFee(
+      BigInt(transaction.trx_receipt.gasUsed || 0),
+      BigInt(transaction.trx_receipt.effectiveGasPrice || 0),
+    );
+
+    const metadata = this.transactionGatewayUtil.parseMetadata(transaction);
+
+    const value = metadata.value;
+    const functionName = metadata.__typename;
+    const gasUsed = transaction.trx_receipt.gasUsed;
+    const lifecycle =
+      this.transactionGatewayUtil.generateTransactionLifecycle(transaction);
+
     return {
       id: transaction.id,
       trx_hash: transaction.trx_hash,
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
-      transaction_confirmation_trace:
-        transaction.transaction_confirmation_trace,
+      transaction_lifecycle: lifecycle,
+      transaction_fee: transactionFee.feeInEth,
+      value: value,
+      to: transaction.trx_receipt.to,
+      from: transaction.trx_receipt.from,
+      event_logs: transaction.trx_metadata,
+      raw_transaction: transaction.raw_trx,
+      transaction_receipt: JSON.stringify(transaction.trx_receipt),
+      function: functionName,
+      gas_cost: Number(gasUsed) / 1e18,
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
     };
@@ -145,78 +203,64 @@ export class TransactionGatewayService {
     if (!transaction) {
       throw new NotFoundException('Transaction not found');
     }
+
+    const transactionFee = this.transactionGatewayUtil.calculateTransactionFee(
+      BigInt(transaction.trx_receipt.gasUsed || 0),
+      BigInt(transaction.trx_receipt.effectiveGasPrice || 0),
+    );
+
+    const metadata = this.transactionGatewayUtil.parseMetadata(transaction);
+
+    const value = metadata.value;
+    const functionName = metadata.__typename;
+    const gasUsed = transaction.trx_receipt.gasUsed;
+    const lifecycle =
+      this.transactionGatewayUtil.generateTransactionLifecycle(transaction);
+
     return {
       id: transaction.id,
       trx_hash: transaction.trx_hash,
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
-      transaction_confirmation_trace:
-        transaction.transaction_confirmation_trace,
+      transaction_lifecycle: lifecycle,
+      transaction_fee: transactionFee.feeInEth,
+      value: value,
+      to: transaction.trx_receipt.to,
+      from: transaction.trx_receipt.from,
+      event_logs: transaction.trx_metadata,
+      raw_transaction: transaction.raw_trx,
+      transaction_receipt: JSON.stringify(transaction.trx_receipt),
+      function: functionName,
+      gas_cost: Number(gasUsed) / 1e18,
       created_at: transaction.created_at,
       updated_at: transaction.updated_at,
     };
   }
 
   async getStatistics(): Promise<any> {
-    const totalTransactions = await this.transactionRepository.count();
+    const transactions = await this.transactionRepository.find();
+    const overallStats =
+      this.transactionGatewayUtil.overallTransactionStats(transactions);
 
-    const pendingTransactions = await this.transactionRepository.count({
-      where: { trx_status: TransactionStatus.PENDING },
-    });
+    const timeSeries =
+      await this.transactionGatewayUtil.generateTransactionTimeSeries();
 
-    const confirmedTransactions = await this.transactionRepository.count({
-      where: { trx_status: TransactionStatus.CONFIRMED },
-    });
+    const resourceTypeStats =
+      this.transactionGatewayUtil.getResourceTypeStats(transactions);
 
-    const unsyncedTransactions = await this.transactionRepository.count({
-      where: { transaction_confirmation_trace: IsNull() },
-    });
+    const topParticipants = this.transactionGatewayUtil.getTopParticipants(
+      transactions,
+      5,
+    );
 
-    const syncedTransactions = totalTransactions - unsyncedTransactions;
-    const syncRate =
-      totalTransactions === 0
-        ? 0
-        : (syncedTransactions / totalTransactions) * 100;
-
-    const totalLiquidityResult = 100000;
-
-    const confirmationSourceBreakdown = await this.transactionRepository
-      .createQueryBuilder('transaction')
-      .select('transaction.confirmation_source', 'source')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('transaction.confirmation_source')
-      .getRawMany();
-
-    const breakdown = {};
-    confirmationSourceBreakdown.forEach((item) => {
-      breakdown[item.source] = parseInt(item.count, 10);
-    });
-
-    const confirmedTxWithTimes = await this.transactionRepository.find({
-      where: { trx_status: TransactionStatus.CONFIRMED },
-      select: ['created_at', 'updated_at'],
-    });
-
-    let averageConfirmationTime = null;
-    if (confirmedTxWithTimes.length > 0) {
-      const totalMilliseconds = confirmedTxWithTimes.reduce((sum, tx) => {
-        const createdAt = new Date(tx.created_at).getTime();
-        const updatedAt = new Date(tx.updated_at).getTime();
-        return sum + (updatedAt - createdAt);
-      }, 0);
-      averageConfirmationTime = totalMilliseconds / confirmedTxWithTimes.length;
-    }
-
-    return {
-      totalTransactions,
-      pendingTransactions,
-      confirmedTransactions,
-      syncRate: parseFloat(syncRate.toFixed(2)),
-      totalLiquidity: totalLiquidityResult.toString(),
-      confirmationSourceBreakdown: breakdown,
-      averageConfirmationTime: averageConfirmationTime || 'N/A',
+    const stats = {
+      overallStats,
+      timeSeries,
+      resourceTypeStats,
+      topParticipants,
     };
+    return stats;
   }
 
   async getTransactionHashForTraceSync(): Promise<string[]> {
