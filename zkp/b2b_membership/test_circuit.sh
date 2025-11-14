@@ -42,7 +42,7 @@ echo "✅ Witness generated successfully"
 echo "✅ Proving key generated successfully"
 
 echo "🔓 Step 5: Generating verification key..."
-bb write_vk -b ./target/b2b_membership.json -o ./target
+bb write_vk -b ./target/b2b_membership.json -o ./target --oracle_hash keccak
 
 if [ $? -ne 0 ]; then
     echo "❌ Verification key generation failed!"
@@ -62,7 +62,7 @@ fi
 echo "✅ Solidity verifier contract generated successfully"
 
 echo "🔍 Step 4: Generating proof..."
-bb prove -b ./target/b2b_membership.json -w ./target/b2b_membership.gz -o ./target
+bb prove -b ./target/b2b_membership.json -w ./target/b2b_membership.gz -o ./target --oracle_hash keccak
 
 if [ $? -ne 0 ]; then
     echo "❌ Proof generation failed!"
@@ -74,7 +74,7 @@ fi
 echo "✅ Proof generated successfully"
 
 echo "� Step 5: Verifying proof..."
-bb verify -k ./target/vk -p ./target/proof -i ./target/public_inputs
+bb verify -k ./target/vk -p ./target/proof --oracle_hash keccak
 
 if [ $? -eq 0 ]; then
     echo "✅ Proof verification successful!"
