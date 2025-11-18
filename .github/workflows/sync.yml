@@ -22,19 +22,51 @@ jobs:
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
             export PATH="/home/web3/.nvm/versions/node/v22.13.1/bin:$PATH"
+
             echo "=== Verifying Node.js tools ==="
             which node npm pm2
             node --version
             npm --version
             pm2 --version
+
             echo "=== Navigating to project directory ==="
             cd /mnt/ext/projects/web3-governance-kit
-            echo "Pulling latest changes from repository"
-            git pull origin dev
+
+            echo "=== Checking for uncommitted changes ==="
+            if ! git diff-index --quiet HEAD --; then
+              echo "ERROR: Uncommitted changes detected in the working directory"
+              git status
+              exit 1
+            fi
+
+            if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+              echo "ERROR: Untracked files detected in the working directory"
+              git status
+              exit 1
+            fi
+
+            echo "=== Pulling latest changes from repository ==="
+            if ! git pull origin dev; then
+              echo "ERROR: Failed to pull latest changes from repository"
+              exit 1
+            fi
+
+            echo "=== Verifying git pull was successful ==="
+            CURRENT_COMMIT=$(git rev-parse HEAD)
+            REMOTE_COMMIT=$(git rev-parse origin/dev)
+            if [ "$CURRENT_COMMIT" != "$REMOTE_COMMIT" ]; then
+              echo "ERROR: Local branch is not up to date with remote"
+              echo "Local: $CURRENT_COMMIT"
+              echo "Remote: $REMOTE_COMMIT"
+              exit 1
+            fi
+            echo "Successfully pulled latest changes. Current commit: $CURRENT_COMMIT"
+
             echo "Stopping Docker services"
             ./run.sh down
             echo "Starting Docker services"
             ./run.sh up-be
+
             echo "=== Navigating to frontend directory ==="
             cd /mnt/ext/projects/web3-governance-kit/frontend
             echo "Stopping frontend services"
