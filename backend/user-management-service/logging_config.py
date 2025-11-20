@@ -149,6 +149,7 @@ class Logger:
         self.default_context = "Application"
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.INFO)
+        self.logger.propagate = False
         # avoid duplicate handlers in reloads
         if self.logger.handlers:
             return

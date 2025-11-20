@@ -4,6 +4,7 @@ from organizations.models import Organization
 from users.models import User
 from typing import Optional
 from drf_spectacular.utils import extend_schema_field
+from logging_config import logger
 
 
 class RestrictedFieldsMixin:
@@ -124,10 +125,9 @@ class OrganizationUpdateSerializer(RestrictedFieldsMixin, serializers.ModelSeria
 
 
 class OrganizationListSerializer(serializers.ModelSerializer):
-    organization_admin_id = serializers.IntegerField(
-        source="organization_admin.id", read_only=True
-    )
-    organization_admin_name = serializers.SerializerMethodField()
+    offchain_status=serializers.CharField(source="status",read_only=True)
+    organization_admin=serializers.SerializerMethodField()
+    onchain_status=serializers.SerializerMethodField()
 
     class Meta:
         model = Organization
@@ -138,24 +138,55 @@ class OrganizationListSerializer(serializers.ModelSerializer):
             "type",
             "address",
             "legal_entity_identifier",
-            "status",
-            "organization_admin_id",
-            "organization_admin_name",
+            "offchain_status",
+            "organization_admin",
+            "onchain_status",
             "created_at",
             "updated_at",
         ]
         read_only_fields = fields
 
+    
+    @extend_schema_field(dict)
+    def get_organization_admin(self,obj)->Optional[dict]:
+        try:
+            if obj.organization_admin:
+                return {
+                    "id": obj.organization_admin.id,
+                    "email": obj.organization_admin.email,
+                    "full_name": f"{obj.organization_admin.first_name} {obj.organization_admin.last_name}".strip(),
+                    "status": obj.organization_admin.status,
+                    "phone_number": (
+                        str(obj.organization_admin.contact_number)
+                        if obj.organization_admin.contact_number
+                        else None
+                    ),
+                    "wallet_address": obj.organization_admin.wallet_address,
+                }
+            return None
+        except Exception as e:
+            logger.error({"event": "Error getting organization admin in list serializer", "error": str(e)})
+            return None
+        
     @extend_schema_field(str)
-    def get_organization_admin_name(self, obj) -> Optional[str]:
-        if obj.organization_admin:
-            return f"{obj.organization_admin.first_name} {obj.organization_admin.last_name}".strip()
-        return None
+    def get_onchain_status(self,obj)->Optional[str]:
+        try:
+            latest_verification=obj.onchain_verifications.order_by("-created_at").first()
+            if latest_verification:
+                return latest_verification.onchain_status
+            return None
+        except Exception as e:
+            logger.error(
+                {"event": "Error getting onchain data in list serializer", "error": str(e)},
+                contextValue="OrganizationListSerializer"
+            )
+            return None
 
 
 class OrganizationDetailSerializer(serializers.ModelSerializer):
+    offchain_status=serializers.CharField(source="status",read_only=True)
     organization_admin = serializers.SerializerMethodField()
-    onchain_verifications = serializers.SerializerMethodField()
+    onchain_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Organization
@@ -166,10 +197,10 @@ class OrganizationDetailSerializer(serializers.ModelSerializer):
             "type",
             "address",
             "legal_entity_identifier",
-            "status",
+            "offchain_status",
             "is_active",
             "organization_admin",
-            "onchain_verifications",
+            "onchain_status",
             "created_at",
             "updated_at",
         ]
@@ -177,37 +208,41 @@ class OrganizationDetailSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(dict)
     def get_organization_admin(self, obj) -> Optional[dict]:
-        if obj.organization_admin:
-            return {
-                "id": obj.organization_admin.id,
-                "email": obj.organization_admin.email,
-                "full_name": f"{obj.organization_admin.first_name} {obj.organization_admin.last_name}".strip(),
-                "status": obj.organization_admin.status,
-                "phone_number": (
-                    str(obj.organization_admin.contact_number)
-                    if obj.organization_admin.contact_number
-                    else None
-                ),
-                "wallet_address": obj.organization_admin.wallet_address,
-            }
-        return None
+        try:
+            if obj.organization_admin:
+                return {
+                    "id": obj.organization_admin.id,
+                    "email": obj.organization_admin.email,
+                    "full_name": f"{obj.organization_admin.first_name} {obj.organization_admin.last_name}".strip(),
+                    "status": obj.organization_admin.status,
+                    "phone_number": (
+                        str(obj.organization_admin.contact_number)
+                        if obj.organization_admin.contact_number
+                        else None
+                    ),
+                    "wallet_address": obj.organization_admin.wallet_address,
+                }
+            return None
+        except Exception as e:
+            logger.error(
+                {"event": "Error getting organization admin in detail serializer", "error": str(e)},
+                contextValue="OrganizationDetailSerializer"
+            )
+            return None
 
-    @extend_schema_field(list)
-    def get_onchain_verifications(self, obj) -> list:
-        if not hasattr(obj, "onchain_verifications"):
-            return []
-        return [
-            {
-                "id": verification.id,
-                "trx_hash": verification.trx_hash,
-                "onchain_id": verification.onchain_id,
-                "onchain_status": verification.onchain_status,
-                "proposer_wallet": verification.proposer_wallet,
-                "created_at": verification.created_at,
-                "updated_at": verification.updated_at,
-            }
-            for verification in obj.onchain_verifications.all()
-        ]
+    @extend_schema_field(str)
+    def get_onchain_status(self,obj)->Optional[str]:
+        try:
+            latest_verification=obj.onchain_verifications.order_by("-created_at").first()
+            if latest_verification:
+                return latest_verification.onchain_status
+            return None
+        except Exception as e:
+            logger.error(
+                {"event": "Error getting onchain data in detail serializer", "error": str(e)},
+                contextValue="OrganizationDetailSerializer"
+            )
+            return None
 
 
 class OrganizationResponseSerializer(serializers.ModelSerializer):

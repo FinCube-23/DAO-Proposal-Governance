@@ -35,7 +35,6 @@ DjangoInstrumentor().instrument()
 RequestsInstrumentor().instrument()
 Psycopg2Instrumentor().instrument()
 PikaInstrumentor().instrument()
-LoggingInstrumentor().instrument(set_logging_format=True)
 
 print("OpenTelemetry SDK (tracing) started for user-management-service")
 

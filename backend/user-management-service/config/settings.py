@@ -262,6 +262,9 @@ LOGGING = {
     },
     "handlers": {
         "console": {"class": "logging.StreamHandler", "formatter": "json"},
+        "null": {
+            "class": "logging.NullHandler",
+        },
     },
     "root": {
         "handlers": ["console"],
@@ -271,7 +274,12 @@ LOGGING = {
         "django": {
             "handlers": ["console"],
             "level": "INFO",
-            "propagate": True,
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["null"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
