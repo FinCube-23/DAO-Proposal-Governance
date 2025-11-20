@@ -226,6 +226,18 @@ export class TasksService {
           topics: [proposalTopic, proposalEndTopic],
         };
 
+        // Add error handler for WebSocket
+        alchemy.ws.on('error', (error) => {
+          this.logger.error(`WebSocket error: ${error.message}`);
+        });
+
+        // Add close handler
+        alchemy.ws.on('close', () => {
+          this.logger.warn(
+            'WebSocket connection closed. Attempting to reconnect...',
+          );
+        });
+
         // Event handler with separate spans
         alchemy.ws.on(ProposalAddedEvents, async (txn) => {
           // Create independent span for each event (not child of setup span)
