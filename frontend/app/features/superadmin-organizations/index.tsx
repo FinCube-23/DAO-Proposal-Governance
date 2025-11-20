@@ -195,11 +195,11 @@ export default function SuperAdminOrganizations() {
       ),
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
+      accessorKey: 'offchain_status',
+      header: 'Offchain Status',
       enableSorting: false,
       cell: ({ row }) => {
-        const status = row.getValue('status') as SuperAdminOrgStatus;
+        const status = (row.getValue('offchain_status') || row.getValue('status')) as SuperAdminOrgStatus;
         const allowedTransitions = getAllowedStatusTransitions(status);
         const configKey = STATUS_CONFIG[status];
         const config = STATUS_BADGE_CONFIG[configKey];
@@ -264,6 +264,31 @@ export default function SuperAdminOrganizations() {
               })}
             </SelectContent>
           </Select>
+        );
+      },
+    },
+    {
+      accessorKey: 'onchain_status',
+      header: 'Onchain Status',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const status = row.getValue('onchain_status') as string | undefined;
+        if (!status) {
+          return <span className="text-gray-400 text-xs">-</span>;
+        }
+        const configKey = status === 'approved' ? 'success' : status === 'pending' ? 'pending' : 'failed';
+        const config = STATUS_BADGE_CONFIG[configKey];
+        const dotColor = configKey === 'success'
+          ? 'bg-green-600'
+          : configKey === 'failed'
+            ? 'bg-red-600'
+            : 'bg-amber-600';
+
+        return (
+          <Badge variant="secondary" className={cn('capitalize rounded-full border-0', config.color, configKey === 'pending' && 'animate-pulse')}>
+            <span className={cn('inline-block w-2 h-2 rounded-full mr-1', dotColor)} />
+            {status}
+          </Badge>
         );
       },
     },

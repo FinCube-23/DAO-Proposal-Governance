@@ -42,11 +42,11 @@ const columns: ColumnDef<Organization>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
+    accessorKey: 'offchain_status',
+    header: 'Offchain Status',
     enableSorting: false,
     cell: ({ row }) => {
-      const status = row.getValue('status') as OrgStatus;
+      const status = (row.getValue('offchain_status') || row.getValue('status')) as OrgStatus;
       const txStatus = ORG_STATUS_TO_TX[status];
       const config = STATUS_BADGE_CONFIG[txStatus];
       const dotColor = txStatus === 'success' || txStatus === 'approved'
@@ -56,6 +56,30 @@ const columns: ColumnDef<Organization>[] = [
           : txStatus === 'pending'
             ? 'bg-amber-600'
             : 'bg-gray-600';
+      return (
+        <Badge variant="secondary" className={cn('capitalize', config.color, txStatus === 'pending' && 'animate-pulse')}>
+          <span className={cn('inline-block w-2 h-2 rounded-full mr-1', dotColor)} />
+          {status}
+        </Badge>
+      );
+    },
+  },
+  {
+    accessorKey: 'onchain_status',
+    header: 'Onchain Status',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const status = row.getValue('onchain_status') as string | undefined;
+      if (!status) {
+        return <span className="text-gray-400 text-xs">-</span>;
+      }
+      const txStatus = status === 'approved' ? 'success' : status === 'pending' ? 'pending' : 'failed';
+      const config = STATUS_BADGE_CONFIG[txStatus];
+      const dotColor = txStatus === 'success'
+        ? 'bg-green-600'
+        : txStatus === 'failed'
+          ? 'bg-red-600'
+          : 'bg-amber-600';
       return (
         <Badge variant="secondary" className={cn('capitalize', config.color, txStatus === 'pending' && 'animate-pulse')}>
           <span className={cn('inline-block w-2 h-2 rounded-full mr-1', dotColor)} />
