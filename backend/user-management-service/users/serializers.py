@@ -90,9 +90,25 @@ class UserResponseSerializer(serializers.ModelSerializer):
 
 
 class UserListSerializer(serializers.ModelSerializer):
+    
     class Meta:
         model = User
-        fields = ["id", "email", "first_name", "last_name", "is_active", "is_staff"]
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "contact_number",
+            "wallet_address",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "is_verified_email",
+            "is_verified_contact_number",
+            "status",
+            "date_joined",
+            "updated_at",
+        ]
         read_only_fields = fields
 
 
@@ -107,13 +123,20 @@ class UserDetailSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "contact_number",
+            "wallet_address",
             "is_active",
             "is_staff",
+            "is_superuser",
+            "is_verified_email",
+            "is_verified_contact_number",
             "status",
+            "date_joined",
+            "updated_at",
             "organizations",
         ]
         read_only_fields = fields
 
+    @extend_schema_field(list)
     def get_organizations(self, obj):
         if not hasattr(obj, "organization_memberships"):
             return []
@@ -284,3 +307,23 @@ class RefreshTokenRequestSerializer(serializers.Serializer):
 
 class RefreshTokenResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
+
+
+class UserStatusChangeSerializer(serializers.Serializer):
+    user_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=True,
+        allow_empty=False,
+        help_text="List of user IDs to update"
+    )
+    status = serializers.ChoiceField(
+        choices=User.STATUS_CHOICES,
+        required=True,
+        help_text="New status to set"
+    )
+    
+    def validate_user_ids(self, value):
+        if not value:
+            raise serializers.ValidationError("At least one user ID is required")
+        # Remove duplicates
+        return list(set(value))

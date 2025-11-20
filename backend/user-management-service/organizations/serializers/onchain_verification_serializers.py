@@ -117,7 +117,9 @@ class OnchainVerificationListSerializer(serializers.ModelSerializer):
             "onchain_id",
             "onchain_status",
             "proposer_wallet",
+            "context",
             "organization_name",
             "created_at",
+            "updated_at",
         ]
         read_only_fields = fields

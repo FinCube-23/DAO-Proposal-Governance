@@ -9,6 +9,7 @@ from organizations.serializers.organization_serializers import (
     OrganizationListSerializer,
     OrganizationDetailSerializer,
     OrganizationResponseSerializer,
+    OrganizationStatusChangeSerializer,
 )
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 
@@ -92,17 +93,34 @@ class ProtectedOrganizationController(ViewSet):
                 description="Filter by organization type",
                 enum=[choice[0] for choice in Organization.ORGANIZATION_TYPES],
             ),
+            OpenApiParameter(
+                name="search",
+                type=OpenApiTypes.STR,
+                description="Search by id, name, email, or organization admin details (email, first name, last name)",
+            ),
+            OpenApiParameter(
+                name="sort_by",
+                type=OpenApiTypes.STR,
+                description="Sort by field",
+                enum=['id', 'name', 'email', 'type', 'status', 'is_active', 'created_at'],
+            ),
+            OpenApiParameter(
+                name="order",
+                type=OpenApiTypes.STR,
+                description="Sort order",
+                enum=['asc', 'desc'],
+            ),
         ],
         responses={
             200: OpenApiTypes.OBJECT,
             400: OpenApiTypes.OBJECT,
         },
         summary="List all organizations",
-        description="Retrieve a paginated list of all organizations with optional filtering.",
+        description="Retrieve a paginated list of all organizations with optional filtering, search, and sorting.",
     )
     def get_list(self, request):
         """
-        Retrieve all organizations with pagination and filtering.
+        Retrieve all organizations with pagination, filtering, search, and sorting.
         out -> id, name, email, type, address, legal_entity_identifier, status, organization_admin_id, organization_admin_name
         """
         logger.log({"event": "Getting organization list Started", "data": request.query_params})
@@ -223,3 +241,69 @@ class ProtectedOrganizationController(ViewSet):
                 else status.HTTP_400_BAD_REQUEST
             )
             return Response({"status": "error", "message": str(e)}, status=error_status)
+    
+    @extend_schema(
+        request=OrganizationStatusChangeSerializer,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "string"},
+                    "message": {"type": "string"},
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "updated_count": {"type": "integer"},
+                            "updated_ids": {"type": "array", "items": {"type": "integer"}},
+                            "skipped_ids": {"type": "array", "items": {"type": "integer"}},
+                        }
+                    }
+                }
+            },
+            400: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="Change organization status",
+        description=(
+            "Change status for one or multiple organizations. "
+            "Allowed transitions: pending→approved/cancelled, approved→banned, banned→pending. "
+            "Invalid transitions are skipped without error."
+        ),
+    )
+    def change_status(self, request):
+        """
+        Change organization status (single or bulk).
+        Allowed transitions:
+        - pending => approved or cancelled
+        - approved => banned
+        - banned => pending
+        
+        Invalid transitions are skipped.
+        
+        in -> organization_ids (list), status
+        out -> updated_count, updated_ids, skipped_ids
+        """
+        logger.log({"event": "Changing organization status Started", "data": request.data})
+        
+        try:
+            serializer = OrganizationStatusChangeSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            
+            result = OrganizationService.change_organization_status(
+                org_ids=serializer.validated_data['organization_ids'],
+                new_status=serializer.validated_data['status']
+            )
+            
+            logger.log({"event": "Changing organization status Success", "data": result})
+            
+            return Response({
+                "status": "success",
+                "message": f"Updated {result['updated_count']} organization(s)",
+                "data": result
+            })
+            
+        except Exception as e:
+            logger.error({"event": "Changing organization status Error", "data": request.data, "error": str(e)})
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

@@ -15,6 +15,7 @@ from users.serializers import (
     UserResponseSerializer,
     UserStatusResponseSerializer,
     UserStatusUpdateSerializer,
+    UserStatusChangeSerializer,
 )
 from users.utils.exceptions import EmailAlreadyExistsError
 from drf_spectacular.utils import (
@@ -214,11 +215,44 @@ class ProtectedUserController(ViewSet):
                 type=OpenApiTypes.BOOL,
                 description="Filter staff users",
             ),
+            OpenApiParameter(
+                name="is_verified_email",
+                type=OpenApiTypes.BOOL,
+                description="Filter users by email verification status",
+            ),
+            OpenApiParameter(
+                name="is_verified_contact_number",
+                type=OpenApiTypes.BOOL,
+                description="Filter users by contact number verification status",
+            ),
+            OpenApiParameter(
+                name="search",
+                type=OpenApiTypes.STR,
+                description="Search by id, email, first name, last name, or contact number",
+            ),
+            OpenApiParameter(
+                name="sort_by",
+                type=OpenApiTypes.STR,
+                description="Sort by field",
+                enum=[
+                    'id', 'email', 'first_name', 'last_name', 'status',
+                    'is_active', 'is_staff', 'is_superuser', 'is_verified_email',
+                    'is_verified_contact_number', 'date_joined', 'updated_at'
+                ],
+            ),
+            OpenApiParameter(
+                name="order",
+                type=OpenApiTypes.STR,
+                description="Sort order",
+                enum=['asc', 'desc'],
+            ),
         ],
         responses={
             200: OpenApiTypes.OBJECT,
             400: OpenApiTypes.OBJECT,
         },
+        summary="List all users",
+        description="Retrieve a paginated list of all users with optional filtering, search, and sorting.",
     )
     def get_user_list(self, request):
         logger.log({"event": "Getting user list Started", "data": request.query_params})
@@ -229,6 +263,73 @@ class ProtectedUserController(ViewSet):
         except Exception as e:
             logger.error({"event": "Getting user list Error", "data": request.query_params, "error": str(e)})
             return Response({"error": str(e)}, status=400)
+    
+    @extend_schema(
+        request=UserStatusChangeSerializer,
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "string"},
+                    "message": {"type": "string"},
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "updated_count": {"type": "integer"},
+                            "updated_ids": {"type": "array", "items": {"type": "integer"}},
+                            "skipped_ids": {"type": "array", "items": {"type": "integer"}},
+                        }
+                    }
+                }
+            },
+            400: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="Change user status",
+        description=(
+            "Change status for one or multiple users. "
+            "Allowed transitions: pending→approved/rejected, approved→banned, banned→pending. "
+            "Invalid transitions are skipped without error."
+        ),
+    )
+    def change_status(self, request):
+        """
+        Change user status (single or bulk).
+        Allowed transitions:
+        - pending => approved or rejected
+        - approved => banned
+        - banned => pending
+        
+        Invalid transitions are skipped.
+        
+        in -> user_ids (list), status
+        out -> updated_count, updated_ids, skipped_ids
+        """
+        logger.log({"event": "Changing user status Started", "data": request.data})
+        
+        try:
+            serializer = UserStatusChangeSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            
+            result = UserService.change_user_status(
+                user_ids=serializer.validated_data['user_ids'],
+                new_status=serializer.validated_data['status'],
+                approved_by=request.user.id
+            )
+            
+            logger.log({"event": "Changing user status Success", "data": result})
+            
+            return Response({
+                "status": "success",
+                "message": f"Updated {result['updated_count']} user(s)",
+                "data": result
+            })
+            
+        except Exception as e:
+            logger.error({"event": "Changing user status Error", "data": request.data, "error": str(e)})
+            return Response(
+                {"status": "error", "message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PublicUserController(ViewSet):

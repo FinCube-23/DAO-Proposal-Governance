@@ -38,7 +38,7 @@ class OrganizationService:
     @staticmethod
     def get_all_organizations(query_params):
         """
-        Get paginated list of organizations with filtering.
+        Get paginated list of organizations with filtering, search, and sorting.
         """
         # Validate and parse parameters
         page = int(query_params.get('page', 1))
@@ -56,8 +56,26 @@ class OrganizationService:
         if 'type' in query_params and query_params['type'] != 'all':
             filters['type'] = query_params['type']
         
+        # Get search parameter
+        search = query_params.get('search', '').strip()
+        
+        # Get sorting parameters
+        sort_by = query_params.get('sort_by', '').strip()
+        order = query_params.get('order', 'desc').strip().lower()
+        
+        # Validate order parameter
+        if order not in ['asc', 'desc']:
+            order = 'desc'
+        
         # Delegate to repository
-        return OrganizationRepository.get_all_organizations(page, limit, filters)
+        return OrganizationRepository.get_all_organizations(
+            page, 
+            limit, 
+            filters, 
+            search if search else None,
+            sort_by if sort_by else None,
+            order
+        )
     
     @staticmethod
     def get_organization_by_id(org_id):
@@ -126,3 +144,62 @@ class OrganizationService:
         if organization.organization_admin_id != user_id:
             raise Exception("User is not the admin of this organization")
         return organization
+    
+    @staticmethod
+    def change_organization_status(org_ids, new_status):
+        """
+        Change organization status with validation of allowed transitions.
+        Allowed transitions:
+        - pending => approved or cancelled
+        - approved => banned
+        - banned => pending
+        
+        Returns dict with success count and skipped org IDs.
+        """
+        # Validate new status
+        valid_statuses = ['pending', 'approved', 'cancelled', 'banned']
+        if new_status not in valid_statuses:
+            raise Exception(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+        
+        # Get all organizations
+        organizations = OrganizationRepository.get_organizations_by_ids(org_ids)
+        
+        if not organizations.exists():
+            raise Exception("No organizations found with provided IDs")
+        
+        # Define allowed transitions
+        allowed_transitions = {
+            'pending': ['approved', 'cancelled'],
+            'approved': ['banned'],
+            'banned': ['pending']
+        }
+        
+        # Filter organizations based on allowed transitions
+        valid_org_ids = []
+        skipped_org_ids = []
+        
+        for org in organizations:
+            current_status = org.status
+            
+            # Check if transition is allowed
+            if current_status in allowed_transitions:
+                if new_status in allowed_transitions[current_status]:
+                    valid_org_ids.append(org.id)
+                else:
+                    skipped_org_ids.append(org.id)
+            else:
+                # Status not in transition map, skip
+                skipped_org_ids.append(org.id)
+        
+        # Perform bulk update for valid organizations
+        updated_count = 0
+        if valid_org_ids:
+            updated_count = OrganizationRepository.bulk_update_organization_status(
+                valid_org_ids, new_status
+            )
+        
+        return {
+            'updated_count': updated_count,
+            'updated_ids': valid_org_ids,
+            'skipped_ids': skipped_org_ids
+        }

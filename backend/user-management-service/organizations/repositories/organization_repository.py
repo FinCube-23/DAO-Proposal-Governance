@@ -1,5 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 from organizations.models import Organization
 
 class OrganizationRepository:
@@ -16,9 +17,32 @@ class OrganizationRepository:
         )
 
     @staticmethod
-    def get_all_organizations(page, limit, filters=None):
+    def get_all_organizations(page, limit, filters=None, search=None, sort_by=None, order='desc'):
         filters = filters or {}
-        queryset = Organization.objects.select_related('organization_admin').filter(**filters).order_by('-created_at')
+        queryset = Organization.objects.select_related('organization_admin').filter(**filters)
+        
+        # Apply search across multiple fields
+        if search:
+            search_query = Q(id__icontains=search) | \
+                          Q(name__icontains=search) | \
+                          Q(email__icontains=search) | \
+                          Q(organization_admin__email__icontains=search) | \
+                          Q(organization_admin__first_name__icontains=search) | \
+                          Q(organization_admin__last_name__icontains=search)
+            queryset = queryset.filter(search_query)
+        
+        # Apply sorting
+        if sort_by:
+            # Validate sort_by field to prevent injection
+            allowed_sort_fields = ['id', 'name', 'email', 'type', 'status', 'is_active', 'created_at']
+            if sort_by in allowed_sort_fields:
+                order_prefix = '-' if order == 'desc' else ''
+                queryset = queryset.order_by(f'{order_prefix}{sort_by}')
+            else:
+                queryset = queryset.order_by('-created_at')
+        else:
+            queryset = queryset.order_by('-created_at')
+        
         paginator = Paginator(queryset, limit)
         
         try:
@@ -100,3 +124,26 @@ class OrganizationRepository:
             )
         except Organization.DoesNotExist:
             return None
+    
+    @classmethod
+    def bulk_update_organization_status(cls, org_ids, new_status):
+        """
+        Bulk update organization status.
+        Returns list of updated organization IDs.
+        """
+        # Set is_active based on status
+        is_active = True if new_status == 'approved' else False
+        
+        # Update organizations
+        updated_count = Organization.objects.filter(
+            id__in=org_ids
+        ).update(status=new_status, is_active=is_active)
+        
+        return updated_count
+    
+    @classmethod
+    def get_organizations_by_ids(cls, org_ids):
+        """
+        Get organizations by their IDs.
+        """
+        return Organization.objects.filter(id__in=org_ids)

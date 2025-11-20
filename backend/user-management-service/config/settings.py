@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "event_handlers",  # New app for event handling
     "users",
     "organizations",
+    "analytics",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",

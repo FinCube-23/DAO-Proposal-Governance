@@ -1,5 +1,5 @@
 import { api } from '@/core/api/client';
-import { USER_ENDPOINT } from '@/core/api/endpoints';
+import { ANALYTICS_ENDPOINT, USER_ENDPOINT } from '@/core/api/endpoints';
 
 export interface UpdateUserProfilePayload {
   email?: string;
@@ -23,4 +23,6 @@ export interface UpdateUserProfileResponse {
 export const userApis = {
   updateProfile: (payload: UpdateUserProfilePayload) =>
     api.patch<UpdateUserProfileResponse>(`${USER_ENDPOINT.BASE}/profile/update`, payload),
+  getAnalytics: () =>
+    api.get(`${ANALYTICS_ENDPOINT.BASE}/analytics/stats`),
 };

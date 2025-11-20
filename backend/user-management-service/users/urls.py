@@ -37,6 +37,11 @@ urlpatterns = [
         name="user-list",
     ),
     path(
+        "/update-status",
+        ProtectedUserController.as_view({"patch": "change_status"}),
+        name="user-change-status",
+    ),
+    path(
         "/profile",
         ProtectedUserController.as_view({"get": "get_user_detail"}),
         name="user-profile",

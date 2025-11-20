@@ -20,6 +20,9 @@ class UserService:
 
     @staticmethod
     def get_users(query_params):
+        """
+        Get paginated list of users with filtering, search, and sorting.
+        """
         # Validate and parse parameters
         page = int(query_params.get("page", 1))
         limit = int(query_params.get("limit", 10))
@@ -35,9 +38,31 @@ class UserService:
             filters["is_active"] = query_params["is_active"].lower() == "true"
         if "is_staff" in query_params:
             filters["is_staff"] = query_params["is_staff"].lower() == "true"
+        if "is_verified_email" in query_params:
+            filters["is_verified_email"] = query_params["is_verified_email"].lower() == "true"
+        if "is_verified_contact_number" in query_params:
+            filters["is_verified_contact_number"] = query_params["is_verified_contact_number"].lower() == "true"
+        
+        # Get search parameter
+        search = query_params.get("search", "").strip()
+        
+        # Get sorting parameters
+        sort_by = query_params.get("sort_by", "").strip()
+        order = query_params.get("order", "desc").strip().lower()
+        
+        # Validate order parameter
+        if order not in ["asc", "desc"]:
+            order = "desc"
 
         # Delegate to repository
-        return UserRepository.get_users(page, limit, filters)
+        return UserRepository.get_users(
+            page,
+            limit,
+            filters,
+            search if search else None,
+            sort_by if sort_by else None,
+            order
+        )
 
     @staticmethod
     def get_user_by_id(user_id):
@@ -124,3 +149,62 @@ class UserService:
             user.is_active = False
         user.save(update_fields=["status", "is_active", "approved_by_id"])
         return user
+    
+    @staticmethod
+    def change_user_status(user_ids, new_status, approved_by):
+        """
+        Change user status with validation of allowed transitions.
+        Allowed transitions:
+        - pending => approved or rejected
+        - approved => banned
+        - banned => pending
+        
+        Returns dict with success count and skipped user IDs.
+        """
+        # Validate new status
+        valid_statuses = ['pending', 'approved', 'rejected', 'banned']
+        if new_status not in valid_statuses:
+            raise Exception(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
+        
+        # Get all users
+        users = UserRepository.get_users_by_ids(user_ids)
+        
+        if not users.exists():
+            raise Exception("No users found with provided IDs")
+        
+        # Define allowed transitions
+        allowed_transitions = {
+            'pending': ['approved', 'rejected'],
+            'approved': ['banned'],
+            'banned': ['pending']
+        }
+        
+        # Filter users based on allowed transitions
+        valid_user_ids = []
+        skipped_user_ids = []
+        
+        for user in users:
+            current_status = user.status
+            
+            # Check if transition is allowed
+            if current_status in allowed_transitions:
+                if new_status in allowed_transitions[current_status]:
+                    valid_user_ids.append(user.id)
+                else:
+                    skipped_user_ids.append(user.id)
+            else:
+                # Status not in transition map, skip
+                skipped_user_ids.append(user.id)
+        
+        # Perform bulk update for valid users
+        updated_count = 0
+        if valid_user_ids:
+            updated_count = UserRepository.bulk_update_user_status(
+                valid_user_ids, new_status, approved_by
+            )
+        
+        return {
+            'updated_count': updated_count,
+            'updated_ids': valid_user_ids,
+            'skipped_ids': skipped_user_ids
+        }

@@ -10,6 +10,10 @@ export default function AdminLayout() {
       return 'organizations';
     else if (location.pathname.includes('transactions'))
       return 'transactions';
+    else if (location.pathname.includes('users'))
+      return 'users';
+    else if (location.pathname.includes('onchain-verifications'))
+      return 'onchain-verifications';
     return 'dashboard';
   }, [location.pathname]);
 
@@ -37,7 +41,18 @@ export default function AdminLayout() {
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Organization List
+          Organizations
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/organization/admin/users')}
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'users'
+              ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          Users
         </button>
         <button
           type="button"
@@ -48,7 +63,18 @@ export default function AdminLayout() {
               : 'text-slate-400 hover:text-white'
           }`}
         >
-          Transaction List
+          Transactions
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate('/organization/admin/onchain-verifications')}
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-medium transition-all ${
+            activeTab === 'onchain-verifications'
+              ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white'
+              : 'text-slate-400 hover:text-white'
+          }`}
+        >
+          Onchain Verifications
         </button>
       </div>
 

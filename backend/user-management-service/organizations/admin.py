@@ -155,6 +155,7 @@ class OnchainVerificationAdmin(admin.ModelAdmin):
     search_fields = [
         'organization__name',
         'trx_hash',
-        'proposer_wallet'
+        'proposer_wallet',
+        'onchain_id'
     ]
     readonly_fields = ['created_at', 'updated_at']

@@ -227,3 +227,23 @@ class OrganizationResponseSerializer(serializers.ModelSerializer):
             "organization_admin_id",
         ]
         read_only_fields = fields
+
+
+class OrganizationStatusChangeSerializer(serializers.Serializer):
+    organization_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=True,
+        allow_empty=False,
+        help_text="List of organization IDs to update"
+    )
+    status = serializers.ChoiceField(
+        choices=Organization.STATUS_CHOICES,
+        required=True,
+        help_text="New status to set"
+    )
+    
+    def validate_organization_ids(self, value):
+        if not value:
+            raise serializers.ValidationError("At least one organization ID is required")
+        # Remove duplicates
+        return list(set(value))

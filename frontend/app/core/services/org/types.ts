@@ -125,28 +125,57 @@ export interface AddUserToOrgResponse {
   created_at: string;
 }
 
-export interface OnchainVerificationPayload {
-  trx_hash: string;
-  context: {
-    org_admin_name: string;
-    org_admin_email: string;
-    org: {
-      name: string;
-      type: string;
-      address: string;
-      legal_entity_identifier: string;
-    };
-  };
-  proposer_wallet: string;
-  organization_id: number;
+export type OrgUserStatus = 'pending' | 'approved' | 'rejected' | 'banned';
+
+export interface OrgUser {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  contact_number: string;
+  wallet_address: string | null;
+  is_active: boolean;
+  is_staff: boolean;
+  is_superuser: boolean;
+  is_verified_email: boolean;
+  is_verified_contact_number: boolean;
+  status: OrgUserStatus;
+  date_joined: string;
+  updated_at: string;
 }
 
-export interface OnchainVerificationResponse {
-  id: number;
-  trx_hash: string;
-  context: any;
-  proposer_wallet: string;
-  organization_id: number;
-  created_at: string;
+export interface OrgUserListResponse {
+  org_users: OrgUser[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+  };
+}
+
+export interface OrgOnchainVerificationResponse {
   status: string;
+  data: {
+    verifications: Array<{
+      id: number;
+      trx_hash: string;
+      onchain_id: number | null;
+      onchain_status: string;
+      proposer_wallet: string;
+      context: {
+        __typename: string;
+        description: string;
+        proposalType: string;
+        organizationId: number;
+      };
+      organization_name: string;
+      created_at: string;
+      updated_at: string;
+    }>;
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+    };
+  };
 }

@@ -54,19 +54,3 @@ export interface IOffchainProposal {
   audit_id: number;
   trx_status: number;
 }
-
-export interface ProposalOnchainVerificationPayload {
-  trx_hash: string;
-  context: string;
-  proposer_wallet: string;
-  organization_id: number | null;
-}
-
-export interface ProposalOnchainVerificationResponse {
-  id: number;
-  trx_hash: string;
-  context: string;
-  proposer_wallet: string;
-  organization_id: number;
-  created_at: string;
-}

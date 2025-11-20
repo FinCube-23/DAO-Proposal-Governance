@@ -46,6 +46,7 @@ urlpatterns = [
     path('', welcome_view, name='welcome'),  # Root URL
     path('api/users', include(('users.urls', 'users'), namespace='users')),
     path('api/organizations', include(('organizations.urls', 'organizations'), namespace='organizations')),
+    path('api/analytics', include(('analytics.urls', 'analytics'), namespace='analytics')),
     path('admin/', admin.site.urls),
     # Schema URLs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

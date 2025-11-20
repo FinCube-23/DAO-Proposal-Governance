@@ -44,7 +44,6 @@ export class ProposalListDto {
     required: false,
   })
   proposal_onchain_id: number;
-
 }
 
 export class PaginatedProposalResponse {

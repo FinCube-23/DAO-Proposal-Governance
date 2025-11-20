@@ -5,8 +5,8 @@ import type {
   CreateOrgResponse,
   GetAllOrgResponse,
   GetOrgResponse,
-  OnchainVerificationPayload,
-  OnchainVerificationResponse,
+  OrgOnchainVerificationResponse,
+  OrgUserListResponse,
   UpdateOrgPayload,
   UpdateOrgResponse,
 } from '@/core/services/org/types';
@@ -32,14 +32,40 @@ export const orgApis = {
     api.get<GetAllOrgResponse>(`${ORGANIZATION_ENDPOINT.BASE}`, {
       queryParams,
     }),
+  getUsersByOrg: (
+    orgId: number,
+    queryParams?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      status?: string;
+      is_active?: boolean;
+      is_verified_email?: boolean;
+      is_verified_contact_number?: boolean;
+      sort_by?: string;
+      order?: 'asc' | 'desc';
+    },
+  ) =>
+    api.get<OrgUserListResponse>(
+      `${ORGANIZATION_ENDPOINT.BASE}/${orgId}/users`,
+      { queryParams },
+    ),
+  getOnchainVerificationsByOrg: (
+    orgId: number,
+    queryParams?: {
+      page?: number;
+      limit?: number;
+      search?: string;
+      onchain_status?: string;
+    },
+  ) =>
+    api.get<OrgOnchainVerificationResponse>(
+      `${ORGANIZATION_ENDPOINT.BASE}/${orgId}/onchain-verifications`,
+      { queryParams },
+    ),
   addUserToOrg: (payload: AddUserToOrgPayload) =>
     api.post<AddUserToOrgResponse>(
       `${ORGANIZATION_ENDPOINT.BASE}/users`,
-      payload,
-    ),
-  submitOnchainVerification: (payload: OnchainVerificationPayload) =>
-    api.post<OnchainVerificationResponse>(
-      `${ORGANIZATION_ENDPOINT.BASE}/onchain-verifications`,
       payload,
     ),
 };

@@ -1,4 +1,5 @@
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import Q
 from organizations.models import OnchainVerification, Organization
 
 class OnchainVerificationRepository:
@@ -31,6 +32,48 @@ class OnchainVerificationRepository:
         try:
             return (
                 list(paginator.page(page).object_list),
+                {'page': page, 'limit': limit, 'total': paginator.count}
+            )
+        except EmptyPage:
+            raise Exception("Page not found")
+    
+    @classmethod
+    def get_all_verifications(cls, page, limit, filters=None, search=None, sort_by=None, order='desc'):
+        """
+        Get all on-chain verifications with filtering, search, and sorting.
+        """
+        filters = filters or {}
+        queryset = OnchainVerification.objects.select_related('organization').filter(**filters)
+        
+        # Apply search across multiple fields (matching OnchainVerificationAdmin search_fields)
+        if search:
+            search_query = Q(organization__name__icontains=search) | \
+                          Q(trx_hash__icontains=search) | \
+                          Q(proposer_wallet__icontains=search) | \
+                          Q(onchain_id__icontains=search)
+            queryset = queryset.filter(search_query)
+        
+        # Apply sorting
+        if sort_by:
+            # Validate sort_by field to prevent injection
+            allowed_sort_fields = [
+                'id', 'trx_hash', 'onchain_id', 'onchain_status',
+                'proposer_wallet', 'created_at', 'updated_at'
+            ]
+            if sort_by in allowed_sort_fields:
+                order_prefix = '-' if order == 'desc' else ''
+                queryset = queryset.order_by(f'{order_prefix}{sort_by}')
+            else:
+                queryset = queryset.order_by('-created_at')
+        else:
+            queryset = queryset.order_by('-created_at')
+        
+        paginator = Paginator(queryset, limit)
+        
+        try:
+            page_obj = paginator.page(page)
+            return (
+                list(page_obj.object_list),
                 {'page': page, 'limit': limit, 'total': paginator.count}
             )
         except EmptyPage:

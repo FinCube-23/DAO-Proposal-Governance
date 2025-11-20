@@ -53,6 +53,52 @@ class OnchainVerificationService:
         return OnchainVerificationRepository.get_verifications_by_organization(
             organization_id, page, limit
         )
+    
+    @staticmethod
+    def get_all_verifications(query_params):
+        """
+        Get paginated list of all on-chain verifications with filtering, search, and sorting.
+        """
+        # Validate and parse parameters
+        page = int(query_params.get('page', 1))
+        limit = int(query_params.get('limit', 10))
+        
+        if page < 1 or limit < 1:
+            raise Exception("Page and limit must be positive numbers")
+        
+        # Prepare filters
+        filters = {}
+        if 'onchain_status' in query_params and query_params['onchain_status'] != 'all':
+            filters['onchain_status'] = query_params['onchain_status']
+        
+        # Get search parameter
+        search = query_params.get('search', '').strip()
+        
+        # Get sorting parameters
+        sort_by = query_params.get('sort_by', '').strip()
+        order = query_params.get('order', 'desc').strip().lower()
+        
+        # Validate order parameter
+        if order not in ['asc', 'desc']:
+            order = 'desc'
+        
+        # Delegate to repository
+        return OnchainVerificationRepository.get_all_verifications(
+            page,
+            limit,
+            filters,
+            search if search else None,
+            sort_by if sort_by else None,
+            order
+        )
+        
+    @staticmethod
+    def get_verification_by_id(verification_id):
+        verification = OnchainVerificationRepository.get_verification_by_id(verification_id)
+        if not verification:
+            raise Exception(f"OnchainVerification with ID {verification_id} not found")
+        
+        return verification
 
     @staticmethod
     def get_verifications_by_trx_hash(trx_hash):
