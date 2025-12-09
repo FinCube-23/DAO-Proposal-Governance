@@ -28,7 +28,7 @@ import { shortenAddress } from '@/shared/utils';
 import VotingProgressBar from './voting-progress-bar';
 
 export default function VotingBreakdown({ proposalId }: any) {
-  const { address } = useAccount();
+  const { address, chainId } = useAccount();
   const voteRef = useRef({ proposalId: '', support: false });
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [proposal, setProposal] = useState<IProposal>();
@@ -115,7 +115,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           transactionHash: hash,
           signedBy: `0x${address}`,
           signedWith: 'metamask',
-          chainId: 11155,
+          chainId: Number(chainId),
           context: { __typename: 'ProposalExecuted' },
         },
       };
@@ -159,7 +159,7 @@ export default function VotingBreakdown({ proposalId }: any) {
           transactionHash: hash,
           signedBy: `0x${address}`,
           signedWith: 'metamask',
-          chainId: 11155,
+          chainId: Number(chainId),
           context: { __typename: 'ProposalCanceled' },
         },
       };

@@ -128,6 +128,7 @@ class OrganizationListSerializer(serializers.ModelSerializer):
     offchain_status=serializers.CharField(source="status",read_only=True)
     organization_admin=serializers.SerializerMethodField()
     onchain_status=serializers.SerializerMethodField()
+    members=serializers.SerializerMethodField()
 
     class Meta:
         model = Organization
@@ -141,6 +142,7 @@ class OrganizationListSerializer(serializers.ModelSerializer):
             "offchain_status",
             "organization_admin",
             "onchain_status",
+            "members",
             "created_at",
             "updated_at",
         ]
@@ -181,6 +183,23 @@ class OrganizationListSerializer(serializers.ModelSerializer):
                 contextValue="OrganizationListSerializer"
             )
             return None
+
+    @extend_schema_field(list)
+    def get_members(self, obj) -> list:
+        """
+        Get list of member user IDs for this organization.
+        Returns a list of integers representing user IDs.
+        """
+        try:
+            # Query the OrganizationUser model to get all members for this organization
+            member_ids = obj.members.values_list('user_id', flat=True)
+            return list(member_ids)
+        except Exception as e:
+            logger.error(
+                {"event": "Error getting members in list serializer", "error": str(e)},
+                contextValue="OrganizationListSerializer"
+            )
+            return []
 
 
 class OrganizationDetailSerializer(serializers.ModelSerializer):

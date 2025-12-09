@@ -12,6 +12,13 @@ export class TransactionListItemDto {
   @ApiProperty()
   trx_hash: string;
 
+  @ApiProperty({
+    description: 'The blockchain network chain ID',
+    example: '11155111',
+    required: false,
+  })
+  chain_id?: string;
+
   @ApiProperty({ enum: TransactionStatus })
   trx_status: TransactionStatus;
 
@@ -48,6 +55,16 @@ export class TransactionListItemDto {
     description: 'wallet address that initiated the transaction',
   })
   from: string;
+
+  @ApiProperty({
+    description: 'wallet address that received the transaction',
+  })
+  to: string;
+
+  @ApiProperty({
+    description: 'contract address that received the transaction',
+  })
+  address: string;
 
   @ApiProperty({
     description: 'Gas cost from trx_receipt converted to ETH',

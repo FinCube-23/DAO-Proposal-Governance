@@ -5,7 +5,8 @@ from users.utils.exceptions import (
     EmailAlreadyExistsError,
 )
 from django.contrib.auth.hashers import make_password, check_password
-
+from event_handlers.utils.rabbitmq_publisher import RabbitMQPublisher
+from logging_config import logger
 
 class UserService:
 

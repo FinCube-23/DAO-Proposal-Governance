@@ -1,16 +1,21 @@
 // src/transactions/transactions.controller.ts
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+  ApiConflictResponse,
 } from '@nestjs/swagger';
 import { TransactionGatewayService } from './transaction-gateway.service';
 import { ListTransactionsQueryDto } from './dto/list-transactions.dto';
 import { TransactionListResponseDto } from './dto/transaction-list-response.dto';
 import { TransactionDetailResponseDto } from './dto/transaction-detail.dto';
+import { TransactionReceiptEventDto } from '../shared/common/dto/transaction-receipt-event.dto';
+import { TransactionEntity } from '../shared/common/entity/transaction.entity';
 
 @Controller('transactions')
 export class TransactionGatewayController {
@@ -66,6 +71,30 @@ export class TransactionGatewayController {
   })
   async getDashboardStatistics() {
     return this.transactionsGatewayService.getStatistics();
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiTags('Transaction Off-Chain Backup')
+  @ApiOperation({
+    summary: 'Create a new transaction record',
+    description:
+      'Creates a new transaction record in the audit trail database. The transaction will be in pending status (0) initially.',
+  })
+  @ApiCreatedResponse({
+    description: 'Transaction created successfully',
+    type: TransactionEntity,
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid transaction data provided',
+  })
+  @ApiConflictResponse({
+    description: 'Transaction with this hash already exists',
+  })
+  async createTransaction(
+    @Body() event: TransactionReceiptEventDto,
+  ): Promise<TransactionEntity> {
+    return this.transactionsGatewayService.createTransaction(event);
   }
 
   @Get(':identifier')

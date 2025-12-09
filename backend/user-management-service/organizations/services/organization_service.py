@@ -1,5 +1,7 @@
 from organizations.repositories.organization_repository import OrganizationRepository
 from users.repositories.user_repository import UserRepository
+from event_handlers.utils.rabbitmq_publisher import RabbitMQPublisher
+from logging_config import logger
 
 class OrganizationService:
     
@@ -26,7 +28,7 @@ class OrganizationService:
             raise Exception("An organization with this email already exists")
         
         # Create organization
-        return OrganizationRepository.create_organization(
+        organization = OrganizationRepository.create_organization(
             name=organization_data['name'],
             email=organization_data['email'],
             type=organization_data['type'],
@@ -34,6 +36,19 @@ class OrganizationService:
             legal_entity_identifier=organization_data.get('legal_entity_identifier'),
             organization_admin_id=organization_data['organization_admin_id']
         )
+
+        # Publish organization creation event to RabbitMQ
+        try:
+            org_data = {
+                'id': organization.id,
+                'organization_wallet_address': admin_user.wallet_address  # ✅ Use already-fetched admin_user
+            }
+            RabbitMQPublisher.publish_organization_created(org_data)
+        except Exception as e:
+            # Log error but don't fail organization creation
+            logger.error({"event": "Failed to publish organization creation event", "error": str(e)})
+
+        return organization
     
     @staticmethod
     def get_all_organizations(query_params):

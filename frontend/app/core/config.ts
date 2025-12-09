@@ -1,13 +1,13 @@
-import { sepolia } from 'viem/chains';
+import { celoSepolia } from 'viem/chains';
 import { createConfig, http, injected } from 'wagmi';
 import { env } from '@/core/env';
 
 export const config = createConfig({
-  chains: [sepolia],
+  chains: [celoSepolia],
   connectors: [injected()],
   ssr: true,
   transports: {
-    [sepolia.id]: http(`${env.VITE_SEPOLIA_RPC}`),
+    [celoSepolia.id]: http(`${env.VITE_SEPOLIA_RPC}`),
   },
 });
 
@@ -42,6 +42,11 @@ export const tokenConfig = {
       address: '0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238', // Sepolia USDC test token
       decimals: 6,
       image: 'https://etherscan.io/token/images/centre-usdc_28.png',
+    },
+    11142220: {
+      address: '0x01C5C0122039549AD1493B8220cABEdD739BC44E',
+      decimals: 6,
+      image: 'https://celoscan.io/token/images/centre-usdc_28.png',
     },
   },
 };

@@ -51,6 +51,55 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
       ),
     },
     {
+      accessorKey: 'to',
+      header: 'To',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const to = row.getValue('to') as string;
+        return to
+          ? (
+              <CopyableCode
+                value={to}
+                displayValue={formatAddress(to)}
+              />
+            )
+          : (
+              <span className="text-gray-400">-</span>
+            );
+      },
+    },
+    {
+      accessorKey: 'chain_id',
+      header: 'Chain ID',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const chainId = row.getValue('chain_id') as string;
+        return (
+          <div className="font-mono text-xs">
+            {chainId || '-'}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'address',
+      header: 'Address',
+      enableSorting: false,
+      cell: ({ row }) => {
+        const address = row.getValue('address') as string;
+        return address
+          ? (
+              <CopyableCode
+                value={address}
+                displayValue={formatAddress(address)}
+              />
+            )
+          : (
+              <span className="text-gray-400">-</span>
+            );
+      },
+    },
+    {
       accessorKey: 'function',
       header: 'Function',
       enableSorting: false,

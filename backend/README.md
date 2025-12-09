@@ -70,9 +70,6 @@ For a comprehensive overview of how these services interact within the overall s
 
 Backend folder contains more details regarding each of the services and the APIs.
 
-### Frontend Services
-
-<! -- we can add the screenshots from our project to this -->
 
 ### Web3 services
 

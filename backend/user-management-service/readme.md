@@ -198,3 +198,18 @@ type organization
    | `Can user:charlie can_vote in org:3?` | ✅ (if charlie is any member) |
 
 ---
+
+
+## RabbitMQ
+### Exchange Configuration
+
+- **Exchange Name:** `exchange.ums.events`
+- **Exchange Type:** `topic`
+
+### Event Routing Keys
+
+| Event | Routing Key |
+|-------|-------------|
+| Organization Created | `organization.created` |
+| Organization User Added | `organization.user.created` |
+| Sync All Data | `ums.sync` |

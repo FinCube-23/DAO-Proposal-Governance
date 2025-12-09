@@ -1,5 +1,3 @@
-import type { OnchainVerificationPayload } from '@/core/services/org/types';
-
 import { writeContract } from '@wagmi/core';
 import { X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -10,7 +8,6 @@ import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
 import { membershipApis } from '@/core/services/membership';
-import { orgApis } from '@/core/services/org';
 import { useUserOrg } from '@/features/dao-details/hooks/use-user-org';
 import { Button } from '@/shared/components/ui/button';
 import { useUserStatusNotificationVisibility } from '@/shared/hooks/use-user-status-notification-visibility';
@@ -70,11 +67,9 @@ export default function ApprovalNotification() {
     };
 
     checkMembershipStatus();
-  }, [orgData?.status, address, isConnected, orgData?.id]); // Added orgData?.id to dependencies
-
-  // Auto-dismiss membership approval notification after 5 seconds
+  }, [orgData?.offchain_status, address, isConnected, orgData?.id]); // Use offchain_status instead of status  // Auto-dismiss membership approval notification after 5 seconds
   useEffect(() => {
-    if (orgData?.status === 'approved' && isMemberApproved === true && !hasShownMembershipApproval) {
+    if (orgData?.offchain_status === 'approved' && isMemberApproved === true && !hasShownMembershipApproval) {
       const timer = setTimeout(() => {
         localStorage.setItem(getMembershipApprovalKey(), 'true');
         setIsVisible(false);
@@ -82,10 +77,10 @@ export default function ApprovalNotification() {
 
       return () => clearTimeout(timer);
     }
-  }, [orgData?.status, isMemberApproved, hasShownMembershipApproval]);
+  }, [orgData?.offchain_status, isMemberApproved, hasShownMembershipApproval]);
 
   const handleDismiss = () => {
-    if (orgData?.status === 'approved' && isMemberApproved === true) {
+    if (orgData?.offchain_status === 'approved' && isMemberApproved === true) {
       localStorage.setItem(getMembershipApprovalKey(), 'true');
     }
     setIsVisible(false);
@@ -97,12 +92,12 @@ export default function ApprovalNotification() {
     || !orgData
     || !profile
     || !isVisible
-    || (orgData.status === 'approved' && isMemberApproved === true && hasShownMembershipApproval) // Hide if membership approval already shown
+    || (orgData.offchain_status === 'approved' && isMemberApproved === true && hasShownMembershipApproval) // Hide if membership approval already shown
   ) {
     return null;
   }
 
-  const isApproved = orgData.status === 'approved';
+  const isApproved = orgData.offchain_status === 'approved';
 
   // Calculate top position based on whether user status notification is actually visible
   const topPosition = isUserNotificationVisible ? 'top-[120px]' : 'top-20';
@@ -170,29 +165,13 @@ export default function ApprovalNotification() {
         ],
       });
 
-      toast.success('Your membership application is pending');
+      toast.success(`Your membership application has been submitted successfully! Transaction hash: ${hash.slice(0, 10)}...`);
 
-      const verificationPayload: OnchainVerificationPayload = {
-        trx_hash: hash,
-        context: {
-          org_admin_name: `${profile.first_name} ${profile.last_name}`,
-          org_admin_email: profile.email,
-          org: {
-            name: orgData.name,
-            type: orgData.type,
-            address: orgData.address,
-            legal_entity_identifier: orgData.legal_entity_identifier,
-          },
-        },
-        proposer_wallet: address,
-        organization_id: orgData.id,
-      };
+      // The transaction has been sent to the blockchain
+      // The backend will pick it up via event listeners
+      console.warn('Membership registration transaction hash:', hash);
 
-      const response = await orgApis.submitOnchainVerification(verificationPayload);
-
-      console.warn('API response:', response);
-      toast.warning('Your on-chain membership application is pending.');
-
+      // Hide the notification after successful submission
       setIsVisible(false);
     }
     catch (error) {

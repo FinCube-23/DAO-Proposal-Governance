@@ -13,6 +13,7 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from logging_config import logger
+from event_handlers.utils.rabbitmq_publisher import RabbitMQPublisher
 
 class ProtectedOrganizationUserController(ViewSet):
     logger.set_context("ProtectedOrganizationUserController")
@@ -46,6 +47,9 @@ class ProtectedOrganizationUserController(ViewSet):
 
             response_serializer = OrganizationUserResponseSerializer(organization_user)
             logger.log({"event": "Adding user to organization Success", "data": response_serializer.data})
+
+
+            # Return response
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,

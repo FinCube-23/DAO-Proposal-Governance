@@ -79,7 +79,10 @@ export default function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>
+                Email
+                <span className="text-red-400">*</span>
+              </FormLabel>
               <FormControl>
                 <Input type="email" placeholder="m@example.com" {...field} />
               </FormControl>
@@ -92,7 +95,10 @@ export default function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>
+                Password
+                <span className="text-red-400">*</span>
+              </FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input

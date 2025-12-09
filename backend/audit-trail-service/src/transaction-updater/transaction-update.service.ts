@@ -36,15 +36,70 @@ export class TransactionUpdateService {
     this.update_proposals = [];
   }
 
-  // 💬 Pushing Event in the Message Queue in EventPattern
-  async handleTransactionEventEmission(proposal: TransactionStatusDto) {
-    await this.amqpConnection.publish(
-      'exchange.web3_event_hub.fanout',
-      '',
-      proposal,
+  // 💬 Determine event type category from __typename
+  private getEventCategory(typename: string): 'governance' | 'payment' | 'unknown' {
+    const governanceEvents = [
+      'ProposalAdded',
+      'ProposalExecuted',
+      'ProposalCanceled',
+      'OwnershipTransferred',
+      'MemberRegistered',
+      'MemberApproved',
+    ];
+
+    const paymentEvents = [
+      'StablecoinTransfer',
+    ];
+
+    if (governanceEvents.includes(typename)) {
+      return 'governance';
+    }
+
+    if (paymentEvents.includes(typename)) {
+      return 'payment';
+    }
+
+    return 'unknown';
+  }
+
+  // 💬 Get exchange name based on event category
+  private getExchangeForEvent(category: 'governance' | 'payment' | 'unknown'): string {
+    const exchangeMap = {
+      governance: process.env.GOVERNANCE_EVENT_EXCHANGE || 'exchange.web3_event_hub.fanout',
+      payment: process.env.PAYMENT_EVENT_EXCHANGE || 'exchange.payment_event_hub.fanout',
+      unknown: process.env.GOVERNANCE_EVENT_EXCHANGE || 'exchange.web3_event_hub.fanout', // fallback
+    };
+
+    return exchangeMap[category];
+  }
+
+  // 💬 Pushing Event in the Message Queue in EventPattern with strategy-based routing
+  async handleTransactionEventEmission(transaction: TransactionStatusDto) {
+    // Determine event type from context
+    const typename = transaction.onChainData?.context?.__typename || 'unknown';
+    const category = this.getEventCategory(typename);
+    const exchange = this.getExchangeForEvent(category);
+
+    this.logger.log(
+      `Emitting event: ${typename} (category: ${category}) to exchange: ${exchange}`,
     );
-    this.logger.log('CRON: Transaction on-chain status update notified!');
-    return { message: 'Proposal on-chain status update notified!' };
+
+    await this.amqpConnection.publish(
+      exchange,
+      '',
+      transaction,
+    );
+
+    this.logger.log(
+      `Transaction on-chain status update notified to ${exchange}!`,
+    );
+
+    return {
+      message: 'Transaction on-chain status update notified!',
+      exchange,
+      category,
+      typename,
+    };
   }
 
   async getTransactionUpdatesFromTheGraph(trx_hashes: string[]): Promise<any> {

@@ -44,6 +44,7 @@ export interface GetTrxResponse {
 export interface GetOneTrxResponse {
   id: number;
   trx_hash: string;
+  chain_id?: string | null;
   trx_status: number;
   source: string;
   metaData: string;
@@ -55,6 +56,7 @@ export interface GetOneTrxResponse {
   transaction_fee: number;
   to: string;
   from: string;
+  address?: string;
   event_logs: string;
   raw_transaction: string;
   transaction_receipt: string;

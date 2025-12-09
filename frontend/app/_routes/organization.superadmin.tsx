@@ -17,7 +17,7 @@ export default function SuperAdminLayout() {
 
   return (
     <div className="flex flex-col gap-4 sm:gap-6">
-      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Super Admin Panel</h2>
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Admin Panel</h2>
       <div className="w-full overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
         <div className="inline-flex items-center gap-0.5 sm:gap-1 p-0.5 sm:p-1 bg-slate-800/50 rounded-lg sm:rounded-xl border border-slate-700/50 min-w-max">
           <button

@@ -226,11 +226,13 @@ export default function MemberProposal() {
                       </SelectItem>
                     )
                   : (
-                      organizationsData?.organizations?.map(org => (
-                        <SelectItem key={org.id} value={org.id.toString()}>
-                          {org.name}
-                        </SelectItem>
-                      )) || (
+                      organizationsData?.organizations
+                        ?.filter(org => !org.name.toLowerCase().includes('brain station 23'))
+                        .map(org => (
+                          <SelectItem key={org.id} value={org.id.toString()}>
+                            {org.name}
+                          </SelectItem>
+                        )) || (
                         <SelectItem value="" disabled>
                           {organizationsLoading
                             ? 'Loading...'

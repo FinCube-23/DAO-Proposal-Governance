@@ -9,6 +9,8 @@ import { env } from '@/core/env';
 interface DaoInfoState {
   daoURI?: IDaoInfo;
   proposalCount: number;
+  memberCount: number;
+  proposalThreshold: number;
   version: string;
   votingPeriod: string;
   votingDelay: string;
@@ -23,6 +25,8 @@ interface UseDaoInfoReturn extends DaoInfoState {
 const INITIAL_STATE: DaoInfoState = {
   daoURI: undefined,
   proposalCount: 0,
+  memberCount: 0,
+  proposalThreshold: 0,
   version: '',
   votingPeriod: '',
   votingDelay: '',
@@ -127,6 +131,26 @@ export function useDaoInfo({ debug = false }: Props): UseDaoInfoReturn {
     }
   }, [readContractValue, debugLog]);
 
+  const getMemberCount = useCallback(async (): Promise<number> => {
+    try {
+      return await readContractValue('memberCount', val => val ? Number(val) : 0);
+    }
+    catch (err) {
+      debugLog('getMemberCount error:', err);
+      return 0;
+    }
+  }, [readContractValue, debugLog]);
+
+  const getProposalThreshold = useCallback(async (): Promise<number> => {
+    try {
+      return await readContractValue('proposalThreshold', val => val ? Number(val) : 0);
+    }
+    catch (err) {
+      debugLog('getProposalThreshold error:', err);
+      return 0;
+    }
+  }, [readContractValue, debugLog]);
+
   const getVersion = useCallback(async (): Promise<string> => {
     try {
       return await readContractValue('UPGRADE_INTERFACE_VERSION', val => val?.toString() || '');
@@ -160,9 +184,11 @@ export function useDaoInfo({ debug = false }: Props): UseDaoInfoReturn {
 
       // Try parallel approach first
       try {
-        const [daoURI, proposalCount, version, votingPeriod, votingDelay] = await Promise.all([
+        const [daoURI, proposalCount, memberCount, proposalThreshold, version, votingPeriod, votingDelay] = await Promise.all([
           getDAOInfo(),
           getProposalCount(),
+          getMemberCount(),
+          getProposalThreshold(),
           getVersion(),
           getVotingPeriod(),
           getVotingDelay(),
@@ -171,6 +197,8 @@ export function useDaoInfo({ debug = false }: Props): UseDaoInfoReturn {
         const newState: DaoInfoState = {
           daoURI,
           proposalCount,
+          memberCount,
+          proposalThreshold,
           version,
           votingPeriod,
           votingDelay,
@@ -194,6 +222,16 @@ export function useDaoInfo({ debug = false }: Props): UseDaoInfoReturn {
           newState.proposalCount = await getProposalCount();
         }
         catch (e) { debugLog('Sequential proposalCount failed:', e); }
+
+        try {
+          newState.memberCount = await getMemberCount();
+        }
+        catch (e) { debugLog('Sequential memberCount failed:', e); }
+
+        try {
+          newState.proposalThreshold = await getProposalThreshold();
+        }
+        catch (e) { debugLog('Sequential proposalThreshold failed:', e); }
 
         try {
           newState.version = await getVersion();
@@ -222,7 +260,7 @@ export function useDaoInfo({ debug = false }: Props): UseDaoInfoReturn {
     finally {
       setLoading(false);
     }
-  }, [isConnected, address, contractAddress, getDAOInfo, getProposalCount, getVersion, getVotingPeriod, getVotingDelay, debugLog]);
+  }, [isConnected, address, contractAddress, getDAOInfo, getProposalCount, getMemberCount, getProposalThreshold, getVersion, getVotingPeriod, getVotingDelay, debugLog]);
 
   // Refetch function
   const refetch = useCallback(async (): Promise<void> => {

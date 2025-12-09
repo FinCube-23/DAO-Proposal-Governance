@@ -11,16 +11,69 @@ interface Props {
 }
 
 export default function TransactionParticipants({ transaction }: Props) {
+  // Check if function contains 'transfer'
+  const isTransferFunction = transaction.function?.toLowerCase().includes('transfer');
+
+  // Extract wallet addresses for transfer transactions
+  const getWalletAddresses = () => {
+    if (!isTransferFunction) {
+      return { from: transaction.from, to: transaction.to };
+    }
+
+    try {
+      const rawTx = JSON.parse(transaction.raw_transaction || '{}');
+      if (rawTx.senderWalletAddress && rawTx.receiverWalletAddress) {
+        return {
+          from: rawTx.senderWalletAddress,
+          to: rawTx.receiverWalletAddress,
+        };
+      }
+    }
+    catch (e) {
+      console.error('Failed to parse raw_transaction for wallet addresses:', e);
+    }
+
+    // Fallback to default addresses
+    return { from: transaction.from, to: transaction.to };
+  };
+
+  const { from, to } = getWalletAddresses();
+
+  // Extract reference numbers from event_logs for transfer transactions
+  const getReferenceNumbers = () => {
+    if (!isTransferFunction) {
+      return { senderRef: null, receiverRef: null };
+    }
+
+    try {
+      const eventLogs = JSON.parse(transaction.event_logs || '{}');
+      const memo = JSON.parse(eventLogs.memo || '{}');
+
+      return {
+        senderRef: memo.sender_reference_number,
+        receiverRef: memo.receiver_reference_number,
+      };
+    }
+    catch (e) {
+      console.error('Failed to parse event_logs for reference numbers:', e);
+      return { senderRef: null, receiverRef: null };
+    }
+  };
+
+  const { senderRef, receiverRef } = getReferenceNumbers();
+
   const participants = [
     {
       role: 'Sender',
-      address: transaction.from,
+      address: from,
       description: 'Transaction initiator',
+      referenceNumber: senderRef,
     },
     {
       role: 'Receiver',
-      address: transaction.to,
+      address: to,
       description: 'Transaction recipient',
+      referenceNumber: receiverRef,
     },
   ];
 
@@ -38,6 +91,7 @@ export default function TransactionParticipants({ transaction }: Props) {
             <TableRow>
               <TableHead className="w-[120px]">Role</TableHead>
               <TableHead>Address</TableHead>
+              {isTransferFunction && <TableHead>Reference Number</TableHead>}
               <TableHead className="hidden sm:table-cell">Description</TableHead>
             </TableRow>
           </TableHeader>
@@ -55,6 +109,20 @@ export default function TransactionParticipants({ transaction }: Props) {
                     displayValue={formatAddress(participant.address)}
                   />
                 </TableCell>
+                {isTransferFunction && (
+                  <TableCell>
+                    {participant.referenceNumber
+                      ? (
+                          <CopyableCode
+                            value={participant.referenceNumber}
+                            displayValue={formatAddress(participant.referenceNumber)}
+                          />
+                        )
+                      : (
+                          <span className="text-xs sm:text-sm text-muted-foreground">-</span>
+                        )}
+                  </TableCell>
+                )}
                 <TableCell className="hidden sm:table-cell text-sm text-muted-foreground">
                   {participant.description}
                 </TableCell>

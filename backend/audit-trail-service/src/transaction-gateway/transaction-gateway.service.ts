@@ -45,12 +45,13 @@ export class TransactionGatewayService {
       const new_dao_audit = {
         trx_hash: event.onChainData?.transactionHash,
         trx_sender: event.onChainData?.signedBy,
+        chain_id: event.onChainData?.chainId,
         trx_status: 0,
         raw_trx: JSON.stringify(event.onChainData?.context),
       };
       const dbRecordedTRX = this.transactionRepository.create(new_dao_audit);
       this.logger.log(
-        `New transaction initialized at Audit Trail DB, where transaction hash: ${dbRecordedTRX.trx_hash}`,
+        `New transaction initialized at Audit Trail DB, where transaction hash: ${dbRecordedTRX.trx_hash}, chain ID: ${dbRecordedTRX.chain_id}`,
       );
       const savedTransaction =
         await this.transactionRepository.save(dbRecordedTRX);
@@ -112,6 +113,7 @@ export class TransactionGatewayService {
       .select([
         'transaction.id',
         'transaction.trx_hash',
+        'transaction.chain_id',
         'transaction.trx_status',
         'transaction.confirmation_source',
         'transaction.transaction_confirmation_trace',
@@ -131,11 +133,14 @@ export class TransactionGatewayService {
       return {
         id: tx.id,
         trx_hash: tx.trx_hash,
+        chain_id: tx.chain_id,
         trx_status: tx.trx_status,
         confirmation_source: tx.confirmation_source,
         transaction_confirmation_trace: tx.transaction_confirmation_trace || [],
         updated_at: tx.updated_at,
         from: tx.trx_receipt?.from || 'unknown',
+        to: tx.trx_receipt?.to || 'unknown',
+        address: tx.trx_receipt?.logs[0]?.address || 'unknown',
         gas_cost: Number(gasUsed) / 1e18,
         event_logs: tx.trx_metadata,
         function: functionName,
@@ -177,6 +182,7 @@ export class TransactionGatewayService {
     return {
       id: transaction.id,
       trx_hash: transaction.trx_hash,
+      chain_id: transaction.chain_id,
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
@@ -220,6 +226,7 @@ export class TransactionGatewayService {
     return {
       id: transaction.id,
       trx_hash: transaction.trx_hash,
+      chain_id: transaction.chain_id,
       trx_status: transaction.trx_status,
       source: transaction.confirmation_source,
       metaData: transaction.trx_metadata,
@@ -340,6 +347,50 @@ export class TransactionGatewayService {
       this.logger.error(
         `Error updating transaction trace for hash ${transactionHash}: ${error.message}`,
       );
+    }
+  }
+
+  async createTransaction(event: any): Promise<TransactionEntity> {
+    this.logger.log(
+      `Creating new transaction with hash: ${event.onChainData?.transactionHash}`,
+    );
+    try {
+      // Check if transaction already exists
+      const existingTransaction = await this.transactionRepository.findOne({
+        where: { trx_hash: event.onChainData?.transactionHash },
+      });
+
+      if (existingTransaction) {
+        this.logger.warn(
+          `Transaction with hash ${event.onChainData?.transactionHash} already exists`,
+        );
+        throw new Error('Transaction already exists');
+      }
+
+      const newTransaction = {
+        trx_hash: event.onChainData?.transactionHash,
+        trx_sender: event.onChainData?.signedBy,
+        chain_id: event.onChainData?.chainId,
+        trx_status: 0,
+        raw_trx: JSON.stringify(event.onChainData?.context),
+      };
+
+      const dbRecordedTRX = this.transactionRepository.create(newTransaction);
+      this.logger.log(
+        `New transaction initialized at Audit Trail DB, where transaction hash: ${dbRecordedTRX.trx_hash}`,
+      );
+
+      const savedTransaction =
+        await this.transactionRepository.save(dbRecordedTRX);
+
+      this.logger.log(`Recorded transaction ID: ${savedTransaction.id} in DB`);
+      return savedTransaction;
+    } catch (error) {
+      this.logger.error(
+        `Transaction couldn't be created in DB where transaction hash is ${event.onChainData?.transactionHash}. Error: ${error.message}`,
+        error.stack,
+      );
+      throw error;
     }
   }
 }

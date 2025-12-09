@@ -46,6 +46,14 @@ export class TransactionEntity {
   @ApiProperty()
   trx_hash: string;
 
+  @Column({ type: 'varchar', nullable: true })
+  @ApiProperty({
+    description: 'The blockchain network chain ID',
+    example: '11155111',
+    required: false,
+  })
+  chain_id: string;
+
   @Column({
     type: 'enum',
     enum: TransactionConfirmationSource,

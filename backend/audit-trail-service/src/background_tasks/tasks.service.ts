@@ -12,10 +12,51 @@ import { ProposalType } from 'src/shared/common/dto/onchain-data.dto';
 require('dotenv').config();
 const { Network, Alchemy } = require('alchemy-sdk');
 
-const settings = {
-  apiKey: process.env.ALCHEMY_API_KEY,
-  network: Network[process.env.ALCHEMY_NETWORK] || Network.ETH_SEPOLIA,
+// Map environment network names to Alchemy SDK Network enum or custom URL
+const getAlchemySettings = (networkName: string, apiKey: string, alchemyUrl?: string) => {
+  const networkMap = {
+    'eth-mainnet': Network.ETH_MAINNET,
+    'eth-sepolia': Network.ETH_SEPOLIA,
+    'eth-goerli': Network.ETH_GOERLI,
+    'polygon-mainnet': Network.MATIC_MAINNET,
+    'polygon-mumbai': Network.MATIC_MUMBAI,
+    'polygon-amoy': Network.MATIC_AMOY,
+    'arbitrum-mainnet': Network.ARB_MAINNET,
+    'arbitrum-sepolia': Network.ARB_SEPOLIA,
+    'optimism-mainnet': Network.OPT_MAINNET,
+    'optimism-sepolia': Network.OPT_SEPOLIA,
+    'base-mainnet': Network.BASE_MAINNET,
+    'base-sepolia': Network.BASE_SEPOLIA,
+  };
+  
+  // If network is in the map, use it
+  if (networkMap[networkName]) {
+    return {
+      apiKey,
+      network: networkMap[networkName],
+    };
+  }
+  
+  // For custom networks like celo-sepolia, use custom URL
+  if (alchemyUrl) {
+    return {
+      apiKey,
+      url: alchemyUrl,
+    };
+  }
+  
+  // Fallback to ETH_SEPOLIA
+  return {
+    apiKey,
+    network: Network.ETH_SEPOLIA,
+  };
 };
+
+const settings = getAlchemySettings(
+  process.env.ALCHEMY_NETWORK,
+  process.env.ALCHEMY_API_KEY,
+  process.env.ALCHEMY_URL,
+);
 // Ref: https://github.com/alchemyplatform/alchemy-sdk-js/blob/master/docs-md/enums/Network.md
 
 const alchemy = new Alchemy(settings);
@@ -35,12 +76,15 @@ export class TasksService {
     private readonly tempoService: TempoService,
   ) {
     this.logger.setContext(TasksService.name);
+    this.logger.log(
+      `Alchemy WebSocket initialized with network: ${process.env.ALCHEMY_NETWORK}, URL: ${settings.url || 'using network enum'}`,
+    );
   }
 
   // Handle transaction event emission
   async handleTransactionEventEmission(transaction: any) {
     this.logger.log(
-      `Handling event emission for transaction: ${transaction.transactionHash}`,
+      `Handling event emission for transaction: ${transaction.transactionHash}, type: ${transaction.__typename}`,
     );
 
     await this.transactionUpdateService.updateTransactionStatus(
@@ -49,6 +93,23 @@ export class TasksService {
       TransactionConfirmationSource.THE_GRAPH,
       1,
     );
+
+    // Build context object - only include proposalType if it exists
+    const context: any = {
+      __typename: transaction.__typename,
+      event_logs: JSON.stringify({ ...transaction }),
+    };
+
+    // Only add proposalType for governance events
+    if (transaction.proposalType !== undefined) {
+      context.proposalType = transaction.proposalType as ProposalType;
+    }
+
+    // Add organizationId if present
+    if (transaction.organizationId !== undefined) {
+      context.organizationId = transaction.organizationId;
+    }
+
     await this.transactionUpdateService.handleTransactionEventEmission({
       web3Status: 1,
       message: 'Transaction updated successfully.',
@@ -56,16 +117,12 @@ export class TasksService {
       blockNumber: transaction.blockNumber,
       onChainData: {
         transactionHash: transaction.transactionHash,
-        context: {
-          proposalType: transaction.proposalType as ProposalType,
-          __typename: transaction.__typename,
-          event_logs: JSON.stringify({ ...transaction }),
-        },
+        context,
       },
     });
 
     this.logger.log(
-      `Event emission handled for transaction: ${transaction.transactionHash}`,
+      `Event emission handled for transaction: ${transaction.transactionHash}, emitted to appropriate exchange`,
     );
   }
 
@@ -96,24 +153,36 @@ export class TasksService {
         }
 
         this.logger.log(
-          `CRON: These are the pending transaction hashes: ${pendingTransactionHash}`,
+          `CRON: These are the pending transaction hashes: ${JSON.stringify(pendingTransactionHash)}`,
         );
 
         // Query pending transactions from GraphQL
-        this.logger.log(`CRON: Querying pending transactions from The Graph`);
+        this.logger.log(`CRON: Querying ${pendingTransactionHash.length} pending transactions from The Graph`);
         const pendingTransactions =
           await this.transactionUpdateService.getTransactionUpdatesFromTheGraph(
             pendingTransactionHash,
           );
 
-        if (!pendingTransactions || pendingTransactions.length === 0) {
-          this.logger.log(`CRON: No pending transactions!`);
+        if (!pendingTransactions) {
+          this.logger.warn(`CRON: The Graph returned null/undefined response`);
           return;
         }
 
         this.logger.log(
-          `CRON: Found pending transactions: ${pendingTransactions}`,
+          `CRON: The Graph response: ${JSON.stringify(pendingTransactions)}`,
         );
+
+        // Check if any transaction type has data
+        const hasAnyData = Object.values(pendingTransactions).some(
+          (arr: any) => Array.isArray(arr) && arr.length > 0,
+        );
+
+        if (!hasAnyData) {
+          this.logger.warn(
+            `CRON: No events found in The Graph for ${pendingTransactionHash.length} pending transaction(s). They may not be indexed yet.`,
+          );
+          return;
+        }
 
         const eventDataArray: any[] = [];
         const transactionTypes = [
@@ -123,10 +192,14 @@ export class TasksService {
           'ownershipTransferreds',
           'memberRegistereds',
           'memberApproveds',
+          'stablecoinTransfers',
         ];
 
         for (const type of transactionTypes) {
-          if (pendingTransactions[type]) {
+          if (pendingTransactions[type] && pendingTransactions[type].length > 0) {
+            this.logger.log(
+              `CRON: Found ${pendingTransactions[type].length} ${type} event(s)`,
+            );
             eventDataArray.push(
               ...pendingTransactions[type].map((tx: any) => ({
                 ...tx,
@@ -136,6 +209,13 @@ export class TasksService {
           }
         }
 
+        if (eventDataArray.length === 0) {
+          this.logger.warn(
+            `CRON: No events extracted from The Graph response despite having data`,
+          );
+          return;
+        }
+
         // Remove duplicates based on transactionHash
         const uniqueTransactions = Array.from(
           new Map(
@@ -143,8 +223,15 @@ export class TasksService {
           ).values(),
         );
 
+        this.logger.log(
+          `CRON: Processing ${uniqueTransactions.length} unique transactions`,
+        );
+
         // Update each transaction
         for (const transaction of uniqueTransactions) {
+          this.logger.log(
+            `CRON: Processing transaction ${transaction.transactionHash} of type ${transaction.__typename || transaction.eventType}`,
+          );
           const childSpan = this.tracer.startSpan(
             'audit-trail.cron.process-transaction',
           );

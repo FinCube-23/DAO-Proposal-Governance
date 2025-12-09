@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
+import { TransactionConfirmationSource } from '@/core/api/types';
 import { auditTrailApis } from '@/core/services/audit';
 import CustomPagination from '@/shared/components/custom-pagination';
 import { DataTable } from '@/shared/components/dashboard/data-table';
@@ -63,7 +64,17 @@ export default function AuditTransactions() {
   };
 
   const handleTransactionClick = (transaction: Transaction) => {
-    navigate(`/organization/audit/transactions/${transaction.id}`);
+    // Check if transaction is pending
+    const isPending = transaction.confirmation_source === TransactionConfirmationSource.PENDING_SOURCE || transaction.trx_status === 0;
+
+    if (isPending) {
+      // Navigate to pending page
+      navigate('/organization/audit/transactions/pending');
+    }
+    else {
+      // Navigate to transaction details page
+      navigate(`/organization/audit/transactions/${transaction.id}`);
+    }
   };
 
   return (

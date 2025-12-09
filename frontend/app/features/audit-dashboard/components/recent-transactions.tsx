@@ -34,12 +34,12 @@ const transactionColumns: ColumnDef<Transaction>[] = [
     cell: ({ row }) => {
       const status = row.getValue('trx_status') as number | null;
       const confirmationSource = row.original.confirmation_source;
-      
+
       // If confirmation source is PENDING_SOURCE, it's pending
       if (confirmationSource === TransactionConfirmationSource.PENDING_SOURCE) {
         return <StatusBadge status="pending" showIcon />;
       }
-      
+
       // Otherwise, check the status value
       return (
         <StatusBadge status={status === 1 ? 'success' : 'failed'} showIcon />
@@ -68,6 +68,55 @@ const transactionColumns: ColumnDef<Transaction>[] = [
             <CopyableCode
               value={from}
               displayValue={formatAddress(from)}
+            />
+          )
+        : (
+            <span className="text-gray-400">-</span>
+          );
+    },
+  },
+  {
+    accessorKey: 'to',
+    header: 'To',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const to = row.getValue('to') as string;
+      return to
+        ? (
+            <CopyableCode
+              value={to}
+              displayValue={formatAddress(to)}
+            />
+          )
+        : (
+            <span className="text-gray-400">-</span>
+          );
+    },
+  },
+  {
+    accessorKey: 'chain_id',
+    header: 'Chain ID',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const chainId = row.getValue('chain_id') as string;
+      return (
+        <div className="font-mono text-xs">
+          {chainId || '-'}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'address',
+    header: 'Address',
+    enableSorting: false,
+    cell: ({ row }) => {
+      const address = row.getValue('address') as string;
+      return address
+        ? (
+            <CopyableCode
+              value={address}
+              displayValue={formatAddress(address)}
             />
           )
         : (
@@ -308,8 +357,17 @@ export default function RecentTransactions() {
   });
 
   const handleTransactionClick = (transaction: Transaction) => {
-    // Navigate to transaction details page
-    navigate(`/organization/audit/transactions/${transaction.id}`);
+    // Check if transaction is pending
+    const isPending = transaction.confirmation_source === TransactionConfirmationSource.PENDING_SOURCE || transaction.trx_status === 0;
+
+    if (isPending) {
+      // Navigate to pending page
+      navigate('/organization/audit/transactions/pending');
+    }
+    else {
+      // Navigate to transaction details page
+      navigate(`/organization/audit/transactions/${transaction.id}`);
+    }
   };
 
   return (

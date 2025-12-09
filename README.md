@@ -1,14 +1,23 @@
-# FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services
+# FinCube - A Plug and Play Web3 Traceability Tool for Enterprise Financial Systems
+
+<div align="center">
+  <img src="https://brainstation-23.com/wp-content/uploads/2025/06/image-1-1.png" alt="Brain Station 23 PLC" width="300"/>
+  
+  **Made by Web3 Team - Brain Station 23 PLC**
+</div>
 
 ![Layer 1: Ethereum](https://img.shields.io/badge/Layer%201-Ethereum-blue)
 ![Technology: Blockchain](https://img.shields.io/badge/Technology-Blockchain-lightgrey)
 ![Made by: Brain Station 23](https://img.shields.io/badge/Made%20by-Brain%20Station%2023-green)
 
-Welcome to FinCube's GitHub repository! FinCube is a revolutionary platform leveraging blockchain technology to provide seamless, secure, and efficient cross-border financial services. By decentralizing control and fostering collaboration among Mobile Financial Services (MFSs), FinCube aims to enhance transparency, reduce transaction times, and lower costs, making financial services more inclusive and accessible.
+**FinCube** is a blockchain-based traceability platform that links on-chain payment records with traditional enterprise systems to create an **immutable, auditable collaborative system**. It seamlessly integrates with existing ERP and monitoring tools to enhance transparency, compliance, and trust—especially for exchanges, logistics, trade, and government sectors—by enabling secure, end-to-end visibility and faster international settlements using Stablecoins. 
+
+Additionally, it establishes a **unified reconciliation layer** between government bodies and business institutions, ensuring data consistency and accountability across stakeholders.
+
 
 ## Table of Contents
 
-- [FinCube - A Blockchain Based solution for Interplanetary Decentralized Mobile Financial Services](#fincube---a-blockchain-based-solution-for-interplanetary-decentralized-mobile-financial-services)
+- [FinCube - A Plug and Play Web3 Traceability Tool for Enterprise Financial Systems](#fincube---a-blockchain-based-solution-for-interplanetary-decentralized-mobile-financial-services)
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Features](#features)
@@ -30,18 +39,34 @@ Welcome to FinCube's GitHub repository! FinCube is a revolutionary platform leve
 
 ## Introduction
 
-FinCube addresses the inefficiencies of the current financial system, which heavily relies on centralized authorities like Central Banks and systems like SWIFT. By utilizing blockchain technology and decentralized governance through a Decentralized Autonomous Organization (DAO), FinCube enables near-instantaneous transactions, reduced costs, and enhanced security.
+FinCube empowers enterprise-grade financial institutions, global e-commerce ecosystems, traders, and export-import houses that want to hold their corporate treasuries in form of stablecoins to move money faster and in real-time. It ensures strict adherence to internal and governmental audit standards, without adding operational complexity or compromising trust.
 
 ## Features
 
-- **Decentralization**: Eliminates single points of failure and ensures continuous operation.
-- **Faster Transactions**: Processes transactions almost instantaneously.
-- **Cost Efficiency**: Lower transaction fees managed and set by the DAO.
-- **Transparency and Trust**: Public ledger for all transactions.
-- **Compliance and Security**: Built-in compliance with regulatory requirements and enhanced security through cryptography.
-- **Flexibility and Scalability**: Easily adaptable to new market requirements and scalable to include new MFS members.
-- **Inclusive Governance**: Democratic decision-making process through the DAO.
-- **Economic Inclusivity**: Enhances financial inclusivity in underdeveloped and developing countries.
+- **Real-Time Event Tracking**: Captures on-chain events with 
+- **Fault-Tolerant Recovery**: Automatic reconciliation via The Graph every 30 seconds
+- **Enterprise-Level Indexing**: Maintains off-chain database with only business-relevant transactions
+- **Event-Driven Architecture**: Asynchronous Pub/Sub pattern for non-blocking user experience
+- **At-Least-Once Delivery**: RabbitMQ guarantees no event loss with retry policy
+- **Dual-Source Monitoring**: Alchemy RPC (real-time) + TheGraph (backfill) for 100% coverage
+- **Background Processing**: Scheduled cron jobs for missed transactions
+- **Database Migrations**: TypeORM-based PostgreSQL schema management
+
+**Technology Stack**:
+- **NestJS**: Modern Node.js framework for scalable server-side applications
+- **PostgreSQL + TypeORM**: Enterprise database with migration support (Port 5434)
+- **Alchemy RPC**: Primary blockchain data provider for real-time events
+- **TheGraph Protocol**: Secondary data source for redundancy and backfill
+- **RabbitMQ**: Message queue with at-least-once delivery guarantee
+- **Kong Gateway**: API gateway with RabbitMQ publisher plugin
+
+**Current Implementations**:
+- DAO governance activity tracking
+- FinCube transfer monitoring
+- Smart contract event detection
+- Transaction receipt processing
+- Cross-chain event aggregation
+
 
 ## Technical Features
 
@@ -51,13 +76,16 @@ FinCube addresses the inefficiencies of the current financial system, which heav
 | Message Queue                 | RabbitMQ             | There are multiple services which need to communicate with each other at the same time. Some of them may not be active at the same time. So for interservice communication, Message Queue is used |
 | Blockchain Indexer            | The Graph            | Used to listen and query events from the blockchain                                                                                                                                               |
 | Proxy Contract                | UUPSUpgradeableProxy | The smart contract is made UUPS upgradeable to incorporate changes on the go                                                                                                                      |
+| ReenterancyProof | ReentrancyGuardUpgradeable | ReentrancyProof is a security feature to prevent reentrancy attacks |
 | Pagination                    | Solidity             | Pagination is a way for a caller to make multiple smaller requests to retrieve the data. To prevent read function from being overflowed, pagination is used                                       |
-| API Gateway                   | ExpressJS            | Redirecting client request to appropriate backend container [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)              |
+| API Gateway                   | Kong OSS            | Redirecting client request to appropriate backend container [FDX standard](https://www.financialdataexchange.org/common/Uploaded%20files/Intoduction%20To%20APIs%203212024_1120.pdf)              |
 | Automated Contract Deployment | Shell script         | Ensure the contract compiles and runs all tests before deployment, deploys, creates and moves artifacts to backend web3-proxy container, increasing customization for deployment                  |
+| Unit Testing                  | Chai, Mocha          | Unit testing has been done for smart contracts using Chai, Mocha etc. making sure smart contracts adhere to security principles and is vulnerability proof |
+| Performance Testing           | K6                   | Performance testing has been done for the system in Production. Please see [performance-testing](https://github.com/FinCube-23/performance-testing) for more details |
 
 ## Architecture
 
-FinCube leverages a combination of blockchain technology, smart contracts, and decentralized governance to create a robust and scalable financial platform. Key components include:
+FinCube leverages a combination of blockchain technology, smart contracts, and decentralized governance to create a robust and scalable financial platform. The **Audit Trail Service** provides comprehensive blockchain activity monitoring and regulatory compliance. This integration ensures that every transaction, governance action, and smart contract interaction is automatically tracked and auditable. Key components include:
 
 - **Blockchain Ledger**: For recording immutable transaction records.
 - **Smart Contracts**: To automate and enforce transaction rules.
@@ -72,7 +100,7 @@ For a detailed visual representation of the system architecture, see the [Enhanc
 | ----------------------- | ------------------------- |
 | Audit-trail-service     | NestJS, Alchemy, TheGraph, RabbitMQ          |
 | DAO-service             | NestJS, PostgreSQL        |
-| API-gateway             | Kong Gateway, PostgreSQL  |
+| API-gateway             | Kong Gateway, Lua  |
 | User-management-service | Django, Django Admin, PostgreSQL |
 | Web3-proxy-service      | NestJS, Alchemy, TheGraph   |
 
@@ -82,6 +110,26 @@ Backend folder contains more details regarding each of the services and the APIs
 ### Web3 services
 
 Web3 services contain the smart contracts, smart contract testcases, deployment, UUPS proxy deployment functionalities.
+
+**Why Event-Driven Architecture?**
+
+Traditional synchronous approaches would force users to wait for blockchain confirmation (several seconds to minutes), creating poor user experience. FinCube's event-driven architecture solves this:
+
+**The Problem**: Blockchain transactions require confirmation across multiple blocks, which can take significant time depending on network congestion and gas fees.
+
+**The Solution**: Asynchronous Pub/Sub flow that provides instant user feedback while processing confirmations in the background.
+
+**Flow**:
+1. **User Action**: User initiates blockchain transaction
+2. **Immediate Response**: Frontend receives transaction hash instantly - no waiting
+3. **Background Processing**:
+   - Audit Trail listens to RPC events in real-time
+   - Missed events are backfilled via The Graph (every 30 seconds)
+4. **Event Publishing**: When transaction is finalized on-chain:
+   - Audit Trail publishes acknowledgement to RabbitMQ
+   - All microservices update their off-chain databases asynchronously
+
+**Result**: Users get instant feedback while the system maintains eventual consistency in the background, providing both excellent UX and data integrity.
 
 ## Installation
 
@@ -155,31 +203,63 @@ In the project root a `./run.sh` can be found. This will help to run the whole a
 
 Once the application is running, you can interact with FinCube using the provided web interface or API endpoints. Detailed documentation on the API endpoints and usage examples can be found in the `docs` directory.
 
-## Advantages
+## Deployment
 
-- **Eradicates Current Problems**: Removes reliance on centralized authorities, enabling faster and more controlled transactions.
-- **Better than Centralized Systems**: Offers decentralization, faster transactions, cost efficiency, transparency, compliance, scalability, inclusive governance, and increased economic inclusivity.
+### Production Server
 
-## Business Model
+The FinCube application is deployed and accessible at:
 
-FinCube's revenue streams include:
+**🌐 Production URL**: [http://172.16.231.80/](http://172.16.231.80/)
 
-- **Commission Fees**: From cross-border financial services transactions.
-- **Advertisement**: Targeted ads on the platform.
-- **Data Analytics**: Insights into customer behavior and trends.
-- **Auditing**: Compliance and regulatory audits.
 
-## Roadmap
+### Environment Configuration
 
-1. Scale to include banks and cryptocurrency providers.
-2. Integrate advanced security measures like SMPC and ZK Proof.
-3. Develop a credit system and staking mechanism.
-4. Implement periodic transactions and remittance features.
-5. Ensure cross-currency bill and service payments.
+Ensure the following environment variables are properly configured for production:
 
-### Sprint planning
+- **Database Configuration**: PostgreSQL connection strings
+- **Blockchain RPC**: Alchemy API keys and endpoints
+- **Message Queue**: RabbitMQ credentials and host
+- **API Gateway**: Kong Gateway configuration
+- **Smart Contract Addresses**: Deployed contract addresses on target network
 
-Sprint plans of the project is [here](https://docs.google.com/spreadsheets/d/1H1C_8erMfxNjflPygsy6K6sB8qtqSrySQkH1MoQ7cOQ/edit?usp=sharing).
+Refer to `.env.example` for a complete list of required environment variables.
+
+
+#### Deployment Best Practices
+
+- **Database Migrations**: Always test migrations in staging before production
+- **CI/CD Pipeline**: Use GitLab CI/CD for automated testing and deployment. Database migration script added in CI/CD
+- **Smart Contract Upgrades**: Use UUPS proxy pattern for contract upgrades
+- **Service Dependencies**: Ensure RabbitMQ and PostgreSQL are running before deploying services
+- **Monitoring**: Check logs and metrics after deployment
+- **Backup**: Always backup database before major deployments
+
+#### Monitoring and Logs
+
+FinCube provides comprehensive monitoring and observability tools:
+
+**Grafana Dashboard**: [http://172.16.231.80:3200](http://172.16.231.80:3200)
+
+Access real-time metrics, visualizations, and system health monitoring through the Grafana dashboard. The dashboard provides:
+- Service performance metrics
+- Database query performance
+- RabbitMQ message queue statistics
+- Blockchain event processing metrics
+- API gateway request analytics
+- Resource utilization (CPU, memory, network)
+
+**Docker Logs**:
+
+```bash
+# View all service logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f <SERVICE-NAME>
+
+# Monitor resource usage
+docker stats
+```
 
 ## Contributing
 

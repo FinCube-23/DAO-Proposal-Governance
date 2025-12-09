@@ -22,6 +22,13 @@ export class TransactionDetailResponseDto {
   trx_hash: string;
 
   @ApiProperty({
+    description: 'The blockchain network chain ID',
+    example: '11155111',
+    required: false,
+  })
+  chain_id?: string;
+
+  @ApiProperty({
     description:
       'This is the transaction meta data which was received during the transaction confirmation.',
     example:

@@ -1,6 +1,8 @@
 from organizations.repositories.organization_user_repository import OrganizationUserRepository
 from organizations.repositories.organization_repository import OrganizationRepository
 from users.repositories.user_repository import UserRepository
+from event_handlers.utils.rabbitmq_publisher import RabbitMQPublisher
+from logging_config import logger
 
 class OrganizationUserService:
     
@@ -27,7 +29,24 @@ class OrganizationUserService:
             raise Exception("Organization does not exist")
         
         # Create organization user membership
-        return OrganizationUserRepository.create_organization_user(user_id, organization_id)
+        organization_user= OrganizationUserRepository.create_organization_user(user_id, organization_id)
+
+        # Publish to RabbitMQ
+        try:
+            org_user_data = {
+                'id': organization_user.id,
+                'user_id': organization_user.user_id,
+                'organization_id': organization_user.organization_id,
+                'user_email': user.email,
+                'organization_name': organization.name,
+                'created_at': organization_user.created_at.isoformat(),
+            }
+            RabbitMQPublisher.publish_organization_user_created(org_user_data)
+        except Exception as e:
+            # Log error but don't fail organization user creation
+            logger.error({"event": "Failed to publish organization user creation event", "error": str(e)})
+
+        return organization_user
     
     @staticmethod
     def get_organization_users(organization_id, query_params):

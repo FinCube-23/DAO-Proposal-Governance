@@ -9,6 +9,16 @@ interface Props {
 }
 
 function getResourceType(func: string) {
+  const lowerFunc = func.toLowerCase();
+
+  // Check if the function name contains 'transfer'
+  if (lowerFunc.includes('transfer')) {
+    return {
+      title: 'Transfer',
+      tag: 'TRANSFER',
+    };
+  }
+
   switch (func) {
     case 'ProposalAdded':
     case 'ProposalCanceleds':
@@ -57,13 +67,6 @@ export default function TopResourceType({ topResourceTypes }: Props) {
             <Archive className="h-5 w-5" />
             Top Resource Types
           </CardTitle>
-          {/*  <Link to="/resources">
-            <Button variant="ghost" size="sm">
-              View All
-              {' '}
-              <ArrowRight className="h-4 w-4 ml-1" />
-            </Button>
-          </Link> */}
         </div>
       </CardHeader>
       <CardContent>

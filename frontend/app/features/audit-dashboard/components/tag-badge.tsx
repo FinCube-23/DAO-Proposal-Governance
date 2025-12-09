@@ -14,6 +14,7 @@ const TAG_COLORS = {
   GOVERNANCE: 'bg-blue-500 text-white',
   BRIDGE: 'bg-orange-500 text-white',
   TOKEN: 'bg-green-500 text-white',
+  TRANSFER: 'bg-green-500 text-white',
   DEFAULT: 'bg-gray-500 text-white',
 } as const;
 
