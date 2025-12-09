@@ -1,6 +1,7 @@
 import type { Transaction } from '@/core/api/types';
 import { Select } from '@radix-ui/react-select';
 import { useMutation } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { TransactionConfirmationSource } from '@/core/api/types';
@@ -64,8 +65,14 @@ function TrxList() {
     return () => clearTimeout(debounceTimer);
   }, [page, status, limit, source, searchTerm]);
 
-  if (getTransactions.isPending)
-    return <p>Loading...</p>;
+  if (getTransactions.isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm text-muted-foreground">Loading transactions...</p>
+      </div>
+    );
+  }
   if (getTransactions.isError)
     return <p>Error loading data</p>;
 
@@ -164,45 +171,33 @@ function TrxList() {
                     <TableCell className="whitespace-nowrap">
                       {trx.confirmation_source === TransactionConfirmationSource.ALCHEMY
                         ? (
-                            <Badge
-                              variant="outline"
-                              className="border-2 border-blue-400 text-white"
-                            >
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border bg-blue-500/20 border-blue-500/20 text-blue-400">
                               Alchemy
-                            </Badge>
+                            </span>
                           )
                         : trx.confirmation_source === TransactionConfirmationSource.THE_GRAPH
                           ? (
-                              <Badge
-                                variant="outline"
-                                className="border-2 border-purple-400 text-white"
-                              >
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border bg-purple-500/20 border-purple-500/20 text-purple-400">
                                 The Graph
-                              </Badge>
+                              </span>
                             )
                           : trx.confirmation_source === TransactionConfirmationSource.INFURA
                             ? (
-                                <Badge variant="outline" className="border-2 border-gray-400">
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border bg-gray-500/20 border-gray-500/20 text-gray-400">
                                   Infura
-                                </Badge>
+                                </span>
                               )
                             : trx.confirmation_source === TransactionConfirmationSource.MANUAL
                               ? (
-                                  <Badge
-                                    variant="outline"
-                                    className="border-2 border-yellow-400"
-                                  >
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border bg-yellow-500/20 border-yellow-500/20 text-yellow-400">
                                     Manual
-                                  </Badge>
+                                  </span>
                                 )
                               : trx.confirmation_source === TransactionConfirmationSource.PENDING_SOURCE
                                 ? (
-                                    <Badge
-                                      variant="outline"
-                                      className="border-2 border-orange-400 text-white"
-                                    >
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border bg-orange-500/20 border-orange-500/20 text-orange-400">
                                       Pending Source
-                                    </Badge>
+                                    </span>
                                   )
                                 : null}
                     </TableCell>

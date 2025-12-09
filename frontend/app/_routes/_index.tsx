@@ -1,11 +1,12 @@
 import { ArrowRight } from 'lucide-react';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 import { SparklesCore } from '@/shared/components/sparkles';
 import { Button } from '@/shared/components/ui/button';
 import useAuthStore from '@/shared/stores/auth';
 
 export default function Home() {
   const authStore = useAuthStore(state => state);
+  const navigate = useNavigate();
 
   return (
     <div className="h-screen relative w-full flex flex-col items-center justify-center overflow-hidden rounded-md">
@@ -37,14 +38,33 @@ export default function Home() {
           {' '}
           Seamless
         </h2>
-        <div className="z-40">
-          <Link to={`/${authStore.access ? 'organization' : 'login'}`}>
-            <Button variant="secondary">
-              Get Started
-              {' '}
-              <ArrowRight size={20} />
-            </Button>
-          </Link>
+        <div className="z-40 flex gap-4">
+          {authStore.access
+            ? (
+                <Button onClick={() => navigate('/organization')} variant="secondary">
+                  Back to Dashboard
+                  <ArrowRight size={20} />
+                </Button>
+              )
+            : (
+                <>
+                  <Button
+                    onClick={() => {
+                      navigate('/login');
+                    }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      navigate('/register');
+                    }}
+                  >
+                    Register
+                  </Button>
+                </>
+              )}
         </div>
       </div>
     </div>

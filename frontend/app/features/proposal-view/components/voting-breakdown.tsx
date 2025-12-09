@@ -6,7 +6,7 @@ import {
   waitForTransactionReceipt,
   writeContract,
 } from '@wagmi/core';
-import { CheckCircle } from 'lucide-react';
+import { Check, CheckCircle, Copy } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -39,6 +39,9 @@ export default function VotingBreakdown({ proposalId }: any) {
   const [voteTrxHash, setVoteTrxHash] = useState('');
   const [executeTrxHash, setExecuteTrxHash] = useState('');
   const [cancelTrxHash, setCancelTrxHash] = useState('');
+  const [isVoteCopied, setIsVoteCopied] = useState(false);
+  const [isExecuteCopied, setIsExecuteCopied] = useState(false);
+  const [isCancelCopied, setIsCancelCopied] = useState(false);
   const navigate = useNavigate();
   const executeProposal = useMutation({
     mutationFn: proposalApis.executeProposal,
@@ -52,6 +55,24 @@ export default function VotingBreakdown({ proposalId }: any) {
       toast.success('Proposal cancelled successfully');
     },
   });
+
+  const handleCopyVoteHash = async () => {
+    await navigator.clipboard.writeText(voteTrxHash);
+    setIsVoteCopied(true);
+    setTimeout(() => setIsVoteCopied(false), 2000);
+  };
+
+  const handleCopyExecuteHash = async () => {
+    await navigator.clipboard.writeText(executeTrxHash);
+    setIsExecuteCopied(true);
+    setTimeout(() => setIsExecuteCopied(false), 2000);
+  };
+
+  const handleCopyCancelHash = async () => {
+    await navigator.clipboard.writeText(cancelTrxHash);
+    setIsCancelCopied(true);
+    setTimeout(() => setIsCancelCopied(false), 2000);
+  };
 
   const castVote = async (value: boolean) => {
     setLoadingStatus(true);
@@ -329,9 +350,25 @@ export default function VotingBreakdown({ proposalId }: any) {
             <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
               <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
-                  {shortenAddress(voteTrxHash)}
-                </code>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                    {shortenAddress(voteTrxHash)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyVoteHash}
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    {isVoteCopied
+                      ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        )
+                      : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                  </Button>
+                </div>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${voteTrxHash}`}
                   target="_blank"
@@ -349,7 +386,7 @@ export default function VotingBreakdown({ proposalId }: any) {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="!flex !flex-row !justify-center !items-center">
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
               className="w-full sm:w-auto text-sm sm:text-base"
@@ -381,9 +418,25 @@ export default function VotingBreakdown({ proposalId }: any) {
             <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
               <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
-                  {shortenAddress(executeTrxHash)}
-                </code>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                    {shortenAddress(executeTrxHash)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyExecuteHash}
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    {isExecuteCopied
+                      ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        )
+                      : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                  </Button>
+                </div>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${executeTrxHash}`}
                   target="_blank"
@@ -401,7 +454,7 @@ export default function VotingBreakdown({ proposalId }: any) {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="!flex !flex-row !justify-center !items-center">
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
               className="w-full sm:w-auto text-sm sm:text-base"
@@ -433,9 +486,25 @@ export default function VotingBreakdown({ proposalId }: any) {
             <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
               <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
-                  {shortenAddress(cancelTrxHash)}
-                </code>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                    {shortenAddress(cancelTrxHash)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyCancelHash}
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    {isCancelCopied
+                      ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        )
+                      : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                  </Button>
+                </div>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${cancelTrxHash}`}
                   target="_blank"
@@ -453,7 +522,7 @@ export default function VotingBreakdown({ proposalId }: any) {
               </div>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="!flex !flex-row !justify-center !items-center">
             <Button
               onClick={() => navigate('/organization/dao/proposals')}
               className="w-full sm:w-auto text-sm sm:text-base"

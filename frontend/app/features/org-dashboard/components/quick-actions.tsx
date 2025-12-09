@@ -111,8 +111,8 @@ export default function QuickActions() {
             onClick={handleAddToken}
           >
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <BookmarkPlus className="w-4 h-4 text-white" />
+              <div className="p-2 rounded-lg bg-blue-500/20">
+                <BookmarkPlus className="w-4 h-4 text-blue-400" />
               </div>
               <span className="font-medium text-white">Import USDC Token</span>
             </div>
@@ -125,8 +125,8 @@ export default function QuickActions() {
             onClick={addCeloTestnet}
           >
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <Plus className="w-4 h-4 text-white" />
+              <div className="p-2 bg-purple-500/20 rounded-lg">
+                <Plus className="w-4 h-4 text-purple-400" />
               </div>
               <span className="font-medium text-white">Add Celo Testnet</span>
             </div>

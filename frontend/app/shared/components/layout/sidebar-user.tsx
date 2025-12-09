@@ -1,21 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
 import { BadgeCheck, ChevronsUpDown, LogOut } from 'lucide-react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useDisconnect } from 'wagmi';
-import { orgApis } from '@/core/services/org';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
 } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
-import { Button } from '@/shared/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-} from '@/shared/components/ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,26 +37,12 @@ interface Props {
 export default function SidebarUser({
   name,
   email,
-  contactNumber,
-  isActive,
-  isStaff,
   avatar,
 }: Props) {
   const { isMobile } = useSidebar();
   const { disconnect } = useDisconnect();
-  const [dialogueOpen, setDialogueOpen] = useState(false);
   const authStore = useAuthStore(state => state);
   const navigate = useNavigate();
-
-  // Get organization ID from user's organizations
-  const orgId = authStore.profile?.organizations?.[0]?.id;
-
-  // Fetch organization details
-  const { data: organizationData, isLoading: _isLoadingOrg } = useQuery({
-    queryKey: ['organization', orgId],
-    queryFn: () => orgApis.getOrg(orgId!),
-    enabled: !!orgId,
-  });
 
   return (
     <SidebarMenu>
@@ -109,232 +85,11 @@ export default function SidebarUser({
                   <span className="truncate text-xs">{email}</span>
                 </div>
               </div>
-              <Dialog open={dialogueOpen} onOpenChange={setDialogueOpen}>
-                <DialogContent className="max-h-[80vh] overflow-y-auto w-[95vw] max-w-2xl sm:max-w-3xl">
-                  <DialogHeader>
-                    <h2 className="text-base sm:text-lg font-bold text-green-400">
-                      User Profile
-                    </h2>
-                  </DialogHeader>
-                  <div className="space-y-4 sm:space-y-6">
-                    <div className="space-y-3 sm:space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Full Name
-                          </p>
-                          <p className="text-sm sm:text-base text-white font-semibold break-words">{name}</p>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Email
-                          </p>
-                          <p className="text-sm sm:text-base text-blue-300 break-all">{email}</p>
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Contact Number
-                          </p>
-                          <p className="text-sm sm:text-base text-blue-300 break-all">{contactNumber}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Active Status
-                          </p>
-                          <Badge variant={isActive ? 'default' : 'secondary'} className={`text-xs sm:text-sm ${isActive ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}>
-                            {isActive ? 'Active' : 'Inactive'}
-                          </Badge>
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Staff Status
-                          </p>
-                          <Badge variant={isStaff ? 'default' : 'secondary'} className={`text-xs sm:text-sm ${isStaff ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-600 hover:bg-gray-700'}`}>
-                            {isStaff ? 'Staff' : 'Not Staff'}
-                          </Badge>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Organization Information Section */}
-                    <div className="border-t border-gray-700 pt-3 sm:pt-4">
-                      <h3 className="text-sm sm:text-md font-semibold text-green-400 mb-3 sm:mb-4">
-                        Organization Profile
-                      </h3>
-
-                      <div className="space-y-3 sm:space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Organization Name
-                            </p>
-                            <p className="text-sm sm:text-base text-white font-semibold break-words">
-                              {organizationData?.name || authStore.profile?.organizations?.[0]?.name || 'N/A'}
-                            </p>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Organization Email
-                            </p>
-                            <p className="text-sm sm:text-base text-blue-300 break-all">
-                              {organizationData?.email || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Organization Type
-                            </p>
-                            <p className="text-sm sm:text-base text-purple-300">
-                              {organizationData?.type.toLocaleUpperCase() || 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Location
-                            </p>
-                            <p className="text-sm sm:text-base text-amber-300 break-words">
-                              {(organizationData as any)?.address || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          <div className="min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Admin Wallet Address
-                            </p>
-                            <p className="text-xs sm:text-sm text-blue-400 break-all font-mono">
-                              {(organizationData as any)?.organization_admin?.wallet_address
-                                ? `${(organizationData as any).organization_admin.wallet_address.slice(
-                                  0,
-                                  6,
-                                )}...${(organizationData as any).organization_admin.wallet_address.slice(-6)}`
-                                : 'N/A'}
-                            </p>
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Legal Entity ID
-                            </p>
-                            <p className="text-sm sm:text-base text-emerald-400 break-words">
-                              {(organizationData as any)?.legal_entity_identifier || 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Organization Status
-                            </p>
-                            <span
-                              className={`px-2 py-1 rounded text-xs capitalize ${
-                                (organizationData as any)?.status === 'approved'
-                                  ? 'bg-green-600'
-                                  : 'bg-yellow-600'
-                              }`}
-                            >
-                              {(organizationData as any)?.status || 'Pending'}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Admin Status
-                            </p>
-                            <span
-                              className={`px-2 py-1 rounded text-xs capitalize ${
-                                (organizationData as any)?.organization_admin?.status === 'approved'
-                                  ? 'bg-blue-600'
-                                  : 'bg-gray-600'
-                              }`}
-                            >
-                              {(organizationData as any)?.organization_admin?.status || 'N/A'}
-                            </span>
-                          </div>
-                        </div>
-                        <div>
-                          <p className="text-xs sm:text-sm font-medium text-gray-400">
-                            Organization Admin
-                          </p>
-                          <p className="text-sm sm:text-base text-green-300 break-words">
-                            {(organizationData as any)?.organization_admin?.full_name || 'N/A'}
-                          </p>
-                          <p className="text-xs sm:text-sm text-blue-300 break-all">
-                            {(organizationData as any)?.organization_admin?.email || ''}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Created At
-                            </p>
-                            <p className="text-xs sm:text-sm text-cyan-300">
-                              {(organizationData as any)?.created_at
-                                ? new Date((organizationData as any).created_at).toLocaleDateString(
-                                    undefined,
-                                    {
-                                      year: 'numeric',
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    },
-                                  )
-                                : 'N/A'}
-                            </p>
-                          </div>
-                          <div>
-                            <p className="text-xs sm:text-sm font-medium text-gray-400">
-                              Updated At
-                            </p>
-                            <p className="text-xs sm:text-sm text-orange-300">
-                              {(organizationData as any)?.updated_at
-                                ? new Date((organizationData as any).updated_at).toLocaleDateString(
-                                    undefined,
-                                    {
-                                      year: 'numeric',
-                                      month: 'short',
-                                      day: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    },
-                                  )
-                                : 'N/A'}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex justify-center pt-2">
-                    <Button
-                      variant="secondary"
-                      className="text-sm sm:text-base"
-                      onClick={() => {
-                        try {
-                          authStore.clearAuthState();
-                          disconnect();
-                        }
-                        catch (error) {
-                          console.warn('Disconnect failed:', error);
-                        }
-                        finally {
-                          navigate('/');
-                        }
-                      }}
-                    >
-                      <LogOut className="h-4 w-4 sm:h-5 sm:w-5" />
-                      Log out
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
             </DropdownMenuLabel>
             <DropdownMenuGroup>
               <div
                 className="flex hover:bg-gray-800 items-center gap-2 px-1 py-1.5 text-left hover:cursor-pointer"
-                onClick={() => setDialogueOpen(true)}
+                onClick={() => navigate('/organization/profile')}
               >
                 <BadgeCheck />
                 Account

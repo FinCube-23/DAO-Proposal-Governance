@@ -38,16 +38,15 @@ export default function TransactionOverview({ transaction }: Props) {
 
   // Extract contract address from various sources
   const getContractAddress = () => {
-    // First try the address field
-    if (transaction.address) {
-      return transaction.address;
-    }
-
     // Try to get from transaction_receipt
     try {
       const receipt = JSON.parse(transaction.transaction_receipt || '{}');
       if (receipt.to) {
         return receipt.to;
+      }
+      // Check for contractAddress in receipt (for contract creation)
+      if (receipt.contractAddress) {
+        return receipt.contractAddress;
       }
     }
     catch (e) {
@@ -65,7 +64,8 @@ export default function TransactionOverview({ transaction }: Props) {
       console.error('Failed to parse raw_transaction:', e);
     }
 
-    return null;
+    // Fallback to transaction.to
+    return transaction.to || null;
   };
 
   const contractAddress = getContractAddress();

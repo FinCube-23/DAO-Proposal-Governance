@@ -66,7 +66,7 @@ export interface GetOrgResponse {
   type: string;
   address: string;
   legal_entity_identifier: string;
-  status?: string; // Legacy field for backward compatibility
+  status?: string; // Keep for backwards compatibility
   offchain_status: string;
   onchain_status: string;
   is_active: boolean;
@@ -78,7 +78,7 @@ export interface GetOrgResponse {
     phone_number: string;
     wallet_address: string;
   };
-  onchain_verifications?: any[];
+  onchain_verifications: any[];
   created_at: string;
   updated_at: string;
 }

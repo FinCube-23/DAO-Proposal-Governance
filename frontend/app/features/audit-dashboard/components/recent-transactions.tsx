@@ -1,7 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Transaction } from '@/core/api/types';
 import { useQuery } from '@tanstack/react-query';
-import { Activity, ExternalLink, GitBranch } from 'lucide-react';
+import { Activity, ChevronRight, ExternalLink, GitBranch } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { TransactionConfirmationSource } from '@/core/api/types';
 import { auditTrailApis } from '@/core/services/audit';
@@ -11,6 +11,7 @@ import { StatusBadge } from '@/shared/components/status-badge';
 import { TimeDisplay } from '@/shared/components/time-display';
 import { Button } from '@/shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/components/ui/collapsible';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/components/ui/popover';
 import { formatAddress } from '@/shared/utils';
 
@@ -294,51 +295,78 @@ const transactionColumns: ColumnDef<Transaction>[] = [
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 w-6 p-0"
+                className="h-6 w-6 p-0 hover:bg-green-100 hover:text-green-600 transition-colors"
                 disabled={eventLogs.length === 0}
                 onClick={e => e.stopPropagation()}
+                title="View Event Logs"
               >
                 <Activity className="h-3 w-3" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 max-h-80 overflow-y-auto">
+            <PopoverContent className="w-96 max-h-80 overflow-y-auto bg-background border-border">
               <div className="space-y-3">
                 <h4 className="font-medium text-sm">Event Logs</h4>
-                <div className="space-y-3">
-                  {eventLogs.map((event: any, index: number) => {
-                    const eventData = event.data || event;
-                    const eventName = eventData.__typename || eventData.eventType || 'Event';
-                    const proposalId = eventData.proposalId;
-
-                    return (
-                      <div key={index} className="p-3 bg-gray-100 border rounded space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-sm text-gray-900">{eventName}</span>
+                {eventLogs.length === 0
+                  ? (
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground text-center py-4">
+                          No event logs available
                         </div>
-                        {proposalId && (
-                          <div className="text-xs">
-                            <span className="font-medium text-gray-700">Proposal ID: </span>
-                            <span className="text-gray-600">{proposalId}</span>
-                          </div>
-                        )}
-                        {Object.entries(eventData).map(([key, value]) => {
-                          if (key === '__typename' || key === 'proposalId')
-                            return null;
+                        <div className="text-xs text-muted-foreground/70 text-center">
+                          Event logs will appear here when available
+                        </div>
+                      </div>
+                    )
+                  : (
+                      <div className="space-y-3">
+                        {eventLogs.map((event: any, index: number) => {
+                          const eventData = event.data || event;
+                          const eventName = eventData.__typename || eventData.eventType || 'Event';
+                          const proposalId = eventData.proposalId;
+
                           return (
-                            <div key={key} className="text-xs">
-                              <span className="font-medium text-gray-700 capitalize">
-                                {key.replace(/_/g, ' ')}
-                                :
-                                {' '}
-                              </span>
-                              <span className="text-gray-600">{String(value)}</span>
-                            </div>
+                            <Collapsible key={index}>
+                              <CollapsibleTrigger asChild>
+                                <div
+                                  className="flex items-center justify-between p-2 border border-border rounded cursor-pointer hover:bg-accent/50 bg-card"
+                                  onClick={e => e.stopPropagation()}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium text-sm">
+                                      {eventName}
+                                    </span>
+                                    {proposalId && (
+                                      <span className="text-xs text-muted-foreground">
+                                        #
+                                        {proposalId}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                </div>
+                              </CollapsibleTrigger>
+                              <CollapsibleContent>
+                                <div className="p-3 bg-muted/50 border border-border rounded space-y-2 overflow-hidden">
+                                  {Object.entries(eventData).map(([key, value]) => (
+                                    <div key={key} className="text-xs min-w-0">
+                                      <div className="font-medium capitalize">
+                                        {key.replace(/_/g, ' ')}
+                                        :
+                                      </div>
+                                      <div className="font-mono text-xs break-all text-foreground/80 overflow-wrap-anywhere max-w-full">
+                                        {typeof value === 'object'
+                                          ? JSON.stringify(value, null, 2)
+                                          : String(value)}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </CollapsibleContent>
+                            </Collapsible>
                           );
                         })}
                       </div>
-                    );
-                  })}
-                </div>
+                    )}
               </div>
             </PopoverContent>
           </Popover>

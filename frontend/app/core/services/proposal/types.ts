@@ -3,7 +3,7 @@ export interface IOffchainProposalCard {
   proposal_type: string;
   proposer_address: string;
   proposal_status: string;
-  metadata: string;
+  description: string;
 }
 
 export interface GetAllProposalResponse {

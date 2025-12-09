@@ -1,6 +1,5 @@
-import { Loader } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { Badge } from '@/shared/components/ui/badge';
+import { Loader } from "lucide-react";
+import { useEffect, useState } from "react";
 
 interface Props {
   canceled: boolean;
@@ -8,8 +7,12 @@ interface Props {
   voteDuration: number;
 }
 
-export default function VotingBadge({ canceled, voteStart, voteDuration }: Props) {
-  const [votingStatus, setVotingStatus] = useState('Voting not started');
+export default function VotingBadge({
+  canceled,
+  voteStart,
+  voteDuration,
+}: Props) {
+  const [votingStatus, setVotingStatus] = useState("Voting not started");
   const [votingDelay] = useState(voteStart);
   const [votingPeriod] = useState(voteDuration);
   const [timeLeft, setTimeLeft] = useState(0);
@@ -26,18 +29,16 @@ export default function VotingBadge({ canceled, voteStart, voteDuration }: Props
       const myTime = Date.now() / 1000;
 
       if (myTime < Number(votingDelay)) {
-        setVotingStatus('Voting not started');
+        setVotingStatus("Voting not started");
         setTimeLeft(Number(votingDelay) - myTime);
-      }
-      else if (
-        myTime >= Number(votingDelay)
-        && myTime < Number(votingPeriod)
+      } else if (
+        myTime >= Number(votingDelay) &&
+        myTime < Number(votingPeriod)
       ) {
-        setVotingStatus('Voting in progress');
+        setVotingStatus("Voting in progress");
         setTimeLeft(Number(votingPeriod) - myTime);
-      }
-      else if (myTime >= Number(votingPeriod)) {
-        setVotingStatus('Voting has ended');
+      } else if (myTime >= Number(votingPeriod)) {
+        setVotingStatus("Voting has ended");
         setTimeLeft(0);
       }
     }, 1000);
@@ -47,26 +48,26 @@ export default function VotingBadge({ canceled, voteStart, voteDuration }: Props
 
   return (
     <>
-      {votingStatus !== 'Voting not started'
-        ? (
-            <div className="flex flex-row gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
-              {!canceled && (
-                <>
-                  <Badge variant="outline" className="text-xs whitespace-nowrap">{votingStatus}</Badge>
-                  {votingStatus !== 'Voting has ended' && (
-                    <>
-                      <Badge variant="outline" className="text-xs whitespace-nowrap">{formatTime(timeLeft)}</Badge>
-                    </>
-                  )}
-                </>
+      {votingStatus !== "Voting not started" ? (
+        <div className="flex flex-row gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
+          {!canceled && (
+            <>
+              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 border-blue-500/20 text-blue-400 border whitespace-nowrap">
+                <span>{votingStatus}</span>
+              </div>
+              {votingStatus !== "Voting has ended" && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 border-purple-500/20 text-purple-400 border whitespace-nowrap">
+                  <span>{formatTime(timeLeft)}</span>
+                </div>
               )}
-            </div>
-          )
-        : (
-            <div className="flex gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
-              <Loader className="animate-spin w-4 h-4 sm:w-5 sm:h-5"></Loader>
-            </div>
+            </>
           )}
+        </div>
+      ) : (
+        <div className="flex gap-2 sm:gap-3 justify-start sm:justify-end flex-shrink-0">
+          <Loader className="animate-spin w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+      )}
     </>
   );
 }

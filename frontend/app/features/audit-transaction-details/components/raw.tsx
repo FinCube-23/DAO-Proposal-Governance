@@ -1,7 +1,12 @@
-import type { GetOneTrxResponse } from '@/core/api/types';
-import { Code, Receipt } from 'lucide-react';
-import { JsonViewer } from '@/shared/components/json-viewer';
-import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card';
+import type { GetOneTrxResponse } from "@/core/api/types";
+import { Code, Receipt } from "lucide-react";
+import { JsonViewer } from "@/shared/components/json-viewer";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/shared/components/ui/card";
 
 interface Props {
   transaction: GetOneTrxResponse;
@@ -16,18 +21,16 @@ export default function RawTransactionDetails({ transaction }: Props) {
     if (transaction.raw_transaction) {
       rawTx = JSON.parse(transaction.raw_transaction);
     }
-  }
-  catch (e) {
-    console.error('Failed to parse raw transaction:', e);
+  } catch (e) {
+    console.error("Failed to parse raw transaction:", e);
   }
 
   try {
     if (transaction.transaction_receipt) {
       rawReceipt = JSON.parse(transaction.transaction_receipt);
     }
-  }
-  catch (e) {
-    console.error('Failed to parse transaction receipt:', e);
+  } catch (e) {
+    console.error("Failed to parse transaction receipt:", e);
   }
 
   return (
@@ -40,13 +43,13 @@ export default function RawTransactionDetails({ transaction }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          {rawTx
-            ? (
-                <JsonViewer data={rawTx} initialCollapsed maxLines={5} />
-              )
-            : (
-                <div className="text-sm text-muted-foreground">No raw transaction data available</div>
-              )}
+          {rawTx ? (
+            <JsonViewer data={rawTx} initialCollapsed maxLines={5} />
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              No raw transaction data available
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -58,13 +61,13 @@ export default function RawTransactionDetails({ transaction }: Props) {
           </CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
-          {rawReceipt
-            ? (
-                <JsonViewer data={rawReceipt} initialCollapsed maxLines={5} />
-              )
-            : (
-                <div className="text-sm text-muted-foreground">No transaction receipt available</div>
-              )}
+          {rawReceipt ? (
+            <JsonViewer data={rawReceipt} initialCollapsed maxLines={5} />
+          ) : (
+            <div className="text-sm text-muted-foreground">
+              No transaction receipt available
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

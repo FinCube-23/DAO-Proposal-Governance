@@ -70,16 +70,16 @@ export default function StepOrgSelection({
 
         {/* Select Existing Organization Option - Disabled */}
         <Card
-          className="cursor-not-allowed transition-all opacity-50 bg-gray-100"
+          className="cursor-not-allowed transition-all opacity-60 bg-gray-800/50"
         >
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="flex-shrink-0">
-                <Building className="h-6 w-6 text-gray-400" />
+                <Building className="h-6 w-6 text-gray-500" />
               </div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-500">Select Existing Organization</h3>
-                <p className="text-sm text-gray-400">
+                <h3 className="font-semibold text-gray-400">Select Existing Organization</h3>
+                <p className="text-sm text-gray-500">
                   This option is temporarily disabled. Please create a new organization.
                 </p>
               </div>

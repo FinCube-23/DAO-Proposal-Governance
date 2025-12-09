@@ -22,14 +22,14 @@ export default function ProposalAllocation() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-400">Member</span>
+              <span className="text-sm text-gray-500">Member</span>
             </div>
             <span className="text-sm font-medium text-white">68%</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <div className="w-3 h-3 bg-gray-600 rounded-full"></div>
-              <span className="text-sm text-gray-400">General</span>
+              <span className="text-sm text-gray-500">General</span>
             </div>
             <span className="text-sm font-medium text-white">32%</span>
           </div>

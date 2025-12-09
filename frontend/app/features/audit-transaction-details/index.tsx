@@ -1,5 +1,6 @@
 import { TabsContent } from '@radix-ui/react-tabs';
 import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { auditTrailApis } from '@/core/services/audit';
 import { Tabs, TabsList, TabsTrigger } from '@/shared/components/ui/tabs';
 import TransactionEvents from './components/events';
@@ -22,8 +23,14 @@ export default function AuditTransactionDetails({ id }: Props) {
 
   if (!id)
     return <p>No transaction ID provided</p>;
-  if (isLoading)
-    return <p>Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm text-muted-foreground">Loading transaction details...</p>
+      </div>
+    );
+  }
   if (error)
     return <p>Error loading data</p>;
   if (!data)
@@ -35,15 +42,36 @@ export default function AuditTransactionDetails({ id }: Props) {
       <Tabs defaultValue="overview" className="space-y-4 sm:space-y-6">
         <div className="w-full">
           <TabsList className="flex flex-wrap h-auto w-full sm:grid sm:w-full sm:grid-cols-5 sm:h-10 gap-2">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Overview</TabsTrigger>
-            <TabsTrigger value="lifecycle" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Lifecycle</TabsTrigger>
-            <TabsTrigger value="participants" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[90px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+            <TabsTrigger
+              value="overview"
+              className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700"
+            >
+              Overview
+            </TabsTrigger>
+            <TabsTrigger
+              value="lifecycle"
+              className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700"
+            >
+              Lifecycle
+            </TabsTrigger>
+            <TabsTrigger
+              value="participants"
+              className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[90px] sm:min-w-0 rounded-md border shadow-md border-slate-700"
+            >
               Participants
             </TabsTrigger>
-            <TabsTrigger value="events" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[70px] sm:min-w-0 rounded-md border shadow-md border-slate-700">
+            <TabsTrigger
+              value="events"
+              className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[70px] sm:min-w-0 rounded-md border shadow-md border-slate-700"
+            >
               Events
             </TabsTrigger>
-            <TabsTrigger value="raw" className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700">Raw Data</TabsTrigger>
+            <TabsTrigger
+              value="raw"
+              className="text-xs sm:text-sm whitespace-nowrap flex-1 min-w-[80px] sm:min-w-0 rounded-md border shadow-md border-slate-700"
+            >
+              Raw Data
+            </TabsTrigger>
           </TabsList>
         </div>
         <TabsContent value="overview">

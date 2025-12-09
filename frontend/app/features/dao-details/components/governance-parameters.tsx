@@ -1,5 +1,5 @@
-import { Landmark } from 'lucide-react';
-import GovernanceItem from './governance-item';
+import { Landmark } from "lucide-react";
+import GovernanceItem from "./governance-item";
 
 interface Props {
   governanceItems: {
@@ -17,13 +17,17 @@ export default function GovernanceParameters({ governanceItems }: Props) {
           <Landmark className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
         </div>
         <div>
-          <h3 className="text-base sm:text-lg font-semibold text-white">Governance Parameters</h3>
-          <p className="text-slate-400 text-xs sm:text-sm">Key metrics and thresholds</p>
+          <h3 className="text-base sm:text-lg font-semibold text-white">
+            Governance Parameters
+          </h3>
+          <p className="text-slate-400 text-xs sm:text-sm">
+            Key metrics and thresholds
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {governanceItems.map(item => (
+        {governanceItems.map((item) => (
           <GovernanceItem
             key={item.label}
             label={item.label}

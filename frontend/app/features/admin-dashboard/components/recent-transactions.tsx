@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 import { config } from '@/core/config';
 import contractABI from '@/core/contract/contract-abi.json';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/components/ui/avatar';
-import { Badge } from '@/shared/components/ui/badge';
 
 export function RecentTransactions() {
   const [proposalsByPage, setProposalsByPage] = useState<IProposal[]>();
@@ -73,15 +72,23 @@ export function RecentTransactions() {
                   <div className="sm:ml-auto font-medium flex-shrink-0">
                     {proposal.canceled && !proposal.executed
                       ? (
-                          <Badge variant="danger">Canceled</Badge>
+                          <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-red-500/20 border-red-500/20 text-red-400 border whitespace-nowrap">
+                            <span>Canceled</span>
+                          </div>
                         )
                       : !proposal.canceled && proposal.executed
                           ? (
-                              <Badge variant="success">Confirmed</Badge>
+                              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 border-green-500/20 text-green-400 border whitespace-nowrap">
+                                <span>Confirmed</span>
+                              </div>
                             )
                           : (
                               !proposal.canceled
-                              && !proposal.executed && <Badge variant="warning">Pending</Badge>
+                              && !proposal.executed && (
+                                <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 border-yellow-500/20 text-yellow-400 border whitespace-nowrap">
+                                  <span>Pending</span>
+                                </div>
+                              )
                             )}
                   </div>
                 </div>

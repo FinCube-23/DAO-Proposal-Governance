@@ -2,7 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import type { ProposalCreatePayload } from '@/core/services/proposal/types';
 import { useMutation } from '@tanstack/react-query';
 import { simulateContract, writeContract } from '@wagmi/core';
-import { AlertCircle, CheckCircle, Info, Send } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, CheckCircle, Copy, Info, Send } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -12,7 +12,6 @@ import contractABI from '@/core/contract/contract-abi.json';
 import { env } from '@/core/env';
 import { proposalApis } from '@/core/services/proposal';
 import { Alert, AlertDescription } from '@/shared/components/ui/alert';
-import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import {
   Card,
@@ -42,6 +41,7 @@ export default function GeneralProposal() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [trxHash, setTrxHash] = useState('');
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isCopied, setIsCopied] = useState(false);
   const navigate = useNavigate();
 
   // Form validation
@@ -116,11 +116,16 @@ export default function GeneralProposal() {
     setDescription(e.target.value);
   };
 
+  const handleCopyHash = async () => {
+    await navigator.clipboard.writeText(trxHash);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
   const propose = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validateForm()) {
-      toast.error('Please fix the form errors before submitting');
       return;
     }
 
@@ -183,8 +188,19 @@ export default function GeneralProposal() {
 
   return (
     <div className="container mx-auto px-4 py-6 sm:py-8 max-w-7xl">
-      <div className="text-center mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4">General Proposal</h1>
+      <div className="flex items-center justify-center mb-6 sm:mb-8 relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(-1)}
+          className="absolute left-0 flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">
+          General Proposal
+        </h1>
       </div>
 
       {errors.wallet && (
@@ -198,7 +214,7 @@ export default function GeneralProposal() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
         {/* Form Section */}
-        <Card className="border-gray-700 bg-gray-900/50 backdrop-blur-sm">
+        <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl text-white flex items-center gap-2">
               <Send className="h-5 w-5 sm:h-6 sm:w-6 text-blue-500" />
@@ -208,18 +224,19 @@ export default function GeneralProposal() {
           <CardContent>
             <form onSubmit={propose} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
-                <Label htmlFor="targets" className="text-white font-medium text-sm sm:text-base">
+                <Label
+                  htmlFor="targets"
+                  className="text-white font-medium text-sm sm:text-base"
+                >
                   Target Addresses
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Required
-                  </Badge>
+                  <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="targets"
                   value={targets}
                   onChange={handleTargetsChange}
                   placeholder="0xAbc123...0001, 0xDef456...0002"
-                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
+                  className={`!bg-slate-900/30 border-slate-700/50 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.targets
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                       : ''
@@ -234,18 +251,19 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="values" className="text-white font-medium text-sm sm:text-base">
+                <Label
+                  htmlFor="values"
+                  className="text-white font-medium text-sm sm:text-base"
+                >
                   Values (in Wei)
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Required
-                  </Badge>
+                  <span className="text-red-400">*</span>
                 </Label>
                 <Input
                   id="values"
                   value={values}
                   onChange={handleValuesChange}
                   placeholder="0, 0, 1000000000000000000"
-                  className={`bg-gray-800 border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
+                  className={`!bg-slate-900/30 border-slate-700/50 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500 text-sm sm:text-base ${
                     errors.values
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                       : ''
@@ -260,11 +278,12 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="calldatas" className="text-white font-medium text-sm sm:text-base">
+                <Label
+                  htmlFor="calldatas"
+                  className="text-white font-medium text-sm sm:text-base"
+                >
                   Call Data
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Required
-                  </Badge>
+                  <span className="text-red-400">*</span>
                 </Label>
                 <textarea
                   id="calldatas"
@@ -272,9 +291,9 @@ export default function GeneralProposal() {
                   onChange={handleCalldatasChange}
                   placeholder="0xe0a8f6f5000...0001, 0x..."
                   rows={3}
-                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
+                  className={`w-full bg-slate-900/30 border border-slate-700/50 text-white placeholder:text-slate-400 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
                     errors.calldatas
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50'
                       : ''
                   }`}
                 />
@@ -287,11 +306,12 @@ export default function GeneralProposal() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-white font-medium text-sm sm:text-base">
+                <Label
+                  htmlFor="description"
+                  className="text-white font-medium text-sm sm:text-base"
+                >
                   Proposal Description
-                  <Badge variant="secondary" className="ml-2 text-xs">
-                    Required
-                  </Badge>
+                  <span className="text-red-400">*</span>
                 </Label>
                 <textarea
                   id="description"
@@ -299,9 +319,9 @@ export default function GeneralProposal() {
                   onChange={handleDescriptionChange}
                   placeholder="Provide a detailed explanation of your proposal, including the rationale and expected outcomes..."
                   rows={6}
-                  className={`w-full bg-gray-800 border border-gray-600 text-white placeholder:text-gray-400 focus:border-blue-500 focus:ring-blue-500 resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
+                  className={`w-full bg-slate-900/30 border border-slate-700/50 text-white placeholder:text-slate-400 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] outline-none resize-none rounded-md px-3 py-2 text-sm sm:text-base ${
                     errors.description
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/50'
                       : ''
                   }`}
                 />
@@ -334,7 +354,7 @@ export default function GeneralProposal() {
         </Card>
 
         {/* Help Section */}
-        <Card className="border-gray-700 bg-gray-900/50 backdrop-blur-sm">
+        <Card className="border-slate-700/50 bg-slate-800/50 backdrop-blur-sm">
           <CardHeader>
             <CardTitle className="text-lg sm:text-xl lg:text-2xl text-white flex items-center gap-2">
               <Info className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-500" />
@@ -343,73 +363,75 @@ export default function GeneralProposal() {
           </CardHeader>
           <CardContent className="space-y-4 sm:space-y-6">
             <div className="space-y-3 sm:space-y-4">
-              <div className="p-3 sm:p-4 rounded-lg border border-blue-500/20 bg-blue-500/5">
+              <div className="p-3 sm:p-4 rounded-lg border border-blue-500/20 bg-slate-900/30">
                 <h3 className="text-blue-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
                   <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Target Addresses
                 </h3>
-                <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                <p className="text-slate-300 text-xs sm:text-sm mb-2">
                   Smart contract addresses that will be called when the proposal
                   executes.
                 </p>
-                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400 break-all">
+                <code className="text-xs bg-slate-900/50 p-2 rounded block text-emerald-400 break-all">
                   0xA0b86a33E6441E1bf4f0a5dB8c8dc1B8C9F2AC2d
                 </code>
               </div>
 
-              <div className="p-3 sm:p-4 rounded-lg border border-green-500/20 bg-green-500/5">
+              <div className="p-3 sm:p-4 rounded-lg border border-green-500/20 bg-slate-900/30">
                 <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
                   <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Values (Wei)
                   <div className="group relative">
-                    <Info size={14} className="text-gray-400 cursor-help flex-shrink-0" />
-                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 sm:w-64 z-10">
+                    <Info
+                      size={14}
+                      className="text-slate-400 cursor-help flex-shrink-0"
+                    />
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity w-48 sm:w-64 z-10">
                       Amount of ETH (in wei) to send with each transaction. Use
                       0 for most governance proposals.
                     </div>
                   </div>
                 </h3>
-                <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                <p className="text-slate-300 text-xs sm:text-sm mb-2">
                   Amount of ETH to send with transactions (usually 0 for
                   governance).
                 </p>
-                <code className="text-xs bg-gray-800 p-2 rounded block text-green-400 break-all">
+                <code className="text-xs bg-slate-900/50 p-2 rounded block text-emerald-400 break-all">
                   0, 0, 1000000000000000000
                 </code>
               </div>
 
-              <div className="p-3 sm:p-4 rounded-lg border border-yellow-500/20 bg-yellow-500/5">
+              <div className="p-3 sm:p-4 rounded-lg border border-yellow-500/20 bg-slate-900/30">
                 <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
                   <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Call Data
                 </h3>
-                <p className="text-gray-300 text-xs sm:text-sm mb-2">
+                <p className="text-slate-300 text-xs sm:text-sm mb-2">
                   Encoded function calls to execute on target contracts.
                 </p>
-                <code className="text-xs bg-gray-800 p-2 rounded block text-yellow-400 break-all">
+                <code className="text-xs bg-slate-900/50 p-2 rounded block text-yellow-400 break-all">
                   0xa9059cbb000000000000000000000000...
                 </code>
               </div>
 
-              <div className="p-3 sm:p-4 rounded-lg border border-purple-500/20 bg-purple-500/5">
+              <div className="p-3 sm:p-4 rounded-lg border border-purple-500/20 bg-slate-900/30">
                 <h3 className="text-purple-400 font-semibold mb-2 flex items-center gap-2 text-sm sm:text-base">
                   <CheckCircle className="h-4 w-4 flex-shrink-0" />
                   Description
                 </h3>
-                <p className="text-gray-300 text-xs sm:text-sm">
+                <p className="text-slate-300 text-xs sm:text-sm">
                   Clear explanation of what this proposal does and why it should
                   be approved.
                 </p>
               </div>
             </div>
 
-            <Alert className="border-blue-500/20 bg-blue-500/10">
+            <Alert className="border-blue-500/20 bg-slate-900/30">
               <Info className="h-4 w-4 text-blue-400 flex-shrink-0" />
               <AlertDescription className="text-blue-300 text-xs sm:text-sm">
                 <strong>Pro Tip:</strong>
-                {' '}
-                Test your proposal parameters on a
-                testnet first to ensure they work as expected.
+                Test your proposal parameters on a testnet first to ensure they
+                work as expected.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -424,24 +446,42 @@ export default function GeneralProposal() {
             navigate('/organization/dao/proposals');
         }}
       >
-        <DialogContent className="border-gray-700 bg-gray-900 w-[95vw] max-w-md sm:max-w-lg">
+        <DialogContent className="border-slate-700/50 bg-slate-800/50 backdrop-blur-sm w-[95vw] max-w-md sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-lg sm:text-xl font-bold text-green-400 flex items-center gap-2">
+            <DialogTitle className="text-lg sm:text-xl font-bold text-emerald-400 flex items-center gap-2">
               <CheckCircle className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               Proposal Submitted Successfully
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p className="text-gray-300 text-sm sm:text-base">
+            <p className="text-slate-300 text-sm sm:text-base">
               Your general proposal has been successfully submitted to the
               blockchain and is now under review by DAO members.
             </p>
-            <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
-              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+            <div className="p-3 sm:p-4 bg-slate-900/30 rounded-lg border border-slate-700/50">
+              <p className="text-xs sm:text-sm text-slate-400 mb-2">
+                Transaction Hash:
+              </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
-                  {shortenAddress(trxHash)}
-                </code>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <code className="text-blue-400 text-xs sm:text-sm bg-slate-900/50 p-2 rounded flex-1 break-all">
+                    {shortenAddress(trxHash)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyHash}
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    {isCopied
+                      ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        )
+                      : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                  </Button>
+                </div>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
                   target="_blank"
@@ -459,8 +499,11 @@ export default function GeneralProposal() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={() => navigate('/organization/dao/proposals')} className="w-full sm:w-auto text-sm sm:text-base">
+          <DialogFooter className="!flex !flex-row !justify-center !items-center">
+            <Button
+              onClick={() => navigate('/organization/dao/proposals')}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               View All Proposals
             </Button>
           </DialogFooter>

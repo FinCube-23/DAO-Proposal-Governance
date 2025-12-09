@@ -1,6 +1,7 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { Organization, OrgStatus } from './types';
 import { useMutation } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { orgApis } from '@/core/services/org';
@@ -141,21 +142,27 @@ export default function AuditOrganizations() {
     navigate(`/organization/audit/organizations/${row.id}`);
   };
 
-  if (getAllOrgs.isPending)
-    return <p>Loading...</p>;
+  if (getAllOrgs.isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-8 sm:p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-xs sm:text-sm text-muted-foreground">Loading organizations...</p>
+      </div>
+    );
+  }
   if (getAllOrgs.isError)
-    return <p>Error loading data</p>;
+    return <p className="text-sm text-red-500 p-4">Error loading data</p>;
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle className="text-base sm:text-lg">Organizations</CardTitle>
-          <div className="flex flex-row items-center gap-3 sm:gap-2 overflow-x-auto scrollbar-hide w-full sm:w-auto">
-            <div className="flex items-center gap-2 flex-shrink-0">
+      <CardHeader className="p-4 sm:p-6">
+        <div className="flex flex-col gap-3 sm:gap-4">
+          <CardTitle className="text-base sm:text-lg lg:text-xl">Organizations</CardTitle>
+          <div className="flex flex-row items-center sm:justify-end gap-2 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-0 sm:min-w-fit">
               <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Type:</span>
               <Select value={typeFilter} onValueChange={v => setTypeFilter(v as any)}>
-                <SelectTrigger className="w-32 h-8">
+                <SelectTrigger className="w-full sm:w-32 h-8 text-xs sm:text-sm">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -167,10 +174,10 @@ export default function AuditOrganizations() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-1 sm:flex-initial min-w-0 sm:min-w-fit">
               <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">Status:</span>
               <Select value={statusFilter} onValueChange={v => setStatusFilter(v as any)}>
-                <SelectTrigger className="w-36 h-8">
+                <SelectTrigger className="w-full sm:w-36 h-8 text-xs sm:text-sm">
                   <SelectValue placeholder="All" />
                 </SelectTrigger>
                 <SelectContent>
@@ -183,10 +190,12 @@ export default function AuditOrganizations() {
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <DataTable columns={columns} data={orgList} isLoading={false} onRowClick={handleRowClick} />
+      <CardContent className="p-4 sm:p-6 pt-0">
+        <div className="overflow-x-auto -mx-4 sm:mx-0">
+          <DataTable columns={columns} data={orgList} isLoading={false} onRowClick={handleRowClick} />
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-center">
+      <CardFooter className="flex justify-center p-4 sm:p-6 pt-4">
         <CustomPagination limit={limit} total={total} page={page} onPageChange={setPage} />
       </CardFooter>
     </Card>

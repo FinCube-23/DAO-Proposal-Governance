@@ -10,8 +10,8 @@ export default function RecentActivity() {
       <CardContent>
         <div className="space-y-4">
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <ArrowUpRight className="w-4 h-4 text-green-600" />
+            <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+              <ArrowUpRight className="w-4 h-4 text-green-500" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-white">Received USDC</p>
@@ -21,8 +21,8 @@ export default function RecentActivity() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <Activity className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
+              <Activity className="w-4 h-4 text-blue-500" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-white">Staked ETH</p>
@@ -32,8 +32,8 @@ export default function RecentActivity() {
           </div>
 
           <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4 text-purple-600" />
+            <div className="w-8 h-8 bg-purple-500/20 rounded-full flex items-center justify-center">
+              <Users className="w-4 h-4 text-purple-500" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium text-white">Voted on Proposal</p>

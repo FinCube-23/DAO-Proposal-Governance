@@ -1,41 +1,34 @@
-import { Badge } from '@/shared/components/ui/badge';
-import { cn } from '@/shared/utils/style';
+import { cn } from "@/shared/utils/style";
 
 interface TagBadgeProps {
   title?: string;
   tag: string;
   className?: string;
-  variant?: 'default' | 'secondary' | 'destructive' | 'outline';
 }
 
 const TAG_COLORS = {
-  DEFI: 'bg-purple-500 text-white',
-  NFT: 'bg-pink-500 text-white',
-  GOVERNANCE: 'bg-blue-500 text-white',
-  BRIDGE: 'bg-orange-500 text-white',
-  TOKEN: 'bg-green-500 text-white',
-  TRANSFER: 'bg-green-500 text-white',
-  DEFAULT: 'bg-gray-500 text-white',
+  DEFI: "bg-purple-500/20 border-purple-500/20 text-purple-400",
+  NFT: "bg-pink-500/20 border-pink-500/20 text-pink-400",
+  GOVERNANCE: "bg-blue-500/20 border-blue-500/20 text-blue-400",
+  BRIDGE: "bg-orange-500/20 border-orange-500/20 text-orange-400",
+  TOKEN: "bg-emerald-500/20 border-emerald-500/20 text-emerald-400",
+  TRANSFER: "bg-green-500/20 border-green-500/20 text-green-400",
+  DEFAULT: "bg-gray-500/20 border-gray-500/20 text-gray-400",
 } as const;
 
-export function TagBadge({
-  title,
-  tag,
-  className,
-  variant = 'secondary',
-}: TagBadgeProps) {
-  const colorClass = TAG_COLORS[tag as keyof typeof TAG_COLORS] || TAG_COLORS.DEFAULT;
+export function TagBadge({ title, tag, className }: TagBadgeProps) {
+  const colorClass =
+    TAG_COLORS[tag as keyof typeof TAG_COLORS] || TAG_COLORS.DEFAULT;
 
   return (
-    <Badge
-      variant={variant}
+    <div
       className={cn(
-        variant === 'secondary' && colorClass,
-        'text-xs',
-        className,
+        "flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap w-fit",
+        colorClass,
+        className
       )}
     >
       {title}
-    </Badge>
+    </div>
   );
 }

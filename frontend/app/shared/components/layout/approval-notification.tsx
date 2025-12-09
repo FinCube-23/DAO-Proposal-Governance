@@ -34,7 +34,7 @@ export default function ApprovalNotification() {
   useEffect(() => {
     console.warn('useEffect triggered with:', {
       orgDataExists: !!orgData,
-      orgStatus: orgData?.status,
+      orgStatus: orgData?.offchain_status,
       address,
       isConnected,
     });
@@ -67,7 +67,9 @@ export default function ApprovalNotification() {
     };
 
     checkMembershipStatus();
-  }, [orgData?.offchain_status, address, isConnected, orgData?.id]); // Use offchain_status instead of status  // Auto-dismiss membership approval notification after 5 seconds
+  }, [orgData?.offchain_status, address, isConnected, orgData?.id]); // Added orgData?.id to dependencies
+
+  // Auto-dismiss membership approval notification after 5 seconds
   useEffect(() => {
     if (orgData?.offchain_status === 'approved' && isMemberApproved === true && !hasShownMembershipApproval) {
       const timer = setTimeout(() => {
@@ -166,12 +168,7 @@ export default function ApprovalNotification() {
       });
 
       toast.success(`Your membership application has been submitted successfully! Transaction hash: ${hash.slice(0, 10)}...`);
-
-      // The transaction has been sent to the blockchain
-      // The backend will pick it up via event listeners
       console.warn('Membership registration transaction hash:', hash);
-
-      // Hide the notification after successful submission
       setIsVisible(false);
     }
     catch (error) {

@@ -14,6 +14,7 @@ export default function Header() {
   // Only show header on specific routes
   const allowedRoutes = ['/', '/login', '/register'];
   const shouldShowHeader = allowedRoutes.includes(location.pathname);
+  const isHomePage = location.pathname === '/';
 
   if (!shouldShowHeader) {
     return null;
@@ -28,56 +29,60 @@ export default function Header() {
               {env.VITE_APP_NAME}
             </Link>
           </div>
-          <div>
-            <ul className="flex space-x-4">
-              {authStore.access
-                ? (
-                    <li>
-                      <Button
-                        className="rounded-xl"
-                        variant="destructive"
-                        onClick={() => {
-                          try {
-                            authStore.clearAuthState();
-                            disconnect();
-                          }
-                          catch (error) {
-                            console.warn('Disconnect failed:', error);
-                          }
-                          finally {
-                            navigate('/');
-                          }
-                        }}
-                      >
-                        <LogOut size={20} />
-                      </Button>
-                    </li>
-                  )
-                : (
-                    <>
-                      <li>
-                        <Button
-                          onClick={() => {
-                            navigate('/login');
-                          }}
-                        >
-                          Login
-                        </Button>
-                      </li>
-                      <li>
-                        <Button
-                          variant="outline"
-                          onClick={() => {
-                            navigate('/register');
-                          }}
-                        >
-                          Register
-                        </Button>
-                      </li>
-                    </>
-                  )}
-            </ul>
-          </div>
+          {(isHomePage && authStore.access) || !isHomePage
+            ? (
+                <div>
+                  <ul className="flex space-x-4">
+                    {authStore.access
+                      ? (
+                          <li>
+                            <Button
+                              className="rounded-xl"
+                              variant="destructive"
+                              onClick={() => {
+                                try {
+                                  authStore.clearAuthState();
+                                  disconnect();
+                                }
+                                catch (error) {
+                                  console.warn('Disconnect failed:', error);
+                                }
+                                finally {
+                                  navigate('/');
+                                }
+                              }}
+                            >
+                              <LogOut size={20} />
+                            </Button>
+                          </li>
+                        )
+                      : (
+                          <>
+                            <li>
+                              <Button
+                                onClick={() => {
+                                  navigate('/login');
+                                }}
+                              >
+                                Login
+                              </Button>
+                            </li>
+                            <li>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  navigate('/register');
+                                }}
+                              >
+                                Register
+                              </Button>
+                            </li>
+                          </>
+                        )}
+                  </ul>
+                </div>
+              )
+            : null}
         </div>
       </nav>
     </div>

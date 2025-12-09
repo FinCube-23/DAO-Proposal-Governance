@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { CheckIcon, CopyIcon } from 'lucide-react';
+import { CheckIcon, CopyIcon, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { auditTrailApis } from '@/core/services/audit';
@@ -34,8 +34,14 @@ function TrxDetails() {
     getTrx();
   }, [id]);
 
-  if (getTransaction.isPending)
-    return <div className="text-center p-8">Loading...</div>;
+  if (getTransaction.isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm text-muted-foreground">Loading transaction details...</p>
+      </div>
+    );
+  }
   if (getTransaction.isError) {
     return (
       <div className="text-red-500 text-center p-8">

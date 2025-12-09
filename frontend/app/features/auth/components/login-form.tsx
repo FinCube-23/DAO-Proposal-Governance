@@ -102,6 +102,7 @@ export default function LoginForm() {
               <FormControl>
                 <div className="relative">
                   <Input
+                    placeholder="password"
                     type={showPassword ? 'text' : 'password'}
                     className="pr-12 [&::-ms-reveal]:hidden [&::-ms-clear]:hidden"
                     {...field}

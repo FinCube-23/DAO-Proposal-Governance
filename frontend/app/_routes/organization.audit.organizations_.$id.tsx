@@ -1,9 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
-import { MoveLeft } from 'lucide-react';
+import { Loader2, MoveLeft } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { orgApis } from '@/core/services/org';
-import { Badge } from '@/shared/components/ui/badge';
 import { Button } from '@/shared/components/ui/button';
 import { Card } from '@/shared/components/ui/card';
 import { Label } from '@/shared/components/ui/label';
@@ -158,8 +157,14 @@ function MFSDetails() {
     getMFS.mutate(Number(id));
   }, [id]);
 
-  if (getMFS.isPending)
-    return <div>Loading...</div>;
+  if (getMFS.isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm text-muted-foreground">Loading organization details...</p>
+      </div>
+    );
+  }
   if (getMFS.isError)
     return <div>Error loading MFS details</div>;
   if (!mfs)
@@ -197,9 +202,14 @@ function MFSDetails() {
                 {mfs.address}
               </p>
             </div>
-            <Badge variant={mfs.status === 'approved' ? 'success' : 'warning'}>
+            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap w-fit ${
+              mfs.status === 'approved'
+                ? 'bg-green-500/20 border-green-500/20 text-green-400'
+                : 'bg-yellow-500/20 border-yellow-500/20 text-yellow-400'
+            }`}
+            >
               {mfs.status === 'approved' ? 'Approved' : 'Pending'}
-            </Badge>
+            </div>
           </div>
 
           <Separator />
@@ -224,19 +234,38 @@ function MFSDetails() {
                     {' '}
                     {mfs.legal_entity_identifier}
                   </p>
-                  <p>
-                    <span className="font-medium">Status:</span>
-                    {' '}
-                    <Badge variant={mfs.status === 'approved' ? 'success' : 'warning'}>
-                      {mfs.status}
-                    </Badge>
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">Onchain Status:</span>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
+                      mfs.onchain_status === 'approved'
+                        ? 'bg-green-500/20 border-green-500/20 text-green-400'
+                        : 'bg-yellow-500/20 border-yellow-500/20 text-yellow-400'
+                    }`}
+                    >
+                      {mfs.onchain_status}
+                    </span>
                   </p>
-                  <p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-medium">Offchain Status:</span>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
+                      mfs.offchain_status === 'approved'
+                        ? 'bg-green-500/20 border-green-500/20 text-green-400'
+                        : 'bg-yellow-500/20 border-yellow-500/20 text-yellow-400'
+                    }`}
+                    >
+                      {mfs.offchain_status}
+                    </span>
+                  </p>
+                  <p className="flex items-center gap-2">
                     <span className="font-medium">Active:</span>
-                    {' '}
-                    <Badge variant={mfs.is_active ? 'success' : 'destructive'}>
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
+                      mfs.is_active
+                        ? 'bg-green-500/20 border-green-500/20 text-green-400'
+                        : 'bg-red-500/20 border-red-500/20 text-red-400'
+                    }`}
+                    >
                       {mfs.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
+                    </span>
                   </p>
                 </div>
               </div>
@@ -269,12 +298,16 @@ function MFSDetails() {
                                 {' '}
                                 {verification.type || 'N/A'}
                               </p>
-                              <p>
+                              <p className="flex items-center gap-2">
                                 <span className="font-medium">Status:</span>
-                                {' '}
-                                <Badge variant={verification.status === 'verified' ? 'success' : 'warning'}>
+                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${
+                                  verification.status === 'verified'
+                                    ? 'bg-green-500/20 border-green-500/20 text-green-400'
+                                    : 'bg-yellow-500/20 border-yellow-500/20 text-yellow-400'
+                                }`}
+                                >
                                   {verification.status || 'N/A'}
-                                </Badge>
+                                </span>
                               </p>
                               <p>
                                 <span className="font-medium">Transaction Hash:</span>

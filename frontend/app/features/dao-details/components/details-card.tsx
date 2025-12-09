@@ -17,7 +17,12 @@ interface Props {
   }[];
 }
 
-export default function DetailsCard({ title, subtitle, description, infoItems }: Props) {
+export default function DetailsCard({
+  title,
+  subtitle,
+  description,
+  infoItems,
+}: Props) {
   const [copiedAddress, setCopiedAddress] = useState(false);
 
   const copyAddress = () => {
@@ -38,7 +43,9 @@ export default function DetailsCard({ title, subtitle, description, infoItems }:
                 {title}
               </h2>
               <div className="px-3 py-1 bg-emerald-500/20 border border-emerald-500/20 rounded-full w-fit">
-                <span className="text-emerald-400 text-xs sm:text-sm font-medium">Active</span>
+                <span className="text-emerald-400 text-xs sm:text-sm font-medium">
+                  Active
+                </span>
               </div>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-3 sm:mb-4">
@@ -48,15 +55,18 @@ export default function DetailsCard({ title, subtitle, description, infoItems }:
             <p className="text-sm sm:text-base mb-3 sm:mb-4">{description}</p>
 
             {/* Contract Address */}
-            <div className="flex items-center gap-2 p-2 sm:py-3 sm:px-3 bg-slate-900/30 rounded-lg overflow-x-auto scrollbar-hide">
-              <span className="text-slate-400 text-xs sm:text-sm whitespace-nowrap">Contract:</span>
-              <code className="text-emerald-400 font-mono text-xs sm:text-sm break-all flex-1 min-w-0">{env.VITE_SMART_CONTRACT_ADDRESS}</code>
-              <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-fit flex items-center gap-2 p-2 sm:py-3 sm:px-3 bg-slate-800/50 rounded-lg overflow-x-auto scrollbar-hide">
+              <span className="text-slate-400 text-xs sm:text-sm whitespace-nowrap text-bold">
+                Contract:
+              </span>
+              <code className="text-emerald-400 font-mono text-xs sm:text-sm break-all">
+                {env.VITE_SMART_CONTRACT_ADDRESS}
+              </code>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                 <button
                   type="button"
                   onClick={copyAddress}
                   className="p-1 cursor-pointer hover:bg-slate-700/50 rounded transition-colors"
-
                 >
                   {copiedAddress
                     ? (
@@ -66,7 +76,11 @@ export default function DetailsCard({ title, subtitle, description, infoItems }:
                         <Copy className="w-4 h-4 text-slate-400 hover:text-emerald-400" />
                       )}
                 </button>
-                <a href={`${env.VITE_ADDRESS_EXPLORER}/${env.VITE_SMART_CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={`${env.VITE_ADDRESS_EXPLORER}/${env.VITE_SMART_CONTRACT_ADDRESS}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <ExternalLink className="w-4 h-4 text-slate-400 hover:text-emerald-400 cursor-pointer transition-colors" />
                 </a>
               </div>

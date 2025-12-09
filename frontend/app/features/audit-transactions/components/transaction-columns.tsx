@@ -132,10 +132,12 @@ export function createTransactionColumns(): ColumnDef<Transaction>[] {
       cell: ({ row }) => {
         const source = (row.original as any).confirmation_source;
         return (
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize ${
+          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium capitalize border ${
             source === 'alchemy'
-              ? 'bg-blue-500 text-white'
-              : 'bg-purple-500 text-white'
+              ? 'bg-blue-500/20 border-blue-500/20 text-blue-400'
+              : source === 'graph'
+                ? 'bg-purple-500/20 border-purple-500/20 text-purple-400'
+                : 'bg-gray-500/20 border-gray-500/20 text-gray-400'
           }`}
           >
             {source}

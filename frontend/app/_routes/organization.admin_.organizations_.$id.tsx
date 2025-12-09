@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { orgApis } from '@/core/services/org';
@@ -157,8 +158,14 @@ function MFSDetails() {
     getMFS.mutate(Number(id));
   }, [id]);
 
-  if (getMFS.isPending)
-    return <div>Loading...</div>;
+  if (getMFS.isPending) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+        <p className="text-sm text-muted-foreground">Loading organization details...</p>
+      </div>
+    );
+  }
   if (getMFS.isError)
     return <div>Error loading MFS details</div>;
   if (!mfs)

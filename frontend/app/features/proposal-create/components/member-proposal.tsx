@@ -2,7 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react';
 import type { ProposalCreatePayload } from '@/core/services/proposal/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { simulateContract, writeContract } from '@wagmi/core';
-import { CheckCircle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Check, CheckCircle, Copy, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -40,6 +40,8 @@ export default function MemberProposal() {
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [trxHash, setTrxHash] = useState('');
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isCopied, setIsCopied] = useState(false);
   const navigate = useNavigate();
 
   // Fetch organizations
@@ -89,21 +91,51 @@ export default function MemberProposal() {
     }));
   };
 
-  const approveMember = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoadingStatus(true);
+  const handleCopyHash = async () => {
+    await navigator.clipboard.writeText(trxHash);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  // Form validation
+  const validateForm = () => {
+    const newErrors: { [key: string]: string } = {};
 
     if (!data.organizationId) {
-      toast.error('Please select an organization');
-      setLoadingStatus(false);
-      return;
+      newErrors.organizationId = 'Please select an organization';
+    }
+
+    if (!data._newMember.trim()) {
+      newErrors._newMember = 'Member address is required';
+    }
+    else if (!data._newMember.match(/^0x[a-fA-F0-9]{40}$/)) {
+      newErrors._newMember = 'Please enter a valid Ethereum address';
+    }
+
+    if (!data.description.trim()) {
+      newErrors.description = 'Description is required';
+    }
+    else if (data.description.length < 10) {
+      newErrors.description = 'Description must be at least 10 characters long';
     }
 
     if (!address) {
-      toast.error('Please connect your wallet first');
-      setLoadingStatus(false);
+      newErrors.wallet = 'Please connect your wallet';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const approveMember = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
       return;
     }
+
+    setLoadingStatus(true);
+    setErrors({});
 
     try {
       const { request } = await simulateContract(config, {
@@ -127,7 +159,7 @@ export default function MemberProposal() {
         proposal_type: 'membership',
         onChainData: {
           transactionHash: hash,
-          signedBy: address,
+          signedBy: address || '',
           signedWith: 'metamask',
           chainId: chainId.toString(),
           context: contextData,
@@ -174,6 +206,7 @@ export default function MemberProposal() {
             <p>Error loading organizations. Please try refreshing the page.</p>
             <p className="text-xs sm:text-sm mt-2">
               Error:
+              {' '}
               {_organizationsError?.message || 'Unknown error'}
             </p>
           </div>
@@ -190,8 +223,9 @@ export default function MemberProposal() {
           <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8">
             New Member Approval Proposal
           </h1>
-          <div className="text-white p-4 text-sm sm:text-base">
-            <p>Loading organizations...</p>
+          <div className="flex flex-col items-center justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+            <p className="text-sm text-gray-400">Loading organizations...</p>
           </div>
         </div>
       </div>
@@ -201,21 +235,46 @@ export default function MemberProposal() {
   return (
     <div className="container px-4 sm:px-6 mt-10 sm:mt-20">
       <div className="mt-6 sm:mt-10">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6 sm:mb-8 text-center">
-          New Member Approval Proposal
-        </h1>
+        <div className="flex items-center justify-center mb-6 sm:mb-8 relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate(-1)}
+            className="absolute left-0 flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+            New Member Approval Proposal
+          </h1>
+        </div>
+
+        {errors.wallet && (
+          <div className="w-full sm:w-2/3 lg:w-1/2 xl:w-1/3 mx-auto mb-4">
+            <div className="p-4 border border-red-500 bg-red-500/10 rounded-lg">
+              <p className="text-red-400 text-sm">{errors.wallet}</p>
+            </div>
+          </div>
+        )}
+
         <form
           onSubmit={approveMember}
           className="w-full sm:w-2/3 lg:w-1/2 xl:w-1/3 mx-auto space-y-4 sm:space-y-6 border border-gray-600 p-4 sm:p-6 rounded-xl"
         >
           <div>
-            <p className="text-sm sm:text-base">New Member Organization: </p>
+            <p className="text-sm sm:text-base">
+              New Member Organization
+              <span className="text-red-400"> *</span>
+            </p>
             <Select
               value={data.organizationId}
               onValueChange={handleOrganizationSelect}
-              required
             >
-              <SelectTrigger className="w-full mt-2 text-sm sm:text-base">
+              <SelectTrigger className={`w-full mt-2 text-sm sm:text-base bg-background ${
+                errors.organizationId ? 'border-red-500' : ''
+              }`}
+              >
                 <SelectValue placeholder="Select an organization" />
               </SelectTrigger>
               <SelectContent>
@@ -228,46 +287,81 @@ export default function MemberProposal() {
                   : (
                       organizationsData?.organizations
                         ?.filter(org => !org.name.toLowerCase().includes('brain station 23'))
-                        .map(org => (
+                        ?.map(org => (
                           <SelectItem key={org.id} value={org.id.toString()}>
                             {org.name}
                           </SelectItem>
                         )) || (
                         <SelectItem value="" disabled>
-                          {organizationsLoading
-                            ? 'Loading...'
-                            : 'No organizations available'}
+                          No organizations available
                         </SelectItem>
                       )
                     )}
               </SelectContent>
             </Select>
+            {errors.organizationId && (
+              <p className="text-red-400 text-xs sm:text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.organizationId}
+              </p>
+            )}
           </div>
           <div>
-            <p className="text-sm sm:text-base">New Member Address: </p>
+            <p className="text-sm sm:text-base">
+              New Member Address
+              <span className="text-red-400"> *</span>
+            </p>
             <input
-              className="w-full p-2 sm:p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm sm:text-base"
+              className={`w-full p-2 sm:p-3 mt-2 bg-background border text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm sm:text-base ${
+                errors._newMember ? 'border-red-500' : 'border-gray-600'
+              }`}
               type="text"
               name="_newMember"
               onChange={handleInput}
               placeholder="Enter address"
-              required
             />
+            {errors._newMember && (
+              <p className="text-red-400 text-xs sm:text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors._newMember}
+              </p>
+            )}
           </div>
           <div>
-            <p className="text-sm sm:text-base">Description: </p>
+            <p className="text-sm sm:text-base">
+              Description
+              <span className="text-red-400"> *</span>
+            </p>
             <textarea
-              className="w-full p-2 sm:p-3 mt-2 bg-black border border-gray-600 text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none text-sm sm:text-base"
+              className={`w-full p-2 sm:p-3 mt-2 bg-background border text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600 resize-none text-sm sm:text-base ${
+                errors.description ? 'border-red-500' : 'border-gray-600'
+              }`}
               name="description"
               onChange={handleInput}
               placeholder="Enter description"
               rows={8}
-              required
-            >
-            </textarea>
+            />
+            <div className="flex justify-between text-xs sm:text-sm text-gray-400 mt-1">
+              <span>
+                {data.description.length}
+                {' '}
+                characters
+              </span>
+              <span>Minimum 10 characters</span>
+            </div>
+            {errors.description && (
+              <p className="text-red-400 text-xs sm:text-sm mt-1 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {errors.description}
+              </p>
+            )}
           </div>
           <div className="flex justify-center">
-            <Button type="submit" isLoading={loadingStatus} className="w-full sm:w-auto text-sm sm:text-base">
+            <Button
+              type="submit"
+              isLoading={loadingStatus}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               Place Proposal
             </Button>
           </div>
@@ -294,11 +388,29 @@ export default function MemberProposal() {
               blockchain and is now under review by DAO members.
             </p>
             <div className="p-3 sm:p-4 bg-gray-800 rounded-lg">
-              <p className="text-xs sm:text-sm text-gray-400 mb-2">Transaction Hash:</p>
+              <p className="text-xs sm:text-sm text-gray-400 mb-2">
+                Transaction Hash:
+              </p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-                <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
-                  {shortenAddress(trxHash)}
-                </code>
+                <div className="flex items-center gap-2 flex-1 min-w-0">
+                  <code className="text-blue-400 text-xs sm:text-sm bg-gray-900 p-2 rounded flex-1 break-all">
+                    {shortenAddress(trxHash)}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCopyHash}
+                    className="h-8 w-8 p-0 flex-shrink-0"
+                  >
+                    {isCopied
+                      ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        )
+                      : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                  </Button>
+                </div>
                 <a
                   href={`${env.VITE_TRX_EXPLORER}/${trxHash}`}
                   target="_blank"
@@ -316,8 +428,11 @@ export default function MemberProposal() {
               </div>
             </div>
           </div>
-          <DialogFooter>
-            <Button onClick={() => navigate('/organization/dao/proposals')} className="w-full sm:w-auto text-sm sm:text-base">
+          <DialogFooter className="!flex !flex-row !justify-center !items-center">
+            <Button
+              onClick={() => navigate('/organization/dao/proposals')}
+              className="w-full sm:w-auto text-sm sm:text-base"
+            >
               View All Proposals
             </Button>
           </DialogFooter>

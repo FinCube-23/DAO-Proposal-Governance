@@ -62,6 +62,7 @@ export interface GetOneTrxResponse {
   transaction_receipt: string;
   function: string;
   gas_cost: number;
+  chain_id?: string | number;
   created_at: string;
   updated_at: string;
 }
