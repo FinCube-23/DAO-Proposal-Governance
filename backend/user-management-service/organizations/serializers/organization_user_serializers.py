@@ -5,7 +5,7 @@ from typing import Optional
 from drf_spectacular.utils import extend_schema_field
 
 
-class OrganizationUserCreateSerializer(serializers.ModelSerializer):
+class OrganizationUserAddSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(write_only=True, required=True)
     organization_id = serializers.IntegerField(write_only=True, required=True)
 

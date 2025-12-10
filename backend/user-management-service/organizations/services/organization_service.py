@@ -6,12 +6,12 @@ from logging_config import logger
 class OrganizationService:
     
     @staticmethod
-    def create_organization(organization_data):
+    def create_new_organization(organization_data):
         """
         Create a new organization with validation.
         """
         # Validate admin user exists
-        admin_user = UserRepository.get_user_by_id(organization_data['organization_admin_id'])
+        admin_user = UserRepository.get_user_details_by_id(organization_data['organization_admin_id'])
         if not admin_user:
             raise Exception("Admin user does not exist")
         
@@ -20,15 +20,15 @@ class OrganizationService:
             raise Exception("Admin user must be active")
         
         # Check for duplicate name
-        if OrganizationRepository.get_organization_by_name(organization_data['name']):
+        if OrganizationRepository.get_organization_details_by_name(organization_data['name']):
             raise Exception("An organization with this name already exists")
         
         # Check for duplicate email
-        if OrganizationRepository.get_organization_by_email(organization_data['email']):
+        if OrganizationRepository.get_organization_details_by_email(organization_data['email']):
             raise Exception("An organization with this email already exists")
         
         # Create organization
-        organization = OrganizationRepository.create_organization(
+        organization = OrganizationRepository.create_new_organization(
             name=organization_data['name'],
             email=organization_data['email'],
             type=organization_data['type'],
@@ -51,7 +51,7 @@ class OrganizationService:
         return organization
     
     @staticmethod
-    def get_all_organizations(query_params):
+    def get_organization_list(query_params):
         """
         Get paginated list of organizations with filtering, search, and sorting.
         """
@@ -83,7 +83,7 @@ class OrganizationService:
             order = 'desc'
         
         # Delegate to repository
-        return OrganizationRepository.get_all_organizations(
+        return OrganizationRepository.get_organization_list(
             page, 
             limit, 
             filters, 
@@ -93,11 +93,11 @@ class OrganizationService:
         )
     
     @staticmethod
-    def get_organization_by_id(org_id):
+    def get_organization_details_by_id(org_id):
         """
         Get organization by ID with admin and onchain verification data.
         """
-        organization = OrganizationRepository.get_organization_by_id(org_id)
+        organization = OrganizationRepository.get_organization_details_by_id(org_id)
         if not organization:
             raise Exception("Organization not found")
         return organization
@@ -115,11 +115,11 @@ class OrganizationService:
         return OrganizationRepository.get_organization_id_by_admin_wallet(wallet_address)
 
     @staticmethod
-    def update_organization(org_id, update_data):
+    def update_organization_details_by_id(org_id, update_data):
         """
         Update organization (only email and address allowed).
         """
-        organization = OrganizationService.get_organization_by_id(org_id)
+        organization = OrganizationService.get_organization_details_by_id(org_id)
 
         # Filter allowed fields
         allowed_fields = {'email', 'address'}
@@ -145,7 +145,7 @@ class OrganizationService:
         """
         Helper method to validate organization exists.
         """
-        organization = OrganizationRepository.get_organization_by_id(org_id)
+        organization = OrganizationRepository.get_organization_details_by_id(org_id)
         if not organization:
             raise Exception("Organization not found")
         return organization
@@ -161,9 +161,9 @@ class OrganizationService:
         return organization
     
     @staticmethod
-    def change_organization_status(org_ids, new_status):
+    def update_organization_status(org_ids, new_status):
         """
-        Change organization status with validation of allowed transitions.
+        Update organization status with validation of allowed transitions.
         Allowed transitions:
         - pending => approved or cancelled
         - approved => banned
@@ -177,7 +177,7 @@ class OrganizationService:
             raise Exception(f"Invalid status. Must be one of: {', '.join(valid_statuses)}")
         
         # Get all organizations
-        organizations = OrganizationRepository.get_organizations_by_ids(org_ids)
+        organizations = OrganizationRepository.get_organization_list_by_ids(org_ids)
         
         if not organizations.exists():
             raise Exception("No organizations found with provided IDs")

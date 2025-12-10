@@ -7,7 +7,7 @@ from logging_config import logger
 class OrganizationUserService:
     
     @staticmethod
-    def create_organization_user(organization_user_data):
+    def add_user_to_organization(organization_user_data):
         """
         Create a new organization user membership with validation.
         """
@@ -15,7 +15,7 @@ class OrganizationUserService:
         organization_id = organization_user_data['organization_id']
         
         # Validate user exists
-        user = UserRepository.get_user_by_id(user_id)
+        user = UserRepository.get_user_details_by_id(user_id)
         if not user:
             raise Exception("User does not exist")
         
@@ -24,12 +24,12 @@ class OrganizationUserService:
             raise Exception("User is inactive and cannot be added to an organization")
         
         # Validate organization exists
-        organization = OrganizationRepository.get_organization_by_id(organization_id)
+        organization = OrganizationRepository.get_organization_details_by_id(organization_id)
         if not organization:
             raise Exception("Organization does not exist")
         
         # Create organization user membership
-        organization_user= OrganizationUserRepository.create_organization_user(user_id, organization_id)
+        organization_user= OrganizationUserRepository.add_user_to_organization(user_id, organization_id)
 
         # Publish to RabbitMQ
         try:
@@ -49,12 +49,12 @@ class OrganizationUserService:
         return organization_user
     
     @staticmethod
-    def get_organization_users(organization_id, query_params):
+    def get_user_list_by_organization_id(organization_id, query_params):
         """
         Get paginated list of organization users with filtering, search, and sorting.
         """
         # Validate organization exists
-        organization = OrganizationRepository.get_organization_by_id(organization_id)
+        organization = OrganizationRepository.get_organization_details_by_id(organization_id)
         if not organization:
             raise Exception("Organization does not exist")
         
@@ -90,7 +90,7 @@ class OrganizationUserService:
             order = "desc"
 
         # Delegate to repository
-        return OrganizationUserRepository.get_organization_users(
+        return OrganizationUserRepository.get_user_list_by_organization_id(
             organization_id,
             page,
             limit,

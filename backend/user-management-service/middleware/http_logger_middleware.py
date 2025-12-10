@@ -10,16 +10,17 @@ class HTTPLoggerMiddleware(MiddlewareMixin):
     """
 
     def process_request(self, request):
-        request._morgan_start_time = time.time()
+        request._start_time = time.time()
 
     def process_response(self, request, response):
-        start = getattr(request, "_morgan_start_time", None)
+        start = getattr(request, "_start_time", None)
         if start:
             response_time_ms = (time.time() - start) * 1000.0
         else:
             response_time_ms = None
 
         logData = {
+            "message": f"{request.method} {request.get_full_path()} - {response.status_code} ({round(response_time_ms, 2)}ms)",
             "timestamp": datetime.utcnow().isoformat() + "Z",
             "method": request.method,
             "url": request.get_full_path(),
@@ -36,16 +37,9 @@ class HTTPLoggerMiddleware(MiddlewareMixin):
             "client_ip": request.META.get("HTTP_X_REAL_IP")
             or request.META.get("REMOTE_ADDR"),
             "forwarded_for": request.META.get("HTTP_X_FORWARDED_FOR"),
-            "request_id": request.META.get("HTTP_X_REQUEST_ID", ""),
+            "request_id": request.META.get("HTTP_X_REQUEST_ID", "12300123"),
         }
 
         logger.log(logData)
 
-        
-
         return response
-        
-    
-
-    
-   

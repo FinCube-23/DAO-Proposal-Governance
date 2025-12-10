@@ -78,7 +78,7 @@ export interface GetOrgResponse {
     phone_number: string;
     wallet_address: string;
   };
-  onchain_verifications: any[];
+  onchain_verifications?: any[];
   created_at: string;
   updated_at: string;
 }

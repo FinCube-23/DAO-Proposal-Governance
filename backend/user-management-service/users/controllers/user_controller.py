@@ -12,10 +12,10 @@ from users.serializers import (
     UserListSerializer,
     UserRegistrationSerializer,
     UserSelfUpdateSerializer,
-    UserResponseSerializer,
+    UserDetailsResponseSerializer,
     UserStatusResponseSerializer,
     UserStatusUpdateSerializer,
-    UserStatusChangeSerializer,
+    UserStatusUpdateByIdSerializer
 )
 from users.utils.exceptions import EmailAlreadyExistsError
 from drf_spectacular.utils import (
@@ -27,8 +27,6 @@ from drf_spectacular.utils import (
 from logging_config import logger
 
 class ProtectedUserController(ViewSet):
-    logger.set_context("ProtectedUserController")
-
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
@@ -42,19 +40,20 @@ class ProtectedUserController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get_user_detail(self, request):
-        logger.log({"event": "Getting user detail Started", "user_id": request.user.id})
+    def get_user_details(self, request):
+        logger.set_context("get_user_details")
+        logger.log({"message": "Getting user detail Started", "user_id": request.user.id})
         try:
             user_id = request.user.id
-            user = UserService.get_user_with_organizations(user_id)
+            user = UserService.get_user_details_with_organization_list(user_id)
             serializer = UserDetailSerializer(
                 user, context={"request": request, "user_id": user_id}
             )
-            logger.log({"event": "Getting user detail Success", "user_id": user_id, "data": serializer.data})
+            logger.log({"message": "Getting user detail Success", "user_id": user_id, "data": serializer.data})
             return Response(serializer.data)
 
         except Exception as e:
-            logger.error({"event": "Getting user detail Error", "user_id": user_id, "error": str(e)})
+            logger.error({"message": "Getting user detail Error", "user_id": user_id, "error": str(e)})
             return Response(
                 {"error": str(e)},
                 status=(
@@ -74,18 +73,19 @@ class ProtectedUserController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get_user_detail_by_id(self, request, user_id):
-        logger.log({"event": "Getting user detail by id Started", "user_id": user_id})
+    def get_user_details_by_id(self, request, user_id):
+        logger.set_context("get_user_detail_by_id")
+        logger.log({"message": "Getting user detail by id Started", "user_id": user_id})
         try:
-            user = UserService.get_user_with_organizations(user_id)
+            user = UserService.get_user_details_with_organization_list(user_id)
             serializer = UserDetailSerializer(
                 user, context={"request": request, "user_id": user_id}
             )
-            logger.log({"event": "Getting user detail by id Success", "user_id": user_id, "data": serializer.data})
+            logger.log({"message": "Getting user detail by id Success", "user_id": user_id, "data": serializer.data})
             return Response(serializer.data)
 
         except Exception as e:
-            logger.error({"event": "Getting user detail by id Error", "user_id": user_id, "error": str(e)})
+            logger.error({"message": "Getting user detail by id Error", "user_id": user_id, "error": str(e)})
             return Response(
                 {"error": str(e)},
                 status=(
@@ -100,9 +100,10 @@ class ProtectedUserController(ViewSet):
     """
 
     @extend_schema(request=UserSelfUpdateSerializer, responses=UserSelfUpdateSerializer)
-    def update_user(self, request):
+    def update_user_details(self, request):
         """User self profile update (email/contact/wallet)"""
-        logger.log({"event": "Updating user Started", "user_id": request.user.id})
+        logger.set_context("update_user_details")
+        logger.log({"message": "Updating user Started", "user_id": request.user.id})
 
         try:
             user = request.user
@@ -111,48 +112,13 @@ class ProtectedUserController(ViewSet):
                 instance=user, data=request.data, partial=True
             )
             serializer.is_valid(raise_exception=True)
-            updated_user = UserService.partial_update(user.id, serializer.validated_data)
-            logger.log({"event": "Updating user Success", "user_id": request.user.id, "data": UserSelfUpdateSerializer(updated_user).data})
+            updated_user = UserService.partially_update_user_details(user.id, serializer.validated_data)
+            logger.log({"message": "Updating user Success", "user_id": request.user.id, "data": UserSelfUpdateSerializer(updated_user).data})
             return Response(UserSelfUpdateSerializer(updated_user).data)
         except Exception as e:
-            logger.error({"event": "Updating user Error", "user_id": request.user.id, "error": str(e)})
+            logger.error({"message": "Updating user Error", "user_id": request.user.id, "error": str(e)})
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-    """
-    Update user status. For now we are just checking if the JWT token is valid or not as role structure is not final yet.
-    """
-
-    @extend_schema(
-        request=UserStatusUpdateSerializer,
-        responses={
-            200: UserStatusUpdateSerializer,
-            400: {"type": "object", "properties": {"error": {"type": "string"}}},
-            404: {"type": "object", "properties": {"error": {"type": "string"}}},
-        },
-        summary="Update user status by user_id",
-        description="Allows an authenticated user to update the status of any user by user_id.",
-    )
-    def update_user_status(self, request, user_id):
-        logger.log({"event": "Updating user status Started", "user_id": user_id})
-        try:
-            serializer = UserStatusUpdateSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            updated_user = UserService.update_status(
-                user_id=user_id,
-                approved_by=request.user.id,
-                new_status=serializer.validated_data["status"],
-            )
-            logger.log({"event": "Updating user status Success", "user_id": user_id, "data": UserStatusUpdateSerializer(updated_user).data})
-            response_serializer = UserStatusUpdateSerializer(updated_user)
-            return Response({"status": "success", "data": response_serializer.data})
-        except Exception as e:
-            logger.error({"event": "Updating user status Error", "user_id": user_id, "error": str(e)})
-            error_status = (
-                status.HTTP_404_NOT_FOUND
-                if "not found" in str(e).lower()
-                else status.HTTP_400_BAD_REQUEST
-            )
-            return Response({"status": "error", "message": str(e)}, status=error_status)
 
     """
     This will allow the user to check their status by email.
@@ -164,8 +130,9 @@ class ProtectedUserController(ViewSet):
             404: {"type": "object", "properties": {"error": {"type": "string"}}},
         }
     )
-    def get_user_status(self, request, email):
-        logger.log({"event": "Getting user status Started", "email": email})
+    def get_user_status_by_email(self, request, email):
+        logger.set_context("get_user_status_by_email")
+        logger.log({"message": "Getting user status Started", "email": email})
         if not email:
             return Response(
                 {"error": "Email parameter is required"},
@@ -174,16 +141,17 @@ class ProtectedUserController(ViewSet):
         try:
             user = UserService.get_user_status_by_email(email)
             response_serializer = UserStatusResponseSerializer(user)
-            logger.log({"event": "Getting user status Success", "email": email, "data": response_serializer.data})
+            logger.log({"message": "Getting user status Success", "email": email, "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            logger.error({"event": "Getting user status Error", "email": email, "error": str(e)})
+            logger.error({"message": "Getting user status Error", "email": email, "error": str(e)})
             return Response(
                 {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
     @extend_schema(
         parameters=[
@@ -255,17 +223,19 @@ class ProtectedUserController(ViewSet):
         description="Retrieve a paginated list of all users with optional filtering, search, and sorting.",
     )
     def get_user_list(self, request):
-        logger.log({"event": "Getting user list Started", "data": request.query_params})
+        logger.set_context("get_user_list")
+        logger.log({"message": "Getting user list Started", "data": request.query_params})
         try:
-            users, pagination = UserService.get_users(request.query_params)
+            users, pagination = UserService.get_user_list(request.query_params)
             serializer = UserListSerializer(users, many=True)
             return Response({"users": serializer.data, "pagination": pagination})
         except Exception as e:
-            logger.error({"event": "Getting user list Error", "data": request.query_params, "error": str(e)})
+            logger.error({"message": "Getting user list Error", "data": request.query_params, "error": str(e)})
             return Response({"error": str(e)}, status=400)
     
+
     @extend_schema(
-        request=UserStatusChangeSerializer,
+        request=UserStatusUpdateSerializer,
         responses={
             200: {
                 "type": "object",
@@ -291,9 +261,9 @@ class ProtectedUserController(ViewSet):
             "Invalid transitions are skipped without error."
         ),
     )
-    def change_status(self, request):
+    def update_user_status(self, request):
         """
-        Change user status (single or bulk).
+        Update user status (single or bulk).
         Allowed transitions:
         - pending => approved or rejected
         - approved => banned
@@ -304,19 +274,20 @@ class ProtectedUserController(ViewSet):
         in -> user_ids (list), status
         out -> updated_count, updated_ids, skipped_ids
         """
-        logger.log({"event": "Changing user status Started", "data": request.data})
+        logger.set_context("update_user_status")
+        logger.log({"message": "Changing user status Started", "data": request.data})
         
         try:
-            serializer = UserStatusChangeSerializer(data=request.data)
+            serializer = UserStatusUpdateSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             
-            result = UserService.change_user_status(
+            result = UserService.update_user_status(
                 user_ids=serializer.validated_data['user_ids'],
                 new_status=serializer.validated_data['status'],
                 approved_by=request.user.id
             )
             
-            logger.log({"event": "Changing user status Success", "data": result})
+            logger.log({"message": "Changing user status Success", "data": result})
             
             return Response({
                 "status": "success",
@@ -325,22 +296,54 @@ class ProtectedUserController(ViewSet):
             })
             
         except Exception as e:
-            logger.error({"event": "Changing user status Error", "data": request.data, "error": str(e)})
+            logger.error({"message": "Changing user status Error", "data": request.data, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
 
+    @extend_schema(
+        request=UserStatusUpdateByIdSerializer,
+        responses={
+            200: UserStatusUpdateByIdSerializer,
+            400: {"type": "object", "properties": {"error": {"type": "string"}}},
+            404: {"type": "object", "properties": {"error": {"type": "string"}}},
+        },
+        summary="Update user status by user_id",
+        description="Allows an authenticated user to update the status of any user by user_id.",
+    )
+    def update_user_status_by_id(self, request, user_id):
+        logger.set_context("update_user_status_by_id")
+        logger.log({"message": "Updating user status Started", "user_id": user_id})
+        try:
+            serializer = UserStatusUpdateByIdSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            updated_user = UserService.update_user_status_by_id(
+                user_id=user_id,
+                approved_by=request.user.id,
+                new_status=serializer.validated_data["status"],
+            )
+            logger.log({"message": "Updating user status Success", "user_id": user_id, "data": UserStatusUpdateByIdSerializer(updated_user).data})
+            response_serializer = UserStatusUpdateByIdSerializer(updated_user)
+            return Response({"status": "success", "data": response_serializer.data})
+        except Exception as e:
+            logger.error({"message": "Updating user status Error", "user_id": user_id, "error": str(e)})
+            error_status = (
+                status.HTTP_404_NOT_FOUND
+                if "not found" in str(e).lower()
+                else status.HTTP_400_BAD_REQUEST
+            )
+            return Response({"status": "error", "message": str(e)}, status=error_status)
+
 class PublicUserController(ViewSet):
-    logger.set_context("PublicUserController")
 
     @extend_schema(
-        request=UserRegistrationSerializer, responses={201: UserResponseSerializer}
+        request=UserRegistrationSerializer, responses={201: UserDetailsResponseSerializer}
     )
-    def register(self, request):
-        logger.log({"event": "Registering user Started", "data": request.data})
-        
+    def register_user(self, request):
+        logger.set_context("register_user")
+        logger.log({"message": "Registering user Started", "data": request.data})
 
         try:
             registration_serializer = UserRegistrationSerializer(data=request.data)
@@ -355,24 +358,22 @@ class PublicUserController(ViewSet):
 
             user = UserService.register_user(user_dto)
 
-            response_serializer = UserResponseSerializer(user)
-            logger.log({"event": "Registering user Success", "data": response_serializer.data})
+            response_serializer = UserDetailsResponseSerializer(user)
+            logger.log({"message": "Registering user Success", "data": response_serializer.data})
             return Response(
                 {"status": "success", "data": response_serializer.data},
                 status=status.HTTP_201_CREATED,
             )
 
-
-
         except EmailAlreadyExistsError as e:
-            logger.error({"event": "Registering user Conflict", "error": str(e)})
+            logger.error({"message": "Registering user Conflict", "error": str(e)})
             return Response(
                 {"status": "error", "message": "Email already exists"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         except Exception as e:
-            logger.error({"event": "Registering user Error", "error": str(e)})
+            logger.error({"message": "Registering user Error", "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

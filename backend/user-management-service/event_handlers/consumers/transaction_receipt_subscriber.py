@@ -12,7 +12,6 @@ from logging_config import logger
 This is responsible for Listening to Exchange from Frontend.
 """
 class TransactionReceiptSubscriber:
-    logger.set_context("TransactionReceiptSubscriber")
     def __init__(self):
         self.event_handlers = {
             'transaction_receipt': self.handle_transaction_receipt,
@@ -20,6 +19,7 @@ class TransactionReceiptSubscriber:
 
     def start_listening(self):
         """Start listening for transaction receipt events with reconnection logic"""
+        logger.set_context("TransactionReceiptSubscriber.start_listening")
         while True:
             try:
                 connection, channel = RabbitMQConnector.get_connection()
@@ -78,13 +78,9 @@ class TransactionReceiptSubscriber:
 
     def process_message(self, ch, method, properties, body):
         """Process incoming transaction receipt events"""
+        logger.set_context("TransactionReceiptSubscriber.process_message")
         try:
             event = json.loads(body)
-            print("[$$$$$$$] Event is " , event)
-            print(f"\n [📧] Received transaction receipt event")
-            print(f" [ⓘ] Timestamp: {event.get('timestamp', 'N/A')}")
-            print(f" [ⓘ] Method: {event.get('method', 'N/A')}")
-            print(f" [ⓘ] Path: {event.get('path', 'N/A')}")
 
             logger.log("Received transaction receipt event")
             logger.log(f"Timestamp: {event.get('timestamp', 'N/A')}")
@@ -92,17 +88,10 @@ class TransactionReceiptSubscriber:
             logger.log(f"Path: {event.get('path', 'N/A')}")
 
             onChainData = event.get('onChainData', {})
-            print(f" [ⓘ] Transaction Hash: {onChainData.get('transactionHash', 'N/A')}")
-            print(f" [ⓘ] Signed By: {onChainData.get('signedBy', 'N/A')}")
-            print(f" [ⓘ] Context: {onChainData.get('context', 'N/A')}")
 
             logger.log(f"Transaction Hash: {onChainData.get('transactionHash', 'N/A')}")
             logger.log(f"Signed By: {onChainData.get('signedBy', 'N/A')}")
             logger.log(f"Context: {onChainData.get('context', 'N/A')}")
-
-            # Always use transaction_receipt handler
-            print(f" [⚡] Event Type: transaction_receipt")
-            print(f" [⚙] Executing handler...")
 
             logger.log("Executing handler...")
             self.event_handlers['transaction_receipt'](event)
@@ -128,6 +117,7 @@ class TransactionReceiptSubscriber:
     # ===== HANDLER IMPLEMENTATIONS =====
     def handle_transaction_receipt(self, event):
         """Handle transaction receipts from Kong API"""
+        logger.set_context("TransactionReceiptSubscriber.handle_transaction_receipt")
         onChainData = event.get('onChainData', {})
         trxHash = onChainData.get('transactionHash')
 
@@ -160,7 +150,6 @@ class TransactionReceiptSubscriber:
             return
 
 
-        print(f" [💰] {json.dumps(log_message)}")
         logger.log(f" {json.dumps(log_message)}")
         # Extract organizationId from parsed context
         organization_id = context.get("organizationId")
@@ -195,9 +184,3 @@ class TransactionReceiptSubscriber:
         except Exception as e:
             print(f" [✘] Failed to create OnchainVerification: {str(e)}")
             logger.log(f"Failed to create OnchainVerification: {str(e)}")
-
-
-        # TODO: Implement transaction receipt processing logic
-        # - Log transaction details
-        # - Update user transaction history
-        # - Generate receipt document

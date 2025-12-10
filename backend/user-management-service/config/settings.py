@@ -32,7 +32,9 @@ SECRET_KEY = env("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=False)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1","user-management-api"])
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS", default=["localhost", "127.0.0.1","172.16.231.80","user-management-api"]
+)
 
 # Proxy/Gateway configuration
 USE_X_FORWARDED_HOST = env.bool("USE_X_FORWARDED_HOST", default=False)
@@ -61,7 +63,6 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
-    
 ]
 
 REST_FRAMEWORK = {
@@ -105,6 +106,11 @@ SPECTACULAR_SETTINGS = {
         "enabled": True,
         "timeout": 60 * 60 * 24,  # 1 day
         "name": "drf_spectacular_schema",
+    },
+    "ENUM_NAME_OVERRIDES": {
+        "UserStatusEnum": "users.models.User.STATUS_CHOICES",
+        "OrganizationStatusEnum": "organizations.models.Organization.STATUS_CHOICES",
+        "OrganizationTypeEnum": "organizations.models.Organization.ORGANIZATION_TYPES",
     },
 }
 
@@ -181,7 +187,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django_prometheus.db.backends.postgresql",# to track db metrics.
+        "ENGINE": "django_prometheus.db.backends.postgresql",  # to track db metrics.
         "NAME": env("POSTGRES_DB"),
         "USER": env("POSTGRES_USER"),
         "PASSWORD": env("POSTGRES_PASSWORD"),
@@ -255,31 +261,38 @@ CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672//"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "DEBUG",
+            "class": "logging.FileHandler",
+            "filename": str(BASE_DIR / "logs" / "django1.log"),
+            "formatter": "json",
+        }
+    },
     "formatters": {
         "json": {
             "()": "pythonjsonlogger.jsonlogger.JsonFormatter",
-            "fmt": "%(context)s %(level)s %(message)s %(span_id)s %(timestamp)s %(trace_id)s",
-        },
-    },
-    "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "json"},
-        "null": {
-            "class": "logging.NullHandler",
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(message)s %(trace_id)s %(span_id)s",
         },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["file"],
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
-            "level": "INFO",
+            "handlers": ["file"],
+            "level": "ERROR",
             "propagate": False,
         },
         "django.server": {
-            "handlers": ["null"],
-            "level": "INFO",
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "opentelemetry": {
+            "handlers": ["file"],
+            "level": "ERROR",
             "propagate": False,
         },
     },

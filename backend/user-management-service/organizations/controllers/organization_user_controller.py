@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from organizations.services.organization_user_service import OrganizationUserService
 from organizations.serializers.organization_user_serializers import (
-    OrganizationUserCreateSerializer,
+    OrganizationUserAddSerializer,
     OrganizationUserResponseSerializer,
 )
 from organizations.models import Organization
@@ -15,14 +15,13 @@ from rest_framework.permissions import IsAuthenticated
 from logging_config import logger
 from event_handlers.utils.rabbitmq_publisher import RabbitMQPublisher
 
-class ProtectedOrganizationUserController(ViewSet):
-    logger.set_context("ProtectedOrganizationUserController")
-    
+class ProtectedOrganizationUserController(ViewSet):    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=OrganizationUserCreateSerializer,
+        operation_id="add_user_to_organization",
+        request=OrganizationUserAddSerializer,
         responses={
             201: OrganizationUserResponseSerializer,
             400: {"type": "object", "properties": {"error": {"type": "string"}}},
@@ -35,18 +34,19 @@ class ProtectedOrganizationUserController(ViewSet):
         Add a user to an organization.
         Creates a new organization user membership with proper validation.
         """
-        logger.log({"event": "Adding user to organization Started", "data": request.data})
+        logger.set_context("add_user_to_organization")
+        logger.log({"message": "Adding user to organization Started", "data": request.data})
         
 
         try:
-            serializer = OrganizationUserCreateSerializer(data=request.data)
+            serializer = OrganizationUserAddSerializer(data=request.data)
             serializer.is_valid(raise_exception=True)
-            organization_user = OrganizationUserService.create_organization_user(
+            organization_user = OrganizationUserService.add_user_to_organization(
                 serializer.validated_data
             )
 
             response_serializer = OrganizationUserResponseSerializer(organization_user)
-            logger.log({"event": "Adding user to organization Success", "data": response_serializer.data})
+            logger.log({"message": "Adding user to organization Success", "data": response_serializer.data})
 
 
             # Return response
@@ -56,13 +56,14 @@ class ProtectedOrganizationUserController(ViewSet):
             )
 
         except Exception as e:
-            logger.error({"event": "Adding user to organization Error", "data": request.data, "error": str(e)})
+            logger.error({"message": "Adding user to organization Error", "data": request.data, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,
             )
     
     @extend_schema(
+        operation_id="get_user_list_by_organization_id",
         parameters=[
             OpenApiParameter(
                 name="page",
@@ -129,18 +130,19 @@ class ProtectedOrganizationUserController(ViewSet):
         summary="Get users of an organization",
         description="Retrieve a paginated list of all users belonging to a specific organization with optional filtering, search, and sorting.",
     )
-    def get_organization_users(self, request, org_id):
+    def get_user_list_by_organization_id(self, request, org_id):
         """
         Get all users belonging to an organization with filtering, search, sorting, and pagination.
         """
-        logger.log({"event": "Getting organization users Started", "org_id": org_id, "params": request.query_params})
+        logger.set_context("get_user_list_by_organization_id")
+        logger.log({"message": "Getting all user list by organization id started", "org_id": org_id, "params": request.query_params})
         try:
-            users, pagination = OrganizationUserService.get_organization_users(
+            users, pagination = OrganizationUserService.get_user_list_by_organization_id(
                 org_id, 
                 request.query_params
             )
             serializer = UserListSerializer(users, many=True)
-            logger.log({"event": "Getting organization users Success", "org_id": org_id, "count": len(users)})
+            logger.log({"message": "Successfully got all user list by organization id", "org_id": org_id, "count": len(users)})
             return Response(
                 {
                     "org_users": serializer.data,
@@ -149,7 +151,7 @@ class ProtectedOrganizationUserController(ViewSet):
                 status=status.HTTP_200_OK,
             )
         except Exception as e:
-            logger.error({"event": "Getting organization users Error", "org_id": org_id, "error": str(e)})
+            logger.error({"message": "Failed to get all user list by organization id", "org_id": org_id, "error": str(e)})
             return Response(
                 {"status": "error", "message": str(e)},
                 status=status.HTTP_400_BAD_REQUEST,

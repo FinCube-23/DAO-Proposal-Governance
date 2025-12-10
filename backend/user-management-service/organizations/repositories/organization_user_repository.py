@@ -5,11 +5,11 @@ from organizations.models import OrganizationUser
 class OrganizationUserRepository:
 
     @classmethod
-    def create_organization_user(cls, user_id, organization_id):
+    def add_user_to_organization(cls, user_id, organization_id):
         return OrganizationUser.objects.create(user_id=user_id, organization_id=organization_id)
     
     @classmethod
-    def get_organization_users(cls, organization_id, page, limit, filters=None, search=None, sort_by=None, order='desc'):
+    def get_user_list_by_organization_id(cls, organization_id, page, limit, filters=None, search=None, sort_by=None, order='desc'):
         """
         Get paginated list of organization users with filtering, search, and sorting.
         """

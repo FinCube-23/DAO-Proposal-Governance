@@ -20,7 +20,7 @@ class UserService:
         return user
 
     @staticmethod
-    def get_users(query_params):
+    def get_user_list(query_params):
         """
         Get paginated list of users with filtering, search, and sorting.
         """
@@ -73,12 +73,15 @@ class UserService:
         return user
 
     @staticmethod
-    def get_user_with_organizations(user_id):
-        return UserRepository.get_user_with_organizations(user_id)
+    def get_user_details_with_organization_list(user_id):
+        """
+        This will get a user details with the list of organizations they are a member of.
+        """
+        return UserRepository.get_user_details_with_organization_list(user_id)
 
     @staticmethod
-    def partial_update(user_id, update_data):
-        user = UserRepository.get_user_by_id(user_id)
+    def partially_update_user_details(user_id, update_data):
+        user = UserRepository.get_user_details_by_id(user_id)
         
         updated_fields = []
         
@@ -112,7 +115,7 @@ class UserService:
         return user
 
     @staticmethod
-    def update_password(user_id, current_password, new_password):
+    def update_user_password(user_id, current_password, new_password):
         user = UserRepository.get_user_by_id(user_id)
 
         if not check_password(current_password, user.password):
@@ -129,32 +132,11 @@ class UserService:
             raise Exception("User not found")
         return user
 
-    @staticmethod
-    def update_status(user_id: int, approved_by: int, new_status: str):
-        user = UserRepository.get_user_by_id(user_id)
-        if not user:
-            raise Exception("User not found")
-
-        valid_statuses = [choice[0] for choice in User.STATUS_CHOICES]
-        if new_status not in valid_statuses:
-            raise Exception(
-                f"Invalid status: {new_status}. Must be one of {valid_statuses}"
-            )
-
-        user.status = new_status
-        user.approved_by_id = approved_by  # We are getting this from JWT token.
-        # update is_active based on status(rejected,banned)
-        if new_status == "approved":
-            user.is_active = True
-        elif new_status in ("rejected", "banned"):
-            user.is_active = False
-        user.save(update_fields=["status", "is_active", "approved_by_id"])
-        return user
     
     @staticmethod
-    def change_user_status(user_ids, new_status, approved_by):
+    def update_user_status(user_ids, new_status, approved_by):
         """
-        Change user status with validation of allowed transitions.
+        Update user status with validation of allowed transitions.
         Allowed transitions:
         - pending => approved or rejected
         - approved => banned
@@ -209,3 +191,26 @@ class UserService:
             'updated_ids': valid_user_ids,
             'skipped_ids': skipped_user_ids
         }
+
+
+    @staticmethod
+    def update_user_status_by_id(user_id: int, approved_by: int, new_status: str):
+        user = UserRepository.get_user_details_by_id(user_id)
+        if not user:
+            raise Exception("User not found")
+
+        valid_statuses = [choice[0] for choice in User.STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            raise Exception(
+                f"Invalid status: {new_status}. Must be one of {valid_statuses}"
+            )
+
+        user.status = new_status
+        user.approved_by_id = approved_by  # We are getting this from JWT token.
+        # update is_active based on status(rejected,banned)
+        if new_status == "approved":
+            user.is_active = True
+        elif new_status in ("rejected", "banned"):
+            user.is_active = False
+        user.save(update_fields=["status", "is_active", "approved_by_id"])
+        return user

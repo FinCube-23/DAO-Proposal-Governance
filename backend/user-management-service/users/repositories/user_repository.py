@@ -30,7 +30,7 @@ class UserRepository:
         return user
 
     @staticmethod
-    def get_user_with_organizations(user_id):
+    def get_user_details_with_organization_list(user_id):
         return User.objects.prefetch_related(
             'organization_memberships__organization'
         ).get(pk=user_id)
@@ -77,7 +77,7 @@ class UserRepository:
             raise Exception("Page not found")
         
     @staticmethod
-    def get_user_by_id(user_id):
+    def get_user_details_by_id(user_id):
         try:
             return User.objects.get(pk=user_id)
         except User.DoesNotExist:

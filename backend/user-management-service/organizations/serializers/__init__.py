@@ -2,11 +2,11 @@ from .organization_serializers import (
     OrganizationCreateSerializer,
     OrganizationUpdateSerializer,
     OrganizationListSerializer,
-    OrganizationDetailSerializer,
+    OrganizationDetailsSerializer,
     OrganizationResponseSerializer
 )
 from .organization_user_serializers import (
-    OrganizationUserCreateSerializer,
+    OrganizationUserAddSerializer,
     OrganizationUserResponseSerializer
 )
 from .onchain_verification_serializers import (
@@ -19,9 +19,9 @@ __all__ = [
     "OrganizationCreateSerializer",
     "OrganizationUpdateSerializer",
     "OrganizationListSerializer",
-    "OrganizationDetailSerializer",
+    "OrganizationDetailsSerializer",
     "OrganizationResponseSerializer",
-    "OrganizationUserCreateSerializer",
+    "OrganizationUserAddSerializer",
     "OrganizationUserResponseSerializer",
     "OnchainVerificationCreateSerializer",
     "OnchainVerificationResponseSerializer",

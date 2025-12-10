@@ -6,7 +6,7 @@ from organizations.models import Organization
 class OrganizationRepository:
     
     @classmethod
-    def create_organization(cls, name, email, type, address, legal_entity_identifier, organization_admin_id):
+    def create_new_organization(cls, name, email, type, address, legal_entity_identifier, organization_admin_id):
         return Organization.objects.create(
             name=name,
             email=email,
@@ -17,7 +17,7 @@ class OrganizationRepository:
         )
 
     @staticmethod
-    def get_all_organizations(page, limit, filters=None, search=None, sort_by=None, order='desc'):
+    def get_organization_list(page, limit, filters=None, search=None, sort_by=None, order='desc'):
         filters = filters or {}
         queryset = Organization.objects.select_related('organization_admin').filter(**filters)
         
@@ -55,7 +55,7 @@ class OrganizationRepository:
             raise Exception("Page not found")
 
     @staticmethod
-    def get_organization_by_id(org_id):
+    def get_organization_details_by_id(org_id):
         try:
             return Organization.objects.select_related('organization_admin').prefetch_related(
                 'onchain_verifications'
@@ -84,14 +84,14 @@ class OrganizationRepository:
             return None
         
     @classmethod
-    def get_organization_by_name(cls, name):
+    def get_organization_details_by_name(cls, name):
         try:
             return Organization.objects.get(name=name)
         except ObjectDoesNotExist:
             return None
 
     @classmethod
-    def get_organization_by_email(cls, email):
+    def get_organization_details_by_email(cls, email):
         try:
             return Organization.objects.get(email=email)
         except ObjectDoesNotExist:
@@ -142,7 +142,7 @@ class OrganizationRepository:
         return updated_count
     
     @classmethod
-    def get_organizations_by_ids(cls, org_ids):
+    def get_organization_list_by_ids(cls, org_ids):
         """
         Get organizations by their IDs.
         """

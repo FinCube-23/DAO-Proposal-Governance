@@ -71,7 +71,7 @@ class UserLoginSerializer(serializers.ModelSerializer):
         }
 
 
-class UserResponseSerializer(serializers.ModelSerializer):
+class UserDetailsResponseSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     contact_number = serializers.SerializerMethodField()
 
@@ -272,20 +272,6 @@ class UserStatusResponseSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class UserStatusUpdateSerializer(serializers.ModelSerializer):
-    status = serializers.ChoiceField(
-        choices=[choice[0] for choice in User.STATUS_CHOICES]
-    )
-
-    class Meta:
-        model = User
-        fields = ["status"]
-
-    def validate(self, data):
-        if set(data.keys()) != {"status"}:
-            raise serializers.ValidationError("Only status can be updated.")
-        return data
-
 
 class RefreshTokenRequestSerializer(serializers.Serializer):
     refresh = serializers.CharField(write_only=True, required=True)
@@ -309,7 +295,7 @@ class RefreshTokenResponseSerializer(serializers.Serializer):
     access = serializers.CharField()
 
 
-class UserStatusChangeSerializer(serializers.Serializer):
+class UserStatusUpdateSerializer(serializers.Serializer):
     user_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=True,
@@ -327,3 +313,18 @@ class UserStatusChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError("At least one user ID is required")
         # Remove duplicates
         return list(set(value))
+
+
+class UserStatusUpdateByIdSerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(
+        choices=[choice[0] for choice in User.STATUS_CHOICES]
+    )
+
+    class Meta:
+        model = User
+        fields = ["status"]
+
+    def validate(self, data):
+        if set(data.keys()) != {"status"}:
+            raise serializers.ValidationError("Only status can be updated.")
+        return data

@@ -30,26 +30,26 @@ otlp_exporter = OTLPSpanExporter(endpoint=os.environ.get("OTEL_TRACE_COLLECTOR")
 trace_provider.add_span_processor(SimpleSpanProcessor(otlp_exporter))
 trace.set_tracer_provider(trace_provider)
 
-# Auto-instrument Django and common libs
-DjangoInstrumentor().instrument()
-RequestsInstrumentor().instrument()
-Psycopg2Instrumentor().instrument()
-PikaInstrumentor().instrument()
-
 print("OpenTelemetry SDK (tracing) started for user-management-service")
 
+def instrument_app():
+    """Call this after Django settings are loaded to avoid initialization issues"""
+    DjangoInstrumentor().instrument()
+    RequestsInstrumentor().instrument()
+    Psycopg2Instrumentor().instrument()
+    PikaInstrumentor().instrument()
+    LoggingInstrumentor().instrument()
+    print("OpenTelemetry instrumentations applied")
 
-# Graceful shutdown - flush and shut OTel tracer provider on SIGINT/SIGTERM
+    
+# Graceful shutdown - flush and shut OTEL tracer provider on SIGINT/SIGTERM
 def _shutdown(*_):
     tp = trace.get_tracer_provider()
     if hasattr(tp, "shutdown"):
         try:
             tp.shutdown()
-            print("Tracer provider shut down successfully")
         except Exception as e:
             print("Error shutting down tracer provider:", e)
-    # then exit the process
-    sys.exit(0)
 
 
 atexit.register(_shutdown)

@@ -11,8 +11,6 @@ from logging_config import logger
 This is responsible for Listening to Exchange from Audit Trail Service.
 """
 class ProposalSubscriber:
-    logger.set_context("ProposalSubscriber")
-
     def __init__(self):
         self.event_handlers: Dict[str, Callable] = {
             'ProposalCanceled': self.handle_proposal_updated,
@@ -20,14 +18,13 @@ class ProposalSubscriber:
             'ProposalAdded': self.handle_proposal_created,
         }
 
-    # 📡 Event Listener from Audit Trail
     def start_listening(self):
         """Start listening for proposal events with reconnection logic"""
+        logger.set_context("ProposalSubscriber.start_listening")
         while True:
             try:
                 connection, channel = RabbitMQConnector.get_connection()
 
-                # Mirror NestJS configuration exactly
                 channel.exchange_declare(
                     exchange='exchange.web3_event_hub.fanout',
                     exchange_type='fanout',
@@ -77,16 +74,13 @@ class ProposalSubscriber:
 
     def process_message(self, ch, method, properties, body):
         """Process incoming blockchain events"""
+        logger.set_context("ProposalSubscriber.process_message")
         try:
             event = json.loads(body)
 
             # Extract onChainData
             onChainData = event.get('onChainData', {})
             trxHash = onChainData.get('transactionHash', 'N/A')
-
-            print(f"\n [⚐] Received blockchain event")
-            print(f" [ⓘ] Transaction Hash: {trxHash}")
-            print(f" [ⓘ] Signed By: {onChainData.get('signedBy', 'N/A')}")
 
             logger.log("Received blockchain event")
             logger.log(f"Transaction Hash: {trxHash}")
@@ -115,11 +109,9 @@ class ProposalSubscriber:
                 ch.basic_ack(delivery_tag=method.delivery_tag)
                 return
 
-            print(f" [⚡] Event Type: {typename}")
             logger.log(f"Event Type: {typename}")
 
             if typename in self.event_handlers:
-                print(f" [⚙] Executing handler...")
                 logger.log("Executing handler...")
                 self.event_handlers[typename](event, context)
             else:
@@ -131,7 +123,6 @@ class ProposalSubscriber:
             logger.log(f"No handler for {typename}")
 
             ch.basic_ack(delivery_tag=method.delivery_tag)
-            print(" [✓] Processing complete")
             logger.log("Processing complete")
 
         except json.JSONDecodeError:
@@ -153,6 +144,7 @@ class ProposalSubscriber:
     # ===== HANDLER IMPLEMENTATIONS =====
     def handle_proposal_updated(self, event, context):
         """Handle proposal updates (Canceled/Executed)"""
+        logger.set_context("ProposalSubscriber.handle_proposal_updated")
         eventType = context.get('__typename')
         onchainId = event.get('data').get('proposalId')
 
@@ -165,20 +157,16 @@ class ProposalSubscriber:
             logger.log("Missing on-chain ID in event")
             return
 
-        print(f"Processed on-chain proposal ID: {onchainId}")
         logger.log(f"Processed on-chain proposal ID: {onchainId}")
 
         try:
             if eventType == 'ProposalExecuted':
-                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
                 logger.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
                 OnchainVerificationService.update_verification_status_by_onchain_id(onchainId, 'approved')
             elif eventType == 'ProposalCanceled':
-                print("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
                 logger.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
                 OnchainVerificationService.update_verification_status_by_onchain_id(onchainId, 'cancelled')
             else:
-                print(f" [!] Unknown proposal event type: {eventType}")
                 logger.log(f"Unknown proposal event type: {eventType}")
         except Exception as e:
             print(f" [✘] Failed to update verification status: {str(e)}")
@@ -186,11 +174,11 @@ class ProposalSubscriber:
 
     def handle_proposal_created(self, event, context):
         """Handle new proposal creation - ProposalAdded event"""
+        logger.set_context("ProposalSubscriber.handle_proposal_created")
         onChainData = event.get('onChainData', {})
         trxHash = onChainData.get('transactionHash')
         onchainId = event.get('data').get('proposalId')
 
-        print(f"Received a ProposalAdded event - hash: {trxHash[:10] if trxHash else 'N/A'}...{trxHash[-10:] if trxHash else 'N/A'}")
         logger.log(f"Received a ProposalAdded event - hash: {trxHash[:10] if trxHash else 'N/A'}...{trxHash[-10:] if trxHash else 'N/A'}")
 
 
@@ -202,7 +190,6 @@ class ProposalSubscriber:
         # Check proposal type
         proposalType = context.get("proposalType")
         if proposalType != 0 and proposalType != "membership":
-            print(f" [⏭️] Skipping non-membership proposal (type: {proposalType})")
             logger.log(f"Skipping non-membership proposal (type: {proposalType})")
             return
 
@@ -220,10 +207,7 @@ class ProposalSubscriber:
 
             # Update the onchainId field with the proposal ID from the event
             updated_verification = OnchainVerificationService.update_verification_onchain_id_by_trx_hash(trxHash, onchainId)
-
-            print(f" [✓] Successfully updated OnChainValidation record (ID: {updated_verification.id}) with proposal ID: {onchainId}")
-            print(f" [✓] ProposalAdded event processed successfully for {trxHash}")
-
+            
             logger.log(f"Successfully updated OnChainValidation record (ID: {updated_verification.id}) with proposal ID: {onchainId}")
             logger.log(f"ProposalAdded event processed successfully for {trxHash}")
 

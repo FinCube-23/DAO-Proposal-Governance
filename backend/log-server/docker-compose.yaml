@@ -5,11 +5,11 @@ services:
     networks:
       - fincube23_network
     ports:
-      - "3100:3100"  # Expose Loki's port for queries
-      - "9096:9096"  # Expose Loki's gRPC port
-      - "9097:9097"  # Expose Loki's Alertmanager port
+      - "3100:3100" # Expose Loki's port for queries
+      - "9096:9096" # Expose Loki's gRPC port
+      - "9097:9097" # Expose Loki's Alertmanager port
     volumes:
-      - ./config/loki-config.yaml:/etc/loki/local-config.yaml  # Mount the custom Loki config
+      - ./config/loki-config.yaml:/etc/loki/local-config.yaml # Mount the custom Loki config
 
   grafana:
     image: grafana/grafana:latest
@@ -21,19 +21,19 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
     ports:
-      - "3200:3000"  # Expose Grafana's UI port
+      - "3200:3000" # Expose Grafana's UI port
     depends_on:
-      - loki  # Ensure Loki is up before starting Grafana
+      - loki # Ensure Loki is up before starting Grafana
       - tempo
-      - prometheus 
+      - prometheus
     volumes:
-      - grafana-data:/var/lib/grafana  # Persistent storage for Grafana dashboards and settings
+      - grafana-data:/var/lib/grafana # Persistent storage for Grafana dashboards and settings
       # Data sources config
       - ./config/grafana/grafana.yaml:/etc/grafana/provisioning/datasources/ds.yaml
-      
+
       # Dashboard provisioning config (tells Grafana WHERE to find JSON files)
       - ./config/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/dashboard.yaml
-      
+
       # Actual dashboard JSON files (stored in a DIFFERENT path)
       - ./config/grafana/dashboards:/var/lib/grafana/dashboards
 
@@ -46,22 +46,22 @@ services:
       - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     command: ["--config", "/etc/otel-collector-config.yaml"]
     ports:
-      - "4320:4317"  # OTLP gRPC endpoint
-      - "4321:4318"  # OTLP HTTP endpoint
+      - "4320:4317" # OTLP gRPC endpoint
+      - "4321:4318" # OTLP HTTP endpoint
 
   tempo:
     image: grafana/tempo:latest
     container_name: tempo
-    command: [ "-config.file=/etc/tempo.yaml" ]
+    command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./config/tempo.yaml:/etc/tempo.yaml
       - ./tempo-data:/var/tempo
     ports:
-      - "3201:3200"   # tempo
+      - "3201:3200" # tempo
     networks:
       - fincube23_network
 
-  #new service for prometheus    
+  #new service for prometheus
   prometheus:
     image: prom/prometheus:latest
     container_name: prometheus
@@ -70,23 +70,23 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./config/prometheus.yaml:/etc/prometheus/prometheus.yml  # Prometheus configuration
-      - prometheus-data:/prometheus  # Persistent storage for metrics data
+      - ./config/prometheus.yaml:/etc/prometheus/prometheus.yml # Prometheus configuration
+      - prometheus-data:/prometheus # Persistent storage for metrics data
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'  # Config file location
-      - '--storage.tsdb.path=/prometheus'  # Data storage path
-      - '--web.console.libraries=/usr/share/prometheus/console_libraries'  # Console libraries
-      - '--web.console.templates=/usr/share/prometheus/consoles'  # Console templates
-      - '--storage.tsdb.retention.time=15d'  # Keep metrics for 15 days
-      - '--web.enable-lifecycle'  # Enable reload via HTTP POST to /-/reload
+      - "--config.file=/etc/prometheus/prometheus.yml" # Config file location
+      - "--storage.tsdb.path=/prometheus" # Data storage path
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries" # Console libraries
+      - "--web.console.templates=/usr/share/prometheus/consoles" # Console templates
+      - "--storage.tsdb.retention.time=15d" # Keep metrics for 15 days
+      - "--web.enable-lifecycle" # Enable reload via HTTP POST to /-/reload
     restart: unless-stopped
 
 networks:
   fincube23_network:
-    external: true  # Use the external Docker network 'fincube23_network'
+    external: true # Use the external Docker network 'fincube23_network'
 
 volumes:
   grafana-data:
-    driver: local  # Persistent volume for Grafana
+    driver: local # Persistent volume for Grafana
   prometheus-data:
-    driver: local  
+    driver: local

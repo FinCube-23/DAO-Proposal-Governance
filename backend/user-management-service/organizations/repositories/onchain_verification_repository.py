@@ -19,7 +19,7 @@ class OnchainVerificationRepository:
         )
     
     @classmethod
-    def get_verifications_by_organization(cls, organization_id, page, limit):
+    def get_onchain_verification_list_by_organization_id(cls, organization_id, page, limit):
         """
         Get all on-chain verifications for a specific organization with pagination.
         """
@@ -38,7 +38,7 @@ class OnchainVerificationRepository:
             raise Exception("Page not found")
     
     @classmethod
-    def get_all_verifications(cls, page, limit, filters=None, search=None, sort_by=None, order='desc'):
+    def get_all_onchain_verification_list(cls, page, limit, filters=None, search=None, sort_by=None, order='desc'):
         """
         Get all on-chain verifications with filtering, search, and sorting.
         """
@@ -80,7 +80,7 @@ class OnchainVerificationRepository:
             raise Exception("Page not found")
     
     @classmethod
-    def get_verification_by_id(cls, verification_id):
+    def get_onchain_verification_details_by_id(cls, verification_id):
         """
         Get a specific on-chain verification by ID.
         """
@@ -90,7 +90,7 @@ class OnchainVerificationRepository:
             return None
     
     @classmethod
-    def get_verification_by_trx_hash(cls, trx_hash):
+    def get_onchain_verification_details_by_trx_hash(cls, trx_hash):
         """
         Get on-chain verification by transaction hash.
         """
@@ -100,7 +100,7 @@ class OnchainVerificationRepository:
             return None
         
     @classmethod
-    def update_verification_status_by_trx_hash(cls, trx_hash, status):
+    def update_onchain_verification_status_by_trx_hash(cls, trx_hash, status):
         """
         Update the status of an on-chain verification.
         """
@@ -117,7 +117,7 @@ class OnchainVerificationRepository:
             raise Exception(f"Failed to update on-chain verification status: {str(e)}")
         
     @classmethod
-    def update_verification_onchain_id_by_trx_hash(cls, trx_hash, onchain_id):
+    def update_onchain_verification_onchain_id_by_trx_hash(cls, trx_hash, onchain_id):
         """
         Update the status of an on-chain verification.
         """
@@ -134,7 +134,7 @@ class OnchainVerificationRepository:
             raise Exception(f"Failed to update verification onchain_id: {str(e)}")
         
     @classmethod
-    def get_verification_by_onchain_id(cls, onchain_id):
+    def get_onchain_verification_details_by_onchain_id(cls, onchain_id):
         """
         Get on-chain verification by on-chain ID.
         """
@@ -144,7 +144,7 @@ class OnchainVerificationRepository:
             return None
 
     @classmethod
-    def update_verification_status_by_onchain_id(cls, onchain_id, status):
+    def update_onchain_verification_status_by_onchain_id(cls, onchain_id, status):
         """
         Update the status of an on-chain verification.
         """
@@ -175,7 +175,7 @@ class OnchainVerificationRepository:
             return None
     
     @classmethod
-    def get_latest_verification_by_proposer_wallet(cls, proposer_wallet):
+    def get_latest_onchain_verification_details_by_proposer_wallet(cls, proposer_wallet):
         """
         Get the latest on-chain verification by proposer wallet address.
         Returns the most recent verification (by creation time) if multiple exist.
@@ -222,7 +222,7 @@ class OnchainVerificationRepository:
             return None
     
     @classmethod
-    def update_verification_onchain_id_by_proposer_wallet(cls, proposer_wallet, onchain_id):
+    def update_onchain_verification_onchain_id_by_proposer_wallet(cls, proposer_wallet, onchain_id):
         """
         Update the onchain_id field for the latest on-chain verification by proposer wallet address.
         """
@@ -239,7 +239,7 @@ class OnchainVerificationRepository:
             raise Exception(f"Failed to update on-chain ID for verification: {str(e)}")
 
     @classmethod
-    def add_verification_onchain_id(cls, proposer_wallet, onchain_id):
+    def add_onchain_id_to_onchain_verification(cls, proposer_wallet, onchain_id):
         """
         Add an on-chain ID to the latest on-chain verification by proposer wallet address.
         """

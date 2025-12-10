@@ -202,7 +202,7 @@ class OrganizationListSerializer(serializers.ModelSerializer):
             return []
 
 
-class OrganizationDetailSerializer(serializers.ModelSerializer):
+class OrganizationDetailsSerializer(serializers.ModelSerializer):
     offchain_status=serializers.CharField(source="status",read_only=True)
     organization_admin = serializers.SerializerMethodField()
     onchain_status = serializers.SerializerMethodField()

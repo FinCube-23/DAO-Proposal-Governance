@@ -15,12 +15,12 @@ class OnchainVerificationService:
         proposer_wallet = verification_data['proposer_wallet']
         
         # Validate organization exists
-        organization = OrganizationRepository.get_organization_by_id(organization_id)
+        organization = OrganizationRepository.get_organization_details_by_id(organization_id)
         if not organization:
             raise Exception("Organization does not exist")
         
         # Check if transaction hash already exists
-        existing_verification = OnchainVerificationRepository.get_verification_by_trx_hash(trx_hash)
+        existing_verification = OnchainVerificationRepository.get_verification_details_by_trx_hash(trx_hash)
         if existing_verification:
             raise Exception("Transaction hash already exists")
         
@@ -33,7 +33,7 @@ class OnchainVerificationService:
         )
     
     @staticmethod
-    def get_verifications_by_organization(organization_id, query_params):
+    def get_onchain_verification_list_by_organization_id(organization_id, query_params):
         """
         Get all on-chain verifications for a specific organization with pagination.
         """
@@ -45,17 +45,17 @@ class OnchainVerificationService:
             raise Exception("Page and limit must be positive numbers")
         
         # Validate organization exists
-        organization = OrganizationRepository.get_organization_by_id(organization_id)
+        organization = OrganizationRepository.get_organization_details_by_id(organization_id)
         if not organization:
             raise Exception("Organization does not exist")
         
         # Delegate to repository
-        return OnchainVerificationRepository.get_verifications_by_organization(
+        return OnchainVerificationRepository.get_onchain_verification_list_by_organization_id(
             organization_id, page, limit
         )
     
     @staticmethod
-    def get_all_verifications(query_params):
+    def get_all_onchain_verification_list(query_params):
         """
         Get paginated list of all on-chain verifications with filtering, search, and sorting.
         """
@@ -83,7 +83,7 @@ class OnchainVerificationService:
             order = 'desc'
         
         # Delegate to repository
-        return OnchainVerificationRepository.get_all_verifications(
+        return OnchainVerificationRepository.get_all_onchain_verification_list(
             page,
             limit,
             filters,
@@ -93,29 +93,29 @@ class OnchainVerificationService:
         )
         
     @staticmethod
-    def get_verification_by_id(verification_id):
-        verification = OnchainVerificationRepository.get_verification_by_id(verification_id)
+    def get_onchain_verification_details_by_id(verification_id):
+        verification = OnchainVerificationRepository.get_onchain_verification_details_by_id(verification_id)
         if not verification:
             raise Exception(f"OnchainVerification with ID {verification_id} not found")
         
         return verification
 
     @staticmethod
-    def get_verifications_by_trx_hash(trx_hash):
-        verification = OnchainVerificationRepository.get_verification_by_trx_hash(trx_hash)
+    def get_onchain_verification_details_by_trx_hash(trx_hash):
+        verification = OnchainVerificationRepository.get_onchain_verification_details_by_trx_hash(trx_hash)
         if not verification:
             raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
         
         return verification
     
     @staticmethod
-    def update_verification_status_by_trx_hash(trx_hash, status):
+    def update_onchain_verification_status_by_trx_hash(trx_hash, status):
         # Validate trx_hash
         if not trx_hash or not trx_hash.startswith("0x") or len(trx_hash) != 66:
             raise Exception("Invalid transaction hash format")
          
         # Get current verification
-        verification = OnchainVerificationRepository.get_verification_by_trx_hash(trx_hash)
+        verification = OnchainVerificationRepository.get_onchain_verification_details_by_trx_hash(trx_hash)
         if not verification:
             raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
         
@@ -129,14 +129,14 @@ class OnchainVerificationService:
         OnchainVerificationService._validate_status_transition(current_status, status)
 
         # Update verification status
-        updated_verification = OnchainVerificationRepository.update_verification_status_by_trx_hash(trx_hash, status)
+        updated_verification = OnchainVerificationRepository.update_onchain_verification_status_by_trx_hash(trx_hash, status)
         if not updated_verification:
             raise Exception("Failed to update verification status in database")
         
         return updated_verification
     
     @staticmethod
-    def update_verification_onchain_id_by_trx_hash(trx_hash, onchain_id):
+    def update_onchain_verification_onchain_id_by_trx_hash(trx_hash, onchain_id):
         # Validate trx_hash
         if not trx_hash or not trx_hash.startswith("0x") or len(trx_hash) != 66:
             raise Exception("Invalid transaction hash format")
@@ -146,18 +146,18 @@ class OnchainVerificationService:
             raise Exception("onchain_id is required")
         
         try:
-            return OnchainVerificationRepository.update_verification_onchain_id_by_trx_hash(trx_hash, onchain_id)
+            return OnchainVerificationRepository.update_onchain_verification_onchain_id_by_trx_hash(trx_hash, onchain_id)
         except Exception as e:
             raise Exception(f"Failed to update onchain_id: {str(e)}")
         
     @staticmethod
-    def update_verification_status_by_onchain_id(onchain_id, status):
+    def update_onchain_verification_status_by_onchain_id(onchain_id, status):
         # Validate onchain_id
         if onchain_id is None:
             raise Exception("onchain_id is required")
 
         # Get current verification
-        verification = OnchainVerificationRepository.get_verification_by_onchain_id(onchain_id)
+        verification = OnchainVerificationRepository.get_onchain_verification_details_by_onchain_id(onchain_id)
         if not verification:
             raise Exception(f"OnchainVerification with on-chain ID {onchain_id} not found")
 
@@ -172,16 +172,16 @@ class OnchainVerificationService:
 
         # Update verification status
         try:
-            updated_verification = OnchainVerificationRepository.update_verification_status_by_onchain_id(onchain_id, status)
+            updated_verification = OnchainVerificationRepository.update_onchain_verification_status_by_onchain_id(onchain_id, status)
         except Exception as e:
-            print(f"Proposal on-chain ID issue found | Error: {str(e)}")
+            raise Exception(f"Failed to update onchain_id: {str(e)}")
         
         print(f"Successfully updated proposal status into {status} of proposal id {onchain_id} (on-chain)")
 
         return updated_verification
 
     @staticmethod
-    def add_onchain_id_to_verification(proposer_wallet, onchain_id):
+    def add_onchain_id_to_onchain_verification(proposer_wallet, onchain_id):
         """Add an on-chain ID to the latest verification for a proposer wallet"""
         if not proposer_wallet:
             print(" [!] Missing proposer wallet")
@@ -191,12 +191,12 @@ class OnchainVerificationService:
             return
 
         try:
-            return OnchainVerificationRepository.add_verification_onchain_id(proposer_wallet, onchain_id)
+            return OnchainVerificationRepository.add_onchain_id_to_onchain_verification(proposer_wallet, onchain_id)
         except Exception as e:
-            print(f" [!] Failed to add on-chain ID to verification: {str(e)}")
+            print(f" [!] Failed to add on-chain ID to onchain verification: {str(e)}")
 
     @staticmethod
-    def get_verification_by_proposer_wallet(proposer_wallet):
+    def get_latest_onchain_verification_details_by_proposer_wallet(proposer_wallet):
         """
         Get the latest on-chain verification by proposer wallet address.
         Returns the most recent verification (by creation time) if multiple exist.
@@ -204,10 +204,10 @@ class OnchainVerificationService:
         if not proposer_wallet:
             raise Exception("Proposer wallet is required")
         
-        return OnchainVerificationRepository.get_latest_verification_by_proposer_wallet(proposer_wallet)
+        return OnchainVerificationRepository.get_latest_onchain_verification_details_by_proposer_wallet(proposer_wallet)
     
     @staticmethod
-    def update_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id):
+    def update_onchain_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id):
         """
         Update the onchain_id field for the latest verification by proposer wallet address.
         """
@@ -216,7 +216,7 @@ class OnchainVerificationService:
         if not onchain_id:
             raise Exception("On-chain ID is required")
         
-        return OnchainVerificationRepository.update_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id)
+        return OnchainVerificationRepository.update_onchain_verification_onchain_id_by_proposer_wallet(proposer_wallet, onchain_id)
 
     @staticmethod
     def handle_proposal_creation(proposer_wallet, onchain_id):
@@ -236,11 +236,11 @@ class OnchainVerificationService:
         try:
             # Step 1: Add onchain_id to the latest verification by proposer_wallet
             with transaction.atomic():
-                verification = OnchainVerificationService.add_onchain_id_to_verification(proposer_wallet, onchain_id)
+                verification = OnchainVerificationService.add_onchain_id_to_onchain_verification(proposer_wallet, onchain_id)
                 print(f" [*] Added onchain_id {onchain_id} to verification {verification.id}")
                 
                 # Step 2: Update the status to 'pending' using the onchain_id
-                updated_verification = OnchainVerificationService.update_verification_status_by_onchain_id(onchain_id, 'pending')
+                updated_verification = OnchainVerificationService.update_onchain_verification_status_by_onchain_id(onchain_id, 'pending')
                 print(f" [*] Updated verification status to 'pending' for onchain_id {onchain_id}")
 
                 print(f"Successfully updated proposal_onchain_id to ${onchain_id} for wallet address: ${proposer_wallet}")

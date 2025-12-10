@@ -30,6 +30,7 @@ admin.site.site_header = "FinCube DAO Administration"
 admin.site.site_title = "FinCube Admin"
 admin.site.index_title = "Welcome to FinCube DAO Portal"
 
+
 def welcome_view(request):
     return HttpResponse(
         "<h1>Welcome to USER-MANAGEMENT-SERVICE node! &#x1F680;</h1>"
@@ -43,12 +44,21 @@ def welcome_view(request):
 
 
 urlpatterns = [
-    path('', welcome_view, name='welcome'),  # Root URL
-    path('api/users', include(('users.urls', 'users'), namespace='users')),
-    path('api/organizations', include(('organizations.urls', 'organizations'), namespace='organizations')),
-    path('api/analytics', include(('analytics.urls', 'analytics'), namespace='analytics')),
-    path('api/event-handlers', include(('event_handlers.urls', 'event_handlers'), namespace='event_handlers')),
-    path('admin/', admin.site.urls),
+    path("", welcome_view, name="welcome"),  # Root URL
+    path("api/users/", include(("users.urls", "users"), namespace="users")),
+    path(
+        "api/organizations/",
+        include(("organizations.urls", "organizations"), namespace="organizations"),
+    ),
+    path(
+        "api/analytics/",
+        include(("analytics.urls", "analytics"), namespace="analytics"),
+    ),
+    path(
+        "api/event-handlers/",
+        include(("event_handlers.urls", "event_handlers"), namespace="event_handlers"),
+    ),
+    path("admin/", admin.site.urls),
     # Schema URLs
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Swagger UI
@@ -59,7 +69,6 @@ urlpatterns = [
     ),
     # Redoc
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-
     # django-prometheus metrics endpoint
-    path('', include('django_prometheus.urls')),  # This adds /metrics endpoint
+    path("", include("django_prometheus.urls")),  # This adds /metrics endpoint
 ]

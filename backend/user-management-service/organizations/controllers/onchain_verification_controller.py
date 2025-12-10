@@ -14,13 +14,12 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 from logging_config import logger
 
-class ProtectedOnchainVerificationController(ViewSet):
-    logger.set_context("ProtectedOnchainVerificationController")
-    
+class ProtectedOnchainVerificationController(ViewSet):    
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
+        operation_id="get_all_onchain_verification_list",
         parameters=[
             OpenApiParameter(
                 name="page",
@@ -63,23 +62,24 @@ class ProtectedOnchainVerificationController(ViewSet):
         summary="List all on-chain verifications",
         description="Retrieve a paginated list of all on-chain verifications with optional filtering, search, and sorting.",
     )
-    def get_all_verifications(self, request):
+    def get_all_onchain_verification_list(self, request):
         """
         Retrieve all on-chain verifications with pagination, filtering, search, and sorting.
         """
-        logger.log({"event": "Getting all on-chain verifications Started", "data": request.query_params})
+        logger.set_context("get_all_onchain_verification_list")
+        logger.log({"message": "Getting all on-chain verifications Started", "data": request.query_params})
         try:
-            verifications, pagination = OnchainVerificationService.get_all_verifications(
+            verifications, pagination = OnchainVerificationService.get_all_onchain_verification_list(
                 request.query_params
             )
             serializer = OnchainVerificationListSerializer(verifications, many=True)
-            logger.log({"event": "Getting all on-chain verifications Success", "data": serializer.data})
+            logger.log({"message": "Getting all on-chain verifications Success", "data": serializer.data})
             return Response({
                 "verifications": serializer.data,
                 "pagination": pagination
             })
         except Exception as e:
-            logger.error({"event": "Getting all on-chain verifications Error", "data": request.query_params, "error": str(e)})
+            logger.error({"message": "Getting all on-chain verifications Error", "data": request.query_params, "error": str(e)})
             if "invalid" in str(e).lower():
                 return Response(
                     {"status": "error", "message": str(e)},
@@ -97,6 +97,7 @@ class ProtectedOnchainVerificationController(ViewSet):
                 )
 
     @extend_schema(
+        operation_id="get_onchain_verification_details_by_id",
         parameters=[
             OpenApiParameter(
                 name="verification_id",
@@ -114,18 +115,19 @@ class ProtectedOnchainVerificationController(ViewSet):
         summary="Get on-chain verification by ID",
         description="Retrieve a single on-chain verification by its ID.",
     )        
-    def get_verification_by_id(self, request, verification_id):
+    def get_onchain_verification_details_by_id(self, request, verification_id):
         """
         Retrieve a single on-chain verification by its ID.
         """
-        logger.log({"event": "Getting on-chain verification by ID Started", "verification_id": verification_id})
+        logger.set_context("get_onchain_verification_details_by_id")
+        logger.log({"message": "Getting on-chain verification by ID Started", "verification_id": verification_id})
         try:
-            verification = OnchainVerificationService.get_verification_by_id(verification_id)
+            verification = OnchainVerificationService.get_onchain_verification_details_by_id(verification_id)
             serializer = OnchainVerificationListSerializer(verification)
-            logger.log({"event": "Getting on-chain verification by ID Success", "data": serializer.data})
+            logger.log({"message": "Getting on-chain verification by ID Success", "verification_id": verification_id, "data": serializer.data})
             return Response(serializer.data)
         except Exception as e:
-            logger.error({"event": "Getting on-chain verification by ID Error", "verification_id": verification_id, "error": str(e)})
+            logger.error({"message": "Getting on-chain verification by ID Error", "verification_id": verification_id, "error": str(e)})
             if "not found" in str(e).lower() or "does not exist" in str(e).lower():
                 return Response(
                     {"status": "error", "message": str(e)},
@@ -143,6 +145,7 @@ class ProtectedOnchainVerificationController(ViewSet):
                 )
 
     @extend_schema(
+        operation_id="get_onchain_verification_list_by_organization_id",
         parameters=[
             OpenApiParameter(
                 name="org_id",
@@ -170,21 +173,22 @@ class ProtectedOnchainVerificationController(ViewSet):
         summary="Get on-chain verifications by organization",
         description="Retrieve a paginated list of on-chain verifications for a specific organization.",
     )
-    def get_onchain_verifications_by_organization(self, request, org_id):
+    def get_onchain_verification_list_by_organization_id(self, request, org_id):
         """
         Retrieve on-chain verifications by organization ID.
         Returns a paginated list of on-chain verifications for the specified organization.
         """
-        logger.log({"event": "Getting on-chain verifications by organization Started", "org_id": org_id})
+        logger.set_context("get_onchain_verification_list_by_organization_id")
+        logger.log({"message": "Getting on-chain verification list by organization id Started", "org_id": org_id})
         try:
             verifications, pagination = (
-                OnchainVerificationService.get_verifications_by_organization(
+                OnchainVerificationService.get_onchain_verification_list_by_organization_id(
                     org_id, request.query_params
                 )
             )
 
             serializer = OnchainVerificationListSerializer(verifications, many=True)
-            logger.log({"event": "Getting on-chain verifications by organization Success", "data": serializer.data})
+            logger.log({"message": "Getting on-chain verifications by organization Success","org_id": org_id, "data": serializer.data})
             return Response(
                 {
                     "status": "success",
@@ -196,7 +200,7 @@ class ProtectedOnchainVerificationController(ViewSet):
             )
 
         except Exception as e:
-            logger.error({"event": "Getting on-chain verifications by organization Error", "org_id": org_id, "error": str(e)})
+            logger.error({"message": "Getting on-chain verifications by organization Error", "org_id": org_id, "error": str(e)})
             error_status = (
                 status.HTTP_404_NOT_FOUND
                 if "not found" in str(e).lower() or "does not exist" in str(e).lower()

@@ -3,25 +3,14 @@ import logging
 import json
 from datetime import datetime
 from pythonjsonlogger import jsonlogger
-
+from loki_logger_handler.loki_logger_handler import LokiLoggerHandler
 from opentelemetry import trace
-from opentelemetry.sdk.resources import Resource
-
-# OpenTelemetry logs SDK
-from opentelemetry._logs import set_logger_provider
-from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-
-# OTLP log exporter
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
-
-import logging_loki
 
 # === MASK CONFIG ===
 MASK_CONFIG = {
     "emailFields": ["email"],
     "passwordFields": ["password"],
-    "phoneFields": ["phone","contact_number"],
+    "phoneFields": ["phone", "contact_number"],
     "cardFields": ["creditCard", "cardNumber", "wallet"],
     "uuidFields": ["uuid"],
     "jwtFields": ["jwtToken"],
@@ -57,6 +46,8 @@ def _mask_value(s, unmasked_start=0, unmasked_end=0, mask_with="*"):
 """
 This function recursively traverses a dictionary and masks values associated with keys that match any of the sensitive fields defined in MASK_CONFIG.
 """
+
+
 def mask_sensitive_data(obj):
     """
     A simple masking implementation: it walks the dict and masks values for keys listed in MASK_CONFIG.
@@ -127,22 +118,6 @@ def mask_sensitive_data(obj):
     return out
 
 
-# === OpenTelemetry Logs provider setup ===
-_resource = Resource.create(
-    {
-        "service.name": os.environ.get("SERVICE_NAME", "user-management-service"),
-        "service.namespace": os.environ.get("SERVICE_NAMESPACE", "user-service-api"),
-        "service.version": os.environ.get("SERVICE_VERSION", "1.0"),
-        "service.instance.id": os.environ.get("SERVICE_INSTANCE_ID", "1"),
-    }
-)
-
-logger_provider = LoggerProvider(resource=_resource)
-set_logger_provider(logger_provider)
-otlp_log_exporter = OTLPLogExporter(endpoint=os.environ.get("OTEL_LOG_COLLECTOR"))
-logger_provider.add_log_record_processor(BatchLogRecordProcessor(otlp_log_exporter))
-
-
 # === Python logger with Console (JSON), File, Loki, and OTLP handlers ===
 class Logger:
     def __init__(self, name="user-management-service"):
@@ -158,11 +133,6 @@ class Logger:
         fmt = "%(asctime)s %(levelname)s %(name)s %(message)s %(trace_id)s %(span_id)s"
         json_formatter = jsonlogger.JsonFormatter(fmt)
 
-        # Console
-        ch = logging.StreamHandler()
-        ch.setFormatter(json_formatter)
-        self.logger.addHandler(ch)
-
         # File
         log_dir = os.environ.get("LOG_DIR", "logs")
         os.makedirs(log_dir, exist_ok=True)
@@ -172,26 +142,25 @@ class Logger:
         fh.setFormatter(json_formatter)
         self.logger.addHandler(fh)
 
-        # Loki
-        loki_url = os.environ.get("LOG_SERVER")
+        try:
+            loki_url = os.environ.get("LOG_SERVER")
 
-        loki_handler = logging_loki.LokiHandler(
-            url=loki_url,
-            tags={
-                "service_name": os.environ.get(
-                    "SERVICE_NAME", "user-management-service"
-                ),
-                "service_namespace": os.environ.get(
-                    "SERVICE_NAMESPACE", "user-service-api"
-                ),
-            },
-            version="1",
-        )
-        self.logger.addHandler(loki_handler)
+            loki_handler = LokiLoggerHandler(
+                url=loki_url,
+                labels={
+                    "service_name": os.environ.get("SERVICE_NAME", name),
+                    "service_namespace": os.environ.get("SERVICE_NAMESPACE", "default"),
+                },
+                timeout=50,
+                compressed=True,
+            )
+            self.logger.addHandler(loki_handler)
 
-        # OpenTelemetry
-        otel_handler = LoggingHandler(level=logging.INFO)
-        self.logger.addHandler(otel_handler)
+        except Exception as e:
+            print(
+                "⚠️⚠️⚠️ Warning: Failed to initialize Loki logging handler, Trying again.",
+                e,
+            )
 
     def _get_trace_id(self):
         span = trace.get_current_span()
@@ -207,60 +176,65 @@ class Logger:
             return "N/A"
         return "{:016x}".format(ctx.span_id)
 
-    def _create_log_entry(self, message, level="info", contextValue=None):
-        
-        masked = mask_sensitive_data(message)
-        
-        
+    def _create_log_entry(self, data="No Data Provided!", level="info"):
+        # if data is string.
+        if isinstance(data, str):
+            data = {"message": data}
+        # data not string,not dict.
+        elif not isinstance(data, dict):
+            data = {"message": str(data)}
+
+        data = mask_sensitive_data(data)
+
         entry = {
-            "context": contextValue or self.default_context,
-            "message": masked,
+            "context": self.default_context,
             "level": level,
             "trace_id": self._get_trace_id(),
             "span_id": self._get_span_id(),
             "timestamp": datetime.utcnow().isoformat() + "Z",
+            **data
         }
         return entry
 
     def set_context(self, contextValue):
         self.default_context = contextValue
 
-    def log(self, message, contextValue=None):
-        entry = self._create_log_entry(message, "info", contextValue)
-        self.logger.info(
-            json.dumps(entry),
-            extra={"trace_id": entry["trace_id"], "span_id": entry["span_id"]},
-        )
+    def log(self, data):
+        if data is None:
+            return
+        entry = self._create_log_entry(data, level="info")
+        message=entry.pop("message")
+        self.logger.info(message,extra=entry)
 
-    def error(self, message, trace_str=None, contextValue=None):
-        entry = self._create_log_entry(message, level="error", contextValue=contextValue)
+    def error(self, data, trace_str=None):
+        if data is None:
+            return
+        entry = self._create_log_entry(data, level="error")
         if trace_str:
             entry["error_stack"] = trace_str
-        self.logger.error(
-            json.dumps(entry),
-            extra={"trace_id": entry["trace_id"], "span_id": entry["span_id"]},
-        )
+        message=entry.pop("message")
+        self.logger.error(message,extra=entry)
 
-    def warn(self, message, contextValue=None):
-        entry = self._create_log_entry(message, "warn", contextValue)
-        self.logger.warning(
-            json.dumps(entry),
-            extra={"trace_id": entry["trace_id"], "span_id": entry["span_id"]},
-        )
+    def warn(self, data):
+        if data is None:
+            return
+        entry = self._create_log_entry(data, level="warn")
+        message=entry.pop("message")
+        self.logger.warning(message,extra=entry)
 
-    def debug(self, message, contextValue=None):
-        entry = self._create_log_entry(message, "debug", contextValue)
-        self.logger.debug(
-            json.dumps(entry),
-            extra={"trace_id": entry["trace_id"], "span_id": entry["span_id"]},
-        )
+    def debug(self, data):
+        if data is None:
+            return
+        entry = self._create_log_entry(data, level="debug")
+        message=entry.pop("message")
+        self.logger.debug(message,extra=entry)
 
-    def verbose(self, message, contextValue=None):
-        entry = self._create_log_entry(message, "verbose", contextValue)
-        self.logger.info(
-            json.dumps(entry),
-            extra={"trace_id": entry["trace_id"], "span_id": entry["span_id"]},
-        )
+    def verbose(self, data):
+        if data is None:
+            return
+        entry = self.   _create_log_entry(data, "verbose")
+        message=entry.pop("message")
+        self.logger.info(message,extra=entry)
 
 
 logger = Logger()
