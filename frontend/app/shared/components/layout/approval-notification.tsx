@@ -168,7 +168,12 @@ export default function ApprovalNotification() {
       });
 
       toast.success(`Your membership application has been submitted successfully! Transaction hash: ${hash.slice(0, 10)}...`);
+
+      // The transaction has been sent to the blockchain
+      // The backend will pick it up via event listeners
       console.warn('Membership registration transaction hash:', hash);
+
+      // Hide the notification after successful submission
       setIsVisible(false);
     }
     catch (error) {

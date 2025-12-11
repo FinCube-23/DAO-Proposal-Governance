@@ -13,16 +13,16 @@ interface Props {
   transaction: GetOneTrxResponse;
 }
 export default function TransactionHeader({ transaction }: Props) {
-  const [isCopied, setIsCopied] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleCopyHash = async () => {
     try {
       await navigator.clipboard.writeText(transaction.trx_hash);
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
     catch {
-      toast.error('Failed to copy transaction hash');
+      // Silent fail
     }
   };
   return (
@@ -46,14 +46,14 @@ export default function TransactionHeader({ transaction }: Props) {
 
       <div className="flex gap-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
         <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={handleCopyHash}>
-          {isCopied
+          {copied
             ? (
                 <Check className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 text-green-500" />
               )
             : (
                 <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
               )}
-          <span className="hidden sm:inline">{isCopied ? 'Copied!' : 'Copy Hash'}</span>
+          <span className="hidden sm:inline">{copied ? 'Copied' : 'Copy Hash'}</span>
         </Button>
         <Link
           to={`${import.meta.env.VITE_TRX_EXPLORER}/${transaction.trx_hash}`}

@@ -76,11 +76,7 @@ export default function DetailsCard({
                         <Copy className="w-4 h-4 text-slate-400 hover:text-emerald-400" />
                       )}
                 </button>
-                <a
-                  href={`${env.VITE_ADDRESS_EXPLORER}/${env.VITE_SMART_CONTRACT_ADDRESS}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
+                <a href={`${env.VITE_ADDRESS_EXPLORER}/${env.VITE_SMART_CONTRACT_ADDRESS}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 text-slate-400 hover:text-emerald-400 cursor-pointer transition-colors" />
                 </a>
               </div>
