@@ -55,7 +55,7 @@ services:
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./config/tempo.yaml:/etc/tempo.yaml
-      - ./tempo-data:/var/tempo
+      - tempo-data:/var/tempo
     ports:
       - "3201:3200" # tempo
     networks:
@@ -86,6 +86,8 @@ networks:
     external: true # Use the external Docker network 'fincube23_network'
 
 volumes:
+  tempo-data:
+    driver: local
   grafana-data:
     driver: local # Persistent volume for Grafana
   prometheus-data:
