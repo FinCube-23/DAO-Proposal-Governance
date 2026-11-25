@@ -25,6 +25,9 @@ RUN ls -la dist/
 FROM node:20-alpine AS production
 WORKDIR /app
 
+# Build tools so native modules (e.g. bufferutil) can compile on Alpine when no prebuilt binary exists
+RUN apk add --no-cache python3 make g++
+
 
 # Change ownership of working directory to node user
 RUN chown -R node:node /app
