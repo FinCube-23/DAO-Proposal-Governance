@@ -2,12 +2,16 @@ services:
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: "rabbitmq"
+    hostname: rabbitmq # stable node name so data in the volume survives container recreation
     ports:
       - 5672:5672
       - 15672:15672
     volumes:
       - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
       - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq/
+      # Pre-create exchanges/queues/bindings on every broker start
+      - ./definitions.json:/etc/rabbitmq/definitions.json:ro
+      - ./definitions.conf:/etc/rabbitmq/conf.d/20-definitions.conf:ro
     networks:
       - fincube23_network
 
