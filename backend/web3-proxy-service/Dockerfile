@@ -43,6 +43,11 @@ COPY --from=builder --chown=node:node /app/src ./src
 COPY --from=builder --chown=node:node /app/tsconfig*.json ./
 COPY --from=builder --chown=node:node /app/nest-cli.json ./
 
+# Build toolchain for native npm modules (e.g. utf-8-validate, bufferutil).
+# Alpine (musl) has no prebuilt binaries for some of them on every CPU arch
+# (e.g. arm64 on Apple Silicon), so node-gyp must compile them from source.
+RUN apk add --no-cache python3 make g++
+
 # Install dependencies based on environment
 # For development: install all dependencies (including devDependencies)
 # For production: install only production dependencies

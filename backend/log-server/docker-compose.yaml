@@ -50,7 +50,7 @@ services:
       - "4321:4318" # OTLP HTTP endpoint
 
   tempo:
-    image: grafana/tempo:latest
+    image: grafana/tempo:2.8.2
     container_name: tempo
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
