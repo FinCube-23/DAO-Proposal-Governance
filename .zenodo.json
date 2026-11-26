@@ -1,0 +1,20 @@
+{
+  "title": "FinCube DAO-Proposal-Governance with DORI: multi-source blockchain event observation and reconciliation",
+  "upload_type": "software",
+  "version": "2.0.0",
+  "description": "<p>Source code of the FinCube DAO-Proposal-Governance system (frontend, microservices, smart contracts) used to evaluate DORI.</p><p>Version 2.0.0 adds the DORI module behind the DORI_ENABLED flag: deterministic EventKey derivation, multi-source observation with quorum-based reconciliation and canonical lookup, revision records, a dedicated exchange, and consumer-side receipt records keyed by (EventKey, version). Existing flows are unchanged when the flag is off. Version 1 remains available as an earlier version of this record.</p>",
+  "creators": [
+    {"name": "Islam, Md Ariful", "affiliation": "TODO"},
+    {"name": "Sikder, Sampad", "affiliation": "TODO"},
+    {"name": "Maitra, Dipanjal", "affiliation": "TODO"},
+    {"name": "Islam, Md Antonin", "affiliation": "TODO"},
+    {"name": "Raad, Ashabul Yamin", "affiliation": "TODO"},
+    {"name": "Miah, Md Saef Ullah", "affiliation": "TODO"},
+    {"name": "Khan, Md Muhidul Islam", "affiliation": "TODO"}
+  ],
+  "license": "mit",
+  "keywords": ["blockchain", "event synchronization", "reconciliation", "microservices", "RabbitMQ", "observability"],
+  "related_identifiers": [
+    {"identifier": "TODO: performance-testing v2.0.0 version DOI", "relation": "isReferencedBy", "scheme": "doi"}
+  ]
+}

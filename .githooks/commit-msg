@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Enforce: <type>(<scope>): <summary>   (see RELEASING.md, section 3)
+# Enable once per clone: git config core.hooksPath .githooks
+msg_file="$1"
+first="$(grep -v '^#' "$msg_file" | head -n1)"
+# Allow git's own merge/revert/fixup messages.
+[[ "$first" =~ ^(Merge|Revert|fixup!|squash!) ]] && exit 0
+re='^(feat|fix|exp|analysis|test|docs|refactor|chore)(\([a-z0-9-]+\))?!?: [^ ].{0,71}$'
+if [[ ! "$first" =~ $re ]]; then
+  echo "commit message rejected: \"$first\"" >&2
+  echo "use: <type>(<scope>): <summary, max 72 chars>" >&2
+  echo "types: feat fix exp analysis test docs refactor chore    e.g. exp(t1): add 10% gap plan" >&2
+  exit 1
+fi
+first_len=${#first}
+if (( first_len > 100 )); then echo "first line is $first_len characters; keep it under 100" >&2; exit 1; fi
+exit 0
