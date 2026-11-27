@@ -12,6 +12,10 @@ web3/subgraph/
   fincube-dori-sepolia/           the subgraph (manifest, schema, mappings, ABI)
 ```
 
+To see this stack together with the other running services (pgAdmin,
+RabbitMQ, Grafana and so on), run `scripts/ops_dashboard.sh`; see
+[docs/ops-dashboard.md](../../docs/ops-dashboard.md).
+
 ## What is indexed
 
 | Item | Value |
