@@ -1,0 +1,82 @@
+# Self-hosted graph-node for the FinCube DAO subgraph on Ethereum Sepolia.
+#
+# Start : docker compose -f docker-compose.graph-node.yml up -d
+# Stop  : docker compose -f docker-compose.graph-node.yml down      (keeps indexed data)
+# Wipe  : docker compose -f docker-compose.graph-node.yml down -v   (deletes indexed data)
+#
+# Secrets (ETHEREUM_RPC, GRAPH_POSTGRES_PASSWORD) come from ./.env, which is
+# untracked (see .gitignore). Copy .env.example to .env and fill it in.
+#
+# Image versions are pinned to exact releases (no "latest").
+name: fincube-subgraph
+
+services:
+  graph-node:
+    image: graphprotocol/graph-node:v0.45.0
+    container_name: fincube-graph-node
+    restart: unless-stopped
+    depends_on:
+      ipfs:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+    ports:
+      # Host ports are bound to loopback only and chosen to avoid the FinCube stack.
+      - "127.0.0.1:18000:8000" # GraphQL HTTP queries
+      - "127.0.0.1:18001:8001" # GraphQL WebSocket
+      - "127.0.0.1:18020:8020" # JSON-RPC admin (graph create / deploy)
+      - "127.0.0.1:18030:8030" # indexing status
+      - "127.0.0.1:18040:8040" # metrics
+    environment:
+      postgres_host: postgres
+      postgres_user: graph-node
+      postgres_pass: ${GRAPH_POSTGRES_PASSWORD:?set GRAPH_POSTGRES_PASSWORD in .env}
+      postgres_db: graph-node
+      ipfs: "ipfs:5001"
+      ethereum: "sepolia:${ETHEREUM_RPC:?set ETHEREUM_RPC in .env}"
+      GRAPH_LOG: info
+      # Alchemy's free tier rejects eth_getLogs ranges above 10 blocks. Without this
+      # cap graph-node asks for 100 blocks, gets HTTP 400 and retries with backoff,
+      # which makes indexing ~50x slower. Raise or remove it on a paid RPC plan.
+      GRAPH_ETHEREUM_MAX_BLOCK_RANGE_SIZE: ${GRAPH_ETHEREUM_MAX_BLOCK_RANGE_SIZE:-10}
+    networks:
+      - default
+      # Lets other FinCube containers reach it as http://fincube-graph-node:8000
+      # (OS-agnostic alternative to host.docker.internal).
+      - fincube23_network
+
+  ipfs:
+    image: ipfs/kubo:v0.43.1
+    container_name: fincube-graph-ipfs
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:15001:5001" # IPFS API (graph deploy uploads here)
+    volumes:
+      - ipfs-data:/data/ipfs
+
+  postgres:
+    image: postgres:16.14
+    container_name: fincube-graph-postgres
+    restart: unless-stopped
+    # graph-node requires a C-locale UTF-8 database.
+    command: ["postgres", "-cshared_preload_libraries=pg_stat_statements", "-cmax_connections=200"]
+    environment:
+      POSTGRES_USER: graph-node
+      POSTGRES_PASSWORD: ${GRAPH_POSTGRES_PASSWORD:?set GRAPH_POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: graph-node
+      POSTGRES_INITDB_ARGS: "-E UTF8 --locale=C"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graph-node -d graph-node"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  ipfs-data:
+  postgres-data:
+
+networks:
+  fincube23_network:
+    external: true

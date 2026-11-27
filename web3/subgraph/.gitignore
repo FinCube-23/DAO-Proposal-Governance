@@ -1,0 +1,2 @@
+# Local secrets for docker-compose.graph-node.yml. Never commit .env.
+.env
