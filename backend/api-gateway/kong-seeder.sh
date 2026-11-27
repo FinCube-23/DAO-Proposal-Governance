@@ -211,6 +211,26 @@ PLUGIN_CONFIG='{
     }
 }'
 
+# Routes whose POST/PUT/PATCH bodies can carry onChainData: proposal creation and voting go through the DAO route,
+# and the user-management route covers on-chain verifications. The plugin skips every request without onChainData.
+# The audit-trail and web3-proxy routes stay without it: audit-trail only consumes the exchange.
+ONCHAIN_ROUTES="ums-service-route dao-service-route"
+for route in $ONCHAIN_ROUTES; do
+    # Idempotent: a route that already has the plugin is skipped, so re-running the seeder adds no duplicate.
+    attached=$(kong_api GET "/routes/$route/plugins" | jq -r '[(.data // [])[] | select(.name == "rabbitmq-publisher")] | length' 2>/dev/null)
+    if [ "${attached:-0}" != "0" ]; then
+        echo "     - $route: already attached"
+        continue
+    fi
+    response=$(kong_api POST "/routes/$route/plugins" "$PLUGIN_CONFIG")
+    if echo "$response" | jq -e '.id' >/dev/null 2>&1; then
+        echo "     - $route: attached"
+    else
+        echo "     - $route: FAILED to attach rabbitmq-publisher: $response"
+        exit 1
+    fi
+done
+
 echo ""
 echo "🎉 Kong Database Seeding Complete!"
 echo "=================================="
