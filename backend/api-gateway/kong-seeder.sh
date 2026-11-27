@@ -194,13 +194,36 @@ CORS_PLUGIN_CONFIG='{
         "origins": ["http://localhost:5173", "http://localhost:3000", "http://172.16.231.80:8001", "http://172.16.231.80:8002", "http://172.16.231.80", "http://172.16.231.80:3000"],
         "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         "headers": ["Accept", "Accept-Version", "Content-Length", "Content-MD5", "Content-Type", "Date", "X-Auth-Token", "Authorization"],
-        "exposed_headers": ["X-Auth-Token"],8002
+        "exposed_headers": ["X-Auth-Token"],
         "credentials": true,
         "max_age": 3600,
         "preflight_continue": false
     }
 }'
-kong_api POST /plugins "$CORS_PLUGIN_CONFIG"
+# Idempotent: create the global cors plugin only if there is none. An existing one is never changed; if its
+# config differs from the one above, the differing fields are printed so they can be reviewed.
+existing_cors=$(kong_api GET /plugins | jq -c '[(.data // [])[] | select(.name == "cors" and .route == null and .service == null and .consumer == null)] | first // empty' 2>/dev/null)
+if [ -z "$existing_cors" ]; then
+    response=$(kong_api POST /plugins "$CORS_PLUGIN_CONFIG")
+    if echo "$response" | jq -e '.id' >/dev/null 2>&1; then
+        echo "     - cors (global): attached"
+    else
+        echo "     - cors (global): FAILED to attach: $response"
+        exit 1
+    fi
+else
+    # Only the fields set above are compared (Kong fills in defaults for the rest); arrays compare without order.
+    cors_diff=$(jq -n --argjson want "$CORS_PLUGIN_CONFIG" --argjson have "$existing_cors" '
+        def n: if type == "array" then sort else . end;
+        [$want.config | to_entries[] | select((.value | n) != ($have.config[.key] | n))
+         | {key: .key, live: $have.config[.key], seeder: .value}]')
+    if [ "$(echo "$cors_diff" | jq 'length')" = "0" ]; then
+        echo "     - cors (global): already attached, config matches"
+    else
+        echo "     - cors (global): already attached, config differs from the seeder (live plugin left unchanged):"
+        echo "$cors_diff" | jq -r '.[] | "         \(.key): live=\(.live | tojson) seeder=\(.seeder | tojson)"'
+    fi
+fi
 
 # Enable RabbitMQ publisher plugin for specific routes that need on-chain data
 echo "   Enabling RabbitMQ publisher plugin for on-chain routes..."
