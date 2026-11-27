@@ -107,18 +107,23 @@ All backend services receive the same event and log:
 
 The plugin can be selectively bound to specific routes that require on-chain transaction handling through Kong Manager UI or API.
 
+> `./kong-seeder.sh` attaches `rabbitmq-publisher` (exchange `exchange.transaction-receipt.fanout`) to
+> `ums-service-route` and `dao-service-route`, and skips a route that already has it. The manual steps below are a
+> fallback, for example to bind the plugin to another route. `./kong-reset.sh` removes every plugin, so run the
+> seeder again after a reset.
+
 #### Using Kong Manager UI
 
 1. **Access Kong Manager**: Navigate to `http://localhost:8002`
-2. **Select Route**: Choose the specific route that handles on-chain transactions
+2. **Select Route**: Choose the specific route that handles on-chain transactions (for example `dao-service-route`)
 3. **Add Plugin**: Click "Add Plugin" and select `rabbitmq-publisher`
 4. **Configure**: Set the exchange name and save
 
 #### Using Kong Admin API
 
 ```bash
-# Bind plugin to user registration route
-curl -X POST http://localhost:8001/routes/{route-id}/plugins \
+# Bind plugin to the user-management route (seeded name: ums-service-route)
+curl -X POST http://localhost:8001/routes/ums-service-route/plugins \
   -H "Content-Type: application/json" \
   -d '{
     "name": "rabbitmq-publisher",
@@ -127,8 +132,8 @@ curl -X POST http://localhost:8001/routes/{route-id}/plugins \
     }
   }'
 
-# Bind plugin to DAO voting route
-curl -X POST http://localhost:8001/routes/{dao-vote-route-id}/plugins \
+# Bind plugin to the DAO route: proposal creation and voting (seeded name: dao-service-route)
+curl -X POST http://localhost:8001/routes/dao-service-route/plugins \
   -H "Content-Type: application/json" \
   -d '{
     "name": "rabbitmq-publisher",
@@ -159,12 +164,17 @@ Bind the plugin only to routes that require on-chain transaction synchronization
 
 #### Example Route Configurations
 
+These examples create additional, narrower routes that the seeder does not create. The service names are the
+seeded ones (`user-management-service`, `decentralized-autonomous-organization`, `audit-trail-web3-tracing`,
+`custodian-wallet-admin-web3-proxy`). To bind the plugin to the routes the seeder already creates, use the
+commands above.
+
 ```bash
 # User Management Service - Registration
 curl -X POST http://localhost:8001/routes \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "user-registration-route",
+    "name": "ums-register-route",
     "service": {"name": "user-management-service"},
     "paths": ["/user-management-service/api/users/register"],
     "methods": ["POST"]
@@ -175,7 +185,7 @@ curl -X POST http://localhost:8001/routes \
   -H "Content-Type: application/json" \
   -d '{
     "name": "dao-vote-route", 
-    "service": {"name": "dao-service"},
+    "service": {"name": "decentralized-autonomous-organization"},
     "paths": ["/dao-service/api/proposals/vote"],
     "methods": ["POST"]
   }'
@@ -185,7 +195,7 @@ curl -X POST http://localhost:8001/routes \
   -H "Content-Type: application/json" \
   -d '{
     "name": "audit-transaction-route",
-    "service": {"name": "audit-trail-service"}, 
+    "service": {"name": "audit-trail-web3-tracing"}, 
     "paths": ["/audit-trail-service/api/transactions"],
     "methods": ["POST", "PUT"]
   }'
@@ -276,20 +286,21 @@ docker-compose up -d --build
 
 This script will automatically create:
 - All backend services (User Management, DAO, Audit Trail, Web3 Proxy)
-- All routes with proper path mappings
-- On-chain data publisher plugin on transaction-related routes
-- General routes without plugins for non-transaction endpoints
+- All routes with proper path mappings: `ums-service-route`, `dao-service-route`, `audit-trail-route`, `web3-proxy-route`
+- The `rabbitmq-publisher` plugin on `ums-service-route` and `dao-service-route`, the routes that carry
+  `onChainData`. Running the seeder again is safe: a route that already has the plugin is skipped.
+- No publisher on `audit-trail-route` and `web3-proxy-route` (the audit-trail service only consumes the exchange)
 
 ### 5. Manual Configuration (Alternative)
 If you prefer manual configuration:
 
 ```bash
-# Example: Enable plugin on user registration endpoint
+# Example: attach the plugin to the user-management route (the seeder already does this)
 curl -X POST http://localhost:8001/plugins \
   -H "Content-Type: application/json" \
   -d '{
     "name": "rabbitmq-publisher",
-    "route": {"name": "user-registration-route"},
+    "route": {"name": "ums-service-route"},
     "config": {
       "exchange_name": "exchange.transaction-receipt.fanout"
     }
@@ -403,8 +414,8 @@ The `kong-seeder.sh` script provides a complete Kong configuration setup:
 
 **What it creates:**
 - **Services**: All backend services with proper URLs and timeouts
-- **Routes**: Transaction routes (with on-chain plugin) and general routes
-- **Plugins**: RabbitMQ publisher plugin on on-chain transaction routes
+- **Routes**: `ums-service-route`, `dao-service-route`, `audit-trail-route`, `web3-proxy-route`
+- **Plugins**: RabbitMQ publisher plugin on `ums-service-route` and `dao-service-route` (attached once, never duplicated)
 
 ### Kong Database Reset
 If you need to start fresh:
@@ -420,21 +431,18 @@ If you need to start fresh:
 ### Seeded Configuration
 
 **Services Created:**
-- `user-management-service` → http://user-management-service:8000
-- `dao-service` → http://dao-service:3000
-- `audit-trail-service` → http://audit-trail-service:3000
-- `web3-proxy-service` → http://web3-proxy-service:3000
+- `user-management-service` → http://host.docker.internal:3001
+- `decentralized-autonomous-organization` → http://host.docker.internal:3002
+- `audit-trail-web3-tracing` → http://host.docker.internal:3003
+- `custodian-wallet-admin-web3-proxy` → http://host.docker.internal:3004
 
-**Routes with On-Chain Plugin:**
-- User registration/login/profile routes
-- DAO proposal creation/voting/update routes
-- Audit trail transaction routes
-- Web3 transaction routes
+**Routes with the `rabbitmq-publisher` plugin:**
+- `ums-service-route` (`/user-management-service`)
+- `dao-service-route` (`/dao-service`): proposal creation, voting and the other DAO calls
 
-**Routes without Plugin:**
-- General service routes (GET requests)
-- Health check endpoints
-- Static content routes
+**Routes without the plugin:**
+- `audit-trail-route` (`/audit-trail-service`)
+- `web3-proxy-route` (`/web3-proxy-service`)
 
 ## Troubleshooting
 
