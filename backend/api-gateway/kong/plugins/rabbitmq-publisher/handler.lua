@@ -10,6 +10,28 @@ local function safestr(x)
   return (cjson and cjson.encode(x)) or ("<"..t..">")
 end
 
+-- Header values that carry credentials are never written to the log.
+local SENSITIVE_HEADERS = {
+  ["authorization"] = true,
+  ["proxy-authorization"] = true,
+  ["cookie"] = true,
+  ["set-cookie"] = true,
+  ["x-api-key"] = true,
+}
+
+-- Copy of the request headers with the values of SENSITIVE_HEADERS replaced by <redacted>.
+local function redacted_headers()
+  local out = {}
+  for name, value in pairs(kong.request.get_headers()) do
+    if SENSITIVE_HEADERS[string.lower(name)] then
+      out[name] = "<redacted>"
+    else
+      out[name] = value
+    end
+  end
+  return out
+end
+
 -- Create exchange if it doesn't exist
 local function ensure_exchange_exists(exchange_name)
   local httpc = http.new()
@@ -123,7 +145,7 @@ function RabbitmqPublisher:access(conf)
   kong.log.info(">>>> ENTERED RABBITMQ PUBLISHER PLUGIN <<<<")
   kong.log.info("Request Method: " .. method)
   kong.log.info("Request Path: " .. kong.request.get_path())
-  kong.log.info("Request Headers: " .. safestr(kong.request.get_headers()))
+  kong.log.info("Request Headers: " .. safestr(redacted_headers()))
 
   -- Read JSON body
   local body, berr = kong.request.get_body()
