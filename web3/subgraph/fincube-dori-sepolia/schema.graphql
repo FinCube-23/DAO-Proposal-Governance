@@ -1,0 +1,72 @@
+type ProposalAdded @entity(immutable: true) {
+  id: Bytes!
+  proposalType: Int! # uint8
+  proposalId: BigInt! # uint256
+  data: Bytes! # bytes
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+# ---------------------------------------------------------------------------
+# Compatibility entities.
+#
+# audit-trail-service (transaction-indexer.repository.ts) sends ONE GraphQL
+# query that asks for all seven collections below. GraphQL rejects the whole
+# query if any collection is missing from the schema, so they are declared
+# here even though the Sepolia contract 0x5202...facf (FincubeTesting) only
+# emits ProposalAdded. The entities below have no handlers and therefore stay
+# empty on this deployment.
+# ---------------------------------------------------------------------------
+
+type ProposalExecuted @entity(immutable: true) {
+  id: Bytes!
+  proposalId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type ProposalCanceled @entity(immutable: true) {
+  id: Bytes!
+  proposalId: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type OwnershipTransferred @entity(immutable: true) {
+  id: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MemberRegistered @entity(immutable: true) {
+  id: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type MemberApproved @entity(immutable: true) {
+  id: Bytes!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type StablecoinTransfer @entity(immutable: true) {
+  id: Bytes!
+  memo: String!
+  memoHash: Bytes!
+  nullifier: Bytes!
+  sender_reference_number: String!
+  receiver_reference_number: String!
+  to: Bytes!
+  from: Bytes!
+  amount: BigInt!
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
