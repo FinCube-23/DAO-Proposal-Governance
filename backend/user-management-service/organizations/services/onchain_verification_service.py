@@ -20,7 +20,7 @@ class OnchainVerificationService:
             raise Exception("Organization does not exist")
         
         # Check if transaction hash already exists
-        existing_verification = OnchainVerificationRepository.get_verification_details_by_trx_hash(trx_hash)
+        existing_verification = OnchainVerificationRepository.get_onchain_verification_details_by_trx_hash(trx_hash)
         if existing_verification:
             raise Exception("Transaction hash already exists")
         

@@ -4,6 +4,7 @@ from typing import Dict, Callable
 from event_handlers.utils.rabbitmq_connector import RabbitMQConnector
 from event_handlers.utils.types import ResponseTransactionStatusDto
 from organizations.services.onchain_verification_service import OnchainVerificationService
+from organizations.repositories.onchain_verification_repository import OnchainVerificationRepository
 from custom_metrics import track_rabbitmq_consume
 from logging_config import logger
 
@@ -195,7 +196,7 @@ class ProposalSubscriber:
 
         try:
             # Check if OnChainValidation record exists
-            verification = OnchainVerificationService.get_verifications_by_trx_hash(trxHash)
+            verification = OnchainVerificationRepository.get_onchain_verification_details_by_trx_hash(trxHash)
             if not verification:
                 print(f" [!] No OnChainValidation record found for {trxHash}")
                 logger.log(f"No OnChainValidation record found for {trxHash}")
