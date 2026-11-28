@@ -67,7 +67,7 @@ class UserService:
 
     @staticmethod
     def get_user_by_id(user_id):
-        user = UserRepository.get_user_by_id(user_id)
+        user = UserRepository.get_user_details_by_id(user_id)
         if not user:
             raise Exception("User not found")
         return user
@@ -116,7 +116,7 @@ class UserService:
 
     @staticmethod
     def update_user_password(user_id, current_password, new_password):
-        user = UserRepository.get_user_by_id(user_id)
+        user = UserRepository.get_user_details_by_id(user_id)
 
         if not check_password(current_password, user.password):
             raise Exception("Current password is incorrect")

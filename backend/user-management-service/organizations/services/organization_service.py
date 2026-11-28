@@ -130,7 +130,7 @@ class OrganizationService:
 
         # Check email uniqueness if changed
         if 'email' in filtered_data and filtered_data['email'].lower() != organization.email.lower():
-            if OrganizationRepository.get_organization_by_email(filtered_data['email']):  # Fixed method name
+            if OrganizationRepository.get_organization_details_by_email(filtered_data['email']):  # Fixed method name
                 raise Exception("An organization with this email already exists")
             
         # Call repository with correct signature

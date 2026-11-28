@@ -163,10 +163,10 @@ class ProposalSubscriber:
         try:
             if eventType == 'ProposalExecuted':
                 logger.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Execute Proposal")
-                OnchainVerificationService.update_verification_status_by_onchain_id(onchainId, 'approved')
+                OnchainVerificationService.update_onchain_verification_status_by_onchain_id(onchainId, 'approved')
             elif eventType == 'ProposalCanceled':
                 logger.log("Redirecting the AUDIT-TRAIL-SERVICE event call to Cancel Proposal")
-                OnchainVerificationService.update_verification_status_by_onchain_id(onchainId, 'cancelled')
+                OnchainVerificationService.update_onchain_verification_status_by_onchain_id(onchainId, 'cancelled')
             else:
                 logger.log(f"Unknown proposal event type: {eventType}")
         except Exception as e:
@@ -207,7 +207,7 @@ class ProposalSubscriber:
             logger.log(f"Found OnChainValidation record (ID: {verification.id}) for {trxHash}")
 
             # Update the onchainId field with the proposal ID from the event
-            updated_verification = OnchainVerificationService.update_verification_onchain_id_by_trx_hash(trxHash, onchainId)
+            updated_verification = OnchainVerificationService.update_onchain_verification_onchain_id_by_trx_hash(trxHash, onchainId)
             
             logger.log(f"Successfully updated OnChainValidation record (ID: {updated_verification.id}) with proposal ID: {onchainId}")
             logger.log(f"ProposalAdded event processed successfully for {trxHash}")

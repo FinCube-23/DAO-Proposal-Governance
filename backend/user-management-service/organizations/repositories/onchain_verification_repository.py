@@ -105,7 +105,7 @@ class OnchainVerificationRepository:
         Update the status of an on-chain verification.
         """
         try:
-            verification = cls.get_verification_by_trx_hash(trx_hash)
+            verification = cls.get_onchain_verification_details_by_trx_hash(trx_hash)
             if not verification:
                 raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
                 
@@ -122,7 +122,7 @@ class OnchainVerificationRepository:
         Update the status of an on-chain verification.
         """
         try:
-            verification = cls.get_verification_by_trx_hash(trx_hash)
+            verification = cls.get_onchain_verification_details_by_trx_hash(trx_hash)
             if not verification:
                 raise Exception(f"OnchainVerification with transaction hash {trx_hash} not found")
                 
@@ -149,7 +149,7 @@ class OnchainVerificationRepository:
         Update the status of an on-chain verification.
         """
         try:
-            verification = cls.get_verification_by_onchain_id(onchain_id)
+            verification = cls.get_onchain_verification_details_by_onchain_id(onchain_id)
             if not verification:
                 raise Exception(f"OnchainVerification with on-chain ID {onchain_id} not found")
 
@@ -227,7 +227,7 @@ class OnchainVerificationRepository:
         Update the onchain_id field for the latest on-chain verification by proposer wallet address.
         """
         try:
-            verification = cls.get_latest_verification_by_proposer_wallet(proposer_wallet)
+            verification = cls.get_latest_onchain_verification_details_by_proposer_wallet(proposer_wallet)
             if not verification:
                 raise Exception(f"OnchainVerification with proposer wallet {proposer_wallet} not found")
 
